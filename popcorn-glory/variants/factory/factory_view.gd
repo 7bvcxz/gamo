@@ -50,6 +50,15 @@ var hint_dot := Node2D.new()
 var hint_gold := Node2D.new()
 var hint_finger := Node2D.new()
 var _hint_key := ""
+## Step 23: the bottleneck cue (a soft outline round the floor that holds the
+## next one back, pulsing by its alpha -- drawn once per floor change) and the
+## understated numbers by a badge on hover or press.
+var cue_node := Node2D.new()
+var _cue := ""
+var _cue_key := ""
+var stats_node := Node2D.new()
+var _hover := -1
+var _stats_key := ""
 var _status := ""
 var _clock := 0.0
 var _cooking := false            ## this press started on the bottom floor
@@ -70,6 +79,8 @@ func setup(p_rules: PopRules) -> void:
 	nozzles.clear()
 	_nozzle_key = ""
 	_status = ""
+	_cue_key = ""
+	_stats_key = ""
 	if floor_layer.get_parent() == null:
 		floor_layer.name = "Floors"
 		add_child(floor_layer)
@@ -94,6 +105,12 @@ func setup(p_rules: PopRules) -> void:
 		hint_gold.draw.connect(func() -> void: _draw_hint_gold(hint_gold))
 		hint_finger.draw.connect(func() -> void: _draw_hint_finger(hint_finger))
 		hint_node.visible = false
+		cue_node.name = "BottleneckCue"
+		add_child(cue_node)
+		cue_node.draw.connect(func() -> void: _draw_cue(cue_node))
+		stats_node.name = "StageNumbers"
+		add_child(stats_node)
+		stats_node.draw.connect(func() -> void: _draw_stage_numbers(stats_node))
 		bell_node.name = "Bell"
 		add_child(bell_node)
 		bell_node.draw.connect(func() -> void: PopFactoryArt.bell(bell_node, _head_px() * 0.9))
@@ -194,6 +211,12 @@ func _floor_at(p: Vector2) -> int:
 # -- input --------------------------------------------------------------------
 
 func _gui_input(event: InputEvent) -> void:
+	var mm := event as InputEventMouseMotion
+	if mm != null:
+		_hover = -1
+		for i in 3:
+			if badge_rect(i).grow(6).has_point(mm.position):
+				_hover = i
 	var mb := event as InputEventMouseButton
 	if mb == null or mb.button_index != MOUSE_BUTTON_LEFT:
 		return
@@ -289,6 +312,7 @@ func _process(delta: float) -> void:
 	_step_station(delta)
 	_step_bell()
 	_step_hint()
+	_step_cues()
 
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and
@@ -887,6 +911,7 @@ func _reconcile_customers() -> void:
 			a.size_px = _head_px()
 			a.body = CUSTOMER_COLOURS[id % 5]
 			a.skin = SKIN[id % 5]
+			a.order_size = int(queue[i]["order"]["size"])
 			a.position = _door() if now_ms > 500 else _queue_spot(i)
 			customers[id] = a
 		customers[id].walk_to(_queue_spot(i))
@@ -937,7 +962,8 @@ func debug_state() -> Dictionary:
 			"x": (f["bag"] as Node2D).position.x, "y": (f["bag"] as Node2D).position.y})
 	return {"flying": flying, "customers": customers.size(), "leaving": leaving.size(), "log": cargo_log.duplicate(),
 		"filling": fill, "nozzles": nozzles.size(), "packer_status": _status,
-		"moods": customers.values().map(func(a: Node2D) -> String: return a.mood), "bell": bell_swinging()}
+		"moods": customers.values().map(func(a: Node2D) -> String: return a.mood), "bell": bell_swinging(),
+		"cue": _cue if cue_node.visible else "", "bubbles": customers.values().map(func(a: Node2D) -> int: return a.order_size)}
 
 
 # -- Step 20: the packing station ---------------------------------------------
@@ -1250,3 +1276,64 @@ func _draw_sign_numbers(ci: CanvasItem, d: Rect2) -> void:
 		var yy := bar.position.y + j * fs * 0.45
 		ci.draw_rect(Rect2(Vector2(a, yy), Vector2(b - a, fs * 0.3)), PopPalette.GOLD if j == 0 else PopTokens.OK)
 		ci.draw_circle(Vector2(bar.position.x + bar.size.x * float(t["mode_ms"]) / full, yy + fs * 0.15), fs * 0.12, PopPalette.INK)
+
+
+# -- Step 23: seeing the bottleneck without a spreadsheet ------------------------
+
+const CUE_FLOOR := {"production": LOW, "packaging": MID, "demand": TOP}
+
+
+func _step_cues() -> void:
+	if rules == null:
+		return
+	var b := String(rules.bottleneck())
+	var ck := "%s|%s" % [b, size]   # (and on a resize: drawn before the layout, it was drawn at nothing)
+	if ck != _cue_key:
+		_cue_key = ck
+		_cue = b
+		cue_node.queue_redraw()
+	cue_node.modulate.a = (0.45 + 0.35 * sin(_clock * 3.0)) if not reduced_motion else 0.7
+	cue_node.visible = CUE_FLOOR.has(_cue)
+	var show := _hover if _hover >= 0 else selected
+	var key := "%d|%s|%s|%d|%d" % [show, size, rules.get("recent")["lots"].size() + rules.get("recent")["packs"].size() * 1000 + rules.get("recent")["sales"].size() * 1000000,
+		rules.bin_portions() + (rules.get("shelf") as Array).size() * 100, (rules.get("queue") as Array).size()]
+	if key != _stats_key:
+		_stats_key = key
+		stats_node.queue_redraw()
+
+
+## A soft amber outline round the floor that holds things back.
+func _draw_cue(ci: CanvasItem) -> void:
+	if not CUE_FLOOR.has(_cue):
+		return
+	# Coral, not gold: the floors' own edges and the selection are gold.
+	var r := floor_rect(int(CUE_FLOOR[_cue])).grow(-7)
+	var pts := PopMachineArt.round_rect_points(r, PopTokens.R_FLOOR - 5)
+	pts.append(pts[0])
+	ci.draw_polyline(pts, PopTokens.WARN.lerp(Color(1.0, 0.45, 0.35), 0.4), 8.0, true)
+
+
+## By the hovered (or open) floor's badge: what it finished in the last minute
+## (a clock and a number) and what waits after it (a stack and a number) --
+## lots popped and portions in the bin, packs sealed and packs on the shelf,
+## sales and people in the queue.
+func _draw_stage_numbers(ci: CanvasItem) -> void:
+	var i := _hover if _hover >= 0 else selected
+	if rules == null or i < 0:
+		return
+	var b := badge_rect(i)
+	var rate := int(rules.per_min(["sales", "packs", "lots"][i]))
+	var backlog: int = [(rules.get("queue") as Array).size(), (rules.get("shelf") as Array).size(), int(rules.bin_portions())][i]
+	var font := ThemeDB.fallback_font
+	var fs := int(clampf(b.size.y * 0.32, 14.0, 22.0))
+	var p := Vector2(b.end.x + 6, b.position.y + b.size.y * 0.5 - fs * 0.75)
+	var pill := Rect2(p, Vector2(fs * 5.2, fs * 1.5))
+	PopMachineArt._round_rect(ci, pill, fs * 0.6, Color(1, 1, 1, 0.82))
+	var c := p + Vector2(fs * 0.7, fs * 0.75)
+	ci.draw_arc(c, fs * 0.38, 0, TAU, 16, Color(PopPalette.INK, 0.7), 2.0)
+	ci.draw_line(c, c + Vector2(0, -fs * 0.26), Color(PopPalette.INK, 0.7), 2.0)
+	ci.draw_string(font, c + Vector2(fs * 0.55, fs * 0.36), str(rate), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.8))
+	var s := p + Vector2(fs * 3.0, fs * 0.75)
+	for k in 3:
+		ci.draw_rect(Rect2(s + Vector2(-fs * 0.35, fs * 0.25 - k * fs * 0.22), Vector2(fs * 0.7, fs * 0.16)), Color(PopPalette.INK, 0.6))
+	ci.draw_string(font, s + Vector2(fs * 0.5, fs * 0.36), str(backlog), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.8))

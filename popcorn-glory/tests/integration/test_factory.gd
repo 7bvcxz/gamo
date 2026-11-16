@@ -445,3 +445,32 @@ func test_a_hidden_tab_stops_the_factory() -> void:
 	app.clock.set_pause("hidden", false)
 	await tree.create_timer(0.3).timeout
 	assert_true(int(f.flow_ms) > flow, "it continues when shown")
+
+
+# -- Step 23: orders and the bottleneck on screen -----------------------------
+
+func test_bubbles_show_each_order_and_the_cue_follows_the_bottleneck() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var f = app.rules
+	f.packer_tier = 2
+	app.dev_advance(60000)
+	await tree.process_frame
+	await tree.process_frame
+	for c: Dictionary in f.queue:
+		var a: Node2D = v.customers[int(c["id"])]
+		assert_eq(int(a.order_size), int(c["order"]["size"]), "customer %d's bubble shows their order" % int(c["id"]))
+	assert_eq(String(f.bottleneck()), "production", "people wait, no popcorn")
+	assert_true(v.cue_node.visible and String(v._cue) == "production", "the kitchen is outlined")
+	f.queue.clear()
+	f.next_arrival_ms = 1 << 40
+	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 100, "portions": 24})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 24
+	await _frames(40, 500)
+	assert_eq(String(f.bottleneck()), "demand", "packs wait, nobody comes")
+	assert_eq(String(v._cue), "demand", "the shop is outlined")
+	v._hover = 1
+	await tree.process_frame
+	await tree.process_frame
+	assert_true(String(v._stats_key).begins_with("1|"), "hovering the middle badge shows its numbers")

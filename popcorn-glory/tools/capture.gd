@@ -48,6 +48,7 @@ func _init() -> void:
 	# Pictures never read or write a player's save (Step 12).
 	_app.set("save_prefix", "capture.")
 	PopSaveStore.clear("capture.stand.v1")
+	PopSaveStore.clear("capture.factory.v1")   # Step 22: the factory is saved too
 	root.add_child(_app)
 	_frames_left = int(float(_args.get("seconds", "1.0")) * 60.0)
 	process_frame.connect(_tick)

@@ -91,7 +91,7 @@ func test_backpressure_a_full_bin_holds_the_glass_and_stops_the_kettle() -> void
 	assert_true(refused, "the kettle stops when nothing downstream has room")
 	assert_eq(f.shelf.size(), int(f.state()["shelf_cap"]), "the shelf is full")
 	assert_false(f.glass.is_empty(), "the glass holds the last lot")
-	assert_eq(String(f.bottleneck()), "shop", "the shop is the bottleneck (packs wait for customers)")
+	assert_eq(String(f.bottleneck()), "demand", "demand is the bottleneck (packs wait for customers)")
 	assert_true(int(f.stats["glass_wait_ms"]) > 0, "the wait is counted")
 	_check_conservation(f, "full")
 	# A customer frees a pack: the line moves again, nothing is lost.
@@ -607,3 +607,130 @@ func test_save_and_resume_continue_the_same_factory() -> void:
 	var odd: Dictionary = JSON.parse_string(text)
 	odd["sign_tier"] = 99
 	assert_false(bool(c.from_save(odd)), "a tier out of range is refused")
+
+
+# -- Step 23: orders, sizes, the bottleneck -----------------------------------
+
+func _customer(f: PopRules, size: int, patience: int = 60000) -> int:
+	var id: int = f._new_id()
+	f.queue.append({"id": id, "order": {"recipe": "plain", "size": size}, "patience_ms": patience})
+	return id
+
+
+func test_the_large_bag_opens_with_the_station_and_orders_never_move_arrivals() -> void:
+	var a: PopRules = Factory.new(null, 5)
+	var b: PopRules = Factory.new(null, 5)
+	b.packer_tier = 2
+	assert_eq(a.sizes_open().size(), 1, "tier 0: the small bag only")
+	assert_eq(b.sizes_open().size(), 2, "tier 2: the large bag opens")
+	a.advance(3600000)
+	b.advance(3600000)
+	assert_eq(a.arrival_log, b.arrival_log, "the same customers arrive (orders have their own generator)")
+	var large := 0
+	var all := 0
+	for l: Dictionary in b.ledger:
+		all += 1
+	# Orders of everyone who came: count from the generator directly.
+	var c: PopRules = Factory.new(null, 5)
+	c.packer_tier = 2
+	for i in 400:
+		all += 0
+		if int(c._draw_order()["size"]) == 4:
+			large += 1
+	assert_true(large > 110 and large < 170, "about 35%% order the large bag (%d of 400)" % large)
+	var d: PopRules = Factory.new(null, 5)
+	for i in 100:
+		assert_eq(int(d._draw_order()["size"]), 2, "before it opens nobody orders it")
+
+
+func test_exact_size_matching_and_the_large_bag_price() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.packer_tier = 2
+	f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 100})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
+	_customer(f, 4, 20000)
+	f.advance(2000)
+	assert_eq(int(f.stats["sold"]), 0, "a large-bag customer is never given a small bag")
+	assert_eq(int(f.packer_state() == "starved"), 1, "and the station has no popcorn for a large bag")
+	_lot(f, "plain", 4, 100)
+	f.advance(int(f.packer()["ms"]) + 1500)
+	assert_eq(int(f.stats["sold"]), 1, "a large bag packed for them and sold")
+	assert_eq(int(f.ledger[0]["size"]), 4, "the large bag")
+	assert_eq(int(f.ledger[0]["coins"]), 18, "at its own price")
+	assert_eq(f.shelf.size(), 1, "the small bag still waits for a small order")
+	_check_conservation(f, "sizes")
+
+
+func test_the_station_packs_for_the_head_first_and_never_floods_the_shelf_with_large_bags() -> void:
+	var f: PopRules = Factory.new(null, 9)
+	f.packer_tier = 2
+	var worst := 0
+	for i in 400:
+		if i % 3 == 0:
+			_pop(f)
+		f.advance(700)
+		var waiting_large := 0
+		for c: Dictionary in f.queue:
+			if int(c["order"]["size"]) == 4:
+				waiting_large += 1
+		worst = maxi(worst, f.on_hand("plain", 4) - waiting_large)
+	assert_true(worst <= 2, "large bags on hand never beyond the orders waiting + a stock of 2 (worst %d)" % worst)
+	assert_true(int(f.stats["sold"]) > 10, "sales happened (%d)" % int(f.stats["sold"]))
+	var sizes := {}
+	for l: Dictionary in f.ledger:
+		sizes[int(l["size"])] = true
+	assert_true(sizes.has(2) and sizes.has(4), "both bags sold")
+	_check_conservation(f, "mixed")
+
+
+func test_a_mixed_burst_is_served_once_each_in_order() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.packer_tier = 2
+	var ids: Array[int] = []
+	for s in [2, 4, 2, 2, 4]:
+		ids.append(_customer(f, s))
+	for s in [2, 2, 2, 4, 4]:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": s, "quality": 100})
+		f.stats["made_portions"] = int(f.stats["made_portions"]) + s
+	f.advance(10000)
+	assert_eq(int(f.stats["sold"]), 5, "all five served")
+	for i in 5:
+		assert_eq(int(f.ledger[i]["customer"]), ids[i], "in queue order (%d)" % i)
+	assert_eq(f.ledger.map(func(l: Dictionary) -> int: return int(l["size"])), [2, 4, 2, 2, 4], "each got the size they ordered")
+	assert_eq(f.shelf.size(), 0, "no pack left over, none sold twice")
+	_check_conservation(f, "burst")
+
+
+func test_an_impatient_exit_costs_nothing_and_the_station_waits_for_the_right_popcorn() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.packer_tier = 2
+	f.money = 50
+	_customer(f, 4, 3000)
+	_lot(f, "plain", 2, 100)
+	f.advance(2000)
+	assert_eq(f.packing.size(), 0, "two portions are not packed into a small bag while the head waits for a large one")
+	f.advance(2000)
+	assert_eq(int(f.stats["abandoned"]), 1, "the customer leaves")
+	assert_eq(int(f.money), 50, "a gentle consequence: nothing is taken")
+	f.advance(int(f.packer()["ms"]) + 200)
+	assert_eq(f.shelf.size(), 1, "with nobody waiting, the portions become stock (a small bag)")
+	_check_conservation(f, "exit")
+
+
+func test_the_bottleneck_names_the_stage_that_holds_the_next_one_back() -> void:
+	var f: PopRules = Factory.new()
+	assert_eq(String(f.bottleneck()), "production", "a customer waits, no popcorn: production")
+	_pop(f)
+	f.advance(1500)
+	assert_eq(String(f.bottleneck()), "packaging", "popcorn there, packing under way: packaging")
+	var g: PopRules = Factory.new()
+	_quiet_shop(g)
+	_lot(g, "plain", 24, 100)
+	g.advance(30000)
+	assert_eq(String(g.bottleneck()), "demand", "a full shelf, nobody waiting: demand")
+	assert_true(int(g.per_min("packs")) >= 8, "the station's last minute counted (%d packs)" % int(g.per_min("packs")))
+	g.advance(61000)
+	assert_eq(int(g.per_min("packs")), 0, "a minute later, the count is of the last minute only")

@@ -35,6 +35,10 @@ var packer_tier := 0        ## Step 20: the packing station's upgrade (data: fac
 var sign_tier := 0          ## Step 22: the shop's sign (data: factory.sign) -- the foot traffic
 var arrival_log: Array = [] ## Step 22: when each customer came in (flow ms), for the statistics
 var first_sale_ms := -1     ## flow ms of the first sale (-1: none yet)
+var order_rng_state := 0    ## Step 23: the orders' own generator (so orders never move arrival times)
+## Step 23: what each stage finished in the last minute (flow ms), for the bottleneck cues.
+var recent := {"lots": [], "packs": [], "sales": []}
+var _orng := RandomNumberGenerator.new()
 var shelf: Array = []       ## sealed packs, oldest first: {id, recipe, size, quality}
 var queue: Array = []       ## customers waiting, head first: {id, order: {recipe, size}, patience_ms}
 ## Step 21: the counter's lanes, each handing one pack over: {customer, pack,
@@ -61,6 +65,8 @@ func _init(p_economy: PopEconomy = null, seed_value: int = 20261116) -> void:
 	burst_mode = true   # the crescendo is the factory's (Step 19: B -> C as real extra portions)
 	_rng.seed = seed_value
 	rng_state = int(_rng.state)
+	_orng.seed = seed_value + 7919
+	order_rng_state = int(_orng.state)
 	# The first customer is already waiting when the shop opens (design/FACTORY_FLOW.md 5).
 	_arrive()
 	var f := _t()["customers"] as Dictionary
@@ -118,10 +124,10 @@ func packs_per_min(at_tier: int) -> float:
 func packer_state() -> String:
 	if not packing.is_empty():
 		return "run"
-	if packable_recipe() == "":
-		return "starved"
 	if shelf.size() >= int(_t()["shelf_packs"]):
 		return "blocked"
+	if _next_pack().is_empty():
+		return "starved"
 	return "idle"
 
 
@@ -181,6 +187,9 @@ func pack_size() -> int:
 
 func pack_price(recipe: String, size: int, quality: int) -> int:
 	var base := int((_t()["price"] as Dictionary).get(recipe, 0)) * size / pack_size()
+	for z: Dictionary in _t().get("sizes", []):
+		if int(z["size"]) == size:   # Step 23: the bag's own price (the large one is cheaper per portion)
+			base = int(z["price"]) * int((_t()["price"] as Dictionary).get(recipe, 0)) / 10
 	return maxi(1, int(round(base * (0.6 + 0.4 * float(quality) / 100.0))))
 
 
@@ -241,6 +250,7 @@ func _resolve(kind: String) -> Dictionary:
 	glass = lot
 	stats["made_portions"] = int(stats["made_portions"]) + portions
 	stats["lots"] = int(stats["lots"]) + 1
+	_note("lots")
 	var centre := (window_start() + window_end()) / 2
 	_emit("outcome", {"kind": kind, "held_ms": held, "from_centre_ms": held - centre})
 	_emit("pop", {"count": portions, "level": level, "outcome": kind})
@@ -287,19 +297,25 @@ func _flow_step(dt: int) -> void:
 	# with as many packs as there are heads, portions in the bin and places on
 	# the shelf (never more -- the shelf is never over-filled).
 	if packing.is_empty():
-		var size := pack_size()
+		# Step 23: what to pack is what is wanted -- first the orders waiting (in
+		# queue order) that the shelf and the heads do not already cover, then the
+		# stock (a small buffer of large bags, small bags for the rest of the shelf).
 		var room := int(t["shelf_packs"]) - shelf.size()
-		if packable_recipe() == "":
-			stats["packer_starved_ms"] = int(stats["packer_starved_ms"]) + dt
-		elif room <= 0:
-			stats["packer_blocked_ms"] = int(stats["packer_blocked_ms"]) + dt
-		else:
-			for k in int(packer()["per_cycle"]):
-				var r := packable_recipe()
-				if r == "" or room <= 0:
-					break
-				_start_pack(size, r)
-				room -= 1
+		var started := 0
+		for k in int(packer()["per_cycle"]):
+			if room <= 0:
+				break
+			var want := _next_pack()
+			if want.is_empty():
+				break
+			_start_pack(int(want["size"]), String(want["recipe"]))
+			room -= 1
+			started += 1
+		if started == 0:
+			if room <= 0:
+				stats["packer_blocked_ms"] = int(stats["packer_blocked_ms"]) + dt
+			else:
+				stats["packer_starved_ms"] = int(stats["packer_starved_ms"]) + dt
 	else:
 		var still_packing: Array = []
 		for p: Dictionary in packing:
@@ -308,6 +324,7 @@ func _flow_step(dt: int) -> void:
 				var pack := {"id": p["id"], "recipe": p["recipe"], "size": p["size"], "quality": p["quality"]}
 				shelf.append(pack)
 				stats["packed"] = int(stats["packed"]) + 1
+				_note("packs")
 				_emit("pack_shelved", {"pack": pack["id"]})
 			else:
 				still_packing.append(p)
@@ -353,16 +370,101 @@ func _flow_step(dt: int) -> void:
 
 ## The oldest recipe in the bin with a whole pack's portions ("" = none): a
 ## pack is never filled from two recipes, and a lone leftover portion waits.
-func packable_recipe() -> String:
+func packable_recipe(size: int = -1) -> String:
+	var need := pack_size() if size < 0 else size
 	var seen := {}
 	for lot: Dictionary in bin:
 		var r := String(lot["recipe"])
 		if seen.has(r):
 			continue
 		seen[r] = true
-		if bin_portions_of(r) >= pack_size():
+		if bin_portions_of(r) >= need:
 			return r
 	return ""
+
+
+# -- Step 23: orders, sizes, what to pack -------------------------------------
+
+## The bags open now (smallest first): the small one always, the large one from its packing tier.
+func sizes_open() -> Array:
+	var out: Array = []
+	for z: Dictionary in _t().get("sizes", [{"size": pack_size(), "price": 10, "unlock_packer": 0}]):
+		if packer_tier >= int(z.get("unlock_packer", 0)):
+			out.append(z)
+	return out
+
+
+## Packs of an SKU and size on the shelf or being filled.
+func on_hand(sku: String, size: int) -> int:
+	var n := 0
+	for p: Dictionary in shelf + packing:
+		if String(p["recipe"]) == sku and int(p["size"]) == size:
+			n += 1
+	return n
+
+
+func _recipe_for(sku: String, size: int) -> String:
+	for lot: Dictionary in bin:
+		var r := String(lot["recipe"])
+		if pack_sku(r) == sku and bin_portions_of(r) >= size:
+			return r
+	return ""
+
+
+## The next pack to fill ({recipe, size, for}) or {} -- nothing wanted, or not
+## enough popcorn of the wanted kind (then the station waits: it never packs the
+## popcorn an order needs into another bag).
+func _next_pack() -> Dictionary:
+	var covered := {}
+	for c: Dictionary in queue:
+		var o: Dictionary = c["order"]
+		var key := "%s|%d" % [o["recipe"], o["size"]]
+		var have := int(covered.get(key, on_hand(String(o["recipe"]), int(o["size"]))))
+		if have > 0:
+			covered[key] = have - 1
+			continue
+		var r := _recipe_for(String(o["recipe"]), int(o["size"]))
+		return {} if r == "" else {"recipe": r, "size": int(o["size"]), "for": "order"}
+	var cap := int(_t()["shelf_packs"])
+	var reserved := 0
+	var open := sizes_open()
+	for z: Dictionary in open:
+		reserved += int(z.get("stock", 0))
+	for z: Dictionary in open:
+		var size := int(z["size"])
+		var target := int(z.get("stock", 0)) if z.has("stock") else cap - reserved
+		var r := packable_recipe(size)
+		if r != "" and on_hand(pack_sku(r), size) < target:
+			return {"recipe": r, "size": size, "for": "stock"}
+	return {}
+
+
+## Customers' orders: the small bag, or once the large one is open, the large
+## one by its share -- drawn from the orders' own generator.
+func _draw_order() -> Dictionary:
+	var size := pack_size()
+	_orng.state = order_rng_state
+	for z: Dictionary in sizes_open():
+		if z.has("order_share") and _orng.randf() < float(z["order_share"]):
+			size = int(z["size"])
+	order_rng_state = int(_orng.state)
+	return {"recipe": "plain", "size": size}
+
+
+func _note(stage: String) -> void:
+	var a: Array = recent[stage]
+	a.append(flow_ms)
+	while not a.is_empty() and int(a[0]) <= flow_ms - 60000:
+		a.pop_front()
+
+
+## What a stage finished in the last minute (lots popped, packs sealed, sales).
+func per_min(stage: String) -> int:
+	var n := 0
+	for t: int in recent[stage]:
+		if t > flow_ms - 60000:
+			n += 1
+	return n
 
 
 func bin_portions_of(recipe: String) -> int:
@@ -455,6 +557,8 @@ func _buy_sign() -> Dictionary:
 ## its arrivals drawn from that seed. Only before anything has happened.
 func reseed(seed_value: int) -> void:
 	_rng.seed = seed_value
+	_orng.seed = seed_value + 7919
+	order_rng_state = int(_orng.state)
 	queue.clear()
 	arrival_log.clear()
 	stats["arrived"] = 0
@@ -485,10 +589,11 @@ func _sell(sv: Dictionary) -> void:
 	var coins := pack_price(String(p["recipe"]), int(p["size"]), int(p["quality"]))
 	if first_sale_ms < 0:
 		first_sale_ms = flow_ms
-	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "quality": p["quality"], "coins": coins})
+	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "ordered": c["order"]["size"], "quality": p["quality"], "coins": coins})
 	if ledger.size() > 500:
 		ledger.pop_front()
 	stats["sold"] = int(stats["sold"]) + 1
+	_note("sales")
 	stats["sold_portions"] = int(stats["sold_portions"]) + int(p["size"])
 	stats["revenue"] = int(stats["revenue"]) + coins
 	_emit("sale", {"customer": c["id"], "pack": p["id"], "coins": coins, "quality": p["quality"]})
@@ -507,7 +612,7 @@ func _arrive() -> void:
 		stats["passed_by"] = int(stats["passed_by"]) + 1
 		_emit("customer_passed", {})
 		return
-	var c := {"id": _new_id(), "order": {"recipe": "plain", "size": pack_size()}, "patience_ms": int(f["patience_ms"])}
+	var c := {"id": _new_id(), "order": _draw_order(), "patience_ms": int(f["patience_ms"])}
 	queue.append(c)
 	stats["arrived"] = int(stats["arrived"]) + 1
 	_emit("customer_arrived", {"customer": c["id"], "order": c["order"]})
@@ -539,10 +644,13 @@ func _schedule_arrival() -> void:
 const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo", "bursts", "packer_tier", "sign_tier",
 	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
 const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
+## Step 23 fields: optional (a 0.22 save has none).
+const SAVE_OPTIONAL := ["order_rng_state", "recent"]
 
 
 func to_save() -> Dictionary:
-	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate()}
+	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
+		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true)}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -604,6 +712,12 @@ func _apply_save(d: Dictionary) -> void:
 	crescendo = clampi(crescendo, 0, crescendo_full() - 1)
 	rng_state = String(d["rng_state"]).to_int()
 	_rng.state = rng_state
+	if String(d.get("order_rng_state", "")).is_valid_int():
+		order_rng_state = String(d["order_rng_state"]).to_int()
+		_orng.state = order_rng_state
+	if typeof(d.get("recent")) == TYPE_DICTIONARY:
+		for k: String in recent.keys():
+			recent[k] = (d["recent"] as Dictionary).get(k, []) if typeof((d["recent"] as Dictionary).get(k)) == TYPE_ARRAY else []
 
 
 # -- reading it ---------------------------------------------------------------
@@ -640,6 +754,9 @@ func state() -> Dictionary:
 	s["kettle_capacity"] = kettle_capacity()
 	s["next_arrival_ms"] = next_arrival_ms
 	s["bottleneck"] = bottleneck()
+	s["per_min"] = {"lots": per_min("lots"), "packs": per_min("packs"), "sales": per_min("sales")}
+	s["sizes_open"] = sizes_open().map(func(z: Dictionary) -> int: return int(z["size"]))
+	s["orders"] = queue.map(func(c: Dictionary) -> int: return int(c["order"]["size"]))
 	s["portions_everywhere"] = portions_everywhere()
 	return s
 
@@ -648,10 +765,18 @@ func state() -> Dictionary:
 ## it into a picture, Step 23): 'kitchen' (the packer is starved), 'packing'
 ## (customers wait for packs), 'shop' (packs wait for customers), or '' (flowing).
 func bottleneck() -> String:
-	if not queue.is_empty() and shelf.is_empty() and serves.is_empty():
-		return "kitchen" if packing.is_empty() and packable_recipe() == "" else "packing"
-	if queue.is_empty() and shelf.size() >= int(_t()["shelf_packs"]):
-		return "shop"
+	# Step 23: which stage holds the next one back, in the player's terms --
+	# "production" (the station waits for popcorn while someone waits),
+	# "packaging" (customers wait for the station, or the kettle waits for room),
+	# "demand" (packs wait for customers), "" (nothing waits).
+	if not queue.is_empty() and serves.size() < lanes():
+		var head: Dictionary = queue[0]["order"]
+		if _matching_pack(head) < 0:
+			if packing.is_empty() and _next_pack().is_empty():
+				return "production"
+			return "packaging"
 	if not glass.is_empty():
-		return "shop" if shelf.size() >= int(_t()["shelf_packs"]) else "packing"
+		return "demand" if shelf.size() >= int(_t()["shelf_packs"]) and queue.is_empty() else "packaging"
+	if queue.is_empty() and shelf.size() >= int(_t()["shelf_packs"]) / 2:
+		return "demand"
 	return ""

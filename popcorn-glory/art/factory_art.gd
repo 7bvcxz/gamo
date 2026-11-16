@@ -230,3 +230,18 @@ static func shop_sign(ci: CanvasItem, r: Rect2, look: int, mono: Color = Color(0
 		ci.draw_polyline(pts, Color(1.0, 0.45, 0.7), 3.0, true)
 	if look >= 6:   # the landmark's star on top
 		ci.draw_colored_polygon(PopMachineArt._star(r.position + Vector2(r.size.x * 0.5, -r.size.y * 0.12), r.size.y * 0.22, r.size.y * 0.1), PopPalette.GOLD)
+
+
+## Step 23: what a customer wants, in a bubble over their head -- a small bag,
+## or a bigger bag with a fuller top for the large one (no words, no numbers).
+static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int) -> void:
+	var w := head * 1.5
+	var h := head * 1.35
+	var r := Rect2(tail - Vector2(w * 0.5, h + head * 0.25), Vector2(w, h))
+	PopMachineArt._round_rect(ci, r, head * 0.35, Color(1, 1, 1, 0.95))
+	ci.draw_colored_polygon(PackedVector2Array([tail, tail + Vector2(-head * 0.2, -head * 0.3), tail + Vector2(head * 0.2, -head * 0.3)]), Color(1, 1, 1, 0.95))
+	var big := size > 2
+	var bw := head * (0.62 if big else 0.42)
+	bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw)
+	if big:
+		popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28)
