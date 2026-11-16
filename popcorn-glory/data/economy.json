@@ -58,6 +58,15 @@
     "lift_ms": 900,
     "bin_portions": 24,
     "pack": { "size": 2, "ms": 3000 },
+    "pack_recipes": { "_doc": "Step 20: the SKU each recipe's popcorn is packed as (the seasoning of a later Step maps here); a pack never mixes recipes.", "plain": "plain" },
+    "packer": [
+      { "_doc": "Step 20, the packing station's tiers: a pack per head every ms (per_cycle heads), its look (0 scoop and paper bag, 1 bag feeder, 2 twin filling heads, 3 rotary head, 4 mini conveyor, 5 multihead packer); cost to reach the tier.", "ms": 3000, "per_cycle": 1, "cost": 0, "look": 0 },
+      { "ms": 2400, "per_cycle": 1, "cost": 60, "look": 1 },
+      { "ms": 2400, "per_cycle": 2, "cost": 220, "look": 2 },
+      { "ms": 1800, "per_cycle": 2, "cost": 700, "look": 3 },
+      { "ms": 1800, "per_cycle": 3, "cost": 2200, "look": 4 },
+      { "ms": 1400, "per_cycle": 4, "cost": 6500, "look": 5 }
+    ],
     "shelf_packs": 8,
     "price": { "plain": 10 },
     "service_ms": 1200,

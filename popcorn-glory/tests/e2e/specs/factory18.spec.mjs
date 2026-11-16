@@ -26,6 +26,7 @@ test('one batch from the kettle to a satisfied customer', async ({ pop }) => {
   const log = s.view.log;
   const started = {}; const ended = {};
   for (const e of log) {
+    if (e.kind === 'fill') continue;   // the packing station's own record (Step 20, factory20)
     const k = `${e.kind}:${e.id}`;
     if (e.what === 'start' || e.what === 'serve') started[k] = (started[k] || 0) + 1;
     if (e.what === 'end') ended[k] = (ended[k] || 0) + 1;

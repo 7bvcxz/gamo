@@ -68,7 +68,9 @@ func _ready() -> void:
 	frame.auto_pressed.connect(buy_auto)
 	frame.denied.connect(func(which: String) -> void:
 		if rules != null:
-			session.record(clock.now_ms, "denied", {"card": which, "money": rules.money})
+			# Step 20: which offer the card showed (the factory's middle floor sells the station).
+			var offer := String(frame.upgrade_button.art_key) if which == "upgrade" else ""
+			session.record(clock.now_ms, "denied", {"card": which, "money": rules.money, "offer": offer if offer != "" else "kettle"})
 			audio.play("thud", 1.25, -8.0))
 	frame.sound_pressed.connect(toggle_sound)
 	frame.log_pressed.connect(download_log)
@@ -169,8 +171,10 @@ func restart() -> void:
 func buy() -> void:
 	if rules == null:
 		return
-	var r := rules.execute({"type": "buy"})
-	session.record(clock.now_ms, "buy", {"ok": bool(r["ok"]), "reason": String(r.get("reason", ""))})
+	# Step 20: the card may sell another station (the factory's open floor).
+	var cmd: Dictionary = frame.play.card_command() if frame.play != null and frame.play.has_method("card_command") else {"type": "buy"}
+	var r := rules.execute(cmd)
+	session.record(clock.now_ms, "buy", {"ok": bool(r["ok"]), "reason": String(r.get("reason", "")), "what": String(cmd["type"])})
 	_flush()
 	if bool(r["ok"]):
 		save_now()

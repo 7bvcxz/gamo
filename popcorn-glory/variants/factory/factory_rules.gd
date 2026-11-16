@@ -30,7 +30,8 @@ const GRADE_QUALITY := {PERFECT: 100, NEAR: 80, LATE: 60, EARLY: 50, BURNT: 20}
 var glass := {}            ## the lot waiting in the kettle's glass ({} when empty)
 var lift: Array = []        ## lots on their way up: {lot, left_ms}
 var bin: Array = []         ## lots in the raw bin, oldest first: {id, recipe, quality, portions}
-var packing := {}           ## the pack being filled: {id, recipe, size, quality, left_ms} ({} = idle)
+var packing: Array = []     ## packs being filled together (one per head): {id, recipe, size, quality, left_ms}
+var packer_tier := 0        ## Step 20: the packing station's upgrade (data: factory.packer)
 var shelf: Array = []       ## sealed packs, oldest first: {id, recipe, size, quality}
 var queue: Array = []       ## customers waiting, head first: {id, order: {recipe, size}, patience_ms}
 var serving := {}           ## {customer, pack, left_ms} while a pack is being handed over
@@ -80,6 +81,50 @@ func kettle_capacity(at_level: int = -1) -> int:
 func _cooldown_ms() -> int:
 	var r: Array = _t()["recovery_ms"]
 	return int(r[clampi(level, 0, r.size() - 1)])
+
+
+# -- Step 20: the packing station -------------------------------------------
+
+## The packer's current tier: {ms, per_cycle, cost, look} (data: factory.packer).
+func packer(at_tier: int = -1) -> Dictionary:
+	var tiers: Array = _t()["packer"]
+	return tiers[clampi(packer_tier if at_tier < 0 else at_tier, 0, tiers.size() - 1)]
+
+
+## The next tier's price, or -1 at the top.
+func packer_cost() -> int:
+	var tiers: Array = _t()["packer"]
+	return int(tiers[packer_tier + 1]["cost"]) if packer_tier + 1 < tiers.size() else -1
+
+
+## Packs a minute the station can make when it is fed and has room (the
+## forecast shown before buying; the real rate is in the statistics).
+func packs_per_min(at_tier: int) -> float:
+	var p := packer(at_tier)
+	return 60000.0 / float(p["ms"]) * float(p["per_cycle"])
+
+
+## What the station is doing: run, starved (no portions), blocked (shelf full), idle.
+func packer_state() -> String:
+	if not packing.is_empty():
+		return "run"
+	if packable_recipe() == "":
+		return "starved"
+	if shelf.size() >= int(_t()["shelf_packs"]):
+		return "blocked"
+	return "idle"
+
+
+func _buy_packer() -> Dictionary:
+	var c := packer_cost()
+	if c < 0:
+		return {"ok": false, "reason": "err.max_level"}
+	if money < c:
+		return {"ok": false, "reason": "err.not_enough_money"}
+	money -= c
+	packer_tier += 1
+	_emit("station_upgrade", {"station": "packer", "tier": packer_tier, "cost": c, "money": money})
+	return {"ok": true, "tier": packer_tier, "cost": c}
 
 
 ## What a kettle level gives (Step 19: every level changes at least one of
@@ -148,8 +193,8 @@ func portions_everywhere() -> int:
 	var n := bin_portions() + lift_portions()
 	if not glass.is_empty():
 		n += int(glass["portions"])
-	if not packing.is_empty():
-		n += int(packing["size"])
+	for p: Dictionary in packing:
+		n += int(p["size"])
 	for p: Dictionary in shelf:
 		n += int(p["size"])
 	if not serving.is_empty():
@@ -160,6 +205,8 @@ func portions_everywhere() -> int:
 # -- the hand -----------------------------------------------------------------
 
 func _act(kind: String, cmd: Dictionary) -> Dictionary:
+	if kind == "buy_packer":
+		return _buy_packer()
 	if kind == "press" and not glass.is_empty():
 		# The glass still holds a lot (the bin is full): no heat until it pours.
 		return {"ok": false, "reason": "err.kettle_full"}
@@ -224,23 +271,35 @@ func _flow_step(dt: int) -> void:
 		else:
 			still.append(x)
 	lift = still
-	# 3. The packer.
+	# 3. The packer: every head fills one pack in the tier's time; a cycle starts
+	# with as many packs as there are heads, portions in the bin and places on
+	# the shelf (never more -- the shelf is never over-filled).
 	if packing.is_empty():
 		var size := pack_size()
-		if bin_portions() < size:
+		var room := int(t["shelf_packs"]) - shelf.size()
+		if packable_recipe() == "":
 			stats["packer_starved_ms"] = int(stats["packer_starved_ms"]) + dt
-		elif shelf.size() >= int(t["shelf_packs"]):
+		elif room <= 0:
 			stats["packer_blocked_ms"] = int(stats["packer_blocked_ms"]) + dt
 		else:
-			_start_pack(size)
+			for k in int(packer()["per_cycle"]):
+				var r := packable_recipe()
+				if r == "" or room <= 0:
+					break
+				_start_pack(size, r)
+				room -= 1
 	else:
-		packing["left_ms"] = int(packing["left_ms"]) - dt
-		if int(packing["left_ms"]) <= 0:
-			var pack := {"id": packing["id"], "recipe": packing["recipe"], "size": packing["size"], "quality": packing["quality"]}
-			shelf.append(pack)
-			packing = {}
-			stats["packed"] = int(stats["packed"]) + 1
-			_emit("pack_shelved", {"pack": pack["id"]})
+		var still_packing: Array = []
+		for p: Dictionary in packing:
+			p["left_ms"] = int(p["left_ms"]) - dt
+			if int(p["left_ms"]) <= 0:
+				var pack := {"id": p["id"], "recipe": p["recipe"], "size": p["size"], "quality": p["quality"]}
+				shelf.append(pack)
+				stats["packed"] = int(stats["packed"]) + 1
+				_emit("pack_shelved", {"pack": pack["id"]})
+			else:
+				still_packing.append(p)
+		packing = still_packing
 	# 4. Customers arrive.
 	if flow_ms + dt >= next_arrival_ms:
 		_arrive()
@@ -274,21 +333,57 @@ func _flow_step(dt: int) -> void:
 			_sell()
 
 
-func _start_pack(size: int) -> void:
+## The oldest recipe in the bin with a whole pack's portions ("" = none): a
+## pack is never filled from two recipes, and a lone leftover portion waits.
+func packable_recipe() -> String:
+	var seen := {}
+	for lot: Dictionary in bin:
+		var r := String(lot["recipe"])
+		if seen.has(r):
+			continue
+		seen[r] = true
+		if bin_portions_of(r) >= pack_size():
+			return r
+	return ""
+
+
+func bin_portions_of(recipe: String) -> int:
+	var n := 0
+	for lot: Dictionary in bin:
+		if String(lot["recipe"]) == recipe:
+			n += int(lot["portions"])
+	return n
+
+
+## The SKU a recipe's popcorn is packed as (data: factory.pack_recipes; the
+## seasoning step of a later Step changes it, never the portions).
+func pack_sku(recipe: String) -> String:
+	return String((_t().get("pack_recipes", {}) as Dictionary).get(recipe, recipe))
+
+
+## Takes `size` portions of `recipe` from the bin's oldest lots of it (FIFO)
+## into a new pack; its quality is the portions' average (nothing lost).
+func _start_pack(size: int, recipe: String) -> void:
 	var need := size
 	var q_sum := 0
 	var used: Array = []
+	var i := 0
 	while need > 0:
-		var lot: Dictionary = bin[0]
+		var lot: Dictionary = bin[i]
+		if String(lot["recipe"]) != recipe:
+			i += 1
+			continue
 		var take := mini(need, int(lot["portions"]))
 		lot["portions"] = int(lot["portions"]) - take
 		q_sum += take * int(lot["quality"])
 		need -= take
 		used.append(lot["id"])
 		if int(lot["portions"]) <= 0:
-			bin.remove_at(0)
-	packing = {"id": _new_id(), "recipe": "plain", "size": size, "quality": q_sum / size, "left_ms": int(_t()["pack"]["ms"])}
-	_emit("pack_started", {"pack": packing["id"], "lots": used, "size": size})
+			bin.remove_at(i)
+	var ms := int(packer()["ms"])
+	var pack := {"id": _new_id(), "recipe": pack_sku(recipe), "size": size, "quality": q_sum / size, "left_ms": ms, "ms": ms}
+	packing.append(pack)
+	_emit("pack_started", {"pack": pack["id"], "lots": used, "size": size, "head": packing.size() - 1, "ms": ms, "recipe": pack["recipe"]})
 
 
 func _matching_pack(order: Dictionary) -> int:
@@ -348,7 +443,12 @@ func state() -> Dictionary:
 	s["lift"] = lift.size()
 	s["bin_portions"] = bin_portions()
 	s["bin_cap"] = int(_t()["bin_portions"])
-	s["packing"] = packing.duplicate()
+	s["packing"] = packing.duplicate(true)
+	s["packer_tier"] = packer_tier
+	s["packer_max"] = (_t()["packer"] as Array).size() - 1
+	s["packer_cost"] = packer_cost()
+	s["packer_state"] = packer_state()
+	s["packs_per_min"] = packs_per_min(packer_tier)
 	s["shelf"] = shelf.size()
 	s["shelf_cap"] = int(_t()["shelf_packs"])
 	s["queue"] = queue.size()
@@ -367,7 +467,7 @@ func state() -> Dictionary:
 ## (customers wait for packs), 'shop' (packs wait for customers), or '' (flowing).
 func bottleneck() -> String:
 	if not queue.is_empty() and shelf.is_empty() and serving.is_empty():
-		return "kitchen" if packing.is_empty() and bin_portions() < pack_size() else "packing"
+		return "kitchen" if packing.is_empty() and packable_recipe() == "" else "packing"
 	if queue.is_empty() and shelf.size() >= int(_t()["shelf_packs"]):
 		return "shop"
 	if not glass.is_empty():

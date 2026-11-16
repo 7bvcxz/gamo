@@ -257,3 +257,163 @@ func test_the_hand_beats_one_basic_auto_cooker_per_attempt_and_parallel_cookers_
 		var auto_per_min := 60000.0 / int(auto["cycle_ms"]) * float(auto["portions"])
 		var n := ceili(hand_per_min / auto_per_min + 0.001)
 		assert_true(n >= 2 and n <= 8, "level %d: %d basic cookers in parallel out-produce a skilled hand per minute (hand %.0f, one cooker %.0f)" % [lv, n, hand_per_min, auto_per_min])
+
+
+# -- Step 20: the packing station ---------------------------------------------
+
+func _lot(f: PopRules, recipe: String, portions: int, quality: int) -> void:
+	# A lot dropped straight into the bin, counted as made (the conservation still holds).
+	f.bin.append({"id": f._new_id(), "recipe": recipe, "quality": quality, "portions": portions})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + portions
+
+
+func _shelved(f: PopRules) -> Array:
+	return f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "pack_shelved")
+
+
+func test_a_partial_portion_waits_and_nothing_is_invented() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_lot(f, "plain", 1, 100)
+	f.advance(20000)
+	assert_eq(f.packing.size(), 0, "one portion is not a pack of two")
+	assert_eq(f.shelf.size(), 0, "no pack appears")
+	assert_eq(f.bin_portions(), 1, "the portion waits in the bin")
+	assert_eq(String(f.packer_state()), "starved", "the station says it is starved")
+	assert_true(int(f.stats["packer_starved_ms"]) >= 19900, "and the starving is measured")
+	_lot(f, "plain", 1, 60)
+	f.advance(int(f.packer()["ms"]) + 100)
+	assert_eq(f.shelf.size(), 1, "the second portion completes a pack")
+	assert_eq(int(f.shelf[0]["quality"]), 80, "its quality is the portions' average (100 and 60)")
+	assert_eq(f.bin_portions(), 0, "both portions used")
+	_check_conservation(f, "partial")
+
+
+func test_no_raw_input_no_packs_and_the_station_idles() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.advance(60000)
+	assert_eq(int(f.stats["packed"]), 0, "nothing packed from nothing")
+	assert_eq(f.shelf.size(), 0, "the shelf stays empty")
+	assert_eq(int(f.stats["packer_starved_ms"]), 60000, "a minute starved, measured")
+	assert_eq(f.money, 0, "no money from nothing")
+
+
+func test_a_backlog_packs_one_cycle_per_head_in_order() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	for q in [100, 80, 60]:
+		_lot(f, "plain", 4, q)
+	var ms := int(f.packer()["ms"])
+	f.advance(ms + 60)
+	var ev := _shelved(f)
+	assert_eq(ev.size(), 1, "tier 0: one head, one pack per cycle")
+	assert_eq(int(f.shelf[0]["quality"]), 100, "FIFO: the oldest lot first")
+	f.advance(ms * 5 + 300)
+	assert_eq(f.shelf.size(), 6, "the backlog of twelve portions becomes six packs")
+	assert_eq(f.bin_portions(), 0, "the bin emptied")
+	_check_conservation(f, "backlog")
+
+
+func test_a_full_shelf_blocks_the_station_measurably() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_lot(f, "plain", 24, 100)
+	f.advance(int(f.packer()["ms"]) * 12)
+	var cap := int(f.state()["shelf_cap"])
+	assert_eq(f.shelf.size(), cap, "the shelf fills to its size")
+	assert_eq(f.bin_portions(), 24 - cap * 2, "the rest stays in the bin")
+	var blocked := int(f.stats["packer_blocked_ms"])
+	f.advance(10000)
+	assert_eq(f.shelf.size(), cap, "never over-filled")
+	assert_eq(String(f.packer_state()), "blocked", "the station says the shelf is full")
+	assert_eq(int(f.stats["packer_blocked_ms"]) - blocked, 10000, "the blocking is measured")
+	_check_conservation(f, "blocked")
+
+
+func test_packer_upgrades_change_throughput_and_the_station() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	var tiers: Array = f.economy.table("factory")["packer"]
+	for k in range(1, tiers.size()):
+		assert_true(f.packs_per_min(k) > f.packs_per_min(k - 1), "tier %d packs faster than tier %d" % [k, k - 1])
+		assert_true(int(tiers[k]["cost"]) > int(tiers[k - 1]["cost"]), "and costs more")
+	var r: Dictionary = f.execute({"type": "buy_packer"})
+	assert_false(bool(r["ok"]), "no money: refused")
+	assert_eq(String(r["reason"]), "err.not_enough_money", "with the reason")
+	f.money = 1000
+	assert_true(bool(f.execute({"type": "buy_packer"})["ok"]), "tier 1 bought")
+	assert_true(bool(f.execute({"type": "buy_packer"})["ok"]), "tier 2 bought (two heads)")
+	assert_eq(f.money, 1000 - int(tiers[1]["cost"]) - int(tiers[2]["cost"]), "paid the prices, once")
+	assert_eq(int(f.level), 0, "the kettle untouched (an independent upgrade)")
+	_lot(f, "plain", 8, 100)
+	f.advance(60)
+	assert_eq(f.packing.size(), 2, "two heads fill two packs at once")
+	f.advance(int(f.packer()["ms"]) + 60)
+	assert_eq(f.shelf.size(), 2, "both sealed after one cycle of the new tier's time")
+	_check_conservation(f, "upgraded")
+
+
+func test_an_upgrade_mid_cycle_keeps_the_packs_in_progress() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.money = 1000
+	_lot(f, "plain", 4, 100)
+	f.advance(1000)
+	assert_eq(f.packing.size(), 1, "a pack in progress")
+	var left := int(f.packing[0]["left_ms"])
+	f.execute({"type": "buy_packer"})
+	assert_eq(int(f.packing[0]["left_ms"]), left, "the pack in progress keeps its time (not sped up, not lost)")
+	_check_conservation(f, "mid-cycle")
+	f.advance(left + 60)
+	assert_eq(f.shelf.size(), 1, "it finishes")
+	assert_eq(int(f.packing[0]["ms"]), int(f.packer(1)["ms"]), "the next pack uses the new tier's time")
+	_check_conservation(f, "after")
+
+
+func test_a_paused_cycle_resumes_exactly() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_lot(f, "plain", 2, 100)
+	f.advance(1200)
+	var left := int(f.packing[0]["left_ms"])
+	# No time passes (a hidden tab: the app stops advancing the model).
+	assert_eq(int(f.packing[0]["left_ms"]), left, "nothing moves while the model does not advance")
+	f.advance(left - 100)
+	assert_eq(f.shelf.size(), 0, "not before its time")
+	f.advance(200)
+	assert_eq(f.shelf.size(), 1, "then sealed")
+
+
+func test_recipes_convert_to_their_sku_never_mix_and_orders_get_their_own() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.economy.table("factory")["pack_recipes"]["caramel"] = "caramel"
+	f.money = 1000
+	f.execute({"type": "buy_packer"})
+	f.execute({"type": "buy_packer"})   # two heads: the mix test sees both at once
+	_lot(f, "caramel", 1, 100)
+	_lot(f, "plain", 1, 100)
+	f.advance(3000)
+	assert_eq(f.packing.size() + f.shelf.size(), 0, "one caramel and one plain portion never make a pack")
+	_lot(f, "plain", 1, 80)
+	f.advance(int(f.packer()["ms"]) + 60)
+	assert_eq(f.shelf.size(), 1, "two plain portions do")
+	assert_eq(String(f.shelf[0]["recipe"]), "plain", "as a plain pack")
+	assert_eq(f.bin_portions_of("caramel"), 1, "the caramel portion still waits")
+	_lot(f, "caramel", 3, 100)
+	f.advance(int(f.packer()["ms"]) * 2 + 60)
+	var skus: Array = f.shelf.map(func(p: Dictionary) -> String: return String(p["recipe"]))
+	assert_eq(skus.count("caramel"), 2, "four caramel portions became two caramel packs")
+	# A customer who orders plain gets the plain pack even though caramel is on the shelf.
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "plain", "size": 2}, "patience_ms": 60000})
+	f.drain_events()
+	f.advance(100)
+	var sv := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "serve_started")
+	assert_eq(sv.size(), 1, "served")
+	assert_eq(String(f.serving["pack"]["recipe"]), "plain", "with the plain pack it ordered")
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "plain", "size": 2}, "patience_ms": 60000})
+	f.advance(5000)
+	assert_eq(int(f.stats["sold"]), 1, "a second plain order is not given caramel")
+	_check_conservation(f, "recipes")
+	f.economy.table("factory")["pack_recipes"].erase("caramel")

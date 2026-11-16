@@ -82,6 +82,11 @@ func _tick() -> void:
 						# Picture setup (not a play): money to buy what is shown.
 						_app.rules.money += int(step.substr(1))
 						_app.rules.earned += int(step.substr(1))
+					"x":
+						# Picture setup (Step 20): a factory with no customers (to show a full shelf).
+						if "queue" in _app.rules:
+							_app.rules.queue.clear()
+							_app.rules.next_arrival_ms = 1 << 40
 					"w":
 						_app.dev_advance(int(step.substr(1)))
 					"f":

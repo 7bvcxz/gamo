@@ -56,8 +56,10 @@ static func popcorn(ci: CanvasItem, c: Vector2, s: float) -> void:
 		ci.draw_circle(c + o * s, s * 0.45, PopPalette.CREAM)
 
 
-## A striped paper bag, bottom-centre anchored at `foot`, `w` wide.
-static func bag(ci: CanvasItem, foot: Vector2, w: float, col: Color = PopTokens.MACHINE) -> void:
+## A striped paper bag, bottom-centre anchored at `foot`, `w` wide. Sealed by
+## default (a folded top and a gold label: Step 20); `open` while it is being
+## filled, with `fill` puffs of popcorn showing at the mouth.
+static func bag(ci: CanvasItem, foot: Vector2, w: float, col: Color = PopTokens.MACHINE, open: bool = false, fill: int = 0, of: int = 2) -> void:
 	var h := w * 1.5
 	var p := foot - Vector2(w * 0.5, h)
 	var pts := PackedVector2Array([p, p + Vector2(w, 0), p + Vector2(w * 0.88, h), p + Vector2(w * 0.12, h)])
@@ -67,6 +69,89 @@ static func bag(ci: CanvasItem, foot: Vector2, w: float, col: Color = PopTokens.
 	ci.draw_polyline(loop, col, PopTokens.LINE_PART)
 	ci.draw_line(p + Vector2(w * 0.35, 0), p + Vector2(w * 0.38, h), col, 3.0)
 	ci.draw_line(p + Vector2(w * 0.65, 0), p + Vector2(w * 0.62, h), col, 3.0)
+	if open:
+		ci.draw_rect(Rect2(p + Vector2(2, 1), Vector2(w - 4, w * 0.16)), Color(0.55, 0.42, 0.3, 0.55))
+		for k in mini(fill, maxi(1, of)):
+			var fx := (float(k) + 0.5) / float(maxi(1, of))
+			popcorn(ci, p + Vector2(w * (0.2 + 0.6 * fx), w * 0.02 - w * 0.08 * float(k % 2)), w * 0.2)
+	else:
+		ci.draw_rect(Rect2(p, Vector2(w, w * 0.22)), col)
+		ci.draw_circle(p + Vector2(w * 0.5, h * 0.55), w * 0.17, PopPalette.GOLD)
+		ci.draw_arc(p + Vector2(w * 0.5, h * 0.55), w * 0.17, 0, TAU, 16, PopTokens.BRASS, 2.0)
+
+
+## Step 20: the packing station at a tier's look, in `r` (its body and belt;
+## the moving nozzles are drawn by the view's actors at packer_heads()).
+## 0 scoop table, 1 bag feeder, 2 twin heads, 3 rotary head, 4 mini conveyor,
+## 5 multihead packer. `mono` (alpha > 0) draws it as one-colour silhouette.
+static func packer(ci: CanvasItem, r: Rect2, look: int, heads: int, mono: Color = Color(0, 0, 0, 0)) -> void:
+	var m := mono.a > 0.0
+	var belt := Rect2(Vector2(r.position.x, r.end.y - r.size.y * 0.12), Vector2(r.size.x, r.size.y * 0.12))
+	if look == 0:
+		# A wooden table and a post with a scoop arm.
+		var top := Rect2(Vector2(r.position.x, r.end.y - r.size.y * 0.14), Vector2(r.size.x, r.size.y * 0.14))
+		PopMachineArt._round_rect(ci, top, 6, mono if m else Color(0.74, 0.52, 0.34))
+		var post := Rect2(Vector2(r.position.x + r.size.x * 0.06, r.position.y + r.size.y * 0.1), Vector2(r.size.x * 0.08, r.size.y * 0.78))
+		PopMachineArt._round_rect(ci, post, 4, mono if m else PopTokens.STEEL_DEEP)
+		var arm := Rect2(Vector2(post.position.x, r.position.y + r.size.y * 0.1), Vector2(r.size.x * 0.8, r.size.y * 0.07))
+		PopMachineArt._round_rect(ci, arm, 4, mono if m else PopTokens.STEEL)
+		return
+	# A machine body across the top, a belt along the bottom.
+	var body := Rect2(Vector2(r.position.x, r.position.y + r.size.y * 0.04), Vector2(r.size.x, r.size.y * 0.4))
+	if m:
+		PopMachineArt._round_rect(ci, body, PopTokens.R_MACHINE, mono)
+		PopMachineArt._round_rect(ci, belt, belt.size.y * 0.5, mono)
+	else:
+		machine(ci, body)
+		steel(ci, belt, belt.size.y * 0.5)
+		# Rollers show the belt is a conveyor from tier 4.
+		if look >= 4:
+			var nr := 7
+			for k in nr:
+				ci.draw_circle(Vector2(belt.position.x + belt.size.x * (k + 0.5) / nr, belt.get_center().y), belt.size.y * 0.32, PopTokens.STEEL_DEEP)
+	match look:
+		1:   # a stack of flat bags on the body's left
+			for k in 4:
+				var b := Rect2(Vector2(r.position.x - r.size.x * 0.12, body.position.y + body.size.y * (0.15 + 0.17 * k)), Vector2(r.size.x * 0.13, body.size.y * 0.13))
+				PopMachineArt._round_rect(ci, b, 3, mono if m else Color.WHITE)
+		2:   # a pressure gauge
+			ci.draw_circle(body.position + Vector2(body.size.x * 0.88, body.size.y * 0.45), body.size.y * 0.2, mono if m else Color.WHITE)
+		3:   # the rotary head: a disk on top
+			var c := Vector2(body.get_center().x, body.position.y)
+			ci.draw_circle(c, body.size.y * 0.42, mono if m else PopTokens.STEEL)
+			if not m:
+				for k in 6:
+					var a := TAU * k / 6.0
+					ci.draw_circle(c + Vector2(cos(a), sin(a) * 0.4) * body.size.y * 0.3, body.size.y * 0.07, PopTokens.MACHINE_DEEP)
+		5:   # the weigher: a cone of gold buckets on top
+			var c := Vector2(body.get_center().x, body.position.y)
+			var cone := PackedVector2Array([c + Vector2(-body.size.x * 0.36, 0), c + Vector2(body.size.x * 0.36, 0), c + Vector2(body.size.x * 0.12, -body.size.y * 0.6), c + Vector2(-body.size.x * 0.12, -body.size.y * 0.6)])
+			ci.draw_colored_polygon(cone, mono if m else PopTokens.STEEL)
+			if not m:
+				for k in 6:
+					ci.draw_circle(c + Vector2(body.size.x * (-0.3 + 0.12 * k), -body.size.y * 0.1), body.size.y * 0.08, PopPalette.GOLD)
+	# One window per head (where its nozzle hangs).
+	if not m:
+		for i in heads:
+			var x := packer_head_x(r, i, heads)
+			ci.draw_circle(Vector2(x, body.get_center().y), body.size.y * 0.22, Color(1, 1, 1, 0.75))
+
+
+static func packer_head_x(r: Rect2, i: int, heads: int) -> float:
+	var span := r.size.x * (0.84 if heads > 1 else 0.0)
+	return r.get_center().x - span * 0.5 + (span * float(i) / float(heads - 1) if heads > 1 else 0.0) + (r.size.x * 0.06 if heads == 1 else 0.0)
+
+
+## A nozzle (tier >= 1) or the scoop (tier 0), its tip at the origin.
+static func nozzle(ci: CanvasItem, w: float, scoop: bool, at: Vector2 = Vector2.ZERO) -> void:
+	if scoop:
+		ci.draw_line(at + Vector2(0, -w * 1.6), at + Vector2(0, -w * 0.5), PopTokens.STEEL_DEEP, w * 0.18)
+		ci.draw_arc(at + Vector2(0, -w * 0.3), w * 0.42, 0.0, PI, 12, PopTokens.STEEL_DEEP, w * 0.2)
+		return
+	var cone := PackedVector2Array([at + Vector2(-w * 0.32, -w * 1.1), at + Vector2(w * 0.32, -w * 1.1), at + Vector2(w * 0.12, -w * 0.15), at + Vector2(-w * 0.12, -w * 0.15)])
+	ci.draw_colored_polygon(cone, PopTokens.STEEL)
+	ci.draw_polyline(PackedVector2Array([cone[0], cone[1], cone[2], cone[3], cone[0]]), PopTokens.STEEL_DEEP, 2.0)
+	ci.draw_rect(Rect2(at + Vector2(-w * 0.42, -w * 0.18), Vector2(w * 0.84, w * 0.18)), PopTokens.MACHINE_DEEP)
 
 
 ## A striped awning across `r` (top edge).

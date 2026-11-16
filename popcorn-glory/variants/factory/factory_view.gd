@@ -35,6 +35,14 @@ var cargo := {}           ## lot or pack id -> actor
 var leaving: Array = []   ## customers walking out
 ## What the pictures did, for the tests (G-13): {id, kind, what, t}.
 var cargo_log: Array = []
+## Step 20: the packing station. Bags being filled (pack id -> its fill), the
+## nozzles of the current tier, the station's status icon (starved / blocked).
+var filling := {}
+var nozzles: Array = []
+var _nozzle_key := ""
+var status_node := Node2D.new()
+var _status := ""
+var _clock := 0.0
 var _cooking := false            ## this press started on the bottom floor
 var _floors_key := ""
 
@@ -49,6 +57,10 @@ func setup(p_rules: PopRules) -> void:
 	cargo.clear()
 	leaving.clear()
 	cargo_log.clear()
+	filling.clear()
+	nozzles.clear()
+	_nozzle_key = ""
+	_status = ""
 	if floor_layer.get_parent() == null:
 		floor_layer.name = "Floors"
 		add_child(floor_layer)
@@ -61,6 +73,10 @@ func setup(p_rules: PopRules) -> void:
 		actor_layer.name = "Actors"
 		add_child(actor_layer)
 		move_child(actor_layer, 2)
+		status_node.name = "PackerStatus"
+		add_child(status_node)
+		move_child(status_node, 3)
+		status_node.draw.connect(func() -> void: _draw_status(status_node))
 		detail_layer.name = "Detail"
 		add_child(detail_layer)
 		detail_layer.draw.connect(func() -> void:
@@ -110,8 +126,10 @@ func detail_rect() -> Rect2:
 		var x := size.x * 0.62 + 16
 		return Rect2(Vector2(x, 210), Vector2(size.x - x - 16, size.y - 230))
 	var r := floor_rect(selected)
-	if selected == LOW:
-		# Beside the ring, never over it: the kitchen's free right side.
+	if selected != TOP:
+		# Beside the ring, never over it: the kitchen's free right side (the middle
+		# floor's detail too, Step 20 -- so the station stays in view while choosing).
+		r = floor_rect(LOW)
 		var x := machine_centre().x + ring_radius() + machine_size() * 0.09
 		return Rect2(Vector2(x, r.position.y + 12), Vector2(r.end.x - 12 - x, r.size.y - 24))
 	var w := minf(r.size.x * 0.62, 420.0)
@@ -251,6 +269,8 @@ func _process(delta: float) -> void:
 		_redraw_once = true
 	_process_glass()
 	_step_actors(delta)
+	_clock += delta
+	_step_station(delta)
 
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and
@@ -288,6 +308,12 @@ func on_events(events: Array[Dictionary]) -> void:
 			_gain(int(e["data"].get("amount", 0)))
 			_gains[-1]["at"] = at
 			_sound("coin", 1.0, -6.0)
+		elif String(e["type"]) == "station_upgrade":
+			# Step 20: the new station appears with a sparkle and the upgrade sound.
+			_sound("upgrade")
+			if not reduced_motion:
+				fx.sparkle(_station_rect().get_center(), machine_size() / 900.0, rng, 6, 120.0)
+			_nozzle_key = ""
 		else:
 			rest.append(e)
 	_flow_events(events)
@@ -369,11 +395,9 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 		var col := k % per_row
 		var row := k / per_row
 		PopFactoryArt.popcorn(ci, Vector2(hop.position.x + hop.size.x * (0.2 + 0.2 * col) + (row % 2) * pr * 0.4, hop.end.y - pr * 1.1 - row * pr * 1.2), pr)
-	var pk := Rect2(Vector2(r.position.x + r.size.x * 0.38, r.position.y + r.size.y * 0.14), Vector2(r.size.y * 0.8, r.size.y * 0.58))
-	PopFactoryArt.machine(ci, pk)
-	ci.draw_circle(pk.get_center(), pk.size.y * 0.28, Color(1, 1, 1, 0.7))
-	if rules and not (rules.get("packing") as Dictionary).is_empty():
-		PopFactoryArt.bag(ci, Vector2(pk.get_center().x, pk.end.y + 4), r.size.y * 0.15)   # the pack being filled
+	# Step 20: the station at its tier (the nozzles and the bags in it are actors).
+	if rules:
+		PopFactoryArt.packer(ci, _station_rect(), int(rules.packer()["look"]), int(rules.packer()["per_cycle"]))
 	# The shelf: one bag per real sealed pack, empty places dashed.
 	var shelf_n := (int(rules.state()["shelf"]) - _bags_flying_to_shelf()) if rules else 0
 	var shelf_cap := int(rules.state()["shelf_cap"]) if rules else 0
@@ -381,6 +405,12 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 	var per := maxi(1, (shelf_cap + 1) / 2)
 	var span := tube_rect().position.x - 16 - (r.position.x + r.size.x * 0.62)
 	var w := minf(r.size.y * 0.14, span / (float(per) * 1.2))
+	if rules and String(rules.packer_state()) == "blocked":
+		# The shelf is full: a red outline around it (the station's status icon says so too).
+		var sr := Rect2(Vector2(r.position.x + r.size.x * 0.62 - 6, belt.position.y - w * 3.3), Vector2(span + 4, w * 3.3 + 6))
+		var sp := PopMachineArt.round_rect_points(sr, 8)
+		sp.append(sp[0])
+		ci.draw_polyline(sp, PopTokens.WARN, 4.0, true)
 	for k in shelf_cap:
 		var foot := Vector2(r.position.x + r.size.x * 0.62 + (k % per) * w * 1.2 + w * 0.6, belt.position.y - (k / per) * w * 1.65)
 		if k < shelf_n:
@@ -407,8 +437,13 @@ func _draw_badge(ci: CanvasItem, i: int) -> void:
 		TOP:   # a shop front: awning and a door
 			ci.draw_rect(Rect2(c + Vector2(-s, -s * 0.9), Vector2(s * 2.0, s * 0.6)), PopTokens.MACHINE)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.9, -s * 0.3), Vector2(s * 1.8, s * 1.2)), PopPalette.INK, false, 3.0)
-		MID:   # a bag
+		MID:   # a bag, and a dot for the station's state (green working, blue starved, red shelf full)
 			PopFactoryArt.bag(ci, c + Vector2(0, s * 1.0), s * 1.3)
+			if rules:
+				var st := String(rules.packer_state())
+				var dot := PopTokens.OK if st == "run" else (PopTokens.SKY if st == "starved" else (PopTokens.WARN if st == "blocked" else PopTokens.STEEL))
+				ci.draw_circle(c + Vector2(b.size.x * 0.36, b.size.y * 0.36), b.size.x * 0.13, dot)
+				ci.draw_arc(c + Vector2(b.size.x * 0.36, b.size.y * 0.36), b.size.x * 0.13, 0, TAU, 16, PopPalette.INK, 2.0)
 		LOW:   # a kettle
 			PopMachineArt._round_rect(ci, Rect2(c + Vector2(-s, -s * 0.9), Vector2(s * 2.0, s * 0.5)), 4, PopTokens.MACHINE)
 			PopMachineArt._round_rect(ci, Rect2(c + Vector2(-s * 0.85, -s * 0.4), Vector2(s * 1.7, s * 0.9)), 4, Color(0.9, 0.96, 1.0))
@@ -440,7 +475,7 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 	var a: Vector2
 	var b: Vector2
 	if vertical:   # now above, next below, the arrow pointing down (the kitchen's numbers on top)
-		var top := 0.36 if i == LOW else 0.0
+		var top := 0.36 if i != TOP else 0.0
 		h = minf(d.size.x * 0.55, d.size.y * (0.3 - top * 0.3))
 		a = Vector2(d.get_center().x, d.position.y + d.size.y * (0.42 + top * 0.5))
 		b = Vector2(d.get_center().x, d.position.y + d.size.y * 0.94)
@@ -456,10 +491,12 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 	ci.draw_line(m - dir * h * 0.18, m + dir * h * 0.14, PopPalette.INK, 6.0)
 	ci.draw_colored_polygon(PackedVector2Array([m + dir * h * 0.22, m + dir * h * 0.08 - side * h * 0.1, m + dir * h * 0.08 + side * h * 0.1]), PopPalette.INK)
 	# The lock on the next form -- except the kitchen's, which can be bought now.
-	if i != LOW:
+	if i == TOP:
 		var lk := b + Vector2(0, -h * 0.55)
 		PopMachineArt._round_rect(ci, Rect2(lk - Vector2(14, 8), Vector2(28, 22)), 4, PopPalette.INK)
 		ci.draw_arc(lk + Vector2(0, -8), 9, PI, TAU, 12, PopPalette.INK, 4.0)
+	elif i == MID:
+		_draw_packer_numbers(ci, d)
 	else:
 		_draw_kettle_numbers(ci, d)
 
@@ -503,14 +540,14 @@ func _form(ci: CanvasItem, floor_i: int, k: int, foot: Vector2, h: float, dim: b
 			PopMachineArt.draw(ci, foot, h * 1.3, lv)
 			if dim:
 				PopMachineArt._round_rect(ci, Rect2(foot - Vector2(h * 0.6, h * 1.15), Vector2(h * 1.2, h * 1.15)), 8, Color(1, 1, 1, 0.55))
-		MID:
-			if k == 0:   # a scoop and a paper bag
-				PopFactoryArt.machine(ci, Rect2(foot - Vector2(h * 0.35, h * 0.7), Vector2(h * 0.7, h * 0.7)), dim)
-				PopFactoryArt.bag(ci, foot + Vector2(h * 0.5, 0), h * 0.28)
-			else:        # a filling head over a cup
-				PopFactoryArt.machine(ci, Rect2(foot - Vector2(h * 0.4, h), Vector2(h * 0.8, h * 0.55)), dim)
-				ci.draw_circle(foot - Vector2(0, h * 0.72), h * 0.18, Color(1, 1, 1, 0.7))
-				PopFactoryArt.bag(ci, foot, h * 0.3, PopTokens.MACHINE if not dim else PopPalette.DISABLED)
+		MID:   # the packing station at this tier and the next (Step 20)
+			var tiers: Array = rules.economy.table("factory")["packer"] if rules else []
+			if tiers.is_empty():
+				return
+			var t: Dictionary = tiers[mini(int(rules.get("packer_tier")) + k, tiers.size() - 1)]
+			_station_picture(ci, foot, h, int(t["look"]), int(t["per_cycle"]))
+			if dim:
+				PopMachineArt._round_rect(ci, Rect2(foot - Vector2(h * 0.75, h * 1.0), Vector2(h * 1.5, h * 1.05)), 8, Color(1, 1, 1, 0.5))
 		TOP:
 			if k == 0:   # the chalkboard
 				PopMachineArt._round_rect(ci, Rect2(foot - Vector2(h * 0.45, h * 0.7), Vector2(h * 0.9, h * 0.6)), PopTokens.R_PART, Color(0.24, 0.27, 0.25))
@@ -529,7 +566,7 @@ func _inventory_key() -> String:
 	if rules == null:
 		return ""
 	return "%d|%d|%d|%d|%s|%s" % [rules.bin_portions(), (rules.get("shelf") as Array).size(), (rules.get("queue") as Array).size(),
-		(rules.get("lift") as Array).size(), not (rules.get("packing") as Dictionary).is_empty(), not (rules.get("serving") as Dictionary).is_empty()]
+		(rules.get("lift") as Array).size(), (rules.get("packing") as Array).size(), not (rules.get("serving") as Dictionary).is_empty()] + "|%d|%s" % [rules.get("packer_tier"), rules.packer_state()]
 
 
 ## The kettle's glass shows its waiting lot (the backpressure is visible).
@@ -654,12 +691,44 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				_log(int(d["lot"]), "lot", "start")
 			"lot_binned":
 				_end_cargo(int(d["lot"]), "lot")
+			"pack_started":
+				# Step 20: an empty open bag indexes in under its head; its fill follows the model's clock.
+				var pid := int(d["pack"])
+				var bag := _new_actor(Actor.BAG, pid)
+				bag.size_px = _bag_px()
+				bag.open = true
+				bag.of = int(d["size"])
+				bag.position = _entry_foot()
+				filling[pid] = {"t0": int(e["t"]), "ms": int(d.get("ms", 3000)), "head": int(d.get("head", 0)), "size": int(d["size"]),
+					"dropped": 0, "landed": 0, "sealed": false, "bag": bag, "puffs": []}
+				_log(pid, "fill", "start")
 			"pack_shelved":
-				var b := _new_actor(Actor.BAG, int(d["pack"]))
-				b.size_px = _bag_px()
+				var pid := int(d["pack"])
+				var from := _packer_out()
+				var b: Node2D
+				if filling.has(pid):
+					# The same bag, sealed, slides from under its head to its place on the shelf.
+					var f: Dictionary = filling[pid]
+					for puff: Node2D in f["puffs"]:
+						puff.queue_free()
+					b = f["bag"]
+					b.open = false
+					b.fill = 0
+					b.queue_redraw()
+					from = b.position
+					filling.erase(pid)
+					_log(pid, "fill", "end")
+				else:
+					b = _new_actor(Actor.BAG, pid)
+					b.size_px = _bag_px()
 				b.set_meta("to", "shelf")
 				var k := maxi(0, int(rules.state()["shelf"]) - 1)
-				b.start(PackedVector2Array([_packer_out(), _shelf_spot(k)]), 0.45, reduced_motion)
+				var sh: Array = rules.get("shelf")
+				for q in sh.size():
+					if int(sh[q]["id"]) == pid:
+						k = q
+				var spot := _shelf_spot(k)
+				b.start(PackedVector2Array([from, Vector2(spot.x, from.y), spot]), 0.45, reduced_motion)
 				b.set_meta("end_on_arrival", true)
 				cargo[int(d["pack"])] = b
 				_log(int(d["pack"]), "bag", "start")
@@ -766,5 +835,230 @@ func debug_state() -> Dictionary:
 	for id in cargo.keys():
 		var a: Node2D = cargo[id]
 		flying.append({"id": int(id), "kind": a.kind, "to": a.get_meta("to", ""), "x": a.position.x, "y": a.position.y})
-	return {"flying": flying, "customers": customers.size(), "leaving": leaving.size(), "log": cargo_log.duplicate()}
+	var fill := []
+	for id in filling.keys():
+		var f: Dictionary = filling[id]
+		fill.append({"id": int(id), "head": f["head"], "landed": f["landed"], "size": f["size"], "sealed": f["sealed"],
+			"x": (f["bag"] as Node2D).position.x, "y": (f["bag"] as Node2D).position.y})
+	return {"flying": flying, "customers": customers.size(), "leaving": leaving.size(), "log": cargo_log.duplicate(),
+		"filling": fill, "nozzles": nozzles.size(), "packer_status": _status}
 
+
+# -- Step 20: the packing station ---------------------------------------------
+
+## The station's body and belt on the middle floor (between the raw bin and the shelf).
+func _station_rect() -> Rect2:
+	var r := floor_rect(MID)
+	return Rect2(Vector2(r.position.x + r.size.x * 0.34, r.position.y + r.size.y * 0.12), Vector2(r.size.x * 0.25, r.size.y * 0.76))
+
+
+func _heads() -> int:
+	return int(rules.packer()["per_cycle"]) if rules else 1
+
+
+## Where a head's nozzle tip rests, and the belt spot under it.
+func _head_tip(i: int, n: int) -> Vector2:
+	var s := _station_rect()
+	return Vector2(PopFactoryArt.packer_head_x(s, i, n), s.position.y + s.size.y * 0.5)
+
+
+func _head_foot(i: int, n: int) -> Vector2:
+	var s := _station_rect()
+	return Vector2(PopFactoryArt.packer_head_x(s, i, n), s.end.y - s.size.y * 0.12)
+
+
+## Where an empty bag comes in (the station's left end, on the belt).
+func _entry_foot() -> Vector2:
+	var s := _station_rect()
+	return Vector2(s.position.x - _bag_px() * 0.3, s.end.y - s.size.y * 0.12)
+
+
+## A small picture of a station (the detail and the upgrade card).
+func _station_picture(ci: CanvasItem, foot: Vector2, h: float, look: int, heads: int, mono: Color = Color(0, 0, 0, 0)) -> void:
+	var r := Rect2(foot - Vector2(h * 0.62, h * 0.95), Vector2(h * 1.24, h * 0.95))
+	PopFactoryArt.packer(ci, r, look, heads, mono)
+	for i in heads:
+		var tip := Vector2(PopFactoryArt.packer_head_x(r, i, heads), r.position.y + r.size.y * 0.5)
+		var w := h * 0.17
+		if mono.a > 0.0:
+			ci.draw_rect(Rect2(tip - Vector2(w * 0.3, w), Vector2(w * 0.6, w)), mono)
+		else:
+			PopFactoryArt.nozzle(ci, w, look == 0, tip)
+			PopFactoryArt.bag(ci, Vector2(tip.x, r.end.y - r.size.y * 0.12), w * 0.9)
+
+
+## The upgrade card follows the open floor: the middle floor's detail sells the
+## next packing station (its picture, price and packs a minute now > next).
+func card_offer() -> Dictionary:
+	if rules == null or selected != MID:
+		return {}
+	var tier := int(rules.get("packer_tier"))
+	var cost := int(rules.packer_cost())
+	var now := int(round(rules.packs_per_min(tier)))
+	var nxt := int(round(rules.packs_per_min(tier + 1))) if cost >= 0 else -1
+	return {"key": "packer", "stage": tier + 1, "price": cost, "now": now, "next": nxt, "prefix": "",
+		"art": Callable(self, "_card_art")}
+
+
+func card_command() -> Dictionary:
+	return {"type": "buy_packer"} if card_offer().size() > 0 else {"type": "buy"}
+
+
+func _card_art(ci: CanvasItem, foot: Vector2, h: float, stage: int, sil: Color) -> void:
+	var tiers: Array = rules.economy.table("factory")["packer"]
+	var t: Dictionary = tiers[clampi(stage, 0, tiers.size() - 1)]
+	_station_picture(ci, foot, h * 0.8, int(t["look"]), int(t["per_cycle"]), sil)
+
+
+func _ensure_nozzles() -> void:
+	if rules == null:
+		return
+	var n := _heads()
+	var key := "%d|%s|%d" % [int(rules.get("packer_tier")), size, n]
+	if key == _nozzle_key:
+		return
+	_nozzle_key = key
+	for z in nozzles:
+		z.queue_free()
+	nozzles.clear()
+	for i in n:
+		var z := _new_actor(Actor.NOZZLE, -1 - i)
+		z.size_px = _bag_px() * 0.9
+		z.scoop = int(rules.packer()["look"]) == 0
+		z.position = _head_tip(i, n)
+		nozzles.append(z)
+
+
+## The fill of every pack in progress, by the model's clock: the bag indexes in
+## (0-20%), one puff falls per real portion (20-70%), the nozzle presses down
+## and seals it (72-90%). The model already moved the portions; this shows it.
+func _step_station(delta: float) -> void:
+	if rules == null:
+		return
+	_ensure_nozzles()
+	var n := nozzles.size()
+	var press: Array[float] = []
+	press.resize(n)
+	press.fill(0.0)
+	for pid in filling.keys():
+		var f: Dictionary = filling[pid]
+		var k := clampf(float(rules.now_ms - int(f["t0"])) / maxf(1.0, float(f["ms"])), 0.0, 1.0)
+		var h := clampi(int(f["head"]), 0, maxi(0, n - 1))
+		var bag: Node2D = f["bag"]
+		var foot := _head_foot(h, maxi(1, n))
+		if k < 0.2 and not reduced_motion:
+			var e := k / 0.2
+			bag.position = _entry_foot().lerp(foot, e * e * (3.0 - 2.0 * e))
+		else:
+			bag.position = foot if k >= 0.1 or not reduced_motion else _entry_foot()
+		var size_n := int(f["size"])
+		while int(f["dropped"]) < size_n and k >= 0.2 + 0.5 * (float(f["dropped"]) + 0.5) / float(size_n):
+			var puff := _new_actor(Actor.LOT, int(pid))
+			puff.size_px = _bag_px() * 0.22
+			var tip := _head_tip(h, maxi(1, n))
+			var mouth := foot - Vector2(0, _bag_px() * 1.35)
+			puff.start(PackedVector2Array([tip, mouth]), 0.22, reduced_motion)
+			(f["puffs"] as Array).append(puff)
+			f["dropped"] = int(f["dropped"]) + 1
+		var still: Array = []
+		for puff: Node2D in f["puffs"]:
+			puff.step(delta)
+			if puff.done or k >= 0.81:
+				puff.queue_free()
+				f["landed"] = int(f["landed"]) + 1
+				bag.fill = int(f["landed"])
+				bag.queue_redraw()
+				_sound("pop_1", 1.5 + 0.1 * float(f["landed"]), -16.0)
+			else:
+				still.append(puff)
+		f["puffs"] = still
+		if k >= 0.72 and k < 0.9 and h < n:
+			press[h] = maxf(press[h], sin(PI * (k - 0.72) / 0.18) * _bag_px() * 0.55)
+		if not bool(f["sealed"]) and k >= 0.81:
+			f["sealed"] = true
+			bag.open = false
+			bag.queue_redraw()
+			_sound("clink", 1.25, -10.0)
+	var idle := String(rules.packer_state()) != "run" and not reduced_motion
+	for i in n:
+		var bob := sin(_clock * 2.2 + i) * 2.5 if idle else 0.0
+		nozzles[i].position = _head_tip(i, n) + Vector2(0, press[i] + bob)
+	# The status icon: redrawn when the state changes, bobbing by position.
+	var st := String(rules.packer_state())
+	if st != _status:
+		_status = st
+		status_node.queue_redraw()
+	var anchor := _status_anchor(st)
+	status_node.position = anchor + Vector2(0, (sin(_clock * 3.0) * 3.0) if not reduced_motion else 0.0)
+
+
+func _status_anchor(st: String) -> Vector2:
+	var s := _station_rect()
+	if st == "starved":
+		return _bin_top() + Vector2(0, -_bag_px() * 0.9)
+	return Vector2(s.end.x + _bag_px() * 0.45, s.position.y + s.size.y * 0.18)
+
+
+## Starved: a grey puff in a dashed ring over the raw bin (it needs popcorn).
+## Blocked: a red no-entry sign by the station's output (the shelf is full).
+func _draw_status(ci: CanvasItem) -> void:
+	var r := _bag_px() * 0.55
+	match _status:
+		"starved":
+			ci.draw_circle(Vector2.ZERO, r, Color(1, 1, 1, 0.85))
+			for q in 12:
+				var a0 := TAU * q / 12.0
+				ci.draw_arc(Vector2.ZERO, r, a0, a0 + TAU / 24.0, 4, PopTokens.SKY, 3.0)
+			ci.draw_circle(Vector2(-r * 0.2, r * 0.05), r * 0.3, Color(0.75, 0.75, 0.78))
+			ci.draw_circle(Vector2(r * 0.22, 0), r * 0.28, Color(0.75, 0.75, 0.78))
+			ci.draw_circle(Vector2(0, -r * 0.25), r * 0.28, Color(0.8, 0.8, 0.83))
+		"blocked":
+			ci.draw_circle(Vector2.ZERO, r, PopTokens.WARN)
+			ci.draw_arc(Vector2.ZERO, r, 0, TAU, 20, PopPalette.INK, 2.5)
+			ci.draw_rect(Rect2(Vector2(-r * 0.6, -r * 0.16), Vector2(r * 1.2, r * 0.32)), Color.WHITE)
+
+
+## Step 20: the middle floor's numbers -- heads, seconds a cycle, packs a minute
+## (now > next), and how the station has spent its time: working, starved
+## (blue), blocked by a full shelf (red), measured by the model.
+func _draw_packer_numbers(ci: CanvasItem, d: Rect2) -> void:
+	if rules == null:
+		return
+	var tier := int(rules.get("packer_tier"))
+	var top := int(rules.packer_cost()) < 0
+	var now: Dictionary = rules.packer(tier)
+	var nxt: Dictionary = rules.packer(tier + 1)
+	var font := ThemeDB.fallback_font
+	var fs := int(clampf(d.size.x * 0.1, 18.0, 30.0))
+	var rows := [["heads", str(int(now["per_cycle"])), str(int(nxt["per_cycle"])), int(nxt["per_cycle"]) > int(now["per_cycle"])],
+		["clock", "%.1f" % (float(now["ms"]) / 1000.0), "%.1f" % (float(nxt["ms"]) / 1000.0), int(nxt["ms"]) < int(now["ms"])],
+		["rate", str(int(round(rules.packs_per_min(tier)))), str(int(round(rules.packs_per_min(tier + 1)))), not top]]
+	var y := d.position.y + fs * 1.3
+	for row: Array in rows:
+		var ic := Vector2(d.position.x + fs * 1.1, y - fs * 0.35)
+		match String(row[0]):
+			"heads":
+				PopFactoryArt.nozzle(ci, fs * 0.6, false, ic + Vector2(0, fs * 0.4))
+			"clock":
+				ci.draw_arc(ic, fs * 0.42, 0, TAU, 20, PopPalette.INK, 3.0)
+				ci.draw_line(ic, ic + Vector2(0, -fs * 0.3), PopPalette.INK, 3.0)
+				ci.draw_line(ic, ic + Vector2(fs * 0.22, 0), PopPalette.INK, 3.0)
+			"rate":
+				PopFactoryArt.bag(ci, ic + Vector2(0, fs * 0.45), fs * 0.55)
+		var x := d.position.x + fs * 2.0
+		ci.draw_string(font, Vector2(x, y), String(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopPalette.INK)
+		if not top:
+			var x2 := x + fs * 2.4
+			ci.draw_string(font, Vector2(x2, y), ">", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.5))
+			ci.draw_string(font, Vector2(x2 + fs * 0.9, y), String(row[2]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.OK if bool(row[3]) else Color(PopPalette.INK, 0.45))
+		y += fs * 1.35
+	# Time spent: working / starved / blocked (a bar, measured since the shop opened).
+	var flow := maxf(1.0, float(rules.get("flow_ms")))
+	var st: Dictionary = rules.get("stats")
+	var starved := float(st["packer_starved_ms"]) / flow
+	var blocked := float(st["packer_blocked_ms"]) / flow
+	var bar := Rect2(Vector2(d.position.x + fs * 0.6, y - fs * 0.6), Vector2(d.size.x - fs * 1.2, fs * 0.5))
+	ci.draw_rect(bar, PopTokens.OK)
+	ci.draw_rect(Rect2(Vector2(bar.end.x - bar.size.x * (starved + blocked), bar.position.y), Vector2(bar.size.x * starved, bar.size.y)), PopTokens.SKY)
+	ci.draw_rect(Rect2(Vector2(bar.end.x - bar.size.x * blocked, bar.position.y), Vector2(bar.size.x * blocked, bar.size.y)), PopTokens.WARN)
+	ci.draw_rect(bar, PopPalette.INK, false, 2.0)

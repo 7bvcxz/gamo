@@ -154,6 +154,8 @@ func test_every_good_is_followed_once_from_start_to_end() -> void:
 	var starts := {}
 	var ends := {}
 	for e: Dictionary in v.cargo_log:
+		if String(e["kind"]) == "fill":
+			continue   # the packing station's own record (Step 20, its own test)
 		var key := "%s:%d" % [e["kind"], e["id"]]
 		if String(e["what"]) == "start" or String(e["what"]) == "serve":
 			starts[key] = int(starts.get(key, 0)) + 1
@@ -187,3 +189,107 @@ func test_reduced_motion_moves_in_clear_steps() -> void:
 		assert_true(p in ["(0.0, 0.0)", "(0.0, 100.0)", "(100.0, 100.0)"], "only waypoints, no glide (%s)" % p)
 	assert_true(a.done, "it arrives")
 	a.free()
+
+
+# -- Step 20: the packing station on screen -----------------------------------
+
+func _frames(n: int, ms: int) -> void:
+	for k in n:
+		app.dev_advance(ms)
+		await tree.process_frame
+
+
+func test_the_station_fills_one_puff_per_portion_seals_and_the_same_bag_leaves() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	app.rules.queue.clear()
+	app.rules.next_arrival_ms = 1 << 40
+	var c: Vector2 = v.machine_centre()
+	_mouse(c, true)
+	app.dev_advance(app.rules.window_start() + 60)
+	_mouse(c, false)
+	await tree.process_frame
+	assert_eq(v.nozzles.size(), 1, "tier 0: one scoop")
+	var bag: Node2D = null
+	var pid := -1
+	for k in 40:
+		await _frames(1, 50)
+		if not v.filling.is_empty():
+			pid = int(v.filling.keys()[0])
+			bag = v.filling[pid]["bag"]
+			break
+	assert_true(bag != null, "a pack in the model has an open bag on screen")
+	assert_true(bag.open, "open while it is filled")
+	assert_eq(int(v.filling[pid]["size"]), int(app.rules.pack_size()), "it will hold the pack's real portions")
+	var landed_seen := {}
+	var sealed_before_shelf := false
+	for k in 120:
+		await _frames(1, 30)
+		if v.filling.has(pid):
+			landed_seen[int(v.filling[pid]["landed"])] = true
+			if bool(v.filling[pid]["sealed"]):
+				sealed_before_shelf = true
+				assert_eq(int(v.filling[pid]["landed"]), int(app.rules.pack_size()), "sealed only when every portion has fallen in")
+		else:
+			break
+	assert_true(landed_seen.has(1), "the portions fall one at a time (1 of 2 seen)")
+	assert_true(sealed_before_shelf, "the nozzle seals it before it leaves")
+	assert_false(v.filling.has(pid), "shelved: no longer filling")
+	if v.cargo.has(pid):
+		assert_true(v.cargo[pid] == bag, "the same bag slides to the shelf (no second bag)")
+	await tree.create_timer(0.8).timeout
+	await _frames(40, 250)
+	var starts := 0
+	var ends := 0
+	for e: Dictionary in v.cargo_log:
+		if String(e["kind"]) == "fill":
+			if String(e["what"]) == "start":
+				starts += 1
+			else:
+				ends += 1
+	assert_eq(starts, int(app.rules.stats["packed"]) + app.rules.packing.size(), "one fill per real pack")
+	assert_eq(ends, int(app.rules.stats["packed"]), "every finished pack ended its fill once")
+	assert_eq(v.filling.size(), app.rules.packing.size(), "on screen exactly the packs in progress")
+
+
+func test_the_middle_floor_card_sells_the_station_and_the_status_shows_backpressure() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var f = app.rules
+	f.queue.clear()
+	f.next_arrival_ms = 1 << 40
+	await tree.process_frame
+	assert_eq(String(v._status), "starved", "nothing to pack: the starved icon")
+	assert_eq(String(app.frame.upgrade_button.art_key), "", "the card sells the kettle")
+	v.toggle_floor(1)
+	await tree.process_frame
+	assert_eq(String(app.frame.upgrade_button.art_key), "packer", "the middle floor's card sells the station")
+	assert_eq(int(app.frame.upgrade_button.price), 60, "at the next tier's price")
+	assert_eq(int(app.frame.upgrade_button.gain_now), 20, "packs a minute now")
+	assert_eq(int(app.frame.upgrade_button.gain_next), 25, "and next")
+	app.buy()
+	assert_eq(int(f.packer_tier), 0, "no money: nothing bought")
+	f.money = 300
+	app.buy()
+	assert_eq(int(f.packer_tier), 1, "bought tier 1")
+	assert_eq(int(f.level), 0, "not the kettle")
+	app.buy()
+	assert_eq(int(f.packer_tier), 2, "tier 2")
+	assert_eq(int(f.money), 300 - 60 - 220, "paid each price once")
+	await tree.process_frame
+	assert_eq(v.nozzles.size(), 2, "two heads on screen")
+	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 100, "portions": 24})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 24
+	await _frames(30, 400)
+	assert_eq(String(f.packer_state()), "blocked", "the shelf filled")
+	assert_eq(String(v._status), "blocked", "and the station shows it")
+	v.toggle_floor(2)
+	await tree.process_frame
+	assert_eq(String(app.frame.upgrade_button.art_key), "", "the kitchen's card sells the kettle again")
+	f.money = 30
+	app.buy()
+	assert_eq(int(f.level), 1, "a kettle level bought from the kitchen")
+	assert_eq(int(f.packer_tier), 2, "the station untouched")
+	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing made or lost")

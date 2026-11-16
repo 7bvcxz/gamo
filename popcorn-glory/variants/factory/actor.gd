@@ -9,6 +9,7 @@ extends Node2D
 const LOT := "lot"
 const BAG := "bag"
 const CUSTOMER := "customer"
+const NOZZLE := "nozzle"       ## Step 20: a packing head (it fills, then presses down to seal)
 
 var kind := LOT
 var model_id := 0
@@ -16,6 +17,10 @@ var size_px := 20.0
 var body := Color.WHITE
 var skin := Color.WHITE
 var carrying := false          ## a customer holding the bag they bought
+var open := false              ## a bag being filled (Step 20)
+var fill := 0                  ## portions in it so far
+var of := 2                    ## portions it will hold
+var scoop := false             ## a nozzle that is the tier-0 scoop
 ## The journey: waypoints and the seconds for the whole of it. `steps` (reduced
 ## motion) holds at each waypoint instead of gliding between them.
 var path: PackedVector2Array = PackedVector2Array()
@@ -86,7 +91,9 @@ func _draw() -> void:
 			for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
 				draw_circle(o * size_px, size_px * 0.4, PopPalette.CREAM)
 		BAG:
-			PopFactoryArt.bag(self, Vector2.ZERO, size_px)
+			PopFactoryArt.bag(self, Vector2.ZERO, size_px, PopTokens.MACHINE, open, fill, of)
+		NOZZLE:
+			PopFactoryArt.nozzle(self, size_px, scoop)
 		CUSTOMER:
 			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin)
 			if carrying:

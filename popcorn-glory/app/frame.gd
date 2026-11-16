@@ -164,8 +164,16 @@ func _layout_wide(w: float, h: float) -> void:
 
 func refresh(rules: PopRules, p_clock_ms: int) -> void:
 	money_view.set_money(rules.money)
-	upgrade_button.set_offer(rules.level + 1, rules.cost(), rules.money)
-	upgrade_button.set_gain(rules.payout(rules.level), rules.payout(rules.level + 1))
+	# Step 20: a view may sell something else on the card (the factory's open floor).
+	var offer: Dictionary = play.card_offer() if play != null and play.has_method("card_offer") else {}
+	if offer.is_empty():
+		upgrade_button.set_art("", Callable(), "+")
+		upgrade_button.set_offer(rules.level + 1, rules.cost(), rules.money)
+		upgrade_button.set_gain(rules.payout(rules.level), rules.payout(rules.level + 1))
+	else:
+		upgrade_button.set_art(String(offer["key"]), offer["art"], String(offer["prefix"]))
+		upgrade_button.set_offer(int(offer["stage"]), int(offer["price"]), rules.money)
+		upgrade_button.set_gain(int(offer["now"]), int(offer["next"]))
 	if has_auto:
 		_refresh_auto(rules)
 		var cm := int(rules.state().get("completed_ms", -1))

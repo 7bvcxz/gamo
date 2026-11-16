@@ -26,6 +26,22 @@ func set_offer(next_stage: int, p_price: int, p_money: int) -> void:
 		queue_redraw()
 
 
+## Step 20: what the card sells can change (the factory's open floor): a
+## picture to draw instead of the kettle (Callable(ci, foot, h, stage, colour)),
+## the prefix of the gain numbers ("+" coins, "" packs a minute).
+var art := Callable()
+var gain_prefix := "+"
+var art_key := ""
+
+
+func set_art(key: String, p_art: Callable, prefix: String) -> void:
+	if key != art_key:
+		art_key = key
+		art = p_art
+		gain_prefix = prefix
+		queue_redraw()
+
+
 func set_gain(now: int, next: int) -> void:
 	if now != gain_now or next != gain_next:
 		gain_now = now
@@ -77,8 +93,11 @@ func _draw() -> void:
 	# The next machine, as a silhouette (bright when affordable).
 	var sil := Color(PopPalette.INK, 0.35 + 0.5 * _shine)
 	# Sized so the tallest stage (with its star) stays inside the button.
-	PopMachineArt.draw(self, Vector2(r.position.x + r.size.y * 0.62, r.end.y - r.size.y * 0.1),
-		r.size.y * 0.74, stage, 0.0, 0.3, sil)
+	if art.is_valid():
+		art.call(self, Vector2(r.position.x + r.size.y * 0.62, r.end.y - r.size.y * 0.16), r.size.y * 0.74, stage, sil)
+	else:
+		PopMachineArt.draw(self, Vector2(r.position.x + r.size.y * 0.62, r.end.y - r.size.y * 0.1),
+			r.size.y * 0.74, stage, 0.0, 0.3, sil)
 	# Price: coin + number.
 	var font := ThemeDB.fallback_font
 	var fs := int(size.y * 0.3)
@@ -100,8 +119,8 @@ func _draw() -> void:
 		var gs := int(fs * 0.72)
 		var gy := r.get_center().y + fs * 0.98
 		var ink := Color(PopPalette.INK, 0.7) if enabled else PopPalette.DISABLED.darkened(0.2)
-		var now_s := "+" + PopMoneyView._format(gain_now)
-		var next_s := "+" + PopMoneyView._format(gain_next)
+		var now_s := gain_prefix + PopMoneyView._format(gain_now)
+		var next_s := gain_prefix + PopMoneyView._format(gain_next)
 		var gx := cx + fs * 0.1
 		# The whole line fits before the arrow (Step 11: large numbers ran under it).
 		var room := (r.end.x - r.size.y * 0.42 - r.size.y * 0.24) - gx

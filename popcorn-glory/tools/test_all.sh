@@ -43,7 +43,7 @@ else
     sleep 30; waited=$((waited + 30))
   done
   if [[ -z "$browser_why" ]]; then
-    specs=(specs/stub03.spec.mjs specs/experiments04.spec.mjs specs/sound05.spec.mjs specs/responsive07.spec.mjs specs/input07.spec.mjs specs/progression07.spec.mjs specs/perf07.spec.mjs specs/scorecard09.spec.mjs specs/stall09.spec.mjs specs/stand10.spec.mjs specs/release12.spec.mjs specs/burst14.spec.mjs specs/art15.spec.mjs specs/factory16.spec.mjs specs/factory17.spec.mjs specs/factory18.spec.mjs specs/factory19.spec.mjs)
+    specs=(specs/stub03.spec.mjs specs/experiments04.spec.mjs specs/sound05.spec.mjs specs/responsive07.spec.mjs specs/input07.spec.mjs specs/progression07.spec.mjs specs/perf07.spec.mjs specs/scorecard09.spec.mjs specs/stall09.spec.mjs specs/stand10.spec.mjs specs/release12.spec.mjs specs/burst14.spec.mjs specs/art15.spec.mjs specs/factory16.spec.mjs specs/factory17.spec.mjs specs/factory18.spec.mjs specs/factory19.spec.mjs specs/factory20.spec.mjs)
     (( slow )) && specs+=(specs/play180.spec.mjs)
     # Always through env: an assignment after an empty array expansion is read as a command name.
     vars=(PLAYWRIGHT_JSON_OUTPUT_NAME="$OUT/e2e.json")
