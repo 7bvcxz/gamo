@@ -17,6 +17,7 @@ func before_each() -> void:
 	# (AGENTS.md 2026-10-26: a leftover save made tests pass or fail by history).
 	app.save_prefix = "test."
 	PopSaveStore.clear("test.stand.v1")
+	PopSaveStore.clear("test.factory.v1")
 	tree.root.add_child(app)
 	await tree.process_frame
 	await tree.process_frame

@@ -70,7 +70,17 @@
     "shelf_packs": 8,
     "price": { "plain": 10 },
     "service_ms": 1200,
-    "customers": { "second_ms": [4000, 8000], "min_ms": 10000, "mode_ms": 15000, "max_ms": 20000, "min_gap_ms": 1000, "drought_ms": 25000, "queue_cap": 5, "patience_ms": 60000 }
+    "counter": { "_doc": "Step 21: the counter's lanes -- packs handed over at once (the queue still goes in order). Step 24's shop tree adds lanes.", "lanes": 1 },
+    "customers": { "second_ms": [4000, 8000], "min_gap_ms": 1000, "drought_ms": 25000, "patience_ms": 60000 },
+    "sign": [
+      { "_doc": "Step 22, the shop's sign: each tier sets the next customer's wait -- triangular between min_ms and max_ms around mode_ms (its mean is (min+mode+max)/3), never a fixed timer -- and the shop's size (lanes at the counter, queue_cap places). Tier 0: a chalkboard, ~15 s. The sign never makes money itself (STATIONS 3).", "mode_ms": 15000, "min_ms": 10000, "max_ms": 20000, "lanes": 1, "queue_cap": 5, "cost": 0, "look": 0 },
+      { "mode_ms": 12500, "min_ms": 8500, "max_ms": 17000, "lanes": 1, "queue_cap": 5, "cost": 80, "look": 1 },
+      { "mode_ms": 10000, "min_ms": 7000, "max_ms": 13500, "lanes": 1, "queue_cap": 6, "cost": 260, "look": 2 },
+      { "mode_ms": 8000, "min_ms": 5500, "max_ms": 11000, "lanes": 2, "queue_cap": 6, "cost": 800, "look": 3 },
+      { "mode_ms": 6500, "min_ms": 4500, "max_ms": 9000, "lanes": 2, "queue_cap": 7, "cost": 2400, "look": 4 },
+      { "mode_ms": 5200, "min_ms": 3600, "max_ms": 7200, "lanes": 3, "queue_cap": 8, "cost": 7000, "look": 5 },
+      { "mode_ms": 4200, "min_ms": 2900, "max_ms": 5800, "lanes": 4, "queue_cap": 8, "cost": 20000, "look": 6 }
+    ]
   },
   "stand": {
     "_doc": "Step 10, the Popcorn Stand (design/SLICE.md): B's hold and release, plus shake (unlock.shake: `turns` direction changes in one heat = an even pop x shake.mult; the motor gives motor_mult to every batch and the hand's shake multiplies on top), recipes (unlock.recipes: mult x the batch, window_scale x the gold, burn_scale x the time from the gold to the burn, cooldown_add_ms after a pop), edge_grace_ms (a release this close outside the drawn gold still counts as perfect) and the automation ladder (unlock.auto: a motor that shakes every batch, then a helper kettle paying share x batch[L] every cycle_ms). costs: the main machine's prices, level by level -- B's first four, then stretched for a 10-20 minute session.",

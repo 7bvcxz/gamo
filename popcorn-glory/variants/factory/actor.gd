@@ -21,6 +21,7 @@ var open := false              ## a bag being filled (Step 20)
 var fill := 0                  ## portions in it so far
 var of := 2                    ## portions it will hold
 var scoop := false             ## a nozzle that is the tier-0 scoop
+var mood := "wait"             ## a customer's face (Step 21)
 ## The journey: waypoints and the seconds for the whole of it. `steps` (reduced
 ## motion) holds at each waypoint instead of gliding between them.
 var path: PackedVector2Array = PackedVector2Array()
@@ -95,6 +96,6 @@ func _draw() -> void:
 		NOZZLE:
 			PopFactoryArt.nozzle(self, size_px, scoop)
 		CUSTOMER:
-			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin)
+			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood)
 			if carrying:
 				PopFactoryArt.bag(self, Vector2(size_px * 1.2, -size_px * 0.4), size_px * 0.9)

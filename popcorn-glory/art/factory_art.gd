@@ -163,10 +163,38 @@ static func awning(ci: CanvasItem, r: Rect2, stripes: int = 10) -> void:
 
 
 ## A customer, bottom-centre anchored at `foot`, height ~ 2.6 x head radius.
-static func customer(ci: CanvasItem, foot: Vector2, head: float, body: Color, skin: Color) -> void:
+## Step 21: a face by `mood` -- "wait" (calm), "impatient" (flat mouth, a sweat
+## drop), "happy" (a smile, rosy cheeks), "sad" (a frown) -- read without words.
+static func customer(ci: CanvasItem, foot: Vector2, head: float, body: Color, skin: Color, mood: String = "wait") -> void:
 	PopMachineArt._round_rect(ci, Rect2(foot - Vector2(head * 1.05, head * 1.8), Vector2(head * 2.1, head * 1.8)), head * 0.8, body)
-	ci.draw_circle(foot - Vector2(0, head * 2.6), head, skin)
-	ci.draw_arc(foot - Vector2(0, head * 2.6), head, 0, TAU, 24, PopPalette.INK, 3.0)
+	var c := foot - Vector2(0, head * 2.6)
+	ci.draw_circle(c, head, skin)
+	ci.draw_arc(c, head, 0, TAU, 24, PopPalette.INK, 3.0)
+	var ink := PopPalette.INK
+	var e := head * 0.13
+	ci.draw_circle(c + Vector2(-head * 0.36, -head * 0.12), e, ink)
+	ci.draw_circle(c + Vector2(head * 0.36, -head * 0.12), e, ink)
+	var m := c + Vector2(0, head * 0.38)
+	match mood:
+		"happy":
+			ci.draw_arc(m + Vector2(0, -head * 0.18), head * 0.38, 0.25, PI - 0.25, 10, ink, 2.5)
+			ci.draw_circle(c + Vector2(-head * 0.6, head * 0.22), head * 0.16, Color(1.0, 0.55, 0.55, 0.6))
+			ci.draw_circle(c + Vector2(head * 0.6, head * 0.22), head * 0.16, Color(1.0, 0.55, 0.55, 0.6))
+		"sad":
+			ci.draw_arc(m + Vector2(0, head * 0.22), head * 0.3, PI + 0.4, TAU - 0.4, 10, ink, 2.5)
+		"impatient":
+			ci.draw_line(m + Vector2(-head * 0.26, 0), m + Vector2(head * 0.26, 0), ink, 2.5)
+			var d := c + Vector2(head * 0.95, -head * 0.55)
+			ci.draw_colored_polygon(PackedVector2Array([d + Vector2(0, -head * 0.3), d + Vector2(head * 0.16, 0), d + Vector2(0, head * 0.12), d + Vector2(-head * 0.16, 0)]), PopTokens.SKY)
+		_:
+			ci.draw_arc(m + Vector2(0, -head * 0.1), head * 0.22, 0.4, PI - 0.4, 8, ink, 2.5)
+
+
+## Step 21: the shop's bell (it swings when the next customer is about to come in).
+static func bell(ci: CanvasItem, s: float) -> void:
+	ci.draw_line(Vector2.ZERO, Vector2(0, s * 0.4), PopTokens.STEEL_DEEP, 2.0)
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(-s * 0.45, s * 1.25), Vector2(s * 0.45, s * 1.25), Vector2(s * 0.3, s * 0.55), Vector2(0, s * 0.4), Vector2(-s * 0.3, s * 0.55)]), PopTokens.BRASS)
+	ci.draw_circle(Vector2(0, s * 1.3), s * 0.13, PopTokens.STEEL_DEEP)
 
 
 ## A dashed rounded outline (an empty machine slot, blue = automation).
@@ -175,3 +203,30 @@ static func dashed_slot(ci: CanvasItem, r: Rect2, col: Color = PopTokens.AUTO) -
 	var pts := PopMachineArt.round_rect_points(r, PopTokens.R_MACHINE)
 	for q in range(0, pts.size(), 2):
 		ci.draw_line(pts[q], pts[(q + 1) % pts.size()], col, 4.0)
+
+
+## Step 22: the shop's sign at a tier, in `r` -- 0 a chalkboard, 1 with a lamp,
+## 2 a lit marquee, 3 a bigger marquee, 4 a neon popcorn, 5 neon with a frame
+## of bulbs, 6 a landmark with a star. `mono` (alpha > 0) is a silhouette.
+static func shop_sign(ci: CanvasItem, r: Rect2, look: int, mono: Color = Color(0, 0, 0, 0)) -> void:
+	var m := mono.a > 0.0
+	var board := Color(0.24, 0.27, 0.25) if look < 2 else (Color(0.35, 0.1, 0.16) if look < 4 else Color(0.14, 0.12, 0.22))
+	PopMachineArt._round_rect(ci, r, PopTokens.R_PART, mono if m else board)
+	if m:
+		return
+	if look == 1:   # a lamp over the board
+		ci.draw_line(r.position + Vector2(r.size.x * 0.5, 0), r.position + Vector2(r.size.x * 0.5, -r.size.y * 0.16), PopTokens.STEEL_DEEP, 3.0)
+		ci.draw_circle(r.position + Vector2(r.size.x * 0.5, -r.size.y * 0.18), r.size.y * 0.08, PopPalette.GOLD)
+	if look >= 2:   # bulbs along the top (and all round from 5)
+		var n := 6 if look < 3 else 9
+		for q in n:
+			ci.draw_circle(Vector2(r.position.x + r.size.x * (q + 0.5) / n, r.position.y + 5), maxf(3.0, r.size.y * 0.05), PopTokens.BRASS)
+		if look >= 5:
+			for q in n:
+				ci.draw_circle(Vector2(r.position.x + r.size.x * (q + 0.5) / n, r.end.y - 5), maxf(3.0, r.size.y * 0.05), PopTokens.BRASS)
+	if look >= 4:   # a neon outline
+		var pts := PopMachineArt.round_rect_points(r.grow(-6), PopTokens.R_PART)
+		pts.append(pts[0])
+		ci.draw_polyline(pts, Color(1.0, 0.45, 0.7), 3.0, true)
+	if look >= 6:   # the landmark's star on top
+		ci.draw_colored_polygon(PopMachineArt._star(r.position + Vector2(r.size.x * 0.5, -r.size.y * 0.12), r.size.y * 0.22, r.size.y * 0.1), PopPalette.GOLD)

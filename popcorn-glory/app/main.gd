@@ -30,6 +30,9 @@ var history: Array[Dictionary] = []
 var reduced_motion := false
 ## Step 14: ?burst=1 turns on the stand's crescendo (off = the stand as it was).
 var burst := false
+## Step 22: ?seed=N -- a measured session from that seed: a fresh run that is
+## neither loaded from nor written to the save.
+var seed := -1
 
 var ui: Control
 var chooser: PopChooser
@@ -83,6 +86,7 @@ func _ready() -> void:
 	frame.dev = bool(route["dev"])
 	frame.trial = bool(route["trial"])
 	burst = bool(route["burst"])
+	seed = int(route.get("seed", -1))
 	audio.set_muted(not bool(route["sound"]))
 	frame.set_sound(audio.level_name())
 	if not economy.errors.is_empty():
@@ -278,7 +282,7 @@ var _saved_at_ms := 0
 ## A 3-minute trial (?trial=1, the owner's scorecard) neither reads nor writes
 ## the save: a score is taken from a fresh start, and the real run is untouched.
 func _saves() -> bool:
-	return screen == "play" and rules != null and not frame.trial and bool(PopRegistry.find(exp_id).get("save", false)) and rules.has_method("to_save")
+	return screen == "play" and rules != null and not frame.trial and seed < 0 and bool(PopRegistry.find(exp_id).get("save", false)) and rules.has_method("to_save")
 
 
 func _save_name(id: String) -> String:
@@ -355,7 +359,9 @@ func _start(id: String) -> void:
 		clock = PopClock.new()
 		session = PopSession.new(id)
 		_saved_at_ms = 0
-		if bool(entry.get("save", false)) and not frame.trial:
+		if seed >= 0 and rules.has_method("reseed"):
+			rules.reseed(seed)
+		elif bool(entry.get("save", false)) and not frame.trial:
 			_load_saved(id)
 	# Step 14: the stand's crescendo is a mode of the address (not of the save);
 	# the factory has it always (Step 19), so only entries marked burst_route follow ?burst=1.

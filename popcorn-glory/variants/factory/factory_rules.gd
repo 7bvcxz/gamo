@@ -32,9 +32,19 @@ var lift: Array = []        ## lots on their way up: {lot, left_ms}
 var bin: Array = []         ## lots in the raw bin, oldest first: {id, recipe, quality, portions}
 var packing: Array = []     ## packs being filled together (one per head): {id, recipe, size, quality, left_ms}
 var packer_tier := 0        ## Step 20: the packing station's upgrade (data: factory.packer)
+var sign_tier := 0          ## Step 22: the shop's sign (data: factory.sign) -- the foot traffic
+var arrival_log: Array = [] ## Step 22: when each customer came in (flow ms), for the statistics
+var first_sale_ms := -1     ## flow ms of the first sale (-1: none yet)
 var shelf: Array = []       ## sealed packs, oldest first: {id, recipe, size, quality}
 var queue: Array = []       ## customers waiting, head first: {id, order: {recipe, size}, patience_ms}
-var serving := {}           ## {customer, pack, left_ms} while a pack is being handed over
+## Step 21: the counter's lanes, each handing one pack over: {customer, pack,
+## left_ms, lane}. `serving` is the first of them (the one-lane shop, Step 17).
+var serves: Array = []
+var serving: Dictionary:
+	get:
+		return serves[0] if not serves.is_empty() else {}
+## Step 21: every sale, once, as it was committed (the money's receipt).
+var ledger: Array = []
 var next_arrival_ms := 0    ## flow time of the next customer (absolute)
 var flow_ms := 0            ## flow time done (a multiple of FLOW_STEP_MS)
 var rng_state := 0          ## the arrival generator's state (saved)
@@ -197,8 +207,8 @@ func portions_everywhere() -> int:
 		n += int(p["size"])
 	for p: Dictionary in shelf:
 		n += int(p["size"])
-	if not serving.is_empty():
-		n += int(serving["pack"]["size"])
+	for sv: Dictionary in serves:
+		n += int(sv["pack"]["size"])
 	return n + int(stats["sold_portions"])
 
 
@@ -207,6 +217,8 @@ func portions_everywhere() -> int:
 func _act(kind: String, cmd: Dictionary) -> Dictionary:
 	if kind == "buy_packer":
 		return _buy_packer()
+	if kind == "buy_sign":
+		return _buy_sign()
 	if kind == "press" and not glass.is_empty():
 		# The glass still holds a lot (the bin is full): no heat until it pours.
 		return {"ok": false, "reason": "err.kettle_full"}
@@ -314,23 +326,29 @@ func _flow_step(dt: int) -> void:
 		else:
 			stay.append(c)
 	queue = stay
-	# 6. The counter: the head of the queue, with a pack that matches.
-	if serving.is_empty():
-		if queue.is_empty():
-			stats["counter_empty_ms"] = int(stats["counter_empty_ms"]) + dt
+	# 6. The counter: every lane hands its pack over; a free lane takes the head
+	# of the queue (in order -- nobody jumps it) when a matching pack is there.
+	var going: Array = []
+	for sv: Dictionary in serves:
+		sv["left_ms"] = int(sv["left_ms"]) - dt
+		if int(sv["left_ms"]) <= 0:
+			_sell(sv)
 		else:
-			var head: Dictionary = queue[0]
-			var idx := _matching_pack(head["order"])
-			if idx >= 0:
-				var pack: Dictionary = shelf[idx]
-				shelf.remove_at(idx)
-				queue.remove_at(0)
-				serving = {"customer": head, "pack": pack, "left_ms": int(t["service_ms"])}
-				_emit("serve_started", {"customer": head["id"], "pack": pack["id"]})
-	else:
-		serving["left_ms"] = int(serving["left_ms"]) - dt
-		if int(serving["left_ms"]) <= 0:
-			_sell()
+			going.append(sv)
+	serves = going
+	if serves.is_empty() and queue.is_empty():
+		stats["counter_empty_ms"] = int(stats["counter_empty_ms"]) + dt
+	while serves.size() < lanes() and not queue.is_empty():
+		var head: Dictionary = queue[0]
+		var idx := _matching_pack(head["order"])
+		if idx < 0:
+			break
+		var pack: Dictionary = shelf[idx]
+		shelf.remove_at(idx)
+		queue.remove_at(0)
+		var lane := _free_lane()
+		serves.append({"customer": head, "pack": pack, "left_ms": int(t["service_ms"]), "lane": lane})
+		_emit("serve_started", {"customer": head["id"], "pack": pack["id"], "lane": lane})
 
 
 ## The oldest recipe in the bin with a whole pack's portions ("" = none): a
@@ -394,11 +412,82 @@ func _matching_pack(order: Dictionary) -> int:
 	return -1
 
 
-func _sell() -> void:
-	var c: Dictionary = serving["customer"]
-	var p: Dictionary = serving["pack"]
+## The counter's lanes (data: factory.counter.lanes; Step 24's shop tree adds more).
+func lanes() -> int:
+	return maxi(maxi(1, int((_t().get("counter", {}) as Dictionary).get("lanes", 1))), int(shop_sign().get("lanes", 1)))
+
+
+# -- Step 22: the sign and the foot traffic ------------------------------------
+
+func shop_sign(at_tier: int = -1) -> Dictionary:
+	var tiers: Array = _t()["sign"]
+	return tiers[clampi(sign_tier if at_tier < 0 else at_tier, 0, tiers.size() - 1)]
+
+
+func sign_cost() -> int:
+	var tiers: Array = _t()["sign"]
+	return int(tiers[sign_tier + 1]["cost"]) if sign_tier + 1 < tiers.size() else -1
+
+
+func queue_cap() -> int:
+	return int(shop_sign().get("queue_cap", 5))
+
+
+## The expected wait between customers at a tier: the triangle's mean.
+func mean_wait_ms(at_tier: int) -> int:
+	var s := shop_sign(at_tier)
+	return int((float(s["min_ms"]) + float(s["mode_ms"]) + float(s["max_ms"])) / 3.0)
+
+
+func _buy_sign() -> Dictionary:
+	var c := sign_cost()
+	if c < 0:
+		return {"ok": false, "reason": "err.max_level"}
+	if money < c:
+		return {"ok": false, "reason": "err.not_enough_money"}
+	money -= c
+	sign_tier += 1
+	_emit("station_upgrade", {"station": "sign", "tier": sign_tier, "cost": c, "money": money})
+	return {"ok": true, "tier": sign_tier, "cost": c}
+
+
+## A fresh run from another seed (a measured session, ?seed=N): the same model,
+## its arrivals drawn from that seed. Only before anything has happened.
+func reseed(seed_value: int) -> void:
+	_rng.seed = seed_value
+	queue.clear()
+	arrival_log.clear()
+	stats["arrived"] = 0
+	stats["visitors"] = 0
+	next_id = 1
+	_rng.state = int(_rng.state)
+	rng_state = int(_rng.state)
+	_arrive()
+	var f := _t()["customers"] as Dictionary
+	_rng.state = rng_state
+	next_arrival_ms = flow_ms + _rng.randi_range(int(f["second_ms"][0]), int(f["second_ms"][1]))
+	rng_state = int(_rng.state)
+
+
+func _free_lane() -> int:
+	var used := {}
+	for sv: Dictionary in serves:
+		used[int(sv["lane"])] = true
+	for k in lanes():
+		if not used.has(k):
+			return k
+	return 0
+
+
+func _sell(sv: Dictionary) -> void:
+	var c: Dictionary = sv["customer"]
+	var p: Dictionary = sv["pack"]
 	var coins := pack_price(String(p["recipe"]), int(p["size"]), int(p["quality"]))
-	serving = {}
+	if first_sale_ms < 0:
+		first_sale_ms = flow_ms
+	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "quality": p["quality"], "coins": coins})
+	if ledger.size() > 500:
+		ledger.pop_front()
 	stats["sold"] = int(stats["sold"]) + 1
 	stats["sold_portions"] = int(stats["sold_portions"]) + int(p["size"])
 	stats["revenue"] = int(stats["revenue"]) + coins
@@ -408,7 +497,13 @@ func _sell() -> void:
 
 func _arrive() -> void:
 	var f := _t()["customers"] as Dictionary
-	if queue.size() >= int(f["queue_cap"]):
+	# Every visitor is logged (Step 22): those who join the queue ("arrived")
+	# and those who find it full and walk past ("passed_by").
+	arrival_log.append(flow_ms)
+	if arrival_log.size() > 400:
+		arrival_log.pop_front()
+	stats["visitors"] = int(stats.get("visitors", 0)) + 1
+	if queue.size() >= queue_cap():
 		stats["passed_by"] = int(stats["passed_by"]) + 1
 		_emit("customer_passed", {})
 		return
@@ -423,10 +518,11 @@ func _arrive() -> void:
 ## reproducible; at least min_gap after this one, never more than `drought`.
 func _schedule_arrival() -> void:
 	var f := _t()["customers"] as Dictionary
+	var sg := shop_sign()
 	_rng.state = rng_state
-	var lo := float(f["min_ms"])
-	var hi := float(f["max_ms"])
-	var mo := float(f["mode_ms"])
+	var lo := float(sg["min_ms"])
+	var hi := float(sg["max_ms"])
+	var mo := float(sg["mode_ms"])
 	var u := _rng.randf()
 	var c := (mo - lo) / (hi - lo)
 	var wait := lo + sqrt(u * (hi - lo) * (mo - lo)) if u < c else hi - sqrt((1.0 - u) * (hi - lo) * (hi - mo))
@@ -435,11 +531,87 @@ func _schedule_arrival() -> void:
 	next_arrival_ms = flow_ms + FLOW_STEP_MS + int(wait)
 
 
+# -- Step 22: the save ---------------------------------------------------------
+## The whole factory: every good where it is, the customers, the clocks and the
+## arrival generator's state (so a resumed run continues the same draws). A heat
+## in progress is not kept (as the stand's, Step 12).
+
+const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo", "bursts", "packer_tier", "sign_tier",
+	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
+const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
+
+
+func to_save() -> Dictionary:
+	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate()}
+	for k: String in SAVE_INTS:
+		d[k] = get(k)
+	for k: String in SAVE_GOODS:
+		var v: Variant = get(k)
+		d[k] = v.duplicate(true)
+	return d
+
+
+## JSON gives every number back as a float: whole numbers become ints again.
+static func _ints(v: Variant) -> Variant:
+	match typeof(v):
+		TYPE_FLOAT:
+			return int(v) if float(v) == floor(float(v)) else v
+		TYPE_ARRAY:
+			return (v as Array).map(func(x: Variant) -> Variant: return _ints(x))
+		TYPE_DICTIONARY:
+			var o := {}
+			for k: Variant in (v as Dictionary).keys():
+				o[k] = _ints(v[k])
+			return o
+	return v
+
+
+## Restores only a whole, consistent factory (every portion made is somewhere,
+## tiers in range, nothing negative); otherwise changes nothing and answers false.
+func from_save(raw: Dictionary) -> bool:
+	var d: Dictionary = _ints(raw)
+	for k: String in SAVE_INTS + SAVE_GOODS + ["stats", "outcomes", "rng_state"]:
+		if not d.has(k):
+			return false
+	for k: String in SAVE_INTS:
+		if typeof(d[k]) != TYPE_INT or (int(d[k]) < 0 and k != "first_sale_ms"):
+			return false
+	for k: String in SAVE_GOODS:
+		if typeof(d[k]) != TYPE_ARRAY and not (k == "glass" and typeof(d[k]) == TYPE_DICTIONARY):
+			return false
+	if typeof(d["stats"]) != TYPE_DICTIONARY or typeof(d["outcomes"]) != TYPE_DICTIONARY or not String(d["rng_state"]).is_valid_int():
+		return false
+	if int(d["level"]) > max_level() or int(d["packer_tier"]) >= (_t()["packer"] as Array).size() or int(d["sign_tier"]) >= (_t()["sign"] as Array).size():
+		return false
+	# Try it on a copy first: the goods must add up to what was made.
+	var probe: PopRules = get_script().new(economy)
+	probe._apply_save(d)
+	if int(probe.portions_everywhere()) != int((d["stats"] as Dictionary).get("made_portions", -1)):
+		return false
+	_apply_save(d)
+	return true
+
+
+func _apply_save(d: Dictionary) -> void:
+	for k: String in SAVE_INTS:
+		set(k, int(d[k]))
+	for k: String in SAVE_GOODS:
+		set(k, d[k])
+	for k: String in (d["stats"] as Dictionary).keys():
+		stats[k] = d["stats"][k]
+	for k: String in outcomes.keys():
+		outcomes[k] = int((d["outcomes"] as Dictionary).get(k, 0))
+	crescendo = clampi(crescendo, 0, crescendo_full() - 1)
+	rng_state = String(d["rng_state"]).to_int()
+	_rng.state = rng_state
+
+
 # -- reading it ---------------------------------------------------------------
 
 func state() -> Dictionary:
 	var s := super()
 	s["glass"] = glass.duplicate()
+	s["flow_ms"] = flow_ms
 	s["lift"] = lift.size()
 	s["bin_portions"] = bin_portions()
 	s["bin_cap"] = int(_t()["bin_portions"])
@@ -452,8 +624,18 @@ func state() -> Dictionary:
 	s["shelf"] = shelf.size()
 	s["shelf_cap"] = int(_t()["shelf_packs"])
 	s["queue"] = queue.size()
-	s["queue_cap"] = int((_t()["customers"] as Dictionary)["queue_cap"])
-	s["serving"] = not serving.is_empty()
+	s["queue_cap"] = queue_cap()
+	s["sign_tier"] = sign_tier
+	s["sign_max"] = (_t()["sign"] as Array).size() - 1
+	s["sign_cost"] = sign_cost()
+	s["mean_wait_ms"] = mean_wait_ms(sign_tier)
+	s["arrivals"] = arrival_log.slice(-60)
+	s["first_sale_ms"] = first_sale_ms
+	s["serving"] = not serves.is_empty()
+	s["serves"] = serves.map(func(x: Dictionary) -> Dictionary: return {"customer": x["customer"]["id"], "pack": x["pack"]["id"], "lane": x["lane"], "left_ms": x["left_ms"]})
+	s["lanes"] = lanes()
+	s["ledger"] = ledger.slice(-20)
+	s["sales_logged"] = ledger.size()
 	s["stats"] = stats.duplicate()
 	s["kettle_capacity"] = kettle_capacity()
 	s["next_arrival_ms"] = next_arrival_ms
@@ -466,7 +648,7 @@ func state() -> Dictionary:
 ## it into a picture, Step 23): 'kitchen' (the packer is starved), 'packing'
 ## (customers wait for packs), 'shop' (packs wait for customers), or '' (flowing).
 func bottleneck() -> String:
-	if not queue.is_empty() and shelf.is_empty() and serving.is_empty():
+	if not queue.is_empty() and shelf.is_empty() and serves.is_empty():
 		return "kitchen" if packing.is_empty() and packable_recipe() == "" else "packing"
 	if queue.is_empty() and shelf.size() >= int(_t()["shelf_packs"]):
 		return "shop"

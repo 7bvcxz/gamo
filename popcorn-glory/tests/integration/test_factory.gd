@@ -11,6 +11,7 @@ var app: PopApp
 func before_each() -> void:
 	app = Main.instantiate()
 	app.save_prefix = "test."
+	PopSaveStore.clear("test.factory.v1")   # Step 22: the factory is saved; tests start clean
 	tree.root.add_child(app)
 	await tree.process_frame
 	await tree.process_frame
@@ -316,3 +317,131 @@ func test_the_middle_floor_card_sells_the_station_and_the_status_shows_backpress
 	assert_eq(int(f.level), 1, "a kettle level bought from the kitchen")
 	assert_eq(int(f.packer_tier), 2, "the station untouched")
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing made or lost")
+
+
+# -- Step 21: the shop on screen ----------------------------------------------
+
+func test_faces_follow_patience_the_sale_and_leaving() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var f = app.rules
+	await tree.process_frame
+	await tree.process_frame
+	var first := int(f.queue[0]["id"])
+	assert_eq(String(v.customers[first].mood), "wait", "a new customer is calm")
+	app.dev_advance(42000)   # past two thirds of the patience (60 s)
+	await tree.process_frame
+	await tree.process_frame
+	assert_eq(String(v.customers[first].mood), "impatient", "below a third of the patience: impatient")
+	f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 100})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
+	var actor: Node2D = v.customers[first]
+	await _frames(20, 100)
+	assert_eq(String(actor.mood), "happy", "served: happy, carrying the bag")
+	assert_true(actor.carrying, "with the bag")
+	# The others, with no more stock, leave sad.
+	var left_sad := false
+	for k in 80:
+		var before: Array = v.leaving.duplicate()
+		await _frames(1, 1000)
+		for c: Node2D in v.leaving:
+			if not before.has(c) and c.mood == "sad":
+				left_sad = true
+	assert_true(left_sad, "someone who waited too long walks out sad")
+
+
+func test_the_bell_swings_before_the_next_customer_and_the_queue_fits() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var f = app.rules
+	var soon := int(f.next_arrival_ms) - int(f.flow_ms)
+	app.dev_advance(maxi(0, soon - 4000))
+	await tree.process_frame
+	await tree.process_frame
+	assert_false(v.bell_swinging(), "4 s before: still")
+	app.dev_advance(3000)
+	await tree.process_frame
+	await tree.create_timer(0.1).timeout
+	assert_true(v.bell_swinging(), "in the last 1.5 s: it swings")
+	var top: Rect2 = v.floor_rect(0)
+	# Every sign tier's shop: its lanes and its full queue fit without people on each other.
+	for tier in (f.economy.table("factory")["sign"] as Array).size():
+		f.sign_tier = tier
+		var cap := int(f.queue_cap())
+		var spots: Array = []
+		for k in int(f.lanes()):
+			spots.append(v._handoff_spot(k))
+		for i in cap:
+			spots.append(v._queue_spot(i))
+		for i in spots.size():
+			var p: Vector2 = spots[i]
+			assert_true(top.has_point(p) and p.x + v._head_px() * 1.05 <= top.end.x, "tier %d: place %d inside the shop" % [tier, i])
+			assert_true(p.x - v._head_px() * 1.05 >= v.counter_rect().position.x, "tier %d: place %d on the counter's span" % [tier, i])
+			for j in i:
+				var q: Vector2 = spots[j]
+				var apart: bool = absf(p.x - q.x) >= v._head_px() * 2.1 or absf(p.y - q.y) >= v._head_px() * 1.2
+				assert_true(apart, "tier %d: places %d and %d do not overlap" % [tier, j, i])
+	f.sign_tier = 0
+	assert_true(v.bell_node.position.distance_to(v.news_rect().get_center()) > v.news_rect().size.x * 0.6, "the bell clear of the news paper")
+
+
+# -- Step 22: the factory is saved, a seeded session is not, a hidden tab stops it
+
+func test_the_factory_resumes_where_it_was() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var c: Vector2 = v.machine_centre()
+	for i in 2:
+		_mouse(c, true)
+		app.dev_advance(app.rules.window_start() + 60)
+		_mouse(c, false)
+		app.dev_advance(2600)
+	var a = app.rules
+	assert_true(bool(app.save_now()), "the factory saves")
+	var want := {"money": a.money, "flow": a.flow_ms, "made": a.stats["made_portions"], "shelf": a.shelf.size(), "bin": a.bin_portions(),
+		"queue": a.queue.map(func(q: Dictionary) -> int: return int(q["id"])), "next": a.next_arrival_ms, "lots": a.stats["lots"]}
+	var app2: Node = Main.instantiate()
+	app2.save_prefix = "test."
+	tree.root.add_child(app2)
+	await tree.process_frame
+	app2.open("factory")
+	await tree.process_frame
+	var b = app2.rules
+	var got := {"money": b.money, "flow": b.flow_ms, "made": b.stats["made_portions"], "shelf": b.shelf.size(), "bin": b.bin_portions(),
+		"queue": b.queue.map(func(q: Dictionary) -> int: return int(q["id"])), "next": b.next_arrival_ms, "lots": b.stats["lots"]}
+	# (one frame of play may have passed in the new app: compare what a frame cannot change)
+	for k: String in ["money", "made", "lots", "queue", "next"]:
+		assert_eq(got[k], want[k], "resumed: %s" % k)
+	assert_true(int(got["flow"]) >= int(want["flow"]) and int(got["flow"]) < int(want["flow"]) + 200, "resumed: the flow's clock")
+	assert_eq(int(b.portions_everywhere()), int(b.stats["made_portions"]), "every portion where it was")
+	app2.queue_free()
+	await tree.process_frame
+
+
+func test_a_seeded_session_is_fresh_and_never_saved() -> void:
+	app.seed = 4242
+	app.open("factory")
+	await tree.process_frame
+	var f = app.rules
+	var ref = preload("res://variants/factory/factory_rules.gd").new(null, 4242)
+	assert_eq(int(f.next_arrival_ms), int(ref.next_arrival_ms), "the seed draws its own second customer")
+	assert_false(bool(app.save_now()), "a measured session is not saved")
+	app.seed = -1
+
+
+func test_a_hidden_tab_stops_the_factory() -> void:
+	app.open("factory")
+	await tree.process_frame
+	app.clock.set_pause("hidden", true)
+	var f = app.rules
+	var flow := int(f.flow_ms)
+	var arrivals: int = f.arrival_log.size()
+	await tree.create_timer(0.6).timeout
+	assert_eq(int(f.flow_ms), flow, "no flow while hidden")
+	assert_eq(f.arrival_log.size(), arrivals, "no customer arrives while hidden")
+	app.clock.set_pause("hidden", false)
+	await tree.create_timer(0.3).timeout
+	assert_true(int(f.flow_ms) > flow, "it continues when shown")

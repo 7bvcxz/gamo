@@ -41,16 +41,17 @@ var filling := {}
 var nozzles: Array = []
 var _nozzle_key := ""
 var status_node := Node2D.new()
-var _status := ""
-var _clock := 0.0
-## The idle hint as nodes drawn once and moved (an R-01 regression fixed in
-## 0.20.0: the hint redrew the whole ring layer every frame for as long as nobody
+var bell_node := Node2D.new()      ## Step 21: swings just before the next customer comes in
+## The idle hint as nodes drawn once and moved (Step 21 fix of an R-01 regression:
+## the hint used to redraw the whole ring layer every frame for as long as nobody
 ## touched the factory; 0.19.0's meter and knob made each redraw heavier).
 var hint_node := Node2D.new()
 var hint_dot := Node2D.new()
 var hint_gold := Node2D.new()
 var hint_finger := Node2D.new()
 var _hint_key := ""
+var _status := ""
+var _clock := 0.0
 var _cooking := false            ## this press started on the bottom floor
 var _floors_key := ""
 
@@ -93,6 +94,9 @@ func setup(p_rules: PopRules) -> void:
 		hint_gold.draw.connect(func() -> void: _draw_hint_gold(hint_gold))
 		hint_finger.draw.connect(func() -> void: _draw_hint_finger(hint_finger))
 		hint_node.visible = false
+		bell_node.name = "Bell"
+		add_child(bell_node)
+		bell_node.draw.connect(func() -> void: PopFactoryArt.bell(bell_node, _head_px() * 0.9))
 		detail_layer.name = "Detail"
 		add_child(detail_layer)
 		detail_layer.draw.connect(func() -> void:
@@ -141,15 +145,11 @@ func detail_rect() -> Rect2:
 	if is_wide():
 		var x := size.x * 0.62 + 16
 		return Rect2(Vector2(x, 210), Vector2(size.x - x - 16, size.y - 230))
-	var r := floor_rect(selected)
-	if selected != TOP:
-		# Beside the ring, never over it: the kitchen's free right side (the middle
-		# floor's detail too, Step 20 -- so the station stays in view while choosing).
-		r = floor_rect(LOW)
-		var x := machine_centre().x + ring_radius() + machine_size() * 0.09
-		return Rect2(Vector2(x, r.position.y + 12), Vector2(r.end.x - 12 - x, r.size.y - 24))
-	var w := minf(r.size.x * 0.62, 420.0)
-	return Rect2(Vector2(r.position.x + (r.size.x - w) * 0.5, r.position.y + 12), Vector2(w, r.size.y - 24))
+	# Beside the ring, never over it: the kitchen's free right side -- for every
+	# floor (Steps 20, 22: the floor being chosen for stays in view).
+	var r := floor_rect(LOW)
+	var x := machine_centre().x + ring_radius() + machine_size() * 0.09
+	return Rect2(Vector2(x, r.position.y + 12), Vector2(r.end.x - 12 - x, r.size.y - 24))
 
 
 func tube_rect() -> Rect2:
@@ -287,6 +287,7 @@ func _process(delta: float) -> void:
 	_step_actors(delta)
 	_clock += delta
 	_step_station(delta)
+	_step_bell()
 	_step_hint()
 
 
@@ -401,10 +402,35 @@ func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
 	# The sign: a chalkboard with a popcorn cup (level 1 of the sign's forms).
 	var sign := Rect2(Vector2(r.position.x + r.size.x * 0.08, r.position.y + r.size.y * 0.3), Vector2(r.size.y * 0.42, r.size.y * 0.32))
 	PopFactoryArt.shadow(ci, sign, PopTokens.R_PART)
-	PopMachineArt._round_rect(ci, sign, PopTokens.R_PART, Color(0.24, 0.27, 0.25))
-	PopFactoryArt.bag(ci, sign.get_center() + Vector2(0, sign.size.y * 0.3), sign.size.y * 0.42)
+	PopFactoryArt.shop_sign(ci, sign, int(rules.shop_sign()["look"]) if rules else 0)
+	PopFactoryArt.bag(ci, sign.get_center() + Vector2(-sign.size.x * 0.18, sign.size.y * 0.3), sign.size.y * 0.42)
+	# Step 21: the stock, on the board -- one gold dot per sealed pack ready, an
+	# empty ring per free place; out of stock with someone waiting: the bag in red.
+	if rules:
+		var ready := (rules.get("shelf") as Array).size()
+		var cap := int(rules.economy.table("factory")["shelf_packs"])
+		var dr := sign.size.y * 0.06
+		for k in cap:
+			var p := Vector2(sign.position.x + sign.size.x * (0.62 + 0.18 * (k % 2)), sign.position.y + sign.size.y * (0.16 + 0.19 * (k / 2)))
+			if k < ready:
+				ci.draw_circle(p, dr, PopPalette.GOLD)
+			else:
+				ci.draw_arc(p, dr, 0, TAU, 10, Color(1, 1, 1, 0.45), 1.5)
+		if ready == 0 and not (rules.get("queue") as Array).is_empty():
+			# Out of stock with someone waiting: the bag greys and a red no-entry sign sits on it.
+			var bp := sign.get_center() + Vector2(-sign.size.x * 0.18, sign.size.y * 0.3)
+			PopMachineArt._round_rect(ci, Rect2(bp - Vector2(sign.size.y * 0.3, sign.size.y * 0.7), Vector2(sign.size.y * 0.6, sign.size.y * 0.72)), 4, Color(0.24, 0.27, 0.25))
+			PopFactoryArt.bag(ci, bp, sign.size.y * 0.42, Color(0.6, 0.6, 0.62))
+			var nc := bp + Vector2(sign.size.y * 0.2, -sign.size.y * 0.5)
+			ci.draw_circle(nc, sign.size.y * 0.14, PopTokens.WARN)
+			ci.draw_rect(Rect2(nc - Vector2(sign.size.y * 0.09, sign.size.y * 0.025), Vector2(sign.size.y * 0.18, sign.size.y * 0.05)), Color.WHITE)
 	var counter := counter_rect()
 	PopFactoryArt.machine(ci, counter)
+	# The handover places, one per lane (a mat on the counter).
+	if rules:
+		for lane in int(rules.lanes()):
+			var h := _handoff_spot(lane)
+			PopMachineArt._round_rect(ci, Rect2(h + Vector2(-_head_px() * 1.2, -4), Vector2(_head_px() * 2.4, 8)), 4, Color(1, 1, 1, 0.5))
 
 
 func counter_rect() -> Rect2:
@@ -420,24 +446,6 @@ const SKIN := [Color(0.96, 0.82, 0.68), Color(0.85, 0.63, 0.48), Color(0.97, 0.8
 ## the model's queue; Step 17), the one being served at the hand-over spot.
 func _draw_customer(_ci: CanvasItem) -> void:
 	return   # Step 18: customers are actors (they walk); kept for the layer order.
-
-
-func _draw_customer_static(ci: CanvasItem) -> void:
-	if rules == null:
-		return
-	var c := counter_rect()
-	var head := clampf(floor_rect(TOP).size.y * 0.1, 14.0, 26.0)
-	var gap := head * 2.7
-	var x0 := c.position.x + c.size.x * 0.42
-	var queue: Array = rules.get("queue")
-	if not (rules.get("serving") as Dictionary).is_empty():
-		var sv: Dictionary = rules.get("serving")
-		var id := int(sv["customer"]["id"])
-		PopFactoryArt.customer(ci, Vector2(c.position.x + c.size.x * 0.28, c.position.y + 2), head, CUSTOMER_COLOURS[id % 5], SKIN[id % 5])
-		PopFactoryArt.bag(ci, Vector2(c.position.x + c.size.x * 0.2, c.position.y + 2), head * 1.1)
-	for i in queue.size():
-		var id := int(queue[i]["id"])
-		PopFactoryArt.customer(ci, Vector2(x0 + gap * i, c.position.y + 2), head, CUSTOMER_COLOURS[id % 5], SKIN[id % 5])
 
 
 func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
@@ -535,7 +543,7 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 	var a: Vector2
 	var b: Vector2
 	if vertical:   # now above, next below, the arrow pointing down (the kitchen's numbers on top)
-		var top := 0.36 if i != TOP else 0.0
+		var top := 0.36
 		h = minf(d.size.x * 0.55, d.size.y * (0.3 - top * 0.3))
 		a = Vector2(d.get_center().x, d.position.y + d.size.y * (0.42 + top * 0.5))
 		b = Vector2(d.get_center().x, d.position.y + d.size.y * 0.94)
@@ -552,9 +560,7 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 	ci.draw_colored_polygon(PackedVector2Array([m + dir * h * 0.22, m + dir * h * 0.08 - side * h * 0.1, m + dir * h * 0.08 + side * h * 0.1]), PopPalette.INK)
 	# The lock on the next form -- except the kitchen's, which can be bought now.
 	if i == TOP:
-		var lk := b + Vector2(0, -h * 0.55)
-		PopMachineArt._round_rect(ci, Rect2(lk - Vector2(14, 8), Vector2(28, 22)), 4, PopPalette.INK)
-		ci.draw_arc(lk + Vector2(0, -8), 9, PI, TAU, 12, PopPalette.INK, 4.0)
+		_draw_sign_numbers(ci, d)
 	elif i == MID:
 		_draw_packer_numbers(ci, d)
 	else:
@@ -608,14 +614,14 @@ func _form(ci: CanvasItem, floor_i: int, k: int, foot: Vector2, h: float, dim: b
 			_station_picture(ci, foot, h, int(t["look"]), int(t["per_cycle"]))
 			if dim:
 				PopMachineArt._round_rect(ci, Rect2(foot - Vector2(h * 0.75, h * 1.0), Vector2(h * 1.5, h * 1.05)), 8, Color(1, 1, 1, 0.5))
-		TOP:
-			if k == 0:   # the chalkboard
-				PopMachineArt._round_rect(ci, Rect2(foot - Vector2(h * 0.45, h * 0.7), Vector2(h * 0.9, h * 0.6)), PopTokens.R_PART, Color(0.24, 0.27, 0.25))
-			else:        # a lit marquee
-				var m := Rect2(foot - Vector2(h * 0.5, h * 0.8), Vector2(h, h * 0.62))
-				PopMachineArt._round_rect(ci, m, PopTokens.R_PART, Color(0.35, 0.1, 0.16) if not dim else PopPalette.DISABLED)
-				for q in 6:
-					ci.draw_circle(Vector2(m.position.x + m.size.x * (0.1 + 0.16 * q), m.position.y + 8), 5, PopTokens.BRASS if not dim else Color(1, 1, 1, 0.5))
+		TOP:   # the sign at this tier and the next (Step 22)
+			var tiers: Array = rules.economy.table("factory")["sign"] if rules else []
+			if tiers.is_empty():
+				return
+			var t: Dictionary = tiers[mini(int(rules.get("sign_tier")) + k, tiers.size() - 1)]
+			PopFactoryArt.shop_sign(ci, Rect2(foot - Vector2(h * 0.55, h * 0.75), Vector2(h * 1.1, h * 0.62)), int(t["look"]))
+			if dim:
+				PopMachineArt._round_rect(ci, Rect2(foot - Vector2(h * 0.6, h * 0.95), Vector2(h * 1.2, h * 0.95)), 8, Color(1, 1, 1, 0.5))
 
 
 # -- Step 17: the truth of the model on screen --------------------------------
@@ -685,14 +691,28 @@ func _head_px() -> float:
 	return clampf(floor_rect(TOP).size.y * 0.1, 14.0, 26.0)
 
 
+## The queue's places, head first from the hand-over towards the door; the gap
+## shrinks so a full queue (queue_cap) fits before the door without overlap.
+## A queue too long for one row wraps into a second row behind it (heads above
+## the front row's shoulders), so a big shop never piles people on each other.
 func _queue_spot(i: int) -> Vector2:
 	var c := counter_rect()
-	return Vector2(c.position.x + c.size.x * 0.42 + _head_px() * 2.7 * i, c.position.y + 2)
+	var lanes := int(rules.lanes()) if rules else 1
+	var x0 := maxf(c.position.x + c.size.x * 0.42, _handoff_spot(lanes - 1).x + _head_px() * 2.5)
+	var cap := maxi(1, int(rules.queue_cap())) if rules else 5
+	var room := floor_rect(TOP).end.x - _head_px() * 1.6 - x0
+	var per_row := clampi(int(room / (_head_px() * 2.3)), 1, cap)
+	var gap := minf(_head_px() * 2.7, room / float(per_row))
+	var row := i / per_row
+	var col := i % per_row
+	return Vector2(x0 + gap * col + gap * 0.5 * row, c.position.y + 2 - _head_px() * 1.3 * row)
 
 
-func _handoff_spot() -> Vector2:
+## The hand-over places, one per lane, from the counter's left part rightwards
+## (a bigger shop reveals more of them; Step 22).
+func _handoff_spot(lane: int = 0) -> Vector2:
 	var c := counter_rect()
-	return Vector2(c.position.x + c.size.x * 0.26, c.position.y + 2)
+	return Vector2(c.position.x + c.size.x * 0.26 + _head_px() * 2.5 * lane, c.position.y + 2)
 
 
 func _door() -> Vector2:
@@ -808,13 +828,14 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					bag = _new_actor(Actor.BAG, pid)
 					bag.size_px = _bag_px()
 				bag.set_meta("to", "counter")
-				var hand := _handoff_spot() - Vector2(_head_px() * 1.4, _head_px() * 0.8)
+				var lane := int(d.get("lane", 0))
+				var hand := _handoff_spot(lane) - Vector2(_head_px() * 1.4, _head_px() * 0.8)
 				bag.start(PackedVector2Array([from, Vector2(tube_x, from.y), Vector2(tube_x, hand.y), hand]), _seconds("serve"), reduced_motion)
 				cargo[pid] = bag
 				_log(pid, "bag", "redirect" if redirected else "serve")
 				var cid := int(d["customer"])
 				if customers.has(cid):
-					customers[cid].walk_to(_handoff_spot())
+					customers[cid].walk_to(_handoff_spot(lane))
 			"sale":
 				var pid := int(d["pack"])
 				_end_cargo(pid, "bag")
@@ -822,15 +843,22 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				if customers.has(cid):
 					var c: Node2D = customers[cid]
 					c.carrying = true
+					c.mood = "happy"
 					c.queue_redraw()
+					if not reduced_motion:
+						fx.sparkle(c.position + Vector2(0, -_head_px() * 3.2), machine_size() / 1400.0, rng, 3, 60.0)
 					c.walk_to(_door())
 					leaving.append(c)
 					customers.erase(cid)
 				_log(pid, "bag", "sold")
+			"customer_arrived":
+				_sound("ding", 1.7, -16.0)
 			"customer_left":
 				var cid := int(d["customer"])
 				if customers.has(cid):
 					var c: Node2D = customers[cid]
+					c.mood = "sad"
+					c.queue_redraw()
 					c.walk_to(_door())
 					leaving.append(c)
 					customers.erase(cid)
@@ -862,6 +890,13 @@ func _reconcile_customers() -> void:
 			a.position = _door() if now_ms > 500 else _queue_spot(i)
 			customers[id] = a
 		customers[id].walk_to(_queue_spot(i))
+		customers[id].z_index = -1 if _queue_spot(i).y < _queue_spot(0).y - 1.0 else 0
+		# Their face follows their patience (calm, then impatient below a third).
+		var left := float(queue[i]["patience_ms"]) / float(rules.economy.table("factory")["customers"]["patience_ms"])
+		var mood := "impatient" if left < 0.34 else "wait"
+		if customers[id].mood != mood:
+			customers[id].mood = mood
+			customers[id].queue_redraw()
 	var sv: Dictionary = rules.get("serving")
 	if not sv.is_empty():
 		want[int(sv["customer"]["id"])] = -1
@@ -901,7 +936,8 @@ func debug_state() -> Dictionary:
 		fill.append({"id": int(id), "head": f["head"], "landed": f["landed"], "size": f["size"], "sealed": f["sealed"],
 			"x": (f["bag"] as Node2D).position.x, "y": (f["bag"] as Node2D).position.y})
 	return {"flying": flying, "customers": customers.size(), "leaving": leaving.size(), "log": cargo_log.duplicate(),
-		"filling": fill, "nozzles": nozzles.size(), "packer_status": _status}
+		"filling": fill, "nozzles": nozzles.size(), "packer_status": _status,
+		"moods": customers.values().map(func(a: Node2D) -> String: return a.mood), "bell": bell_swinging()}
 
 
 # -- Step 20: the packing station ---------------------------------------------
@@ -950,6 +986,12 @@ func _station_picture(ci: CanvasItem, foot: Vector2, h: float, look: int, heads:
 ## The upgrade card follows the open floor: the middle floor's detail sells the
 ## next packing station (its picture, price and packs a minute now > next).
 func card_offer() -> Dictionary:
+	if rules != null and selected == TOP:
+		# Step 22: the shop's card sells the next sign -- visitors in ten minutes, now > next.
+		var st := int(rules.get("sign_tier"))
+		var sc := int(rules.sign_cost())
+		return {"key": "sign", "stage": st + 1, "price": sc, "now": int(round(600000.0 / rules.mean_wait_ms(st))),
+			"next": int(round(600000.0 / rules.mean_wait_ms(st + 1))) if sc >= 0 else -1, "prefix": "", "art": Callable(self, "_card_sign")}
 	if rules == null or selected != MID:
 		return {}
 	var tier := int(rules.get("packer_tier"))
@@ -961,7 +1003,18 @@ func card_offer() -> Dictionary:
 
 
 func card_command() -> Dictionary:
-	return {"type": "buy_packer"} if card_offer().size() > 0 else {"type": "buy"}
+	match String(card_offer().get("key", "")):
+		"packer":
+			return {"type": "buy_packer"}
+		"sign":
+			return {"type": "buy_sign"}
+	return {"type": "buy"}
+
+
+func _card_sign(ci: CanvasItem, foot: Vector2, h: float, stage: int, sil: Color) -> void:
+	var tiers: Array = rules.economy.table("factory")["sign"]
+	var t: Dictionary = tiers[clampi(stage, 0, tiers.size() - 1)]
+	PopFactoryArt.shop_sign(ci, Rect2(foot - Vector2(h * 0.5, h * 0.7), Vector2(h, h * 0.58)), int(t["look"]), sil)
 
 
 func _card_art(ci: CanvasItem, foot: Vector2, h: float, stage: int, sil: Color) -> void:
@@ -1122,3 +1175,78 @@ func _draw_packer_numbers(ci: CanvasItem, d: Rect2) -> void:
 	ci.draw_rect(Rect2(Vector2(bar.end.x - bar.size.x * (starved + blocked), bar.position.y), Vector2(bar.size.x * starved, bar.size.y)), PopTokens.SKY)
 	ci.draw_rect(Rect2(Vector2(bar.end.x - bar.size.x * blocked, bar.position.y), Vector2(bar.size.x * blocked, bar.size.y)), PopTokens.WARN)
 	ci.draw_rect(bar, PopPalette.INK, false, 2.0)
+
+
+# -- Step 21: the shop --------------------------------------------------------
+
+## The bell hangs over the queue's far end; it swings in the last 1.5 s before
+## the next customer walks in (the model's seeded arrival time) -- anticipation
+## without a timer or words.
+func _step_bell() -> void:
+	if rules == null:
+		return
+	var r := floor_rect(TOP)
+	# Under the awning's right end (clear of the news paper in the corner).
+	var at := Vector2(r.end.x - 108, r.position.y + 14 + r.size.y * 0.12 + _head_px() * 0.4)
+	if bell_node.position != at:
+		bell_node.position = at
+		bell_node.queue_redraw()
+	var soon := int(rules.get("next_arrival_ms")) - int(rules.get("flow_ms"))
+	var swing := soon >= 0 and soon < 1500
+	if reduced_motion:
+		bell_node.rotation = 0.2 if swing else 0.0
+	else:
+		bell_node.rotation = sin(_clock * 14.0) * 0.35 if swing else move_toward(bell_node.rotation, 0.0, 0.05)
+
+
+## Whether the bell is swinging now (for the tests).
+func bell_swinging() -> bool:
+	return absf(bell_node.rotation) > 0.01
+
+
+## Step 22: the shop's numbers -- visitors a minute and the expected wait (now >
+## next), the spread of the wait (its practical limits, a bar from min to max
+## seconds), the counter's lanes and the queue's places.
+func _draw_sign_numbers(ci: CanvasItem, d: Rect2) -> void:
+	if rules == null:
+		return
+	var st := int(rules.get("sign_tier"))
+	var top := int(rules.sign_cost()) < 0
+	var now: Dictionary = rules.shop_sign(st)
+	var nxt: Dictionary = rules.shop_sign(st + 1)
+	var font := ThemeDB.fallback_font
+	var fs := int(clampf(d.size.x * 0.1, 18.0, 30.0))
+	var rows := [["people", "%.1f" % (60000.0 / rules.mean_wait_ms(st)), "%.1f" % (60000.0 / rules.mean_wait_ms(st + 1)), not top],
+		["clock", "%.1f" % (rules.mean_wait_ms(st) / 1000.0), "%.1f" % (rules.mean_wait_ms(st + 1) / 1000.0), not top],
+		["lanes", str(int(now["lanes"])), str(int(nxt["lanes"])), int(nxt["lanes"]) > int(now["lanes"])]]
+	var y := d.position.y + fs * 1.3
+	for row: Array in rows:
+		var ic := Vector2(d.position.x + fs * 1.1, y - fs * 0.35)
+		match String(row[0]):
+			"people":
+				PopFactoryArt.customer(ci, ic + Vector2(0, fs * 0.5), fs * 0.24, CUSTOMER_COLOURS[0], SKIN[0])
+			"clock":
+				ci.draw_arc(ic, fs * 0.42, 0, TAU, 20, PopPalette.INK, 3.0)
+				ci.draw_line(ic, ic + Vector2(0, -fs * 0.3), PopPalette.INK, 3.0)
+				ci.draw_line(ic, ic + Vector2(fs * 0.22, 0), PopPalette.INK, 3.0)
+			"lanes":
+				for q in 2:
+					PopMachineArt._round_rect(ci, Rect2(ic + Vector2(-fs * 0.45, -fs * 0.3 + q * fs * 0.38), Vector2(fs * 0.9, fs * 0.22)), 3, PopTokens.MACHINE)
+		var x := d.position.x + fs * 2.0
+		ci.draw_string(font, Vector2(x, y), String(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopPalette.INK)
+		if not top:
+			var x2 := x + fs * 2.4
+			ci.draw_string(font, Vector2(x2, y), ">", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.5))
+			ci.draw_string(font, Vector2(x2 + fs * 0.9, y), String(row[2]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.OK if bool(row[3]) else Color(PopPalette.INK, 0.45))
+		y += fs * 1.35
+	# The spread: where the next customer can come, from the shortest to the longest wait (now, and next below it).
+	var full := 20000.0
+	var bar := Rect2(Vector2(d.position.x + fs * 0.6, y - fs * 0.7), Vector2(d.size.x - fs * 1.2, fs * 0.36))
+	ci.draw_rect(bar, Color(PopPalette.INK, 0.08))
+	for j in (1 if top else 2):
+		var t: Dictionary = now if j == 0 else nxt
+		var a := bar.position.x + bar.size.x * float(t["min_ms"]) / full
+		var b := bar.position.x + bar.size.x * float(t["max_ms"]) / full
+		var yy := bar.position.y + j * fs * 0.45
+		ci.draw_rect(Rect2(Vector2(a, yy), Vector2(b - a, fs * 0.3)), PopPalette.GOLD if j == 0 else PopTokens.OK)
+		ci.draw_circle(Vector2(bar.position.x + bar.size.x * float(t["mode_ms"]) / full, yy + fs * 0.15), fs * 0.12, PopPalette.INK)

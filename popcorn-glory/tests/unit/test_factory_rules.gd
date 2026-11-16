@@ -417,3 +417,193 @@ func test_recipes_convert_to_their_sku_never_mix_and_orders_get_their_own() -> v
 	assert_eq(int(f.stats["sold"]), 1, "a second plain order is not given caramel")
 	_check_conservation(f, "recipes")
 	f.economy.table("factory")["pack_recipes"].erase("caramel")
+
+
+# -- Step 21: the counter -----------------------------------------------------
+
+func test_each_pack_sells_once_to_one_customer_and_the_ledger_is_the_money() -> void:
+	var f: PopRules = Factory.new()
+	for i in 12:
+		_pop(f)
+		f.advance(2500)
+	f.advance(120000)
+	assert_true(int(f.stats["sold"]) >= 4, "sales happened (%d)" % int(f.stats["sold"]))
+	assert_eq(f.ledger.size(), int(f.stats["sold"]), "one ledger line per sale")
+	var coins := 0
+	var packs := {}
+	var people := {}
+	for l: Dictionary in f.ledger:
+		coins += int(l["coins"])
+		assert_false(packs.has(int(l["pack"])), "pack %d sold once" % int(l["pack"]))
+		assert_false(people.has(int(l["customer"])), "customer %d bought once" % int(l["customer"]))
+		packs[int(l["pack"])] = true
+		people[int(l["customer"])] = true
+	assert_eq(coins, int(f.stats["revenue"]), "the ledger adds up to the revenue")
+	assert_eq(f.money, coins, "and to the money (nothing bought)")
+	_check_conservation(f, "sales")
+
+
+func test_no_stock_no_sale_and_customers_leave_quietly() -> void:
+	var f: PopRules = Factory.new()
+	f.advance(200000)
+	assert_eq(int(f.stats["sold"]), 0, "no packs: no sale")
+	assert_eq(f.money, 0, "no money")
+	assert_eq(f.ledger.size(), 0, "no ledger line")
+	assert_true(int(f.stats["abandoned"]) >= 1, "people waited and left (%d)" % int(f.stats["abandoned"]))
+	assert_true(f.queue.size() <= int(f.queue_cap()), "the queue never over its cap")
+
+
+func test_two_lanes_serve_two_at_once_in_queue_order() -> void:
+	var f: PopRules = Factory.new()
+	f.economy.table("factory")["counter"]["lanes"] = 2
+	_quiet_shop(f)
+	for k in 3:
+		f.queue.append({"id": f._new_id(), "order": {"recipe": "plain", "size": 2}, "patience_ms": 60000})
+	var order: Array = f.queue.map(func(c: Dictionary) -> int: return int(c["id"]))
+	for k in 3:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 100})
+		f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
+	f.drain_events()
+	f.advance(100)
+	var started := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "serve_started")
+	assert_eq(started.size(), 2, "two lanes: two hand-overs at once")
+	assert_eq(int(started[0]["data"]["customer"]), int(order[0]), "the queue's head first")
+	assert_eq(int(started[1]["data"]["customer"]), int(order[1]), "then the next")
+	assert_true(int(started[0]["data"]["lane"]) != int(started[1]["data"]["lane"]), "on different lanes")
+	f.advance(1300)
+	assert_eq(int(f.stats["sold"]), 2, "both sold after one service time")
+	f.advance(1300)
+	assert_eq(int(f.stats["sold"]), 3, "then the third")
+	_check_conservation(f, "lanes")
+	f.economy.table("factory")["counter"]["lanes"] = 1
+
+
+func test_nobody_jumps_the_queue() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "caramel", "size": 2}, "patience_ms": 3000})
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "plain", "size": 2}, "patience_ms": 60000})
+	f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 100})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
+	f.advance(1000)
+	assert_eq(int(f.stats["sold"]), 0, "the head's order is not here: nobody behind is served first")
+	f.advance(4000)
+	assert_eq(int(f.stats["abandoned"]), 1, "the head leaves after waiting")
+	assert_eq(int(f.stats["sold"]), 1, "then the next customer gets the plain pack")
+
+
+# -- Step 22: foot traffic, the sign, the save --------------------------------
+
+func _traffic(tier: int, seed_value: int, minutes: int) -> Array:
+	var f: PopRules = Factory.new(null, seed_value)
+	f.sign_tier = tier
+	f.advance(minutes * 60000)
+	return f.arrival_log.duplicate()
+
+
+func test_arrivals_follow_the_sign_never_fixed_never_bursts_never_droughts() -> void:
+	var f: PopRules = Factory.new()
+	for tier in [0, 3, 6]:
+		var mins := 60
+		var log := _traffic(tier, 1234 + tier, mins)
+		var s: Dictionary = f.shop_sign(tier)
+		var gaps: Array[int] = []
+		for i in range(2, log.size()):   # from the third: the opening exception (one waiting, the second soon)
+			gaps.append(int(log[i]) - int(log[i - 1]))
+		var mean := 0.0
+		for g in gaps:
+			mean += g
+		mean /= gaps.size()
+		var want := float(f.mean_wait_ms(tier))
+		assert_true(absf(mean - want) / want < 0.08, "tier %d: the mean wait %.0f ms is near the expected %.0f" % [tier, mean, want])
+		assert_true(gaps.min() >= int(s["min_ms"]) - 50, "tier %d: no burst (shortest %d >= %d)" % [tier, gaps.min(), s["min_ms"]])
+		assert_true(gaps.max() <= int(s["max_ms"]) + 100, "tier %d: no drought (longest %d <= %d)" % [tier, gaps.max(), s["max_ms"]])
+		var distinct := {}
+		for g in gaps:
+			distinct[g / 250] = true
+		assert_true(distinct.size() > 8, "tier %d: not a fixed timer (%d different waits)" % [tier, distinct.size()])
+	var t0 := _traffic(0, 99, 10)
+	var t1 := _traffic(0, 99, 10)
+	var t2 := _traffic(0, 100, 10)
+	assert_eq(t0, t1, "the same seed draws the same customers")
+	assert_true(t0 != t2, "another seed draws others")
+	assert_eq(int(t0[0]), 0, "the first customer is waiting when the shop opens")
+	assert_true(int(t0[1]) >= 4000 and int(t0[1]) <= 8100, "the second comes within 4-8 s (%d)" % int(t0[1]))
+
+
+func test_the_sign_buys_shorter_waits_and_a_bigger_shop() -> void:
+	var f: PopRules = Factory.new()
+	var tiers: Array = f.economy.table("factory")["sign"]
+	for k in range(1, tiers.size()):
+		assert_true(f.mean_wait_ms(k) < f.mean_wait_ms(k - 1), "tier %d: customers come more often" % k)
+		assert_true(int(tiers[k]["lanes"]) >= int(tiers[k - 1]["lanes"]) and int(tiers[k]["queue_cap"]) >= int(tiers[k - 1]["queue_cap"]), "tier %d: the shop never shrinks" % k)
+		assert_true(int(tiers[k]["min_ms"]) < int(tiers[k]["mode_ms"]) and int(tiers[k]["mode_ms"]) < int(tiers[k]["max_ms"]), "tier %d: a real spread" % k)
+	assert_false(bool(f.execute({"type": "buy_sign"})["ok"]), "no money: refused")
+	f.money = 100
+	assert_true(bool(f.execute({"type": "buy_sign"})["ok"]), "bought")
+	assert_eq(int(f.sign_tier), 1, "tier 1")
+	assert_eq(int(f.money), 100 - int(tiers[1]["cost"]), "paid once")
+	assert_eq(int(f.level) + int(f.packer_tier), 0, "the kettle and the station untouched")
+
+
+func test_a_slow_player_and_a_sold_out_counter() -> void:
+	var f: PopRules = Factory.new()
+	f.advance(600000)
+	assert_true(f.queue.size() <= int(f.queue_cap()), "the queue never over its cap")
+	assert_eq(f.money, 0, "a player who never pops earns nothing")
+	assert_eq(int(f.stats["visitors"]), f.arrival_log.size(), "every visitor logged")
+	assert_eq(int(f.stats["visitors"]), int(f.stats["arrived"]) + int(f.stats["passed_by"]), "visitors = joined + walked past")
+	assert_eq(int(f.stats["arrived"]), f.queue.size() + int(f.stats["abandoned"]) + int(f.stats["sold"]) + f.serves.size(), "everyone who joined is waiting, served, or left")
+	# Sold out: a customer waits; one pack arrives; they get it, the next keeps waiting.
+	var g: PopRules = Factory.new()
+	g.advance(9000)
+	assert_eq(g.queue.size(), 2, "two waiting, nothing to sell")
+	_pop(g)
+	g.advance(12000)
+	assert_eq(int(g.stats["sold"]), 2, "the one lot of four made two packs: two sales, no more")
+	assert_eq(g.shelf.size(), 0, "sold out again")
+
+
+func test_a_long_advance_equals_many_short_ones_with_a_bigger_shop() -> void:
+	var a: PopRules = Factory.new()
+	var b: PopRules = Factory.new()
+	for f: PopRules in [a, b]:
+		f.sign_tier = 3
+		f.money = 0
+	_pop(a)
+	_pop(b)
+	a.advance(300000)
+	for i in 3000:
+		b.advance(100)
+	assert_eq(a.arrival_log, b.arrival_log, "the same customers however time is cut")
+	assert_eq(a.stats, b.stats, "the same statistics")
+
+
+func test_save_and_resume_continue_the_same_factory() -> void:
+	var a: PopRules = Factory.new(null, 777)
+	a.money = 500
+	a.execute({"type": "buy_packer"})
+	a.execute({"type": "buy_sign"})
+	for i in 6:
+		_pop(a)
+		a.advance(2300)
+	a.advance(7000)
+	var text := JSON.stringify(a.to_save())
+	var b: PopRules = Factory.new(null, 1)
+	assert_true(bool(b.from_save(JSON.parse_string(text))), "a whole save loads")
+	assert_eq(int(b.portions_everywhere()), int(b.stats["made_portions"]), "every portion where it was")
+	assert_eq(b.money, a.money, "the money")
+	assert_eq(int(b.packer_tier) + int(b.sign_tier), 2, "the tiers")
+	a.advance(180000)
+	b.advance(180000)
+	assert_eq(b.arrival_log, a.arrival_log, "the resumed run draws the same customers")
+	assert_eq(b.stats, a.stats, "and ends the same")
+	assert_eq(b.money, a.money, "with the same money")
+	var bad: Dictionary = JSON.parse_string(text)
+	bad["stats"]["made_portions"] = int(bad["stats"]["made_portions"]) + 3
+	var c: PopRules = Factory.new()
+	assert_false(bool(c.from_save(bad)), "a save whose goods do not add up is refused")
+	assert_eq(int(c.money), 0, "and changes nothing")
+	var odd: Dictionary = JSON.parse_string(text)
+	odd["sign_tier"] = 99
+	assert_false(bool(c.from_save(odd)), "a tier out of range is refused")
