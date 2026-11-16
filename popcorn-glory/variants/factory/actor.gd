@@ -1,0 +1,93 @@
+extends Node2D
+
+## Step 18: one moving thing in the factory -- a lot of popcorn, a bag, or a
+## customer -- tied to the model's id. Drawn once (and again only if its look
+## changes); it moves by its position along waypoints, so a busy factory does
+## not redraw polygons every frame (QUALITY_GATES R-01). The model has already
+## moved the good; the actor only shows the journey (design/FACTORY_FLOW.md 9).
+
+const LOT := "lot"
+const BAG := "bag"
+const CUSTOMER := "customer"
+
+var kind := LOT
+var model_id := 0
+var size_px := 20.0
+var body := Color.WHITE
+var skin := Color.WHITE
+var carrying := false          ## a customer holding the bag they bought
+## The journey: waypoints and the seconds for the whole of it. `steps` (reduced
+## motion) holds at each waypoint instead of gliding between them.
+var path: PackedVector2Array = PackedVector2Array()
+var duration := 0.5
+var t := 0.0
+var steps := false
+var done := false
+## Customers ease towards a spot (the queue moves up) instead of following a path.
+var target := Vector2.ZERO
+var easing_to := false
+
+
+func start(p: PackedVector2Array, seconds: float, step_mode: bool) -> void:
+	path = p
+	duration = maxf(0.05, seconds)
+	t = 0.0
+	steps = step_mode
+	done = false
+	easing_to = false
+	position = p[0]
+
+
+func walk_to(p: Vector2) -> void:
+	target = p
+	easing_to = true
+
+
+func step(delta: float) -> void:
+	if easing_to:
+		var d := target - position
+		if d.length() < 1.0:
+			position = target
+			easing_to = false
+		else:
+			position += d * minf(1.0, delta * 6.0)
+		return
+	if done or path.size() < 2:
+		return
+	t = minf(duration, t + delta)
+	var k := t / duration
+	if steps:
+		k = floor(k * float(path.size() - 1) + 0.0001) / float(path.size() - 1)
+	else:
+		k = k * k * (3.0 - 2.0 * k)   # ease in and out
+	position = _along(k)
+	if t >= duration:
+		done = true
+
+
+func _along(k: float) -> Vector2:
+	var total := 0.0
+	for i in range(1, path.size()):
+		total += path[i].distance_to(path[i - 1])
+	var want := k * total
+	for i in range(1, path.size()):
+		var seg := path[i].distance_to(path[i - 1])
+		if want <= seg or i == path.size() - 1:
+			return path[i - 1].lerp(path[i], clampf(want / maxf(seg, 0.001), 0.0, 1.0))
+		want -= seg
+	return path[path.size() - 1]
+
+
+func _draw() -> void:
+	match kind:
+		LOT:
+			for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
+				draw_circle(o * size_px, size_px * 0.5, Color(0.85, 0.64, 0.25))
+			for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
+				draw_circle(o * size_px, size_px * 0.4, PopPalette.CREAM)
+		BAG:
+			PopFactoryArt.bag(self, Vector2.ZERO, size_px)
+		CUSTOMER:
+			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin)
+			if carrying:
+				PopFactoryArt.bag(self, Vector2(size_px * 1.2, -size_px * 0.4), size_px * 0.9)

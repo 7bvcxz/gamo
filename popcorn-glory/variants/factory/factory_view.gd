@@ -27,6 +27,14 @@ var selected := -1               ## the floor whose detail is open, -1 none
 var floor_layer := Node2D.new()
 var customer_node := Node2D.new()
 var detail_layer := Node2D.new()   ## above everything: the open floor's detail
+## Step 18: the moving goods and people, keyed by the model's ids.
+const Actor := preload("res://variants/factory/actor.gd")
+var actor_layer := Node2D.new()
+var customers := {}       ## customer id -> actor
+var cargo := {}           ## lot or pack id -> actor
+var leaving: Array = []   ## customers walking out
+## What the pictures did, for the tests (G-13): {id, kind, what, t}.
+var cargo_log: Array = []
 var _cooking := false            ## this press started on the bottom floor
 var _floors_key := ""
 
@@ -34,6 +42,13 @@ var _floors_key := ""
 func setup(p_rules: PopRules) -> void:
 	super(p_rules)
 	selected = -1
+	# A new run (restart, a new factory): no journey of the old one may linger.
+	for a in actor_layer.get_children():
+		a.queue_free()
+	customers.clear()
+	cargo.clear()
+	leaving.clear()
+	cargo_log.clear()
 	if floor_layer.get_parent() == null:
 		floor_layer.name = "Floors"
 		add_child(floor_layer)
@@ -43,6 +58,9 @@ func setup(p_rules: PopRules) -> void:
 		add_child(customer_node)
 		move_child(customer_node, 1)
 		customer_node.draw.connect(func() -> void: _draw_customer(customer_node))
+		actor_layer.name = "Actors"
+		add_child(actor_layer)
+		move_child(actor_layer, 2)
 		detail_layer.name = "Detail"
 		add_child(detail_layer)
 		detail_layer.draw.connect(func() -> void:
@@ -231,8 +249,7 @@ func _process(delta: float) -> void:
 		detail_layer.queue_redraw()
 		_redraw_once = true
 	_process_glass()
-	# The waiting customer breathes by moving, not by redrawing (R-01).
-	customer_node.position = Vector2(0, 0 if reduced_motion else sin(_t * 2.2) * 2.5)
+	_step_actors(delta)
 
 
 func _draw_hints(ci: CanvasItem, base: Vector2, size_px: float) -> void:
@@ -254,6 +271,7 @@ func on_events(events: Array[Dictionary]) -> void:
 			_sound("coin", 1.0, -6.0)
 		else:
 			rest.append(e)
+	_flow_events(events)
 	super(rest)
 
 
@@ -295,7 +313,11 @@ const SKIN := [Color(0.96, 0.82, 0.68), Color(0.85, 0.63, 0.48), Color(0.97, 0.8
 
 ## The queue at the counter, head first from the left (only real customers --
 ## the model's queue; Step 17), the one being served at the hand-over spot.
-func _draw_customer(ci: CanvasItem) -> void:
+func _draw_customer(_ci: CanvasItem) -> void:
+	return   # Step 18: customers are actors (they walk); kept for the layer order.
+
+
+func _draw_customer_static(ci: CanvasItem) -> void:
 	if rules == null:
 		return
 	var c := counter_rect()
@@ -334,7 +356,7 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 	if rules and not (rules.get("packing") as Dictionary).is_empty():
 		PopFactoryArt.bag(ci, Vector2(pk.get_center().x, pk.end.y + 4), r.size.y * 0.15)   # the pack being filled
 	# The shelf: one bag per real sealed pack, empty places dashed.
-	var shelf_n := int(rules.state()["shelf"]) if rules else 0
+	var shelf_n := (int(rules.state()["shelf"]) - _bags_flying_to_shelf()) if rules else 0
 	var shelf_cap := int(rules.state()["shelf_cap"]) if rules else 0
 	# Two rows of places, right of the packer and left of the tube.
 	var per := maxi(1, (shelf_cap + 1) / 2)
@@ -482,4 +504,213 @@ func _press() -> void:
 func _counter_point() -> Vector2:
 	var c := counter_rect()
 	return Vector2(c.position.x + c.size.x * 0.28, c.position.y - 40)
+
+
+# -- Step 18: the journeys ----------------------------------------------------
+
+func _bags_flying_to_shelf() -> int:
+	var n := 0
+	for a in cargo.values():
+		if a.kind == Actor.BAG and a.get_meta("to", "") == "shelf":
+			n += 1
+	return n
+
+
+func _new_actor(kind: String, id: int) -> Node2D:
+	var a: Node2D = Actor.new()
+	a.kind = kind
+	a.model_id = id
+	actor_layer.add_child(a)
+	return a
+
+
+func _log(id: int, kind: String, what: String) -> void:
+	cargo_log.append({"id": id, "kind": kind, "what": what, "t": now_ms})
+	if cargo_log.size() > 400:
+		cargo_log.pop_front()
+
+
+func _head_px() -> float:
+	return clampf(floor_rect(TOP).size.y * 0.1, 14.0, 26.0)
+
+
+func _queue_spot(i: int) -> Vector2:
+	var c := counter_rect()
+	return Vector2(c.position.x + c.size.x * 0.42 + _head_px() * 2.7 * i, c.position.y + 2)
+
+
+func _handoff_spot() -> Vector2:
+	var c := counter_rect()
+	return Vector2(c.position.x + c.size.x * 0.26, c.position.y + 2)
+
+
+func _door() -> Vector2:
+	var r := floor_rect(TOP)
+	return Vector2(r.end.x + _head_px() * 2.0, counter_rect().position.y + 2)
+
+
+func _shelf_spot(k: int) -> Vector2:
+	var r := floor_rect(MID)
+	var shelf_cap := int(rules.state()["shelf_cap"])
+	var per := maxi(1, (shelf_cap + 1) / 2)
+	var span := tube_rect().position.x - 16 - (r.position.x + r.size.x * 0.62)
+	var w := minf(r.size.y * 0.14, span / (float(per) * 1.2))
+	var belt_y := r.end.y - r.size.y * 0.2
+	return Vector2(r.position.x + r.size.x * 0.62 + (k % per) * w * 1.2 + w * 0.6, belt_y - (k / per) * w * 1.65)
+
+
+func _bag_px() -> float:
+	return floor_rect(MID).size.y * 0.16
+
+
+func _bin_top() -> Vector2:
+	var r := floor_rect(MID)
+	var hs := r.size.y * 0.46
+	return Vector2(r.position.x + r.size.x * 0.14 + hs * 0.45, r.position.y + r.size.y * 0.16 + hs * 0.3)
+
+
+func _packer_out() -> Vector2:
+	var r := floor_rect(MID)
+	return Vector2(r.position.x + r.size.x * 0.38 + r.size.y * 0.4, r.position.y + r.size.y * 0.14 + r.size.y * 0.58 + 4)
+
+
+func _seconds(key: String) -> float:
+	var t: Dictionary = rules.economy.table("factory")
+	match key:
+		"lift":
+			return float(t["lift_ms"]) / 1000.0
+		"serve":
+			return float(t["service_ms"]) / 1000.0
+	return 0.45
+
+
+func _flow_events(events: Array[Dictionary]) -> void:
+	var tube_x := tube_rect().get_center().x
+	for e: Dictionary in events:
+		var d: Dictionary = e["data"]
+		match String(e["type"]):
+			"lot_lifted":
+				# Up the glass tube from the kettle to the raw bin, in the lift's time.
+				var a := _new_actor(Actor.LOT, int(d["lot"]))
+				a.size_px = _bag_px() * 0.85
+				var top := machine_top()
+				var bin := _bin_top()
+				a.start(PackedVector2Array([top, Vector2(tube_x, top.y), Vector2(tube_x, bin.y - 40), bin]), _seconds("lift"), reduced_motion)
+				cargo[int(d["lot"])] = a
+				_log(int(d["lot"]), "lot", "start")
+			"lot_binned":
+				_end_cargo(int(d["lot"]), "lot")
+			"pack_shelved":
+				var b := _new_actor(Actor.BAG, int(d["pack"]))
+				b.size_px = _bag_px()
+				b.set_meta("to", "shelf")
+				var k := maxi(0, int(rules.state()["shelf"]) - 1)
+				b.start(PackedVector2Array([_packer_out(), _shelf_spot(k)]), 0.45, reduced_motion)
+				b.set_meta("end_on_arrival", true)
+				cargo[int(d["pack"])] = b
+				_log(int(d["pack"]), "bag", "start")
+			"serve_started":
+				# The pack leaves the shelf, rides the tube up to the counter; the customer steps to the hand-over spot.
+				var pid := int(d["pack"])
+				var from := _shelf_spot(int(rules.state()["shelf"]))
+				var bag: Node2D
+				var redirected := cargo.has(pid)
+				if redirected:
+					# Still flying to the shelf when a customer took it: the same bag
+					# turns towards the counter from where it is (no second bag, no jump).
+					bag = cargo[pid]
+					from = bag.position
+					bag.remove_meta("end_on_arrival")
+				else:
+					bag = _new_actor(Actor.BAG, pid)
+					bag.size_px = _bag_px()
+				bag.set_meta("to", "counter")
+				var hand := _handoff_spot() - Vector2(_head_px() * 1.4, _head_px() * 0.8)
+				bag.start(PackedVector2Array([from, Vector2(tube_x, from.y), Vector2(tube_x, hand.y), hand]), _seconds("serve"), reduced_motion)
+				cargo[pid] = bag
+				_log(pid, "bag", "redirect" if redirected else "serve")
+				var cid := int(d["customer"])
+				if customers.has(cid):
+					customers[cid].walk_to(_handoff_spot())
+			"sale":
+				var pid := int(d["pack"])
+				_end_cargo(pid, "bag")
+				var cid := int(d["customer"])
+				if customers.has(cid):
+					var c: Node2D = customers[cid]
+					c.carrying = true
+					c.queue_redraw()
+					c.walk_to(_door())
+					leaving.append(c)
+					customers.erase(cid)
+				_log(pid, "bag", "sold")
+			"customer_left":
+				var cid := int(d["customer"])
+				if customers.has(cid):
+					var c: Node2D = customers[cid]
+					c.walk_to(_door())
+					leaving.append(c)
+					customers.erase(cid)
+
+
+func _end_cargo(id: int, kind: String) -> void:
+	if cargo.has(id):
+		var a: Node2D = cargo[id]
+		cargo.erase(id)
+		a.queue_free()
+		_log(id, kind, "end")
+
+
+## Customers follow the model: every id in the queue (and the one being served)
+## has an actor; a new one walks in from the door; each walks to its place.
+func _reconcile_customers() -> void:
+	if rules == null:
+		return
+	var queue: Array = rules.get("queue")
+	var want := {}
+	for i in queue.size():
+		var id := int(queue[i]["id"])
+		want[id] = i
+		if not customers.has(id):
+			var a := _new_actor(Actor.CUSTOMER, id)
+			a.size_px = _head_px()
+			a.body = CUSTOMER_COLOURS[id % 5]
+			a.skin = SKIN[id % 5]
+			a.position = _door() if now_ms > 500 else _queue_spot(i)
+			customers[id] = a
+		customers[id].walk_to(_queue_spot(i))
+	var sv: Dictionary = rules.get("serving")
+	if not sv.is_empty():
+		want[int(sv["customer"]["id"])] = -1
+
+
+func _step_actors(delta: float) -> void:
+	_reconcile_customers()
+	for a in cargo.values():
+		a.step(delta)
+	for id in cargo.keys():
+		var a: Node2D = cargo[id]
+		if a.done and a.has_meta("end_on_arrival"):
+			_end_cargo(int(id), "bag")
+			_redraw_once = true
+			floor_layer.queue_redraw()   # the bag lands on the static shelf
+	for a in customers.values():
+		a.step(delta)
+	var still: Array = []
+	for c: Node2D in leaving:
+		c.step(delta)
+		if c.position.distance_to(_door()) < 2.0:
+			c.queue_free()
+		else:
+			still.append(c)
+	leaving = still
+
+
+## For the tests: the journeys in flight and the record of them.
+func debug_state() -> Dictionary:
+	var flying := []
+	for id in cargo.keys():
+		var a: Node2D = cargo[id]
+		flying.append({"id": int(id), "kind": a.kind, "to": a.get_meta("to", ""), "x": a.position.x, "y": a.position.y})
+	return {"flying": flying, "customers": customers.size(), "leaving": leaving.size(), "log": cargo_log.duplicate()}
 

@@ -130,3 +130,60 @@ func test_the_stand_is_unchanged() -> void:
 	await tree.process_frame
 	assert_true(bool(_view()._needs_redraw()), "the stand still redraws every frame as before")
 	assert_false(app.frame.wide, "and is not wide")
+
+
+## Step 18: the pictures follow the model's goods one by one (QUALITY_GATES G-13):
+## every lot that rides the lift starts and ends once, every pack that goes to
+## the shelf or to a customer starts once and ends once (at the sale), customers
+## have one actor each, nothing lingers, a restart clears every journey.
+func test_every_good_is_followed_once_from_start_to_end() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var c: Vector2 = v.machine_centre()
+	for i in 5:
+		_mouse(c, true)
+		app.dev_advance(app.rules.window_start() + 60)
+		_mouse(c, false)
+		for k in 12:
+			app.dev_advance(250)
+			await tree.process_frame
+	await tree.create_timer(1.0).timeout    # bags reach the shelf on real frame time
+	app.dev_advance(30000)
+	await tree.create_timer(1.0).timeout
+	var starts := {}
+	var ends := {}
+	for e: Dictionary in v.cargo_log:
+		var key := "%s:%d" % [e["kind"], e["id"]]
+		if String(e["what"]) == "start" or String(e["what"]) == "serve":
+			starts[key] = int(starts.get(key, 0)) + 1
+		elif String(e["what"]) == "end":
+			ends[key] = int(ends.get(key, 0)) + 1
+	assert_true(starts.size() >= 5, "goods were followed (%d)" % starts.size())
+	for key: String in starts.keys():
+		assert_true(int(starts[key]) <= 2, "%s started at most twice (to the shelf, then to a customer)" % key)
+		assert_eq(int(ends.get(key, 0)), int(starts[key]), "%s: every journey that started ended once" % key)
+	var lots_lifted := 0
+	for e: Dictionary in v.cargo_log:
+		if String(e["kind"]) == "lot" and String(e["what"]) == "start":
+			lots_lifted += 1
+	assert_eq(lots_lifted, int(app.rules.stats["lots"]) - (0 if app.rules.glass.is_empty() else 1), "one lift journey per lot that left the glass")
+	assert_eq(v.cargo.size(), int(app.rules.lift.size()) + (0 if app.rules.serving.is_empty() else 1), "no good lingers: only what is still moving in the model")
+	assert_eq(v.customers.size(), app.rules.queue.size() + (0 if app.rules.serving.is_empty() else 1), "one actor per customer in the shop")
+	app.restart()
+	await tree.process_frame
+	assert_eq(_view().cargo.size(), 0, "a restart clears the journeys")
+	assert_eq(_view().cargo_log.size(), 0, "and their record")
+
+
+func test_reduced_motion_moves_in_clear_steps() -> void:
+	var a: Node2D = preload("res://variants/factory/actor.gd").new()
+	a.start(PackedVector2Array([Vector2(0, 0), Vector2(0, 100), Vector2(100, 100)]), 1.0, true)
+	var seen := {}
+	for i in 50:
+		a.step(0.021)
+		seen[str(a.position.round())] = true
+	for p: String in seen.keys():
+		assert_true(p in ["(0.0, 0.0)", "(0.0, 100.0)", "(100.0, 100.0)"], "only waypoints, no glide (%s)" % p)
+	assert_true(a.done, "it arrives")
+	a.free()

@@ -433,6 +433,9 @@ func state() -> Dictionary:
 		"window": [get_window().size.x, get_window().size.y] if get_window() else [0, 0],
 		"listed": PopRegistry.listed().map(func(e: Dictionary) -> String: return String(e["id"])),
 		"history": history.size(), "rects": _rects(), "reduced_motion": reduced_motion}
+	# Step 18: what the picture is doing (the factory's journeys), for the tests.
+	if screen == "play" and frame.play != null and frame.play.has_method("debug_state"):
+		out["view"] = frame.play.call("debug_state")
 	if rules != null:
 		out["run"] = rules.state()
 		out["clock_ms"] = clock.now_ms
