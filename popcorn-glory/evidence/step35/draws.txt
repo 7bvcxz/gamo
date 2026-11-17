@@ -1,0 +1,14 @@
+Step 35 draw calls (Xvfb 1280x800, tools/capture.gd --draws)
+
+The same scenes as Step 34 (step V, then 45 s of play):
+                                    all   Goods  Machines  Actors  Spoons
+V,Q (coaters paused)                740   118    75        155     0
+V (four flavors)                    910   183    111       224     0
+V,H (the spoon open, 45 s)          910   183    111       224     0     (no batch on a drum at that instant)
+=> identical to Step 34 (740 / 910): Step 35 adds nothing where no spoon is shown.
+
+With a spoon on screen (V,H,x, six pops, then the hold / the finish):
+holding the spoon (J1000)           849   -      -         -       12
+0.3 s after a perfect release       880   -      -         -       7
+=> the spoon layer (button, ring, pour, flourish) costs 7-12 calls, and is redrawn every frame
+   only while a spoon is held or a flourish plays (2.4 s); otherwise when the spoons change.

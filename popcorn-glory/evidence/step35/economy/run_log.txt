@@ -1,0 +1,23 @@
+ 17:22:08 up 83 days,  1:03,  1 user,  load average: 17.73, 16.54, 14.79
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+paused: net 393.6/min (26379 ms)
+machines: net 487.8/min (29281 ms)
+hand_skilled: net 547.3/min (28205 ms)
+hand_average: net 540.2/min (28102 ms)
+auto_mode: net 436.3/min (53545 ms)
+auto_mode_hand: net 547.0/min (61426 ms)
+tier2_machines: net 513.2/min (26864 ms)
+low_demand_paused: net 393.6/min (19598 ms)
+low_demand_machines: net 442.3/min (26281 ms)
+low_demand_hand: net 471.7/min (26451 ms)
+high_demand_paused: net 393.6/min (22542 ms)
+high_demand_machines: net 405.3/min (36198 ms)
+high_demand_hand: net 617.5/min (29193 ms)
+high_demand_tier2: net 543.3/min (31893 ms)
+craze_machines: net 302.4/min (37023 ms)
+craze_tier2: net 403.1/min (33752 ms)
+craze_hand: net 538.4/min (31500 ms)
+surplus true: { "special_on_s": 21.0, "sold_down_min": 0.92, "spicy_sold": 8, "abandoned": 0 }
+surplus false: { "special_on_s": -1, "sold_down_min": 2.22, "spicy_sold": 8, "abandoned": 0 }
+ 17:31:19 up 83 days,  1:12,  1 user,  load average: 3.05, 5.68, 9.89

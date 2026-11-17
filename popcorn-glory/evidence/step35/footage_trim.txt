@@ -1,0 +1,2 @@
+p720 trim_start_s 48.44 (30 s before the audio started)
+desktop trim_start_s 48.15 (30 s before the audio started)

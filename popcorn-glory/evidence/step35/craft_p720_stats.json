@@ -1,0 +1,39 @@
+{
+ "video_start_wall": 1794936986778,
+ "audio_start_wall": 1794937065217,
+ "run_start_wall": 1794937065218,
+ "spoon_holds": 12,
+ "hand_finish_before": {},
+ "hand_finish_after": {
+  "perfect": 10
+ },
+ "hand_portions": 40,
+ "hand_sold_portions": 30,
+ "sold": 46,
+ "revenue": 762,
+ "mix_sold": 7,
+ "lost_portions": 0,
+ "flavor_sold_after": {
+  "caramel": 12,
+  "cheese": 14,
+  "cocoa": 3
+ },
+ "coaters": [
+  {
+   "id": 5,
+   "mode": "cheese",
+   "margin": 93,
+   "net": 65,
+   "paid": 700
+  },
+  {
+   "id": 6,
+   "mode": "auto",
+   "margin": 211,
+   "net": 128,
+   "paid": 900
+  }
+ ],
+ "conserved": true,
+ "wrong_sku": 0
+}

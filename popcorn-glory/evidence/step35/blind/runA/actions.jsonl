@@ -1,0 +1,63 @@
+{"t":0.3,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":7.9,"issued":7.9,"cmd":"note","args":{"text":"First look: a popcorn shop. 1,525 coins at top. Top panel: three customers at a red counter, each wanting a popcorn cup. Middle panel (red outline): a packing station with cups on a belt and cream dispensers. Bottom: a big popcorn cart with a circular red/blue ring around it, like a dial or a timer, and a gauge needle. Right column: machine cards, some empty dashed slots. Bottom yellow button: cart icon, 175 coins, +11 -> +14 with red up arrow = upgrade. I think I can tap the cart (to pop popcorn?), maybe drag around the ring, tap the upgrade button to buy. Expect tapping the cart makes popcorn."}}
+{"t":9.9,"issued":8.9,"cmd":"tap","args":{"x":260,"y":850},"shot":"002.png"}
+{"t":15.3,"issued":15.3,"cmd":"note","args":{"text":"Tapped cart: coins 1525->1539. Popcorn puffs flew into middle station, a cup moved, a new customer appeared. The ring now has a needle at the top and a yellow arc on the left side. Maybe tapping when the needle is in the yellow zone is better? Will tap again."}}
+{"t":16.2,"issued":15.4,"cmd":"tap","args":{"x":260,"y":850},"shot":"003.png"}
+{"t":21.8,"issued":21.8,"cmd":"note","args":{"text":"+12 this time. Needle stays at top, yellow arc on the left. Not sure what the ring means yet. I have plenty of coins (1551) - let me buy the 175 upgrade (+11 -> +14 per pop I guess)."}}
+{"t":22.7,"issued":21.9,"cmd":"tap","args":{"x":300,"y":1180},"shot":"004.png"}
+{"t":29.7,"issued":29.7,"cmd":"note","args":{"text":"Bought upgrade: 1551->1398 (wait, that's -153 not -175? maybe I earned some meanwhile). Cart got wider, star appeared, kernels sprayed. Next 430 for +14->+18. Customers queue is filling. Now curious about the ring: the left part is yellow, right part blue, there's a little pressure gauge bottom-right. Let me try HOLDING the cart to see if it heats up."}}
+{"t":33.2,"issued":29.8,"cmd":"hold","args":{"x":260,"y":850,"s":2},"shot":"005.png","held_ms":2331}
+{"t":39,"issued":39,"cmd":"note","args":{"text":"Holding 2s: +22 coins, and 2 of the 9 little dots under the cart turned gold. A white tick appeared on the left side of the ring by the yellow arc. Maybe the hold length fills a meter, and releasing at the right moment (in yellow) is good? Popcorn jar in middle panel filled up. Let me try a longer hold, 4s."}}
+{"t":44.4,"issued":39.1,"cmd":"hold","args":{"x":260,"y":850,"s":4},"shot":"006.png","held_ms":4185}
+{"t":52.9,"issued":52.9,"cmd":"note","args":{"text":"4s hold = big black smoke, the popcorn in the jar is brown = BURNT. Dots stayed at 2. So the ring is a cooking clock: I think the needle goes clockwise from the top while holding: blue (raw) on the right/bottom, yellow (golden) on the left, red (burnt) top-left. A tap = undercooked, 2s = golden (dot gained), 4s = burnt. Aha moment! Try 2.3s to aim for middle of yellow."}}
+{"t":56.5,"issued":53,"cmd":"hold","args":{"x":260,"y":850,"s":2.3},"shot":"007.png","held_ms":2427}
+{"t":63,"issued":63,"cmd":"note","args":{"text":"2.3s: the marker stopped in the RED part (top-left), no new dot. Some brownish bits fall. So too long. Golden must be shorter, try 1.8s. Coins keep rising on their own a bit too (1450->1522)."}}
+{"t":66.1,"issued":63.1,"cmd":"hold","args":{"x":260,"y":850,"s":1.8},"shot":"008.png","held_ms":2172}
+{"t":72.4,"issued":72.4,"cmd":"note","args":{"text":"1.8s: marker at left in yellow, dots jumped to 4 of 9! Golden. Satisfying. Meanwhile something in the middle station puffed smoke (a burnt cup?). Buying the 430 upgrade, then more 1.8s holds."}}
+{"t":73.5,"issued":72.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"009.png"}
+{"t":76.1,"issued":73.5,"cmd":"hold","args":{"x":260,"y":850,"s":1.8},"shot":"010.png","held_ms":1884}
+{"t":82.5,"issued":82.5,"cmd":"note","args":{"text":"Upgraded (now +18 per serve, next 1050). The cart got bunting flags. Golden again, 6 dots filled. Marker landed lower-left of yellow this time - interesting, so the needle speed may have changed with the upgrade? Customers pay +12 floating text. Wonder what happens when all 9 dots fill."}}
+{"t":85.2,"issued":82.6,"cmd":"hold","args":{"x":260,"y":850,"s":1.9},"shot":"011.png","held_ms":1966}
+{"t":92.8,"issued":92.8,"cmd":"note","args":{"text":"1.9s = burnt, big smoke, dots stayed 6. Hmm, 1.8 was golden and 1.9 burnt? The golden window feels narrow or the timing is inconsistent; a bit frustrating not to see the needle while I hold. Also smoke over a round icon in the middle station (top right, a scoop/pin icon) - something there burns too? Try 1.6s."}}
+{"t":95.2,"issued":92.8,"cmd":"hold","args":{"x":260,"y":850,"s":1.6},"shot":"012.png","held_ms":1656}
+{"t":101,"issued":101,"cmd":"note","args":{"text":"1.6s: smoke again, dots still 6. Confused - maybe the smoke is leftover from the last burn, or the cart is still recovering. No marker visible on the ring this time. Let me wait a couple seconds and look before trying again."}}
+{"t":103.4,"issued":101,"cmd":"wait","args":{"s":2},"shot":"013.png"}
+{"t":109.1,"issued":109.1,"cmd":"note","args":{"text":"Cart is calm now. But the middle station keeps puffing black smoke from the 2nd little machine on the top-right (near the round scoop icon). Some cups there look brown. Curious - I'll tap that smoking spot."}}
+{"t":110,"issued":109.1,"cmd":"tap","args":{"x":433,"y":395},"shot":"014.png"}
+{"t":117.3,"issued":117.3,"cmd":"note","args":{"text":"Tapping that machine selected it: a white info card opened at the top: 24 > 28, a red -3, a bar 36/900, a clock ~53, and three icons (caramel cup selected, a locked chocolate cup, a circular arrows). The bottom button now upgrades THIS machine: 400 for +24->+28. Red minus buttons appeared on a few machines (remove?). The -3 worries me - maybe it's losing money? I'll buy the upgrade for this caramel machine."}}
+{"t":118.2,"issued":117.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"015.png"}
+{"t":125.1,"issued":125.1,"cmd":"note","args":{"text":"Bought: 28 > 34 now. But the progress bar target went 900 -> 1300 and the clock ~53 -> ~81. So upgrading made the locked chocolate cup further away?? Not sure what 36/1300 counts. Next upgrade 1000 (greyed, can't afford). Going back to the cart: hold 1.7s."}}
+{"t":127.7,"issued":125.1,"cmd":"hold","args":{"x":260,"y":850,"s":1.7},"shot":"016.png","held_ms":1796}
+{"t":133.9,"issued":133.9,"cmd":"note","args":{"text":"1.7s golden (marker in lower yellow) and - BOOM - popcorn explosion all over the cart, the 9 dots reset to empty. Did I complete the meter? Looked like it went 6 -> full. Fun burst! Coins only +45 though. Keep holding 1.7s."}}
+{"t":136.6,"issued":134,"cmd":"hold","args":{"x":260,"y":850,"s":1.7},"shot":"017.png","held_ms":1777}
+{"t":144.7,"issued":144.7,"cmd":"note","args":{"text":"Same 1.7s hold, this time smoke = burnt, no dot. So identical holds give golden or burnt. Either the needle speeds up after a full meter, or my finger timing is laggy. Frustrating because I can't see the needle move while I hold. Try 1.4s to see if the window moved earlier."}}
+{"t":147,"issued":144.8,"cmd":"hold","args":{"x":260,"y":850,"s":1.4},"shot":"018.png","held_ms":1478}
+{"t":154.9,"issued":154.9,"cmd":"note","args":{"text":"Even 1.4s burnt! Theory: the cart keeps heat between pops, so holding again soon after burns faster. The little pressure gauge bottom-right of the ring might show heat. I'll let it cool 5s, then hold 1.2s."}}
+{"t":160.2,"issued":154.9,"cmd":"wait","args":{"s":5},"shot":"019.png"}
+{"t":162.3,"issued":160.3,"cmd":"hold","args":{"x":260,"y":850,"s":1.2},"shot":"020.png","held_ms":1256}
+{"t":169.6,"issued":169.6,"cmd":"note","args":{"text":"1.2s after cooling: burnt again. I'm lost now - before the explosion 1.8s was golden, after it everything burns. Maybe the explosion was a level-up that made it cook faster. Trying a short 0.7s hold."}}
+{"t":171.2,"issued":169.7,"cmd":"hold","args":{"x":260,"y":850,"s":0.7},"shot":"021.png","held_ms":764}
+{"t":178.8,"issued":178.8,"cmd":"note","args":{"text":"0.7s: smoke again, no dot. Maybe the smoke isn't from my holds at all. Let me hands-off for 6s and see if the cart smokes by itself."}}
+{"t":185.2,"issued":178.9,"cmd":"wait","args":{"s":6},"shot":"022.png"}
+{"t":190.9,"issued":190.9,"cmd":"note","args":{"text":"Idle = no smoke, coins tick up passively (~50 in 7s). So my holds are what burned. Trying a plain quick tap to compare."}}
+{"t":191.9,"issued":191,"cmd":"tap","args":{"x":260,"y":850},"shot":"023.png"}
+{"t":199.5,"issued":199.5,"cmd":"note","args":{"text":"Even a quick tap gives a puff of smoke now. Something changed. The info card for the caramel machine has been open the whole time - maybe that matters. Let me tap the caramel machine again to close the card."}}
+{"t":200.5,"issued":199.6,"cmd":"tap","args":{"x":433,"y":395},"shot":"024.png"}
+{"t":206.2,"issued":206.2,"cmd":"note","args":{"text":"Card didn't close. I'll try the round icon at the top-left of the cart panel (two red bars) - maybe it selects the cart / opens its settings."}}
+{"t":207.2,"issued":206.3,"cmd":"tap","args":{"x":48,"y":610},"shot":"025.png"}
+{"t":213.5,"issued":213.5,"cmd":"note","args":{"text":"That icon selected the CART: the right column became a stat card (18>23, 700>750, 300>300) and a preview of the next cart look. Bottom button back to cart upgrade 1050 (+18->+23). I have 1223, buying it."}}
+{"t":214.5,"issued":213.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"026.png"}
+{"t":222.7,"issued":222.7,"cmd":"note","args":{"text":"Cart upgraded, gold burst, cart wider. Stats 23>29, 750>800, and the circular-arrow stat 300>260 - maybe that's cook time, so next level cooks faster. Next upgrade 2500. Down to 208 coins. Now with cart selected, try a 1.5s hold again to see if burning was tied to the caramel card being open."}}
+{"t":225,"issued":222.7,"cmd":"hold","args":{"x":260,"y":850,"s":1.5},"shot":"027.png","held_ms":1566}
+{"t":231.8,"issued":231.8,"cmd":"note","args":{"text":"GOLDEN again! Marker at the start of the yellow (bottom-left), 2 dots lit, popcorn shower. So the burn streak happened while the caramel machine card was open - maybe holds then went somewhere else, or it was just timing. Relief. Holding 1.6s again."}}
+{"t":234.3,"issued":231.8,"cmd":"hold","args":{"x":260,"y":850,"s":1.6},"shot":"028.png","held_ms":1701}
+{"t":241.7,"issued":241.7,"cmd":"note","args":{"text":"1.6s burnt (marker in the red, top-left). 0.1s difference = from start of yellow to past the end of it? Feels random, like the needle is super fast at the end, or my touch timing jitters. I want to SEE the needle move while I hold. Going back to 1.45s."}}
+{"t":244,"issued":241.7,"cmd":"hold","args":{"x":260,"y":850,"s":1.45},"shot":"029.png","held_ms":1562}
+{"t":251.7,"issued":251.7,"cmd":"note","args":{"text":"Smoke again. New idea: the counter has NO customers and the top panel now has a red outline, the jar is full. Maybe the smoke isn't 'burnt' but 'wasted, nowhere to put it' - the red outline marks the bottleneck. Tap the top panel's icon to see if I can upgrade the counter/customers."}}
+{"t":252.7,"issued":251.8,"cmd":"tap","args":{"x":48,"y":140},"shot":"030.png"}
+{"t":259.9,"issued":259.9,"cmd":"note","args":{"text":"Counter selected: 17.1>27.3 (customers per minute?), clock 3.5>2.2 (seconds between customers?), 1100 coins - I have 351, can't afford. So customers are my bottleneck and my cart outruns them. Makes sense with the red outline. Saving up. Meanwhile one more cart hold at 1.4s."}}
+{"t":262.1,"issued":259.9,"cmd":"hold","args":{"x":260,"y":850,"s":1.4},"shot":"031.png","held_ms":1462}
+{"t":268.3,"issued":268.3,"cmd":"note","args":{"text":"1.4s: smoke again. I clearly haven't cracked the timing - golden happened at 1.5, 1.7, 1.8 and burnt at 0.7, 1.2, 1.4, 1.6, 1.7, 1.9. I suspect the needle position depends on something I can't see (heat left over?). Last try: a 1.0s hold."}}
+{"t":270.2,"issued":268.4,"cmd":"hold","args":{"x":260,"y":850,"s":1},"shot":"032.png","held_ms":1055}
+{"t":276.4,"issued":276.4,"cmd":"note","args":{"text":"1.0s: smoke too. I give up guessing the hold for now; the shop earns on its own anyway (402 coins, saving for the 1100 counter upgrade). Overall: cute, busy, upgrades feel good, but the main cooking skill feels inconsistent and I can't read why."}}
+{"t":301.7,"issued":276.4,"cmd":"wait","args":{"s":25},"shot":"033.png"}

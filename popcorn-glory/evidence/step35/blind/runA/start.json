@@ -1,0 +1,11 @@
+{
+  "url": "http://127.0.0.1:18631/popcorn-glory/?scene=flavors#factory",
+  "version": "0.35.0",
+  "load_ms": 2633,
+  "viewport": {
+    "width": 400,
+    "height": 860
+  },
+  "dpr": 1.5,
+  "seconds": 300
+}

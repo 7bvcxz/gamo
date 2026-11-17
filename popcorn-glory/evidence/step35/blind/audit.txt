@@ -1,0 +1,3 @@
+runA: tool calls {'Bash': 35, 'Read': 30}; flagged 0
+runB: tool calls {'Bash': 120, 'Read': 29}; flagged 0
+exit 0
