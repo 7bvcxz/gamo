@@ -6,7 +6,10 @@
   "customers",
   "sizes",
   "lanes",
-  "upkeep"
+  "upkeep",
+  "kernels",
+  "oil",
+  "heat_model"
  ],
  "machines": [
   {
@@ -62,7 +65,7 @@
     }
    ],
    "marginal": "without kernels an auto kettle starves; with the hopper it never waits for a refill",
-   "runtime": null,
+   "runtime": "M01",
    "step": 28
   },
   {
@@ -121,7 +124,7 @@
     }
    ],
    "marginal": "quality 60 -> 80 on the late share of auto lots",
-   "runtime": null,
+   "runtime": "M02",
    "step": 28
   },
   {
@@ -172,7 +175,7 @@
     }
    ],
    "marginal": "burnt auto lots (yield 0.25) disappear once auto heat can vary",
-   "runtime": null,
+   "runtime": "M03",
    "step": 28
   },
   {
@@ -225,7 +228,7 @@
     }
    ],
    "marginal": "an auto lot of ~2.1 portions makes ~3.1 (+48% from the same kernels)",
-   "runtime": null,
+   "runtime": "M04",
    "step": 28
   },
   {
@@ -274,7 +277,7 @@
     }
    ],
    "marginal": "late share (30%) becomes near: +0.6 portion and +20 quality per such lot",
-   "runtime": null,
+   "runtime": "M05",
    "step": 28
   },
   {
@@ -323,7 +326,7 @@
     }
    ],
    "marginal": "the kettle's glass frees 0.6 s sooner each lot (the hand pops more often when the bin is the limit)",
-   "runtime": null,
+   "runtime": "M06",
    "step": 28
   },
   {
@@ -420,7 +423,7 @@
     }
    ],
    "marginal": "a fast hand pops ~5% more often",
-   "runtime": null,
+   "runtime": "M08",
    "step": 28
   },
   {
