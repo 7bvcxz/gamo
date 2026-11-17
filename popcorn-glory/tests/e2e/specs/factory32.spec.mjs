@@ -38,7 +38,9 @@ test('support machines on their floors, the upkeep overview, pause and resume ev
   await pop.tap('slot_kitchen_1');
   let rects = (await pop.state()).rects;
   for (const id of ['U01', 'U02', 'U03']) expect(rects[`pick_${id}`], `${id} offered in the kitchen`).toBeTruthy();
-  for (const id of ['U04', 'U05', 'U06', 'U07', 'U08']) expect(rects[`pick_${id}`], `${id} not offered in the kitchen`).toBeUndefined();
+  for (const id of ['U04', 'U05', 'U06', 'U08']) expect(rects[`pick_${id}`], `${id} not offered in the kitchen`).toBeUndefined();
+  // Step 37: the demand scheduler stands anywhere once the news exists (sign 6).
+  expect(!!rects.pick_U07, 'U07 offered from sign 6 (Step 37)').toBe((await pop.state()).run.sign_tier >= 6);
   await build(pop, 'kitchen', [[1, 'U02'], [2, 'cooker'], [3, 'M01'], [4, 'U03'], [5, 'U01']]);
   await pop.tap('slot_packing_1');
   rects = (await pop.state()).rects;

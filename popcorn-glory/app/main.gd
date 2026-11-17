@@ -225,6 +225,15 @@ func dev_money(amount: int) -> void:
 		_flush()
 
 
+## Step 37: an event now, for the tests (still only one the shop can answer).
+func dev_news(id: String) -> Dictionary:
+	if rules == null or not rules.has_method("news_force"):
+		return {"ok": false}
+	var r: Dictionary = rules.news_force(id)
+	_flush()
+	return r
+
+
 func dev_level(level: int) -> void:
 	if rules != null:
 		rules.level = clampi(level, 0, rules.max_level())

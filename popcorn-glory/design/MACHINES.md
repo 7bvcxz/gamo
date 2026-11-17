@@ -2,7 +2,7 @@
 
 `data/machines.json`이 단일 원본이다(생성: `tools/catalog/build_catalog.py`, 이 문서: `tools/catalog/catalog_doc.py`). 그림은 게임 안 `#machines`(실제 자리 크기, 다섯 묶음 × 8, 그 아래 40대가 층에 접힌 배치). 수치는 [proposal].
 
-**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch, cup_sku, portion_variance, multi_queue, four_lanes, parallel_lines, flavors.
+**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch, cup_sku, portion_variance, multi_queue, four_lanes, parallel_lines, flavors, news.
 
 ## 해금 지도 (간판 단계 → 열리는 기계)
 
@@ -13,7 +13,7 @@
 | 3 | M01 ●, M02 ●, M04 ●, M07 ●, S01 ●, S07 ●, U04 ● |
 | 4 | M03 ●, M05 ●, M09 ●, M12 ●, S02 ●, S03 ●, S06 ●, U01 ●, U02 ●, U03 ● |
 | 5 | M10 ●, M11 ●, M13 ●, M14 ●, M15 ●, S04 ●, S05 ●, U05 ●, U06 |
-| 6 | M16 ●, S08 ●, U07, U08 ● |
+| 6 | M16 ●, S08 ●, U07 ●, U08 ● |
 
 ● = 지금 돈다(Step 26: M07 자동 냄비, P03 부피 충전기, S07 셀프 키오스크).
 
@@ -79,7 +79,7 @@
 | U04 | Buffer Lift | support · 1 | a lift carries crates between the floors | buffer (bin_plus=12, shelf_plus=4) | — → the raw bin +12/24/36 portions, the shelf +4/6/8 packs | on the packing floor | 간판 3 | — | 500 / 1분 | bin 12, shelf 4 / bin 24, shelf 6 / bin 36, shelf 8 | kettles block less, rushes find packs | 돈다 |
 | U05 | Quality Inspector | support · 1 | a lens checks each lot | inspect (threshold=60, for=customers who ask for a bargain) | lots below quality 60 → bargain packs (price 7) sold only to customers who ask; plain packs stay good | on the packing floor | 간판 5 | — | 600 / 1분 | — / — / — | burnt and early lots stop pulling plain prices down | 돈다 |
 | U06 | Sanitation Bot | support · 1 | a bot leaves a trail of bubbles | freshness (prevents=quality loss of aged stock) | stock in the bin → no aging | covers the floor | 간판 5 | aging | 600 / 2분 | — / — / — | none until stock ages | 체계 대기: aging |
-| U07 | Demand Scheduler | support · 1 | a calendar flips to the next rush | schedule (reads=['news', 'preferences']) | news, preferences → the right flavor first | one per factory | 간판 6 | news, flavors | 1200 / 2분 | — / — / — | none until news and flavors (Steps 34, 37) | 체계 대기: news |
+| U07 | Demand Scheduler | support · 1 | a calendar flips to the next rush | schedule (reads=['news', 'preferences']) | news, preferences → the right flavor first | one per factory | 간판 6 | news, flavors | 1200 / 2분 | — / — / — | while a news event about a flavor runs, puts that flavor first by itself (AUTO coaters coat it first and keep a batch ahead -- the news card's focus, without a tap); pays its upkeep only while news runs | 돈다 |
 | U08 | Route Balancer | support · 1 | arrows swap between two lines | balance (needs_lines=2, move=a lot at a time per line, the oldest first) | goods in a stopped or crowded line → the same goods in an idle line | needs two parallel packing lines; moves 1/2/3 lots at once | 간판 6 | parallel_lines | 1500 / 2분 | parallel 1, move_ms 1500 / parallel 2, move_ms 1100 / parallel 3, move_ms 800 | a paused or crowded packing line's popcorn reaches an idle filler instead of waiting | 돈다 |
 
 ## 다른 체계와의 고리 (아직 없는 것)
@@ -87,7 +87,6 @@
 | 체계 | 기다리는 기계 | 생기는 Step |
 |---|---|---|
 | aging | U06 | 32 |
-| news | U07 | 37 |
 
 ## 40대가 함께 (Step 33)
 

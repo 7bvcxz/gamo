@@ -520,6 +520,12 @@ func test_nobody_jumps_the_queue() -> void:
 ## throughput hold it still (its own test: test_popularity_*).
 func _steady(f: PopRules) -> PopRules:
 	f.economy.table("factory")["reputation"]["arrival_effect"] = 0.0
+	f.economy.table("factory")["news"] = {}   # Step 37: no market events either (a measured stream)
+	return f
+
+
+func _still_popularity(f: PopRules) -> PopRules:
+	f.economy.table("factory")["reputation"]["arrival_effect"] = 0.0
 	return f
 
 
@@ -1163,7 +1169,7 @@ const RUNTIME_TESTS := {"cooker": "test_upkeep_is_paid_a_coin_at_a_time_and_neve
 	"S08": "test_s08_the_robot_adds_counter_lanes",
 	"U01": "test_u01_the_robot_keeps_coins_for_the_machines_that_make_goods", "U02": "test_u02_the_lubricator_speeds_its_neighbours_only",
 	"U03": "test_u03_the_saver_cuts_its_floors_upkeep", "U04": "test_u04_the_buffer_lift_adds_real_room",
-	"U05": "test_u05_the_inspector_sends_rejects_to_a_bargain_sku", "U08": "test_u08_moves_goods_from_a_stopped_line_to_an_idle_one",
+	"U05": "test_u05_the_inspector_sends_rejects_to_a_bargain_sku", "U08": "test_u08_moves_goods_from_a_stopped_line_to_an_idle_one", "U07": "test_focus_puts_the_event_flavor_first_and_the_scheduler_does_it_alone",
 	"bagger": "test_the_bagger_packs_real_portions_and_waits_or_holds_honestly",
 	"kiosk": "test_the_kiosk_serves_real_customers_and_pays_while_it_serves"}
 
@@ -1224,7 +1230,7 @@ func test_no_machine_is_sold_that_would_do_nothing() -> void:
 			assert_true(bool(r["ok"]) or String(r["reason"]) in ["err.no_slot", "err.slot_taken"] or (id == "U08" and String(r["reason"]) == "err.needs_lines"), "%s: a running machine is built (%s)" % [id, r.get("reason", "")])
 			assert_true(RUNTIME_TESTS.has(String(e["runtime"])), "%s: its behaviour has a test" % id)
 			assert_true(has_method(RUNTIME_TESTS[String(e["runtime"])]), "%s: that test exists (%s)" % [id, RUNTIME_TESTS[String(e["runtime"])]])
-	assert_eq(runs, 38, "today: 38 of the 40 run (Step 34 woke M12, P05, P06; U06 waits for aging, U07 for news)")
+	assert_eq(runs, 39, "today: 39 of the 40 run (Step 34 woke M12, P05, P06; Step 37 U07; U06 waits for aging)")
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing invented")
 
 
@@ -2304,7 +2310,7 @@ func test_u05_the_inspector_sends_rejects_to_a_bargain_sku() -> void:
 
 func test_u06_u07_u08_wait_for_their_systems() -> void:
 	var f := _util()
-	for id in ["U06", "U07"]:
+	for id in ["U06"]:   # (Step 37: the news woke U07)
 		assert_eq(String(f.execute({"type": "build", "machine": id})["reason"]), "err.not_yet", "%s is not sold before its system exists" % id)
 	# Step 33: parallel lines exist, but U08 balances two packing lines -- with one it would do nothing.
 	assert_eq(String(f.execute({"type": "build", "machine": "U08"})["reason"]), "err.needs_lines", "U08 is not sold with one packing line")
@@ -3856,3 +3862,256 @@ func test_the_cast_and_the_popularity_save_and_go_on_the_same() -> void:
 	assert_true((f.stats.get("arrived_who", {}) as Dictionary).size() >= 4, "several kinds came: %s" % [f.stats.get("arrived_who", {})])
 	_check_sales(f, "cast")
 	_check_conservation(g, "cast")
+
+
+# -- Step 37: the news -----------------------------------------------------------------
+const NEWS_CHANNELS := ["flavor", "size", "arrivals", "cost"]
+
+
+func _caramel_share(f: PopRules, n: int) -> float:
+	var k := 0
+	for i in n:
+		if String(f._draw_order("classic")["recipe"]) == "caramel":
+			k += 1
+	return float(k) / float(n)
+
+
+func _news_ids_started(f: PopRules) -> Array:
+	var out: Array = []
+	for a: Dictionary in f.news["log"]:
+		out.append("%s@%d" % [a["id"], a["start"]])
+	for a: Dictionary in f.news["active"]:
+		out.append("%s@%d" % [a["id"], a["start"]])
+	return out
+
+
+func test_the_news_is_clean_data_and_never_comes_at_opening() -> void:
+	var f: PopRules = Factory.new()
+	var n: Dictionary = f.news_rules()
+	assert_true(int(n["first_ms"][0]) >= 120000, "never in the first two minutes of an open shop")
+	assert_true(int(n["gap_ms"][0]) >= 60000 and int(n["gap_ms"][1]) > int(n["gap_ms"][0]), "a gap of minutes, never a stream")
+	var flavors: Array = f.flavor_ids()
+	for id: String in f.news_ids():
+		var e: Dictionary = f.news_event(id)
+		assert_false(e.is_empty(), "%s: in the table" % id)
+		assert_true(NEWS_CHANNELS.has(String(e["channel"])), "%s: a known channel" % id)
+		assert_true(int(e["ms"]) >= 60000 and int(e["ms"]) <= 300000, "%s: a finite, readable length" % id)
+		if String(e["channel"]) in ["flavor", "cost"]:
+			assert_true(flavors.has(String(e["flavor"])) and String(e["flavor"]) != "plain", "%s: a real flavor" % id)
+		var mult := float(e.get({"flavor": "demand", "size": "large", "arrivals": "arrivals", "cost": "ingredients"}[String(e["channel"])], 0.0))
+		assert_true(mult > 0.0 and mult <= 2.0, "%s: a bounded multiplier (%.2f)" % [id, mult])
+		assert_false(e.has("coins") or e.has("money") or e.has("price"), "%s: never money from nothing" % id)
+	# A shop whose sign is not open hears no news, however long.
+	var g: PopRules = Factory.new(null, 501)
+	_quiet_shop(g)
+	g.advance(20 * 60000)
+	assert_eq((g.news["log"] as Array).size() + (g.news["active"] as Array).size(), 0, "no news before the sign opens")
+	# Open: the first event comes between first_ms[0] and first_ms[1] after that.
+	_open_sign(g)
+	var t0 := int(g.flow_ms)
+	g.advance(int(n["first_ms"][0]) - 1000)
+	assert_eq(int(g.stats.get("news_started", 0)), 0, "nothing before first_ms")
+	g.advance(int(n["first_ms"][1]) - int(n["first_ms"][0]) + 2000)
+	assert_true(int(g.stats.get("news_started", 0)) >= 1, "then news")
+	var first: Dictionary = g.news["log"][0] if not (g.news["log"] as Array).is_empty() else g.news["active"][0]
+	var at := int(first["start"]) - t0
+	assert_true(at >= int(n["first_ms"][0]) and at <= int(n["first_ms"][1]) + 100, "the first within first_ms (%d ms)" % at)
+
+
+func test_the_schedule_is_seeded_and_only_answerable_events_come() -> void:
+	var runs: Array = []
+	for seed_value: int in [503, 503, 504]:
+		var f: PopRules = _shop(seed_value)
+		_quiet_shop(f)
+		f.advance(60 * 60000)
+		runs.append(_news_ids_started(f))
+		# A plain shop (no flavor): only the festival or big bag day (its larger bags are open).
+		for s: String in runs.back():
+			assert_true(s.begins_with("film_festival") or s.begins_with("big_bag_day"), "a plain shop hears only what it can answer: %s" % s)
+		assert_true((runs.back() as Array).size() >= 8 and (runs.back() as Array).size() <= 40, "every few minutes, not a stream (%d an hour)" % (runs.back() as Array).size())
+	assert_eq(runs[0], runs[1], "the same seed, the same news")
+	assert_ne(runs[0], runs[2], "another seed, other times")
+	# A cheese-only flavor shop: never caramel, cocoa, spicy or sugar news.
+	var c := _flavor_floor(505)
+	_coater(c, "P05", "cheese")
+	_quiet_shop(c)
+	c.advance(90 * 60000)
+	var seen := {}
+	for s: String in _news_ids_started(c):
+		seen[s.split("@")[0]] = true
+	for id: String in ["caramel_craze", "cocoa_week", "spicy_dare", "sugar_sale"]:
+		assert_false(seen.has(id), "%s never comes to a shop that cannot make it" % id)
+	assert_true(seen.has("cheese_fans") or seen.has("cheese_sale"), "cheese news comes to a cheese shop: %s" % [seen.keys()])
+	assert_false(bool(c.news_force("caramel_craze")["ok"]), "nor can it be forced")
+
+
+func test_a_craze_doubles_what_customers_ask_for_never_the_money() -> void:
+	var f := _all_flavors(507)
+	var base := _caramel_share(f, 6000)
+	var money := int(f.money)
+	var r: Dictionary = f.news_force("caramel_craze")
+	assert_true(bool(r["ok"]), "the craze starts")
+	assert_eq(int(f.money), money, "no money from the news")
+	assert_eq(float(f.demand_mods["flavors"]["caramel"]), 2.0, "caramel's demand x2")
+	var during := _caramel_share(f, 6000)
+	assert_true(during / base > 1.7 and during / base < 2.3, "twice the caramel orders (%.3f -> %.3f)" % [base, during])
+	# Nothing about it is sold without customers and bags: no sale during an empty shop.
+	var sold := int(f.stats["sold"])
+	_quiet_shop(f)
+	f.advance(130000)
+	assert_eq(int(f.stats["sold"]), sold, "no customers, no sales -- whatever the news")
+	assert_true((f.news["active"] as Array).is_empty(), "the craze is over after its length")
+	assert_false((f.demand_mods.get("flavors", {}) as Dictionary).has("caramel"), "and its modifier is gone: %s" % [f.demand_mods])
+	var after := _caramel_share(f, 6000)
+	assert_true(absf(after - base) < 0.02, "the stream is back to normal (%.3f vs %.3f)" % [after, base])
+
+
+func test_events_apply_exactly_once_overlap_on_other_channels_and_clear() -> void:
+	var f := _all_flavors(509)
+	f.set_demand_mods({"flavors": {"cheese": 0.5}})
+	assert_true(bool(f.news_force("caramel_craze")["ok"]), "a craze")
+	assert_true(bool(f.news_force("film_festival")["ok"]), "and a festival at the same time (another channel)")
+	assert_false(bool(f.news_force("cocoa_week")["ok"]), "but never two on the same channel")
+	var want := {"flavors": {"cheese": 0.5, "caramel": 2.0}, "arrivals": 1.5}
+	for i in 30:
+		f.advance(1000)
+		assert_eq(JSON.stringify(f.demand_mods), JSON.stringify(want), "the same modifiers every second (never compounded)")
+	var g: PopRules = Factory.new(null, 509)
+	assert_true(g.from_save(JSON.parse_string(JSON.stringify(f.to_save()))), "restored mid-event")
+	assert_eq(JSON.stringify(g.demand_mods), JSON.stringify(want), "the same modifiers after a save")
+	assert_eq(JSON.stringify(g.news_state()), JSON.stringify(f.news_state()), "the same paper")
+	g.advance(130000)
+	assert_eq(JSON.stringify(g.demand_mods), JSON.stringify({"flavors": {"cheese": 0.5}}), "both over: only the base is left")
+	assert_eq((g.news["log"] as Array).size(), 2, "both in the log")
+
+
+func test_unread_counts_running_news_and_drops_what_ended_unread() -> void:
+	var f := _all_flavors(511)
+	_quiet_shop(f)
+	f.news_force("film_festival")
+	assert_eq(int(f.news_state()["unread"]), 1, "one new")
+	assert_true(bool(f.execute({"type": "news_read"})["ok"]), "read")
+	assert_eq(int(f.news_state()["unread"]), 0, "read")
+	f.news_force("caramel_craze")
+	assert_eq(int(f.news_state()["unread"]), 1, "another")
+	f.advance(130000)
+	assert_eq(int(f.news_state()["unread"]), 0, "an event that ended unread is not news any more (no stale badge)")
+	assert_eq((f.news_state()["log"] as Array).size(), 2, "the paper keeps them as past news")
+
+
+func test_a_sale_lowers_only_the_ingredient_coins() -> void:
+	var f := _all_flavors(513)
+	assert_eq(int(f.ingredient_cost("cheese", 4)), 2, "cheese: 2 coins a batch")
+	f.news_force("cheese_sale")
+	assert_eq(int(f.ingredient_cost("cheese", 4)), 1, "on sale: half (rounded up)")
+	assert_eq(int(f.ingredient_cost("cheese", 4, true)), 2, "its full price is known")
+	assert_eq(int(f.ingredient_cost("caramel", 4)), int(f.ingredient_cost("caramel", 4, true)), "other flavors unchanged")
+	assert_eq(int(f.pack_price("cheese", 2, 100)), int(Factory.new().pack_price("cheese", 2, 100)), "the price customers pay is unchanged")
+	f.level = 6
+	f.next_arrival_ms = f.flow_ms + 100
+	for i in 120:
+		if f.glass.is_empty():
+			_pop(f)
+		f.advance(1000)
+	assert_true(int(f.stats.get("news_saved_coins", 0)) > 0, "coins saved on cheese batches (%d)" % int(f.stats.get("news_saved_coins", 0)))
+	_check_conservation(f, "sale")
+
+
+func test_big_bag_day_asks_for_more_large_bags() -> void:
+	var f := _all_flavors(515)
+	assert_true(f.news_eligible("big_bag_day"), "a larger bag is open")
+	var big := func() -> float:
+		var k := 0
+		for i in 4000:
+			if int(f._draw_order("student")["size"]) > int(f.pack_size()):
+				k += 1
+		return float(k) / 4000.0
+	var before: float = big.call()
+	f.news_force("big_bag_day")
+	var during: float = big.call()
+	assert_true(during > before * 1.4, "more large bags asked for (%.3f -> %.3f)" % [before, during])
+	var g := _shop(516)
+	assert_false(g.news_eligible("big_bag_day") and g.sizes_open().size() == 1, "a shop with one bag size never hears it")
+
+
+func test_focus_puts_the_event_flavor_first_and_the_scheduler_does_it_alone() -> void:
+	var f := _all_flavors(517)
+	assert_false(bool(f.execute({"type": "news_focus", "flavor": "caramel"})["ok"]), "no focus without its news")
+	f.news_force("caramel_craze")
+	var w0 := int(f.flavor_want("caramel"))
+	assert_true(bool(f.execute({"type": "news_focus", "flavor": "caramel"})["ok"]), "focus on the craze's flavor")
+	assert_eq(int(f.flavor_want("caramel")), w0 + int(f.flavor("caramel")["in"]), "a batch ahead")
+	var p06: Dictionary = {}
+	for m: Dictionary in f.machines:
+		if String(m["type"]) == "P06":
+			p06 = m
+	f.execute({"type": "set_flavor", "id": p06["id"], "flavor": "auto"})
+	assert_eq(String(f._auto_pick(p06)), "caramel", "an AUTO coater coats it first")
+	f.execute({"type": "news_focus", "flavor": "caramel"})
+	assert_eq(f.news_focus, "", "the same button lets go")
+	f.execute({"type": "news_focus", "flavor": "caramel"})
+	f.advance(130000)
+	assert_eq(f.news_focus, "", "the focus ends with its news")
+	# The demand scheduler (U07) focuses by itself.
+	var g := _all_flavors(519)
+	g.money = 100000
+	assert_true(bool(g.execute({"type": "build", "machine": "U07", "floor": "kitchen"})["ok"]) or bool(g.execute({"type": "build", "machine": "U07", "floor": "packing"})["ok"]), "U07 built")
+	g.news_force("cheese_fans")
+	g.advance(2000)
+	assert_eq(g.news_focus, "cheese", "U07 put the news's flavor first")
+	assert_true(bool(g.news_state()["scheduler"]), "and says so")
+
+
+func test_a_craze_crowd_that_gives_up_costs_no_popularity() -> void:
+	var f := _all_flavors(521)
+	_quiet_shop(f)
+	f.news_force("caramel_craze")
+	f.queue.append({"id": 99901, "order": {"recipe": "caramel", "size": 2}, "patience_ms": 500, "patience0": 500, "who": "kid"})
+	var p := float(f.popularity)
+	f.advance(2000)
+	assert_eq(float(f.popularity), p, "no blame for a crowd the news brought")
+	assert_eq(int(f.stats.get("news_spared", 0)), 1, "counted as spared")
+	f.queue.append({"id": 99902, "order": {"recipe": "plain", "size": 2}, "patience_ms": 500, "patience0": 500, "who": "classic"})
+	f.advance(2000)
+	assert_true(float(f.popularity) < p, "a butter customer who gives up still counts")
+
+
+func test_a_festival_at_a_full_queue_keeps_the_cap_and_people_walk_past() -> void:
+	var f := _shop(523)
+	f.next_arrival_ms = f.flow_ms + 100
+	f.news_force("film_festival")
+	var cap := int(f.queue_cap())
+	var longest := 0
+	for i in 85:
+		f.advance(1000)
+		longest = maxi(longest, f.queue.size())
+	assert_true(longest <= cap, "the cap holds (%d <= %d)" % [longest, cap])
+	assert_true(int(f.stats["passed_by"]) > 0, "the rest walk past (no penalty)")
+	_check_conservation(f, "festival")
+
+
+func test_an_hour_of_news_saves_resumes_and_conserves() -> void:
+	var f := _still_popularity(_all_flavors(525))
+	f.level = 6
+	f.next_arrival_ms = f.flow_ms + 100
+	var g: PopRules = null
+	for i in 3600:
+		if f.glass.is_empty() and i % 4 == 0:
+			_pop(f)
+		f.advance(1000)
+		if i == 1800:
+			g = Factory.new(null, 525)
+			_still_popularity(g)
+			assert_true(g.from_save(JSON.parse_string(JSON.stringify(f.to_save()))), "restored at 30 min")
+		elif g != null:
+			if g.glass.is_empty() and i % 4 == 0:
+				_pop(g)
+			g.advance(1000)
+	assert_eq(JSON.stringify(g.to_save()), JSON.stringify(f.to_save()), "the same news, the same shop after a save")
+	assert_true(int(f.stats.get("news_started", 0)) >= 8, "news came (%d)" % int(f.stats.get("news_started", 0)))
+	var seen := {}
+	for a: Dictionary in f.news["log"]:
+		seen[a["id"]] = true
+		assert_true(int(a["end"]) - int(a["start"]) <= int(f.news_event(String(a["id"]))["ms"]), "%s: never longer than its length" % a["id"])
+	_check_sales(f, "news hour")
+	_check_conservation(f, "news hour")

@@ -159,6 +159,12 @@ func _tick() -> void:
 						print("capture: spoon %s on %s" % [_app.rules.finishing, (_app.rules.machines as Array).filter(func(x: Dictionary) -> bool: return String(x["type"]) in ["P05", "P06"]).map(func(x: Dictionary) -> String: return "%d:%s:%s" % [x["id"], x["state"], (x["held"] as Dictionary).get("left_ms", -1)])])
 					"R":
 						_app.on_command("finish_release", {"type": "finish_release"})
+					"N":
+						# Step 37: `N<id>` starts that news event now (only one the shop can answer).
+						_app.dev_news(step.substr(1))
+					"P":
+						# Step 37: the paper opens (as a tap on its icon).
+						_app.frame.play.toggle_news()
 					"A":
 						# Step 35: `A<id>` sets that coater to AUTO.
 						_app.on_command("set_flavor", {"type": "set_flavor", "id": int(step.substr(1)), "flavor": "auto"})

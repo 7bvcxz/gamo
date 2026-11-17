@@ -134,7 +134,7 @@ test('five flavors are coated, packed, asked for and sold in the browser', async
   }
   s = await pop.state();
   const sold = s.run.stats.flavor_sold || {};
-  testInfo.annotations.push({ type: 'flavor trade', description: JSON.stringify({ sold, revenue: s.run.stats.flavor_revenue, coated: s.run.stats.coated, ingredients: s.run.stats.ingredient_coins, minutes: s.run.flow_ms / 60000, sold_total: s.run.stats.sold, seen_coating: [...seen] }) });
+  testInfo.annotations.push({ type: 'flavor trade', description: JSON.stringify({ sold, revenue: s.run.stats.flavor_revenue, coated: s.run.stats.coated, ingredients: s.run.stats.ingredient_coins, minutes: s.run.flow_ms / 60000, sold_total: s.run.stats.sold, seen_coating: [...seen], asked: s.run.stats.asked_recipe, news: (s.run.news?.log || []).map((x) => x.id) }) });
   for (const f of ['cheese', 'spicy', 'caramel', 'cocoa']) {
     expect(sold[f] || 0, `${f} sold`).toBeGreaterThanOrEqual(1);
     // Coated by its machine (a batch is 1-12 s: a snapshot every 5 s of play can miss it running).

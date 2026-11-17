@@ -98,6 +98,11 @@ var _spoon_key := ""
 var _spoon_fx := {}              ## the last finish: {machine, grade, quality, t}
 var _spoon_seen := -1.0          ## seconds a spoon has been on offer without the hand ever using one
 var _floors_key := ""
+var news_open := false           ## Step 37: the paper is open
+var news_node := Node2D.new()    ## Step 37: the live icon, the ticker, the marks on the lines
+var _news_key := ""
+var _ticker := {}                ## Step 37: {"n", "t" seconds, "end"} -- a start (or end) slides out of the icon
+const TICKER_S := 6.5
 
 
 func setup(p_rules: PopRules) -> void:
@@ -184,6 +189,10 @@ func setup(p_rules: PopRules) -> void:
 		bell_node.name = "Bell"
 		add_child(bell_node)
 		bell_node.draw.connect(func() -> void: PopFactoryArt.bell(bell_node, _head_px() * 0.9))
+		news_node.name = "News"
+		news_node.z_index = 3   # above the machines and spoons, below the open card
+		add_child(news_node)
+		news_node.draw.connect(func() -> void: _draw_news_live(news_node))
 		detail_layer.name = "Detail"
 		detail_layer.z_index = 10   # above everything, also the front row of the queue (z 1, Step 31)
 		add_child(detail_layer)
@@ -191,6 +200,8 @@ func setup(p_rules: PopRules) -> void:
 			redraws["detail"] = int(redraws["detail"]) + 1
 			if overview:
 				_draw_overview(detail_layer, detail_rect())
+			elif news_open:
+				_draw_news_card(detail_layer, detail_rect())
 			elif selected >= 0:
 				_draw_detail(detail_layer, selected, detail_rect()))
 	_floors_key = ""
@@ -231,7 +242,7 @@ func news_rect() -> Rect2:
 ## The open floor's detail: inside that floor on a portrait screen, in the right
 ## column under the card on a landscape one.
 func detail_rect() -> Rect2:
-	if overview:   # Step 32: over the shop floor, like a machine's detail (on desktop, the side panel)
+	if overview or news_open:   # (Step 37: the paper takes the overview's place)   # Step 32: over the shop floor, like a machine's detail (on desktop, the side panel)
 		if is_wide():
 			var xo := size.x * 0.62 + 16
 			return Rect2(Vector2(xo, 210), Vector2(size.x - xo - 16, size.y - 230))
@@ -365,8 +376,12 @@ func extra_rects() -> Dictionary:
 	var c := machine_centre()
 	var r := ring_radius() + machine_size() * 0.045
 	out["ring"] = Rect2(c - Vector2(r, r), Vector2(r * 2.0, r * 2.0))
-	if selected >= 0 or overview:
+	if selected >= 0 or overview or news_open:
 		out["detail"] = detail_rect()
+	if news_open:   # Step 37: the card's focus buttons
+		for fr: Dictionary in _news_layout(detail_rect())["rows"]:
+			if (fr["focus"] as Rect2).size.x > 0.0:
+				out["news_focus_%s" % fr["row"]["flavor"]] = fr["focus"]
 	if rules and not (rules.get("machines") as Array).is_empty():
 		out["overview"] = overview_button_rect()   # Step 32
 	if overview:
@@ -420,6 +435,9 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	if mb.pressed:
 		var f := _floor_at(mb.position)
+		if _news_press(mb.position, f):   # Step 37: the paper -- never in the kitchen's way
+			accept_event()
+			return
 		var sp := _spoon_at(mb.position)
 		if sp >= 0:   # Step 35: the hand takes the coater's spoon (hold, let go in the gold)
 			_spooning = true
@@ -478,6 +496,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 ## Opens a floor's detail, or closes it if it is already open (-1 closes).
 func toggle_floor(i: int) -> void:
 	selected = -1 if i == selected or i < 0 else i
+	if selected >= 0 and news_open:
+		news_open = false
+		detail_layer.queue_redraw()
 	_floors_key = ""
 	_sound("clink", 1.2 if selected >= 0 else 0.9, -12.0)
 
@@ -548,6 +569,7 @@ func _process(delta: float) -> void:
 	_step_cues()
 	_step_machine_motion(delta)
 	_step_spoons(delta)
+	_step_news(delta)
 
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and
@@ -633,6 +655,9 @@ func on_events(events: Array[Dictionary]) -> void:
 			_machine_event(e)
 		elif String(e["type"]) in ["finish_start", "finished", "coat_lost", "paid_back", "promo_on"]:
 			_spoon_event(e)   # Step 35
+		elif String(e["type"]) in ["news_start", "news_end"]:   # Step 37: the ticker slides out of the icon
+			_ticker = {"n": int(e["data"].get("n", -1)), "t": 0.0, "end": String(e["type"]) == "news_end"}
+			_sound("ding", 1.5 if String(e["type"]) == "news_start" else 1.1, -14.0)
 		elif String(e["type"]) == "station_upgrade":
 			# Each floor's own flourish (Step 24): the station sparkles where it
 			# stands with a rising chime and a clink of its new heads; the sign
@@ -673,7 +698,6 @@ func _draw_floors(ci: CanvasItem) -> void:
 	PopFactoryArt.glass(ci, tube, tube.size.x * 0.5)
 	for i in 3:
 		_draw_badge(ci, i)
-	_draw_news(ci)
 
 
 func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
@@ -849,17 +873,277 @@ func _draw_badge(ci: CanvasItem, i: int) -> void:
 			PopMachineArt._round_rect(ci, Rect2(c + Vector2(-s, s * 0.5), Vector2(s * 2.0, s * 0.5)), 4, PopTokens.MACHINE)
 
 
-## The news paper, top right of the shop: reserved (Step 37 fills it), grey until then.
-func _draw_news(ci: CanvasItem) -> void:
+# -- Step 37: the news ------------------------------------------------------------
+## The icon (top right of the shop) is a folded paper: grey on a quiet day, in colour with a
+## ring of the time left while news runs, a red count of what is unread. A start slides a
+## strip out of it for a few seconds (the subject, the effect, the time) and an end slides one
+## more (a tick and what it sold). The paper opens over the shop and the packing floor --
+## never over the kitchen, whose ring keeps working while it is open.
+
+func _news() -> Dictionary:
+	return rules.news_state() if rules != null and rules.has_method("news_state") else {"active": [], "log": [], "unread": 0, "focus": "", "scheduler": false}
+
+
+func _news_row(n: int) -> Dictionary:
+	var ns := _news()
+	for r: Dictionary in (ns["active"] as Array) + (ns["log"] as Array):
+		if int(r["n"]) == n:
+			return r
+	return {}
+
+
+func toggle_news() -> void:
+	news_open = not news_open
+	if news_open:
+		_clear_machine_selection()
+		selected = -1
+		overview = false
+		command.emit("news_read", {"type": "news_read"})
+	_floors_key = ""
+	detail_layer.queue_redraw()
+	news_node.queue_redraw()
+	_sound("clink", 1.3 if news_open else 0.9, -12.0)
+
+
+func _news_press(p: Vector2, f: int) -> bool:
+	if rules == null or not rules.has_method("news_state"):
+		return false
+	var covered := (selected >= 0 or overview) and detail_rect().has_point(p)   # an open card over the icon has the tap
+	if news_rect().grow(6).has_point(p) and not covered:
+		toggle_news()
+		return true
+	if not news_open:
+		return false
+	for fr: Dictionary in _news_layout(detail_rect())["rows"]:
+		if (fr["focus"] as Rect2).has_point(p):
+			command.emit("news_focus", {"type": "news_focus", "flavor": String(fr["row"]["flavor"])})
+			detail_layer.queue_redraw()
+			return true
+	if detail_rect().has_point(p):   # a tap on the paper folds it (it covers its own icon)
+		toggle_news()
+		return true
+	if f == LOW:
+		return false   # the kitchen: cooking (the ring, the spoons, the machines) goes on
+	news_open = false
+	detail_layer.queue_redraw()
+	news_node.queue_redraw()
+	return f >= 0
+
+
+func _step_news(delta: float) -> void:
+	if rules == null or not rules.has_method("news_state"):
+		return
+	if not _ticker.is_empty():
+		_ticker["t"] = float(_ticker["t"]) + delta
+		if float(_ticker["t"]) >= TICKER_S:
+			_ticker = {}
+	var ns := _news()
+	var parts: Array = [ns["unread"], ns["focus"], news_open, size]
+	for r: Dictionary in ns["active"]:
+		parts.append("%d:%d:%d" % [r["n"], int(r["left_ms"]) / 1000, r["sold"]])
+	if not _ticker.is_empty():
+		var t := float(_ticker["t"])
+		parts.append(int(t * 30.0) if t < 0.5 or t > TICKER_S - 0.5 else -1)
+		parts.append(_ticker["n"])
+	parts.append(_structure_key())
+	var key := str(parts)
+	if key != _news_key:
+		_news_key = key
+		news_node.queue_redraw()
+		if news_open:
+			detail_layer.queue_redraw()
+
+
+## The machines a running event is about, and where its mark sits.
+func _news_marks() -> Array:
+	var out: Array = []
+	if rules == null or not rules.has_method("news_state"):
+		return out
+	for r: Dictionary in _news()["active"]:
+		match String(r["channel"]):
+			"flavor", "cost":
+				for m: Dictionary in rules.machines:
+					if String(m["type"]) in ["P05", "P06"] and rules.coater_serves(m, String(r["flavor"])):
+						var sr := slot_rect(String(m["floor"]), int(m["slot"]))
+						out.append({"at": sr.position + Vector2(sr.size.x * 0.86, sr.size.y * 0.14), "s": minf(sr.size.x, sr.size.y) * 0.34, "row": r})
+			"size":
+				var b := badge_rect(MID)
+				out.append({"at": b.end + Vector2(8, -b.size.y * 0.2), "s": b.size.x * 0.5, "row": r})
+			"arrivals":
+				var d := _door()
+				out.append({"at": d + Vector2(0, -_head_px() * 2.2), "s": _head_px() * 0.9, "row": r})
+	return out
+
+
+func _draw_news_live(ci: CanvasItem) -> void:
+	if rules == null or not rules.has_method("news_state"):
+		return
+	var ns := _news()
+	var act: Array = ns["active"]
 	var n := news_rect()
 	var c := n.get_center()
-	ci.draw_circle(c, n.size.x * 0.5, Color(1, 1, 1, 0.7))
-	ci.draw_arc(c, n.size.x * 0.5, 0, TAU, 32, Color(PopPalette.INK, 0.4), 3.0)
-	var p := Rect2(c - Vector2(16, 12), Vector2(32, 24))
-	ci.draw_rect(p, Color(1, 1, 1))
-	ci.draw_rect(p, Color(PopPalette.INK, 0.45), false, 3.0)
-	ci.draw_line(p.position + Vector2(6, 8), p.position + Vector2(26, 8), Color(PopPalette.INK, 0.45), 3.0)
-	ci.draw_line(p.position + Vector2(6, 15), p.position + Vector2(20, 15), Color(PopPalette.INK, 0.45), 3.0)
+	var r := n.size.x * 0.5
+	var live := not act.is_empty()
+	ci.draw_circle(c, r, Color(1, 1, 1, 0.97 if live else 0.72))
+	if live:   # the time left of the first running event, as a gold ring round the icon
+		var a: Dictionary = act[0]
+		var k := clampf(float(a["left_ms"]) / float(maxi(1, int(a["ms"]))), 0.0, 1.0)
+		ci.draw_arc(c, r - 3.0, -PI * 0.5, -PI * 0.5 + TAU * k, 32, PopPalette.GOLD, 6.0)
+	ci.draw_arc(c, r, 0, TAU, 32, PopPalette.GOLD if news_open else (PopPalette.INK if live else Color(PopPalette.INK, 0.4)), 4.0 if news_open else 3.0)
+	PopNewsArt.paper(ci, c + Vector2(2, 2), n.size.x * 0.62, live)
+	var unread := int(ns["unread"])
+	if unread > 0:
+		var bc := c + Vector2(r * 0.72, -r * 0.72)
+		ci.draw_circle(bc, r * 0.36, PopNewsArt.MAST)
+		ci.draw_arc(bc, r * 0.36, 0, TAU, 16, Color.WHITE, 2.5)
+		var font := ThemeDB.fallback_font
+		var fs := int(r * 0.48)
+		var t := str(unread)
+		ci.draw_string(font, Vector2(bc.x - font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x * 0.5, bc.y + fs * 0.36), t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)
+	for mk: Dictionary in _news_marks():
+		PopNewsArt.line_mark(ci, mk["at"], float(mk["s"]), mk["row"])
+	if not _ticker.is_empty():
+		_draw_ticker(ci)
+
+
+func _draw_ticker(ci: CanvasItem) -> void:
+	var row := _news_row(int(_ticker["n"]))
+	if row.is_empty():
+		return
+	var t := float(_ticker["t"])
+	var k := clampf(minf(t / 0.35, (TICKER_S - t) / 0.35), 0.0, 1.0)
+	k = k * k * (3.0 - 2.0 * k)
+	var n := news_rect()
+	var top := floor_rect(TOP)
+	var w := minf(top.size.x - n.size.x - 120.0, n.size.y * 3.3) * k   # as long as its contents
+	if w < 8.0:
+		return
+	var h := n.size.y * 0.86
+	var strip := Rect2(Vector2(n.position.x - 8.0 - w, n.get_center().y - h * 0.5), Vector2(w + n.size.x * 0.5, h))
+	var end := bool(_ticker["end"])
+	PopFactoryArt.shadow(ci, strip, h * 0.5)
+	PopMachineArt._round_rect(ci, strip, h * 0.5, PopNewsArt.PAPER)
+	var pts := PopMachineArt.round_rect_points(strip, h * 0.5)
+	pts.append(pts[0])
+	ci.draw_polyline(pts, Color(PopNewsArt.PAPER_EDGE, 0.5) if end else PopNewsArt.MAST, 4.0, true)
+	if k < 0.98:
+		return   # (the contents appear once it is out)
+	var font := ThemeDB.fallback_font
+	var fs := h * 0.36
+	var x := strip.position.x + h * 0.6
+	PopNewsArt.subject(ci, Vector2(x, strip.get_center().y - h * 0.08), h * 0.62, row, end)
+	x += h * 0.62
+	if end:
+		PopNewsArt.tick(ci, Vector2(x, strip.get_center().y), fs * 0.9)
+		_news_result(ci, font, Vector2(x + fs * 0.9, strip.get_center().y), fs, row, false)
+	else:
+		x += PopNewsArt.effect(ci, font, Vector2(x, strip.get_center().y), fs, row) + fs * 0.7
+		PopNewsArt.timer(ci, font, Vector2(x + h * 0.22, strip.get_center().y - fs * 0.45), h * 0.2, int(row["left_ms"]), int(row["ms"]), fs * 0.62)
+
+
+## What an event brought: bags sold (a flavor or the big bag), people (a festival), coins saved.
+func _news_result(ci: CanvasItem, font: Font, left: Vector2, fs: float, row: Dictionary, dim: bool) -> void:
+	var col := Color(PopPalette.INK, 0.5) if dim else PopPalette.INK
+	var v := 0
+	match String(row["channel"]):
+		"flavor", "size":
+			PopFactoryArt.sku_bag(ci, left + Vector2(fs * 0.3, fs * 0.42), fs * 0.5, String(row["flavor"]) if String(row["flavor"]) != "" else "plain")
+			v = int(row["sold"])
+		"arrivals":
+			ci.draw_circle(left + Vector2(fs * 0.3, fs * 0.22), fs * 0.22, Color(PopTokens.SKY, 0.6 if dim else 1.0))
+			ci.draw_circle(left + Vector2(fs * 0.3, -fs * 0.12), fs * 0.18, Color(0.96, 0.82, 0.68))
+			v = int(row["asked"])
+		"cost":
+			PopMachineArt.draw_coin(ci, left + Vector2(fs * 0.3, 0), fs * 0.28)
+			v = int(row["saved"])
+	ci.draw_string(font, Vector2(left.x + fs * 0.75, left.y + fs * 0.36), str(v), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs), col)
+
+
+## The open paper: the masthead, a row per running event (its subject, the effect, the time
+## left, what it has sold so far and -- for a flavor -- the focus button), the last ones under it.
+func _news_layout(d: Rect2) -> Dictionary:
+	var fs := clampf(minf(d.size.y * 0.075, d.size.x * 0.05), 16.0, 30.0)
+	var ns := _news()
+	var y := d.position.y + fs * 2.6
+	var rows: Array = []
+	for r: Dictionary in ns["active"]:
+		var rr := Rect2(Vector2(d.position.x + fs * 0.6, y), Vector2(d.size.x - fs * 1.2, fs * 3.4))
+		var focus := Rect2()
+		if String(r["flavor"]) != "":
+			focus = Rect2(Vector2(rr.end.x - fs * 2.9, rr.position.y + fs * 0.45), Vector2(fs * 2.5, fs * 2.5))
+		rows.append({"rect": rr, "row": r, "focus": focus})
+		y += fs * 3.7
+	var past: Array = []
+	y += fs * 0.4
+	for r: Dictionary in (ns["log"] as Array).duplicate():
+		if y + fs * 1.9 > d.end.y - fs * 0.3:
+			break
+		past.append({"rect": Rect2(Vector2(d.position.x + fs * 0.6, y), Vector2(d.size.x - fs * 1.2, fs * 1.8)), "row": r})
+		y += fs * 2.0
+	return {"fs": fs, "rows": rows, "past": past, "news": ns}
+
+
+func _draw_news_card(ci: CanvasItem, d: Rect2) -> void:
+	PopFactoryArt.shadow(ci, d, PopTokens.R_BUTTON)
+	PopMachineArt._round_rect(ci, d, PopTokens.R_BUTTON, PopNewsArt.PAPER)
+	var pts := PopMachineArt.round_rect_points(d, PopTokens.R_BUTTON)
+	pts.append(pts[0])
+	ci.draw_polyline(pts, PopNewsArt.MAST, 5.0, true)
+	var L := _news_layout(d)
+	var fs := float(L["fs"])
+	var font := ThemeDB.fallback_font
+	var ns: Dictionary = L["news"]
+	# the masthead: the paper, a red band, the double rule
+	var mast := Rect2(d.position + Vector2(fs * 0.6, fs * 0.5), Vector2(d.size.x - fs * 1.2, fs * 1.3))
+	ci.draw_rect(mast, PopNewsArt.MAST)
+	PopNewsArt.paper(ci, mast.position + Vector2(fs * 1.0, mast.size.y * 0.5), fs * 1.5, true)
+	for i in 5:   # the masthead's lettering, drawn (a newspaper's name, not words to read)
+		var lx := mast.position.x + fs * 2.4 + i * fs * 1.25
+		if lx + fs > mast.end.x - fs * 2.4:
+			break
+		ci.draw_rect(Rect2(Vector2(lx, mast.position.y + mast.size.y * 0.3), Vector2(fs * 0.95, mast.size.y * 0.4)), Color(1, 1, 1, 0.9))
+	ci.draw_line(Vector2(mast.position.x, mast.end.y + fs * 0.25), Vector2(mast.end.x, mast.end.y + fs * 0.25), PopNewsArt.PAPER_EDGE, 2.0)
+	ci.draw_line(Vector2(mast.position.x, mast.end.y + fs * 0.42), Vector2(mast.end.x, mast.end.y + fs * 0.42), PopNewsArt.PAPER_EDGE, 1.0)
+	if bool(ns["scheduler"]):   # U07: a calendar in the masthead's corner (it focuses by itself)
+		var cal := Rect2(Vector2(mast.end.x - fs * 1.5, mast.position.y + fs * 0.2), Vector2(fs * 1.0, fs * 0.9))
+		ci.draw_rect(cal, Color.WHITE)
+		ci.draw_rect(Rect2(cal.position, Vector2(cal.size.x, cal.size.y * 0.3)), PopPalette.GOLD)
+		ci.draw_rect(cal, PopNewsArt.PAPER_EDGE, false, 2.0)
+	var rows: Array = L["rows"]
+	if rows.is_empty():   # a quiet day: a folded grey paper
+		var qc := Vector2(d.get_center().x, d.position.y + fs * 4.6)
+		PopNewsArt.paper(ci, qc, fs * 2.6, false)
+		for i in 3:
+			ci.draw_circle(qc + Vector2(fs * (1.6 + i * 0.5), -fs * (0.9 + i * 0.45)), fs * (0.12 + i * 0.05), Color(PopPalette.INK, 0.3))
+	for fr: Dictionary in rows:
+		var rr: Rect2 = fr["rect"]
+		var r: Dictionary = fr["row"]
+		PopMachineArt._round_rect(ci, rr, fs * 0.6, Color(1, 1, 1, 0.9))
+		var cy := rr.get_center().y
+		PopNewsArt.subject(ci, Vector2(rr.position.x + fs * 1.5, cy - fs * 0.3), fs * 2.2, r)
+		var x := rr.position.x + fs * 3.0
+		x += PopNewsArt.effect(ci, font, Vector2(x, cy - fs * 0.5), fs * 1.15, r) + fs * 0.6
+		_news_result(ci, font, Vector2(rr.position.x + fs * 3.0, cy + fs * 0.95), fs * 0.8, r, false)
+		var tc := Vector2((fr["focus"] as Rect2).position.x - fs * 1.4 if (fr["focus"] as Rect2).size.x > 0.0 else rr.end.x - fs * 1.4, cy - fs * 0.45)
+		PopNewsArt.timer(ci, font, tc, fs * 0.8, int(r["left_ms"]), int(r["ms"]), fs * 0.75)
+		var fb: Rect2 = fr["focus"]
+		if fb.size.x > 0.0:   # put it first: its spoon and an arrow up, gold while on
+			var on := String(ns["focus"]) == String(r["flavor"])
+			var fc := fb.get_center()
+			ci.draw_circle(fc, fb.size.x * 0.5, PopPalette.GOLD if on else Color(1, 1, 1))
+			ci.draw_arc(fc, fb.size.x * 0.5, 0, TAU, 24, PopPalette.INK, 3.0)
+			PopFactoryArt.flavor_popcorn(ci, fc + Vector2(-fb.size.x * 0.08, fb.size.y * 0.08), fb.size.x * 0.34, String(r["flavor"]))
+			var ac := fc + Vector2(fb.size.x * 0.22, -fb.size.y * 0.1)
+			ci.draw_line(ac + Vector2(0, fb.size.y * 0.16), ac + Vector2(0, -fb.size.y * 0.12), PopPalette.INK, 3.5)
+			ci.draw_colored_polygon(PackedVector2Array([ac + Vector2(-fb.size.x * 0.1, -fb.size.y * 0.06), ac + Vector2(fb.size.x * 0.1, -fb.size.y * 0.06), ac + Vector2(0, -fb.size.y * 0.2)]), PopPalette.INK)
+	for pr: Dictionary in L["past"]:
+		var rr: Rect2 = pr["rect"]
+		var r: Dictionary = pr["row"]
+		var cy := rr.get_center().y
+		PopNewsArt.subject(ci, Vector2(rr.position.x + fs * 0.9, cy - fs * 0.2), fs * 1.3, r, true)
+		PopNewsArt.tick(ci, Vector2(rr.position.x + fs * 2.2, cy), fs * 0.6, Color(PopTokens.OK, 0.7))
+		_news_result(ci, font, Vector2(rr.position.x + fs * 2.9, cy), fs * 0.8, r, true)
+		ci.draw_line(Vector2(rr.position.x, rr.end.y + fs * 0.08), Vector2(rr.end.x, rr.end.y + fs * 0.08), Color(PopNewsArt.PAPER_EDGE, 0.15), 1.0)
 
 
 ## A floor's detail: its form now, an arrow, and its next form dimmed with a lock.
@@ -1509,7 +1793,8 @@ func debug_state() -> Dictionary:
 		"cue": _cue if cue_node.visible else "", "bubbles": customers.values().map(func(a: Node2D) -> int: return a.order_size),
 		"cargo_stats": cargo_stats.duplicate(), "cargo_now": cargo.size(), "pool": {"lot": (_pool["lot"] as Array).size(), "bag": (_pool["bag"] as Array).size()},
 		"redraws": redraws.duplicate(), "machine_nodes": _mnodes.size(), "actor_nodes": actor_layer.get_child_count(), "dense": {"kitchen": dense("kitchen"), "packing": dense("packing"), "shop": dense("shop")},
-		"ov_machine": ov_machine, "selected": selected, "sel_machine": sel_machine, "sel_slot": sel_slot}
+		"ov_machine": ov_machine, "selected": selected, "sel_machine": sel_machine, "sel_slot": sel_slot,
+		"news_open": news_open, "ticker": int(_ticker.get("n", -1)), "ticker_end": bool(_ticker.get("end", false)), "news_marks": _news_marks().size()}
 
 
 # -- Step 20: the packing station ---------------------------------------------
@@ -2019,6 +2304,7 @@ func _machine_press(p: Vector2) -> bool:
 		if overview:
 			_clear_machine_selection()
 			selected = -1
+			news_open = false
 		detail_layer.queue_redraw()
 		return true
 	if overview:

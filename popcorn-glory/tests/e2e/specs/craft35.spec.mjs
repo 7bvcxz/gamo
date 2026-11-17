@@ -3,8 +3,8 @@
 // caramel, then the coater set to AUTO on its card). No spoon is offered until the hand has
 // popped twenty times (real holds on the kettle). Then, while a batch is on the coater's drum, a
 // real hold on its spoon, let go in the flavor's gold, finishes it by hand: the model counts the
-// grade, the still a moment later shows the gold flourish, and the hand-finished bag sells at
-// quality 100 to the customer who asked for that flavor. The machine's own batches come out
+// grade, the still a moment later shows the gold flourish, and the bags carrying the hand's
+// portions sell above the machine's best of that flavor (Step 37: a large bag may mix them). The machine's own batches come out
 // below 100 with their losses counted; a mixed bag (half caramel, half cheese) is asked for and
 // sold; the coater's card shows its payback; every portion made is somewhere; a reload keeps AUTO.
 import { test, expect } from '../lib/pop.mjs';
@@ -154,7 +154,14 @@ test('the spoon finishes a batch by hand; the machine, the mix and the payback s
   testInfo.annotations.push({ type: 'flourish', description: JSON.stringify({ goldPx, goldPre, turned, area }) });
   expect(turned, 'the finish turns pixels round the coater gold in a still (against the same place before)').toBeGreaterThan(150);
 
-  // Run until the hand's portions, a mix and the machine's batches are sold.
+  // Run until the hand's portions, a mix and the machine's batches are sold. Every sale row is
+  // kept as it passes (the state shows the last 20): a bag may carry the hand's portions beside
+  // the machine's (Step 37 found it: large bags from Step 36's cast), so the hand's work is judged
+  // by the quality of the bags it is in, against the machine's own bags of the same flavor.
+  const seen = new Map();
+  const note = (rows) => { for (const e of rows) seen.set(e.pack, e); };
+  const handRows = () => [...seen.values()].filter((e) => (e.hand || 0) > 0);
+  const machineRows = () => [...seen.values()].filter((e) => e.recipe === fl && !(e.hand > 0));
   for (let i = 0; i < 90; i++) {
     s = await pop.state();
     if (!s.run.heating && Object.keys(s.run.glass).length === 0 && s.run.cooldown_left <= 0 && i % 2 === 0) {
@@ -162,16 +169,20 @@ test('the spoon finishes a batch by hand; the machine, the mix and the payback s
     }
     const r = await pop.call('dev_advance', 5000);
     const st = r.state.run.stats;
-    if ((st.hand_perfect_bags_sold || 0) >= 1 && (st.mix_sold || 0) >= 1 && r.state.run.ledger.some((e) => e.recipe !== 'plain' && e.recipe !== 'duo' && e.quality < 100) && i >= 10) break;
+    note(r.state.run.ledger);
+    if ((st.hand_sold_portions || 0) >= (st.hand_portions || 1) && handRows().length > 0 && (st.mix_sold || 0) >= 1 && machineRows().length > 0 && i >= 10) break;
   }
   s = await pop.state();
   const st = s.run.stats;
   const coaterRow = s.run.coaters.find((c) => c.id === coat.id);
   testInfo.annotations.push({ type: 'craft trade', description: JSON.stringify({ hand_sold_portions: st.hand_sold_portions, mix_sold: st.mix_sold, lost: st.lost, lost_portions: st.lost_portions, flavor_sold: st.flavor_sold, coater: coaterRow, minutes: s.run.flow_ms / 60000 }) });
   expect(st.hand_sold_portions || 0, "the hand's portions were sold").toBeGreaterThanOrEqual(2);
-  // (the state's ledger is its last 20 rows: the sale may have scrolled out -- the model counts it)
-  expect(st.hand_perfect_bags_sold || 0, 'a hand-finished flavor bag sold at quality 100').toBeGreaterThanOrEqual(1);
-  expect(s.run.ledger.some((e) => e.recipe !== 'plain' && e.recipe !== 'duo' && e.quality < 100), "the machine's own flavor bags sell below 100").toBe(true);
+  const handBest = Math.max(...handRows().map((e) => e.quality));
+  const machineBest = Math.max(...machineRows().map((e) => e.quality));
+  testInfo.annotations.push({ type: 'hand bags', description: JSON.stringify({ hand_rows: handRows().map((e) => [e.recipe, e.size, e.hand, e.quality]), machine_best: machineBest, all_hand_q100: st.hand_perfect_bags_sold || 0 }) });
+  expect(handRows().length, "bags with the hand's portions were sold").toBeGreaterThan(0);
+  expect(machineBest, "the machine's own flavor bags sell below 100").toBeLessThan(100);
+  expect(handBest, "a bag with the hand's portions sells above the machine's best of that flavor").toBeGreaterThan(machineBest);
   expect(st.mix_sold || 0, 'a mixed bag was asked for and sold').toBeGreaterThanOrEqual(1);
   for (const e of s.run.ledger) expect(e.recipe, 'every sale is what was ordered').toBe(e.ordered_recipe);
   expect(st.wrong_sku || 0).toBe(0);

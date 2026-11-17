@@ -17,7 +17,8 @@
   "multi_queue",
   "four_lanes",
   "parallel_lines",
-  "flavors"
+  "flavors",
+  "news"
  ],
  "machines": [
   {
@@ -1963,9 +1964,9 @@
      "cost": 1000
     }
    ],
-   "marginal": "none until news and flavors (Steps 34, 37)",
-   "runtime": null,
-   "step": 32
+   "marginal": "while a news event about a flavor runs, puts that flavor first by itself (AUTO coaters coat it first and keep a batch ahead -- the news card's focus, without a tap); pays its upkeep only while news runs",
+   "runtime": "U07",
+   "step": 37
   },
   {
    "id": "U08",

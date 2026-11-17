@@ -66,6 +66,9 @@ func query(name: String, arg: Variant) -> Variant:
 			# Setup for a test of a later moment (the stand's machines): money, not play.
 			_app.call("dev_money", int(arg))
 			return {"ok": true}
+		"dev_news":
+			# Step 37: a named event now (the schedule's draw is tested headless).
+			return _app.call("dev_news", String(arg))
 		"dev_level":
 			# A picture of a later machine for render checks -- not a play
 			# (the play tests never call it).

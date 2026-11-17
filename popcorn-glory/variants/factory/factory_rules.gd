@@ -52,7 +52,12 @@ var promo := {}            ## Step 35: flavor -> flow ms its surplus began (a ke
 var popularity := 50.0     ## Step 36: the shop's reputation (0-100; stars on the board, foot traffic)
 var cast_rng_state := 0    ## Step 36: who comes in (its own generator: orders and arrivals keep theirs)
 var _crng := RandomNumberGenerator.new()
-var demand_mods := {}      ## Step 36: event modifiers ({"arrivals": x, "flavors": {f: x}}) -- Step 37's news sets them
+var demand_mods := {}      ## Step 36: the modifiers in force ({"arrivals": x, "flavors": {f: x}, "large": x, "ingredients": {f: x}}) -- Step 37: base_mods x the news's events
+var base_mods := {}        ## Step 37: modifiers set from outside (set_demand_mods: tests, tools); the news multiplies on top
+var news := {}             ## Step 37: {"next_ms", "seq", "active": [{n, id, start, end, asked, sold, saved}], "log": [...], "unread": [n...]}
+var news_focus := ""       ## Step 37: the flavor put first while its event runs (the card's button, or U07)
+var news_rng_state := 0    ## Step 37: the news's own generator (orders, arrivals and the cast keep theirs)
+var _nrng := RandomNumberGenerator.new()
 var order_log: Array = []  ## Step 36: the last orders' recipes (the board's favorite)
 ## Step 33: each floor's lines (1 = the first; data: factory.lines adds places per line).
 ## Two or more packing lines make the raw bin parallel lines: every lot that lands is
@@ -104,6 +109,9 @@ func _init(p_economy: PopEconomy = null, seed_value: int = 20261116) -> void:
 	pack_rng_state = int(_prng.state)
 	_crng.seed = seed_value + 32452843
 	cast_rng_state = int(_crng.state)
+	_nrng.seed = seed_value + 49979687
+	news_rng_state = int(_nrng.state)
+	news = _news_fresh()
 	popularity = float(_t().get("reputation", {}).get("start", 50.0))
 	# The first customer is already waiting when the shop opens (design/FACTORY_FLOW.md 5).
 	_arrive()
@@ -353,6 +361,10 @@ func _act(kind: String, cmd: Dictionary) -> Dictionary:
 			return _finish_press(int(cmd.get("id", -1)))
 		"finish_release":
 			return _finish_release()
+		"news_read":   # Step 37: the paper opened -- what is running is read
+			return _news_read()
+		"news_focus":   # Step 37: put an event's flavor first (again: let go)
+			return _news_set_focus(String(cmd.get("flavor", "")))
 	if kind == "press" and not finishing.is_empty():
 		return {"ok": false, "reason": "err.hand_busy"}   # one hand: the spoon or the kettle
 	if kind == "press" and not glass.is_empty():
@@ -415,6 +427,7 @@ func _tick(ms: int) -> void:
 
 func _flow_step(dt: int) -> void:
 	var t := _t()
+	_news_step()   # Step 37: events start and end at their exact flow time
 	# 1. The glass pours into the lift what the bin will have room for: the whole
 	# lot, or (Step 24 fix) a part of it when the lot is bigger than the room --
 	# a lot bigger than the whole bin (kettle level 7+, or a burst at 6) used to
@@ -510,7 +523,10 @@ func _flow_step(dt: int) -> void:
 		c["patience_ms"] = int(c["patience_ms"]) - dt
 		if int(c["patience_ms"]) <= 0:
 			stats["abandoned"] = int(stats["abandoned"]) + 1
-			_reputation(float((_t().get("reputation", {}) as Dictionary).get("left", -3.0)), "left")
+			if _news_spares(c["order"]):   # Step 37: they came for the news -- no blame on the shop
+				stats["news_spared"] = int(stats.get("news_spared", 0)) + 1
+			else:
+				_reputation(float((_t().get("reputation", {}) as Dictionary).get("left", -3.0)), "left")
 			_emit("customer_left", {"customer": c["id"], "why": "waited", "who": String(c.get("who", "classic"))})
 		else:
 			stay.append(c)
@@ -710,6 +726,10 @@ func _utility_step(m: Dictionary, dt: int) -> void:
 			busy = bin_portions() > int(_t()["bin_portions"]) or shelf.size() > int(_t()["shelf_packs"])
 		"U05":
 			busy = _kitchen_busy() or not glass.is_empty()
+		"U07":   # Step 37: the demand scheduler works (and pays) while an event runs; it focuses it
+			busy = not (news.get("active", []) as Array).is_empty()
+			if busy and String(m["state"]) == "run" and not _news_flavors().is_empty() and not _news_flavors().has(news_focus):
+				news_focus = String(_news_flavors()[0])
 	if not busy:
 		m["state"] = "idle"
 		return
@@ -981,7 +1001,7 @@ func _draw_order(who: String = "") -> Dictionary:
 	for z: Dictionary in sizes_open():
 		var share := float(z.get("order_share", 0.0))
 		if z.has("order_share") and int(z["size"]) > pack_size():
-			share = minf(0.95, share * float(p.get("large", 1.0)))   # Step 36: who buys big
+			share = minf(0.95, share * float(p.get("large", 1.0)) * float(demand_mods.get("large", 1.0)))   # Step 36: who buys big (Step 37: big bag day)
 		if z.has("order_share") and _orng.randf() < share:
 			size = int(z["size"])
 	# Step 29: while premium popcorn is on hand (M11 sorts it), some customers ask for it --
@@ -1157,6 +1177,10 @@ func _auto_pick(m: Dictionary) -> String:
 		for f: String in order_flavors(c["order"]):
 			if open.has(f) and _flavor_wanted(f):
 				return f
+	# Step 37: then a focused event flavor, a batch ahead of its crowd (after the customers
+	# already waiting -- putting it before them cost the sim's shop more than it brought).
+	if news_focus != "" and open.has(news_focus) and _flavor_wanted(news_focus):
+		return news_focus
 	for f: String in open:
 		if _flavor_wanted(f):
 			return f
@@ -1239,6 +1263,8 @@ func flavor_want(f: String) -> int:
 	# ... and a slow flavor's buffer coated and waiting in the bin: a large order is packed at
 	# once instead of holding the queue for a whole batch (data: buffer; the Step 34 sim).
 	want += int(flavor(f).get("buffer", 0))
+	if f == news_focus:   # Step 37: the event's crowd is coming -- a batch (or more) ready ahead
+		want += int(news_rules().get("focus_ahead", 1)) * int(flavor(f).get("in", 4))
 	for c: Dictionary in queue:
 		var o: Dictionary = c["order"]
 		if String(o["recipe"]) == f:
@@ -1266,9 +1292,10 @@ func _plain_reserved() -> int:
 
 
 ## A batch's coins: the recipe's ingredient coins for `in` portions, scaled to the batch.
-func ingredient_cost(f: String, batch: int) -> int:
+func ingredient_cost(f: String, batch: int, full: bool = false) -> int:
 	var r := flavor(f)
-	return int(ceil(float(r.get("ingredient_coins", 0)) * float(batch) / float(maxi(1, int(r.get("in", 4))))))
+	var k := 1.0 if full else float((demand_mods.get("ingredients", {}) as Dictionary).get(f, 1.0))   # Step 37: a sale on it
+	return int(ceil(float(r.get("ingredient_coins", 0)) * float(batch) / float(maxi(1, int(r.get("in", 4)))) * k - 0.000001))
 
 
 func coater_batch(m: Dictionary) -> int:
@@ -1347,6 +1374,7 @@ func _coater_step(m: Dictionary, dt: int) -> void:
 			stats["ingredient_short_ms"] = int(stats.get("ingredient_short_ms", 0)) + dt
 			return
 		money -= cost
+		_news_saved(f, ingredient_cost(f, batch, true) - cost)
 		for i in cost:
 			_note("ingredients")
 		stats["ingredient_coins"] = int(stats.get("ingredient_coins", 0)) + cost
@@ -2313,7 +2341,7 @@ func _machines_step(dt: int) -> void:
 				_kiosk_step(m, dt)
 			"S01", "S02", "S03", "S04", "S06", "S08":
 				_shop_device_step(m, dt)
-			"U01", "U02", "U03", "U04", "U05":
+			"U01", "U02", "U03", "U04", "U05", "U07":
 				_utility_step(m, dt)
 			"U08":
 				_balancer_step(m, dt)
@@ -2805,6 +2833,12 @@ func reseed(seed_value: int) -> void:
 	pack_rng_state = int(_prng.state)
 	_crng.seed = seed_value + 32452843
 	cast_rng_state = int(_crng.state)
+	_nrng.seed = seed_value + 49979687
+	news_rng_state = int(_nrng.state)
+	news = _news_fresh()
+	news_focus = ""
+	base_mods = {}
+	demand_mods = {}
 	queue.clear()
 	arrival_log.clear()
 	stats["arrived"] = 0
@@ -2837,6 +2871,7 @@ func _sell(sv: Dictionary) -> void:
 		if not km.is_empty():
 			km["done"] = int(km.get("done", 0)) + 1
 	var coins := pack_price(String(p["recipe"]), int(p["size"]), int(p["quality"]))
+	_news_count({"recipe": p["recipe"], "size": p["size"]}, "sold")   # Step 37
 	if first_sale_ms < 0:
 		first_sale_ms = flow_ms
 	stats["sold_size_%d" % int(p["size"])] = int(stats.get("sold_size_%d" % int(p["size"]), 0)) + 1   # Step 30: cups, bags
@@ -2882,6 +2917,8 @@ func _sell(sv: Dictionary) -> void:
 		stats["happy_sales"] = int(stats.get("happy_sales", 0)) + 1
 		_reputation(float(rp.get("happy", 1.0)), "happy")
 	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "ordered": c["order"]["size"], "ordered_recipe": c["order"]["recipe"], "quality": p["quality"], "coins": coins})
+	if p.has("hand"):   # Step 37: the hand's portions in this bag (a bag may mix them with the machine's)
+		ledger[ledger.size() - 1]["hand"] = int(p["hand"])
 	if ledger.size() > 500:
 		ledger.pop_front()
 	stats["sold"] = int(stats["sold"]) + 1
@@ -2979,8 +3016,253 @@ func customers_per_min() -> float:
 	return 60000.0 / float(maxi(1, mean_wait_ms(sign_tier))) * arrival_factor()
 
 
+# -- Step 37: the news --------------------------------------------------------------
+## Timed market events from a seeded schedule (data: factory.news). Each changes one real
+## thing -- what customers ask for, how many come, an ingredient's price -- never the money or
+## the goods: demand nobody serves earns nothing. demand_mods is recomputed from base_mods and
+## the running events on every start and end, so an event is applied exactly once.
+
+func news_rules() -> Dictionary:
+	return _t().get("news", {})
+
+
+func news_event(id: String) -> Dictionary:
+	var e: Variant = (news_rules().get("events", {}) as Dictionary).get(id)
+	return e if typeof(e) == TYPE_DICTIONARY else {}
+
+
+func news_ids() -> Array:
+	return news_rules().get("order", [])
+
+
+func _news_fresh() -> Dictionary:
+	return {"next_ms": -1, "seq": 0, "active": [], "log": [], "unread": []}
+
+
+## The channel an event changes ("flavor", "size", "arrivals", "cost").
+func news_channel(id: String) -> String:
+	return String(news_event(id).get("channel", ""))
+
+
+## Can the shop answer this event now? Never a flavor it cannot offer (not yet open, no
+## coater, no stock), never big bags before a larger bag is open.
+func news_eligible(id: String) -> bool:
+	var e := news_event(id)
+	if e.is_empty() or not station_open("sign"):
+		return false
+	match String(e.get("channel", "")):
+		"flavor", "cost":
+			return offered_flavors().has(String(e.get("flavor", "")))
+		"size":
+			return sizes_open().any(func(z: Dictionary) -> bool: return int(z["size"]) > pack_size())
+		"arrivals":
+			return true
+	return false
+
+
+func _nrand(range_ms: Array) -> int:
+	_nrng.state = news_rng_state
+	var v := _nrng.randi_range(int(range_ms[0]), int(range_ms[1]))
+	news_rng_state = int(_nrng.state)
+	return v
+
+
+## Every flow step: the schedule starts when the sign first opens; events end at their end
+## time; one starts at each scheduled time (start to start).
+func _news_step() -> void:
+	if news_rules().is_empty() or not station_open("sign"):
+		return
+	var t := flow_ms
+	if int(news["next_ms"]) < 0:
+		news["next_ms"] = t + _nrand(news_rules().get("first_ms", [180000, 300000]))
+		return
+	var ended := false
+	for a: Dictionary in (news["active"] as Array).duplicate():
+		if t >= int(a["end"]):
+			_news_end(a)
+			ended = true
+	if ended:
+		_news_apply()
+	if t >= int(news["next_ms"]):
+		news["next_ms"] = int(news["next_ms"]) + _nrand(news_rules().get("gap_ms", [100000, 300000]))
+		_news_start("")
+
+
+## Starts an event: `id`, or one drawn (by weight) among those the shop can answer and
+## whose channel is free -- not the one that ran last, when there is another.
+func _news_start(id: String) -> Dictionary:
+	var busy := {}
+	for a: Dictionary in news["active"]:
+		busy[news_channel(String(a["id"]))] = true
+	var pick := id
+	if pick == "":
+		var last := String((news["log"] as Array).back()["id"]) if not (news["log"] as Array).is_empty() else ""
+		var cands: Array = news_ids().filter(func(x: String) -> bool: return news_eligible(x) and not busy.has(news_channel(x)))
+		if cands.size() > 1:
+			cands = cands.filter(func(x: String) -> bool: return x != last)
+		if cands.is_empty():
+			stats["news_skipped"] = int(stats.get("news_skipped", 0)) + 1
+			return {"ok": false, "reason": "err.no_news"}
+		var total := 0.0
+		for x: String in cands:
+			total += float(news_event(x).get("weight", 1.0))
+		_nrng.state = news_rng_state
+		var u := _nrng.randf() * total
+		news_rng_state = int(_nrng.state)
+		pick = String(cands.back())
+		for x: String in cands:
+			u -= float(news_event(x).get("weight", 1.0))
+			if u < 0.0:
+				pick = x
+				break
+	elif not news_eligible(pick) or busy.has(news_channel(pick)):
+		return {"ok": false, "reason": "err.no_news"}
+	news["seq"] = int(news["seq"]) + 1
+	var a := {"n": news["seq"], "id": pick, "start": flow_ms, "end": flow_ms + int(news_event(pick).get("ms", 120000)), "asked": 0, "sold": 0, "saved": 0}
+	(news["active"] as Array).append(a)
+	(news["unread"] as Array).append(news["seq"])
+	stats["news_started"] = int(stats.get("news_started", 0)) + 1
+	_news_apply()
+	_emit("news_start", {"n": a["n"], "id": pick})
+	return {"ok": true, "n": a["n"], "id": pick}
+
+
+## For tests and the dev hook only: an event now (still only one the shop can answer).
+func news_force(id: String) -> Dictionary:
+	return _news_start(id)
+
+
+func _news_end(a: Dictionary) -> void:
+	news["active"] = (news["active"] as Array).filter(func(x: Dictionary) -> bool: return int(x["n"]) != int(a["n"]))
+	# An unread event that is over is no longer news: the badge does not count it (no stale call).
+	news["unread"] = (news["unread"] as Array).filter(func(n: Variant) -> bool: return int(n) != int(a["n"]))
+	var row := a.duplicate()
+	row["end"] = mini(int(a["end"]), flow_ms)
+	(news["log"] as Array).append(row)
+	while (news["log"] as Array).size() > 8:
+		(news["log"] as Array).pop_front()
+	stats["news_ended"] = int(stats.get("news_ended", 0)) + 1
+	var subj := String(news_event(String(a["id"])).get("flavor", ""))
+	if subj != "" and news_focus == subj and not _news_flavors().has(subj):
+		news_focus = ""   # its crowd has gone home
+	_emit("news_end", {"n": a["n"], "id": a["id"], "asked": a["asked"], "sold": a["sold"]})
+
+
+## demand_mods = base_mods x every running event (recomputed, never accumulated).
+func _news_apply() -> void:
+	var m := base_mods.duplicate(true)
+	for a: Dictionary in news.get("active", []):
+		var e := news_event(String(a["id"]))
+		match String(e.get("channel", "")):
+			"flavor":
+				var fl: Dictionary = m.get("flavors", {})
+				fl[String(e["flavor"])] = float(fl.get(String(e["flavor"]), 1.0)) * float(e.get("demand", 1.0))
+				m["flavors"] = fl
+			"cost":
+				var ing: Dictionary = m.get("ingredients", {})
+				ing[String(e["flavor"])] = float(ing.get(String(e["flavor"]), 1.0)) * float(e.get("ingredients", 1.0))
+				m["ingredients"] = ing
+			"size":
+				m["large"] = float(m.get("large", 1.0)) * float(e.get("large", 1.0))
+			"arrivals":
+				m["arrivals"] = float(m.get("arrivals", 1.0)) * float(e.get("arrivals", 1.0))
+	demand_mods = m
+	if _device_on("U07"):   # Step 37: the demand scheduler puts the news's flavor first by itself
+		var fl := _news_flavors()
+		if not fl.is_empty() and not fl.has(news_focus):
+			news_focus = String(fl[0])
+
+
+## The flavors running events are about (demand or a sale), in their order.
+func _news_flavors() -> Array:
+	var out: Array = []
+	for a: Dictionary in news.get("active", []):
+		var f := String(news_event(String(a["id"])).get("flavor", ""))
+		if f != "" and not out.has(f):
+			out.append(f)
+	return out
+
+
+## Does this order answer a running event? (what it brought: asked; what it sold: sold)
+func _news_hits(e: Dictionary, o: Dictionary) -> bool:
+	match String(e.get("channel", "")):
+		"flavor", "cost":
+			return order_flavors(o).has(String(e.get("flavor", "")))
+		"size":
+			return int(o["size"]) > pack_size()
+		"arrivals":
+			return true
+	return false
+
+
+func _news_count(o: Dictionary, key: String) -> void:
+	for a: Dictionary in news.get("active", []):
+		if _news_hits(news_event(String(a["id"])), o):
+			a[key] = int(a[key]) + 1
+
+
+func _news_saved(f: String, coins: int) -> void:
+	if coins <= 0:
+		return
+	stats["news_saved_coins"] = int(stats.get("news_saved_coins", 0)) + coins
+	for a: Dictionary in news.get("active", []):
+		var e := news_event(String(a["id"]))
+		if String(e.get("channel", "")) == "cost" and String(e.get("flavor", "")) == f:
+			a["saved"] = int(a["saved"]) + coins
+
+
+## A customer who gives up waiting for a running flavor event's flavor costs no popularity.
+func _news_spares(o: Dictionary) -> bool:
+	if not bool(news_rules().get("spare_left", true)):
+		return false
+	for a: Dictionary in news.get("active", []):
+		var e := news_event(String(a["id"]))
+		if String(e.get("channel", "")) == "flavor" and order_flavors(o).has(String(e.get("flavor", ""))):
+			return true
+	return false
+
+
+func _news_read() -> Dictionary:
+	var n := (news["unread"] as Array).size()
+	news["unread"] = []
+	return {"ok": true, "read": n}
+
+
+## The card's button: put a running event's flavor first (the same flavor again lets go).
+func _news_set_focus(f: String) -> Dictionary:
+	if f == "" or f == news_focus:
+		news_focus = ""
+		return {"ok": true, "focus": ""}
+	if not _news_flavors().has(f):
+		return {"ok": false, "reason": "err.no_news"}
+	news_focus = f
+	return {"ok": true, "focus": f}
+
+
+func news_state() -> Dictionary:
+	var act: Array = []
+	for a: Dictionary in news.get("active", []):
+		act.append(_news_row(a, true))
+	var past: Array = []
+	for a: Dictionary in (news.get("log", []) as Array).slice(-3):
+		past.append(_news_row(a, false))
+	return {"active": act, "log": past, "unread": (news.get("unread", []) as Array).size(), "focus": news_focus,
+		"next_in_ms": maxi(0, int(news.get("next_ms", -1)) - flow_ms) if int(news.get("next_ms", -1)) >= 0 else -1,
+		"scheduler": _device_on("U07")}
+
+
+func _news_row(a: Dictionary, running: bool) -> Dictionary:
+	var e := news_event(String(a["id"]))
+	var r := {"n": a["n"], "id": a["id"], "name": String(e.get("name", a["id"])), "channel": String(e.get("channel", "")), "flavor": String(e.get("flavor", "")),
+		"mult": float(e.get({"flavor": "demand", "size": "large", "arrivals": "arrivals", "cost": "ingredients"}.get(String(e.get("channel", "")), "demand"), 1.0)),
+		"ms": int(a["end"]) - int(a["start"]), "asked": a["asked"], "sold": a["sold"], "saved": a.get("saved", 0)}
+	r["left_ms"] = maxi(0, int(a["end"]) - flow_ms) if running else 0
+	return r
+
+
 func set_demand_mods(mods: Dictionary) -> void:
-	demand_mods = mods.duplicate(true)
+	base_mods = mods.duplicate(true)
+	_news_apply()
 
 
 func _arrive() -> void:
@@ -3015,6 +3297,10 @@ func _arrive() -> void:
 	var by: Dictionary = stats.get("arrived_who", {})
 	by[who] = int(by.get(who, 0)) + 1
 	stats["arrived_who"] = by
+	_news_count(order, "asked")   # Step 37: what each running event brought
+	var ak: Dictionary = stats.get("asked_recipe", {})
+	ak[String(order["recipe"])] = int(ak.get(String(order["recipe"]), 0)) + 1
+	stats["asked_recipe"] = ak
 	order_log.append(String(order["recipe"]))
 	if order_log.size() > 30:
 		order_log.pop_front()
@@ -3049,14 +3335,15 @@ const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo"
 	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
 const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
 ## Step 23 fields: optional (a 0.22 save has none).
-const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines", "next_machine_id", "auto_rng_state", "bn_ring", "promo", "popularity", "popularity_c", "cast_rng_state", "demand_mods", "order_log"]
+const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines", "next_machine_id", "auto_rng_state", "bn_ring", "promo", "popularity", "popularity_c", "cast_rng_state", "demand_mods", "order_log", "news", "news_focus", "news_rng_state"]
 
 
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
 		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state), "paying": paying.duplicate(true), "floor_lines": floor_lines.duplicate(), "promo": promo.duplicate(true),
-		"popularity": popularity, "popularity_c": roundi(popularity * 100.0), "cast_rng_state": str(cast_rng_state), "demand_mods": demand_mods.duplicate(true), "order_log": order_log.duplicate()}
+		"popularity": popularity, "popularity_c": roundi(popularity * 100.0), "cast_rng_state": str(cast_rng_state), "demand_mods": base_mods.duplicate(true), "order_log": order_log.duplicate(),
+		"news": news.duplicate(true), "news_focus": news_focus, "news_rng_state": str(news_rng_state)}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -3162,7 +3449,19 @@ func _apply_save(d: Dictionary) -> void:
 		popularity = float(clampi(int(d["popularity_c"]), 0, 10000)) / 100.0
 	if String(d.get("cast_rng_state", "")).is_valid_int():
 		cast_rng_state = String(d["cast_rng_state"]).to_int()
-	demand_mods = (d.get("demand_mods", {}) as Dictionary).duplicate(true) if typeof(d.get("demand_mods", {})) == TYPE_DICTIONARY else {}
+	base_mods = (d.get("demand_mods", {}) as Dictionary).duplicate(true) if typeof(d.get("demand_mods", {})) == TYPE_DICTIONARY else {}
+	# Step 37 (optional: a 0.36 save has no news -- its schedule starts from here).
+	news = _news_fresh()
+	if typeof(d.get("news")) == TYPE_DICTIONARY:
+		var dn: Dictionary = d["news"]
+		for k: String in news.keys():
+			if dn.has(k) and typeof(dn[k]) == typeof(news[k]):
+				news[k] = dn[k].duplicate(true) if typeof(dn[k]) in [TYPE_ARRAY, TYPE_DICTIONARY] else dn[k]
+		news["active"] = (news["active"] as Array).filter(func(a: Variant) -> bool: return typeof(a) == TYPE_DICTIONARY and not news_event(String(a.get("id", ""))).is_empty())
+	news_focus = String(d.get("news_focus", "")) if typeof(d.get("news_focus", "")) == TYPE_STRING else ""
+	if String(d.get("news_rng_state", "")).is_valid_int():
+		news_rng_state = String(d["news_rng_state"]).to_int()
+	_news_apply()
 	order_log = (d.get("order_log", []) as Array).duplicate() if typeof(d.get("order_log", [])) == TYPE_ARRAY else []
 	bn_ring = (d.get("bn_ring", []) as Array).duplicate() if typeof(d.get("bn_ring", [])) == TYPE_ARRAY else []
 	if String(d.get("auto_rng_state", "")).is_valid_int():
@@ -3266,6 +3565,8 @@ func state() -> Dictionary:
 	s["customers_per_min"] = snappedf(customers_per_min(), 0.1)
 	s["favorite"] = favorite()
 	s["queue_who"] = queue.map(func(c: Dictionary) -> String: return String(c.get("who", "classic")))
+	s["news"] = news_state()   # Step 37
+	s["demand_mods"] = demand_mods.duplicate(true)
 	for cs: Dictionary in s["coaters"]:
 		var cm := machine(int(cs["id"]))
 		cs["mode"] = String(cm.get("flavor", ""))
