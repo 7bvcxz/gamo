@@ -1,0 +1,13 @@
+── Popcorn: import
+── Popcorn: editor load
+── Popcorn: unit + integration
+  1 machines: ten model minutes in 220 ms, sold 432, upkeep 2, revenue 5377
+  5 machines: ten model minutes in 811 ms, sold 416, upkeep 134, revenue 4979
+  10 machines: ten model minutes in 1545 ms, sold 403, upkeep 253, revenue 4611
+  20 machines: ten model minutes in 3872 ms, sold 392, upkeep 433, revenue 4344
+  44 machines: ten model minutes in 10394 ms, sold 391, upkeep 381, revenue 4051
+248 passed, 0 failed, 11895 checks, 18 files, 140.2s
+── test.sh: OK
+── Popcorn: render (gold on top of a burst)
+gold on the arc under burst pieces: without the mode 0.00, with the crescendo mode 1.00
+── check.sh (Popcorn): OK
