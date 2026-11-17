@@ -1,0 +1,4 @@
+{"_doc": "Step 29, desktop (1280x800, Playwright Chromium, SwiftShader software WebGL) on the local 0.29.0 export, a kitchen of ten machines (2 kettles, distributor, rotary popper, hopper, sorter, sensor, vents, recycler, dispatcher) with the bagless station, customers, a hand popping every ~1.5 s.",
+ "minute_of_play": {"fps": [26.9, 25.0, 24.3, 24.4, 24.6, 24.6], "fps_median": 24.6, "draw_calls": [750, 956, 950, 909, 871, 889], "objects": [1083, 1290, 1303, 1249, 1226, 1227], "kept_mb_start": 13.6, "kept_mb_after_60s": 19.73, "load_avg": [11.84, 8.21]},
+ "four_minutes_kept_memory_mb_each_minute": [13.6, 19.78, 28.45, 36.32, 36.19], "nodes_each_minute": [64, 73, 73, 74, 72],
+ "reading": "kept memory (JS heap + backing stores incl. the wasm heap, after GC) rises for three minutes while the ledger and logs fill to their caps, then stays (36.32 -> 36.19 MB); the node count does not grow."}
