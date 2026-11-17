@@ -33,6 +33,9 @@ var burst := false
 ## Step 22: ?seed=N -- a measured session from that seed: a fresh run that is
 ## neither loaded from nor written to the save.
 var seed := -1
+## Step 35: ?scene=NAME -- a measured session that starts at a prepared point of the game
+## (built through the rules' own commands; neither loaded from nor written to the save).
+var scene := ""
 
 var ui: Control
 var chooser: PopChooser
@@ -87,6 +90,7 @@ func _ready() -> void:
 	frame.trial = bool(route["trial"])
 	burst = bool(route["burst"])
 	seed = int(route.get("seed", -1))
+	scene = String(route.get("scene", ""))
 	audio.set_muted(not bool(route["sound"]))
 	frame.set_sound(audio.level_name())
 	if not economy.errors.is_empty():
@@ -199,7 +203,7 @@ func buy_auto() -> void:
 func on_command(kind: String, cmd: Dictionary) -> void:
 	if rules == null:
 		return
-	if kind == "release" or kind == "shake":
+	if kind == "release" or kind == "shake" or kind == "finish_release":
 		# Letting go is part of B's action, not a second input (and so is the
 		# stand's shaking while held): the input count stays one per press.
 		session.record(clock.now_ms, kind, {})
@@ -282,7 +286,7 @@ var _saved_at_ms := 0
 ## A 3-minute trial (?trial=1, the owner's scorecard) neither reads nor writes
 ## the save: a score is taken from a fresh start, and the real run is untouched.
 func _saves() -> bool:
-	return screen == "play" and rules != null and not frame.trial and seed < 0 and bool(PopRegistry.find(exp_id).get("save", false)) and rules.has_method("to_save")
+	return screen == "play" and rules != null and not frame.trial and seed < 0 and scene == "" and bool(PopRegistry.find(exp_id).get("save", false)) and rules.has_method("to_save")
 
 
 func _save_name(id: String) -> String:
@@ -363,6 +367,8 @@ func _start(id: String) -> void:
 			rules.reseed(seed)
 		elif bool(entry.get("save", false)) and not frame.trial:
 			_load_saved(id)
+		if scene != "" and rules.has_method("start_scene"):
+			rules.start_scene(scene)
 	# Step 14: the stand's crescendo is a mode of the address (not of the save);
 	# the factory has it always (Step 19), so only entries marked burst_route follow ?burst=1.
 	if bool(entry.get("burst_route", false)) and "burst_mode" in rules:

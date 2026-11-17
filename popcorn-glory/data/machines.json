@@ -1047,7 +1047,8 @@
     "flavors": [
      "cheese",
      "spicy"
-    ]
+    ],
+    "hand_finish": true
    },
    "inputs": [
     "plain portions of its line",
@@ -1056,7 +1057,7 @@
    "outputs": [
     "Cheese Crunch or Spicy Dust portions on its line"
    ],
-   "queue": "a batch of 4/6/8 portions at a time; coats only what orders and the shelf's flavor stock want",
+   "queue": "a batch of 4/6/8 portions at a time, at 85/91/96% of the popcorn's quality (the hand's finish: 90-100, nothing lost); coats only what orders and the shelf's flavor stock want",
    "prereq": {
     "packer": 2
    },
@@ -1070,22 +1071,28 @@
     {
      "cost": 0,
      "batch": 4,
-     "ms_factor": 1.0
+     "ms_factor": 1.0,
+     "auto_quality": 0.85,
+     "loss_factor": 1.0
     },
     {
      "cost": 400,
      "batch": 6,
-     "ms_factor": 0.85
+     "ms_factor": 0.85,
+     "auto_quality": 0.91,
+     "loss_factor": 0.6
     },
     {
      "cost": 1000,
      "batch": 8,
-     "ms_factor": 0.7
+     "ms_factor": 0.7,
+     "auto_quality": 0.96,
+     "loss_factor": 0.3
     }
    ],
    "marginal": "a flavor's customers (8-22% of new ones) buy a bag worth 13-16 instead of leaving",
    "runtime": "P05",
-   "step": 34
+   "step": 35
   },
   {
    "id": "P06",
@@ -1105,7 +1112,8 @@
     "flavors": [
      "caramel",
      "cocoa"
-    ]
+    ],
+    "hand_finish": true
    },
    "inputs": [
     "plain portions of its line",
@@ -1114,7 +1122,7 @@
    "outputs": [
     "Golden Caramel or Cocoa Swirl portions on its line"
    ],
-   "queue": "a slow batch of 4/6/8 portions; coats only what orders and the shelf's flavor stock want",
+   "queue": "a slow batch of 4/6/8 portions at 85/91/96% of the popcorn's quality, losing 12/7/4% of caramel and 8/5/2% of cocoa to the drum (the hand's finish loses none); coats only what orders and the shelf's flavor stock want",
    "prereq": {
     "packer": 2
    },
@@ -1128,22 +1136,28 @@
     {
      "cost": 0,
      "batch": 4,
-     "ms_factor": 1.0
+     "ms_factor": 1.0,
+     "auto_quality": 0.85,
+     "loss_factor": 1.0
     },
     {
      "cost": 400,
      "batch": 6,
-     "ms_factor": 0.85
+     "ms_factor": 0.85,
+     "auto_quality": 0.91,
+     "loss_factor": 0.6
     },
     {
      "cost": 1000,
      "batch": 8,
-     "ms_factor": 0.7
+     "ms_factor": 0.7,
+     "auto_quality": 0.96,
+     "loss_factor": 0.3
     }
    ],
    "marginal": "caramel (18) and cocoa (22) bags for the customers who ask for them",
    "runtime": "P06",
-   "step": 34
+   "step": 35
   },
   {
    "id": "P07",

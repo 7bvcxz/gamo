@@ -107,9 +107,18 @@ static func flavor_popcorn(ci: CanvasItem, c: Vector2, s: float, recipe: String)
 			ci.draw_circle(c + Vector2(0.35, 0.05) * s, s * 0.1, k["mark"])
 
 
+## Step 35: the mixed bag -- its two parts, half and half.
+const MIX_PARTS := {"duo": ["caramel", "cheese"]}
+
+
 ## A sealed bag of an SKU: plain, premium and bargain as before; a flavor has its own
 ## stripes, band and mark (a cheese wedge, a chili, a caramel drip, a cocoa swirl).
-static func sku_bag(ci: CanvasItem, foot: Vector2, w: float, recipe: String, open: bool = false, fill: int = 0, of: int = 2) -> void:
+## Step 35: a sealed flavor bag shows its crimped seal; `hand` adds the hand's gold seal
+## (a finish of quality 95+); a mix ("duo") is two-tone, a part each side.
+static func sku_bag(ci: CanvasItem, foot: Vector2, w: float, recipe: String, open: bool = false, fill: int = 0, of: int = 2, hand: bool = false) -> void:
+	if MIX_PARTS.has(recipe) and not open:
+		_mix_bag(ci, foot, w, MIX_PARTS[recipe], hand)
+		return
 	if not FLAVOR_LOOK.has(recipe) or recipe == "plain" or open:
 		bag(ci, foot, w, PopTokens.STEEL_DEEP if recipe == "bargain" else PopTokens.MACHINE, open, fill, of, recipe == "premium", recipe == "bargain")
 		if open and FLAVOR_LOOK.has(recipe) and recipe != "plain" and fill > 0:
@@ -146,6 +155,66 @@ static func sku_bag(ci: CanvasItem, foot: Vector2, w: float, recipe: String, ope
 		"cocoa":   # a swirl
 			ci.draw_arc(m, r * 0.8, 0, PI * 1.6, 12, k["stripe"], maxf(1.5, w * 0.07))
 			ci.draw_arc(m, r * 0.4, PI, PI * 2.6, 10, k["stripe"], maxf(1.5, w * 0.07))
+	_crimp(ci, p, w, k["rim"])
+	if hand:
+		hand_seal(ci, p + Vector2(w * 0.86, w * 0.3), maxf(3.0, w * 0.2))
+
+
+## Step 35: the sealed top -- a zigzag crimp along the band (a bag being filled has none).
+static func _crimp(ci: CanvasItem, p: Vector2, w: float, col: Color) -> void:
+	if w < 14.0:
+		return   # too small to read; the band says sealed
+	var zz := PackedVector2Array()
+	var n := 6
+	for i in n + 1:
+		zz.append(p + Vector2(w * float(i) / float(n), (w * 0.05) if i % 2 == 0 else (-w * 0.03)))
+	ci.draw_polyline(zz, col, maxf(1.0, w * 0.05))
+
+
+## Step 35: the hand's seal -- a gold rosette with a white star: this bag was finished by hand.
+static func hand_seal(ci: CanvasItem, c: Vector2, r: float) -> void:
+	ci.draw_circle(c, r * 1.15, PopTokens.BRASS)
+	ci.draw_circle(c, r, PopPalette.GOLD)
+	star(ci, c, r * 0.62, Color.WHITE, PopTokens.BRASS)
+
+
+## Step 35: a two-tone mixed bag: the left half is the first part's, the right the second's.
+static func _mix_bag(ci: CanvasItem, foot: Vector2, w: float, parts: Array, hand: bool) -> void:
+	var a := flavor_look(String(parts[0]))
+	var b := flavor_look(String(parts[1]))
+	var h := w * 1.5
+	var p := foot - Vector2(w * 0.5, h)
+	var pts := PackedVector2Array([p, p + Vector2(w, 0), p + Vector2(w * 0.88, h), p + Vector2(w * 0.12, h)])
+	ci.draw_colored_polygon(pts, Color.WHITE)
+	ci.draw_colored_polygon(PackedVector2Array([p, p + Vector2(w * 0.5, 0), p + Vector2(w * 0.5, h), p + Vector2(w * 0.12, h)]), Color(a["fill"], 0.35))
+	ci.draw_colored_polygon(PackedVector2Array([p + Vector2(w * 0.5, 0), p + Vector2(w, 0), p + Vector2(w * 0.88, h), p + Vector2(w * 0.5, h)]), Color(b["fill"], 0.35))
+	ci.draw_rect(Rect2(p, Vector2(w * 0.5, w * 0.26)), a["band"])
+	ci.draw_rect(Rect2(p + Vector2(w * 0.5, 0), Vector2(w * 0.5, w * 0.26)), b["band"])
+	ci.draw_line(p + Vector2(w * 0.5, 0), p + Vector2(w * 0.5, h), PopPalette.INK, maxf(1.0, w * 0.04))
+	var loop := pts.duplicate()
+	loop.append(p)
+	ci.draw_polyline(loop, a["rim"], PopTokens.LINE_PART)
+	flavor_popcorn(ci, p + Vector2(w * 0.27, h * 0.6), w * 0.15, String(parts[0]))
+	flavor_popcorn(ci, p + Vector2(w * 0.73, h * 0.6), w * 0.15, String(parts[1]))
+	_crimp(ci, p, w, a["rim"])
+	if hand:
+		hand_seal(ci, p + Vector2(w * 0.86, w * 0.3), maxf(3.0, w * 0.2))
+
+
+## Step 35: the hand's spoon (a ladle with a drop of the flavor), `c` its centre, `s` its size.
+static func spoon(ci: CanvasItem, c: Vector2, s: float, recipe: String) -> void:
+	var k := flavor_look(recipe)
+	ci.draw_line(c + Vector2(s * 0.45, -s * 0.5), c + Vector2(-s * 0.05, s * 0.05), PopPalette.INK, maxf(2.5, s * 0.16))
+	ci.draw_circle(c + Vector2(-s * 0.18, s * 0.2), s * 0.32, PopPalette.INK)
+	ci.draw_circle(c + Vector2(-s * 0.18, s * 0.2), s * 0.25, Color.WHITE)
+	ci.draw_circle(c + Vector2(-s * 0.18, s * 0.2), s * 0.19, k["fill"])
+	ci.draw_circle(c + Vector2(-s * 0.18, s * 0.6), s * 0.1, k["fill"])
+
+
+## Step 35: a gloss glint (a four-point sparkle): what a hand's finish leaves on the goods.
+static func glint(ci: CanvasItem, c: Vector2, s: float, col: Color = Color.WHITE) -> void:
+	ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s), c + Vector2(s * 0.22, -s * 0.22), c + Vector2(s, 0), c + Vector2(s * 0.22, s * 0.22),
+		c + Vector2(0, s), c + Vector2(-s * 0.22, s * 0.22), c + Vector2(-s, 0), c + Vector2(-s * 0.22, -s * 0.22)]), col)
 
 ## A striped paper bag, bottom-centre anchored at `foot`, `w` wide. Sealed by
 ## default (a folded top and a gold label: Step 20); `open` while it is being
@@ -371,7 +440,7 @@ static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int, 
 	ci.draw_colored_polygon(PackedVector2Array([tail, tail + Vector2(-head * 0.2, -head * 0.3), tail + Vector2(head * 0.2, -head * 0.3)]), Color(1, 1, 1, 0.95))
 	var big := size > 2
 	var bw := head * (0.62 if big else 0.42)
-	var fl := recipe != "" and FLAVOR_LOOK.has(recipe) and recipe != "plain"
+	var fl := recipe != "" and (FLAVOR_LOOK.has(recipe) or MIX_PARTS.has(recipe)) and recipe != "plain"
 	if size == 1:   # Step 30: a cup
 		cup(ci, Vector2(r.get_center().x, r.end.y - head * 0.16), head * 0.5)
 		if fl:   # Step 34: a flavored cup shows its kernels on top
@@ -382,7 +451,10 @@ static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int, 
 	else:
 		bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw, PopTokens.STEEL_DEEP if bargain else PopTokens.MACHINE, false, 0, 2, premium, bargain)
 	if big:
-		if fl:
+		if MIX_PARTS.has(recipe):   # Step 35: a mix shows both kernels
+			flavor_popcorn(ci, Vector2(r.get_center().x - bw * 0.25, r.end.y - head * 0.14 - bw * 1.55), bw * 0.22, String(MIX_PARTS[recipe][0]))
+			flavor_popcorn(ci, Vector2(r.get_center().x + bw * 0.25, r.end.y - head * 0.14 - bw * 1.55), bw * 0.22, String(MIX_PARTS[recipe][1]))
+		elif fl:
 			flavor_popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28, recipe)
 		else:
 			popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28)

@@ -145,6 +145,23 @@ func _tick() -> void:
 						for qm: Dictionary in _app.rules.machines:
 							if String(qm["type"]) in ["P05", "P06"]:
 								_app.on_command("pause_machine", {"type": "pause_machine", "id": qm["id"], "paused": true})
+					"H":
+						# Step 35 (picture setup): the hand has cooked comfortably (the spoon is open).
+						_app.rules.presses = maxi(int(_app.rules.presses), 30)
+					"J":
+						# Step 35: hold the spoon of the first coater with a batch on its drum for N ms
+						# (`J<ms>`; R lets go) -- through the app, as the hand would.
+						for fm: Dictionary in _app.rules.machines:
+							if _app.rules.can_finish(fm):
+								_app.on_command("finish_press", {"type": "finish_press", "id": fm["id"]})
+								break
+						_app.dev_advance(int(step.substr(1)))
+						print("capture: spoon %s on %s" % [_app.rules.finishing, (_app.rules.machines as Array).filter(func(x: Dictionary) -> bool: return String(x["type"]) in ["P05", "P06"]).map(func(x: Dictionary) -> String: return "%d:%s:%s" % [x["id"], x["state"], (x["held"] as Dictionary).get("left_ms", -1)])])
+					"R":
+						_app.on_command("finish_release", {"type": "finish_release"})
+					"A":
+						# Step 35: `A<id>` sets that coater to AUTO.
+						_app.on_command("set_flavor", {"type": "set_flavor", "id": int(step.substr(1)), "flavor": "auto"})
 					"O":
 						# Step 33: the overview card (`O<id>` with that machine's diagnostics).
 						var vo = _app.frame.play

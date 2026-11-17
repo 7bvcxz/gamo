@@ -2792,7 +2792,7 @@ func _flavor_packs(f: PopRules, flavor: String) -> int:
 func test_flavor_recipes_are_versioned_clean_data_with_real_tradeoffs() -> void:
 	var f := _flavor_floor()
 	var fl: Dictionary = f.flavors()
-	assert_eq(int(fl.get("version", 0)), 1, "the recipes carry a version")
+	assert_eq(int(fl.get("version", 0)), 2, "the recipes carry a version (2: Step 35)")
 	assert_eq(f.flavor_ids(), FIVE, "five flavors in the menu's order")
 	var names: Array = []
 	for id: String in FIVE:
@@ -2967,13 +2967,14 @@ func test_conversion_arithmetic_and_prices() -> void:
 	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 100, "portions": 3})
 	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 40, "portions": 3})
 	f.stats["made_portions"] = int(f.stats["made_portions"]) + 6
+	_want(f, 4, "cheese", 600000)   # Step 35: a bigger drum coats what is short (its stock 2 + this order 4)
 	f.advance(100)
 	var h: Dictionary = f.machine(int(m["id"]))["held"]
 	assert_eq(int(h["portions"]), 6, "tier 1: six portions")
 	assert_eq(int(h["quality"]), 70, "the average quality (3 x 100 + 3 x 40) / 6")
 	assert_eq(int(h["ms"]), int(round(6 * 600 * 0.85)), "0.85 x the time")
 	f.advance(int(h["ms"]) + 100)
-	assert_eq(f.bin_portions_of("cheese") + f.shelf.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "cheese").size() * 2 + f.packing.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "cheese").size() * 2, 6, "six cheese portions out")
+	assert_eq(int(f.stats["coated"]["cheese"]), 6, "six cheese portions out (cheese loses none)")
 	_check_conservation(f, "arithmetic")
 
 
@@ -3204,3 +3205,439 @@ func test_coating_portions_keep_their_place_in_the_bin() -> void:
 	f.advance(200)
 	assert_eq(String(f.machine(int(k["id"]))["state"]), "blocked", "the kettle waits: the drum's portions come back to the bin")
 	_check_conservation(f, "room")
+
+
+# -- Step 35: the hand's finish, the machine's quality and loss, mixes, AUTO, the special, payback
+
+## A coater with a batch on the drum (a caramel order waiting; the hand has cooked enough).
+func _batch_on_drum(seed_value: int, flavor: String, presses: int = 25) -> Dictionary:
+	var f := _flavor_floor(seed_value)
+	f.sign_tier = 6
+	f.presses = presses
+	var type := "P05" if flavor in ["cheese", "spicy"] else "P06"
+	var m := _coater(f, type, flavor)
+	_fill_shelf(f)
+	_fill_bin(f, 12)
+	f.advance(100)
+	assert_false((f.machine(int(m["id"]))["held"] as Dictionary).is_empty(), "%s: a batch on the drum" % flavor)
+	return {"f": f, "m": m}
+
+
+func _hold_spoon(f: PopRules, id: int, ms: int) -> Dictionary:
+	var r := f.execute({"type": "finish_press", "id": id})
+	if not bool(r["ok"]):
+		return r
+	f.advance(ms)
+	if f.finishing.is_empty():
+		return {"ok": true, "dripped": true}
+	return f.execute({"type": "finish_release"})
+
+
+func _coated(f: PopRules) -> Array:
+	return f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "lot_coated")
+
+
+func test_the_spoon_opens_only_once_the_hand_cooks_comfortably() -> void:
+	var s := _batch_on_drum(301, "caramel", 3)
+	var f: PopRules = s["f"]
+	var id := int(s["m"]["id"])
+	assert_false(f.hand_open(), "three pops: no spoon yet")
+	assert_false(bool(f.state()["coaters"][0]["can_finish"]), "the state says so")
+	assert_eq(String(f.execute({"type": "finish_press", "id": id}).get("reason", "")), "err.locked", "refused while locked")
+	f.presses = int(f.hand_rules()["unlock_presses"])
+	assert_true(f.hand_open(), "%d pops: the spoon" % f.presses)
+	assert_true(bool(f.state()["coaters"][0]["can_finish"]), "the batch can be finished")
+	assert_eq(String(f.execute({"type": "finish_press", "id": 999}).get("reason", "")), "err.nothing_to_finish", "no such coater")
+	_check_conservation(f, "locked spoon")
+
+
+func test_a_perfect_finish_beats_the_machine_and_a_miss_changes_nothing() -> void:
+	# The same factory, one left to the machine, one finished by hand.
+	var sa := _batch_on_drum(303, "cocoa")
+	var sb := _batch_on_drum(303, "cocoa")
+	var a: PopRules = sa["f"]
+	var b: PopRules = sb["f"]
+	for x: PopRules in [a, b]:
+		x.sign_tier = 6
+	var ida := int(sa["m"]["id"])
+	var idb := int(sb["m"]["id"])
+	var q_in := int(a.machine(ida)["held"]["quality"])
+	a.drain_events()
+	b.drain_events()
+	var w: Array = b.finish_window("cocoa")
+	var r := _hold_spoon(b, idb, (int(w[0]) + int(w[1])) / 2)
+	assert_eq(String(r.get("grade", "")), "perfect", "released in the gold: perfect")
+	assert_eq(int(r["quality"]), 100, "the hand's finish: quality 100")
+	b.advance(100)
+	var hb := _coated(b)
+	assert_eq(hb.size(), 1, "the batch is done at the release")
+	assert_eq(int(hb[0]["data"]["portions"]), 4, "nothing lost")
+	assert_eq(String(hb[0]["data"]["hand"]), "perfect", "marked as the hand's")
+	var la := []
+	for i in 140:
+		a.advance(100)
+		la = _coated(a)
+		if not la.is_empty():
+			break
+	assert_eq(la.size(), 1, "the machine alone finishes later")
+	assert_eq(int(la[0]["data"]["quality"]), int(round(q_in * 0.85)), "at 85% of the popcorn's quality (tier 0)")
+	assert_true(int(la[0]["data"]["quality"]) < 100, "below the hand's")
+	_check_conservation(a, "machine")
+	_check_conservation(b, "hand")
+	# Near the gold: near_quality, never below the machine; early or late: the machine goes on.
+	var sc := _batch_on_drum(305, "caramel")
+	var c: PopRules = sc["f"]
+	var idc := int(sc["m"]["id"])
+	var wc: Array = c.finish_window("caramel")
+	var left0 := int(c.machine(idc)["held"]["left_ms"])
+	var early := _hold_spoon(c, idc, 200)
+	assert_eq(String(early["grade"]), "early", "a quick tap: early")
+	assert_eq(int(c.machine(idc)["held"]["left_ms"]), left0, "early: the batch waited for the hand, then goes on as before")
+	assert_eq(String(c.machine(idc)["held"].get("hand", "")), "", "not finished")
+	var late := _hold_spoon(c, idc, int(wc[1]) + 600)
+	assert_eq(String(late["grade"]), "late", "held too long: late")
+	var near := _hold_spoon(c, idc, int(wc[0]) - 150)
+	assert_eq(String(near["grade"]), "near", "just before the gold: near")
+	assert_eq(int(near["quality"]), 90, "near: 90")
+	var hs: Dictionary = c.stats["hand_finish"]
+	assert_eq([int(hs.get("early", 0)), int(hs.get("late", 0)), int(hs.get("near", 0))], [1, 1, 1], "each try counted")
+	_check_conservation(c, "near")
+
+
+func test_the_spoon_drips_by_itself_and_one_hand_does_one_thing() -> void:
+	var s := _batch_on_drum(307, "cheese")
+	var f: PopRules = s["f"]
+	var id := int(s["m"]["id"])
+	assert_true(bool(f.execute({"type": "finish_press", "id": id})["ok"]), "the spoon is down")
+	assert_eq(String(f.execute({"type": "press"}).get("reason", "")), "err.hand_busy", "the kettle waits: one hand")
+	assert_eq(String(f.execute({"type": "finish_press", "id": id}).get("reason", "")), "err.hand_busy", "one spoon")
+	assert_eq(String(f.machine(id)["state"]), "run", "")
+	f.advance(100)
+	assert_eq(String(f.machine(id)["state"]), "hand", "the batch is the hand's while held (no upkeep)")
+	f.drain_events()
+	var w: Array = f.finish_window("cheese")
+	f.advance(int(w[1]) + int(f.hand_rules()["drip_ms"]) + 500)
+	assert_true(f.finishing.is_empty(), "held past the drip: it lets go by itself")
+	var fin := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "finished")
+	assert_eq(fin.size(), 1, "one finish")
+	assert_eq(String(fin[0]["data"]["grade"]), "late", "late")
+	# Heating: no spoon.
+	var g := _batch_on_drum(309, "cheese")
+	var gf: PopRules = g["f"]
+	assert_true(bool(gf.execute({"type": "press"})["ok"]), "heating")
+	assert_eq(String(gf.execute({"type": "finish_press", "id": int(g["m"]["id"])}).get("reason", "")), "err.hand_busy", "no spoon while heating")
+	_check_conservation(f, "drip")
+
+
+func test_the_machine_loses_portions_by_flavor_and_tier_and_counts_them() -> void:
+	var f := _flavor_floor(311)
+	f.sign_tier = 6
+	var p06 := _coater(f, "P06", "caramel")
+	var p05 := _coater(f, "P05", "cheese")
+	var lost := {}
+	for spec: Array in [[p06, "caramel", 0], [p06, "cocoa", 0], [p05, "cheese", 0], [p05, "spicy", 0], [p06, "caramel", 2]]:
+		var m: Dictionary = f.machine(int(spec[0]["id"]))
+		m["tier"] = int(spec[2])
+		m["loss_mp"] = 0
+		var n := 0
+		var portions := 0
+		for i in 25:
+			m["held"] = {"id": f._new_id(), "recipe": spec[1], "quality": 80, "portions": 4, "left_ms": 0, "ms": 1000, "line": 0, "lots": []}
+			f.stats["made_portions"] = int(f.stats["made_portions"]) + 4
+			f.drain_events()
+			f._coater_step(m, 50)
+			var e: Array = f.drain_events().filter(func(x: Dictionary) -> bool: return String(x["type"]) == "lot_coated")
+			n += int(e[0]["data"]["lost"])
+			portions += int(e[0]["data"]["portions"])
+			var out: Dictionary = f.bin.pop_back()   # (the test's portions leave again: only the lost stay counted)
+			f.stats["made_portions"] = int(f.stats["made_portions"]) - int(out["portions"])
+		assert_eq(n + portions, 100, "%s tier %d: every portion comes out or is counted lost" % [spec[1], spec[2]])
+		lost["%s%d" % [spec[1], spec[2]]] = n
+	assert_eq(lost, {"caramel0": 12, "cocoa0": 8, "cheese0": 0, "spicy0": 5, "caramel2": 3}, "losses: caramel 12%, cocoa 8%, cheese 0, spicy 5%; tier 2 caramel 3.6%")
+	assert_eq(int(f.stats["lost_portions"]), 28, "the lost portions are counted")
+	_check_conservation(f, "losses")
+
+
+func test_coater_tiers_raise_the_machines_quality_but_never_to_the_hands() -> void:
+	var f := _flavor_floor(313)
+	var m := _coater(f, "P06", "caramel")
+	var qs: Array = []
+	for t in 3:
+		f.machine(int(m["id"]))["tier"] = t
+		qs.append(f.auto_quality(f.machine(int(m["id"]))))
+	assert_eq(qs, [0.85, 0.91, 0.96], "tiers 0-2: 85/91/96% of the popcorn's quality")
+	assert_true(int(round(100 * 0.96)) < int(f.hand_rules()["perfect_quality"]), "even the best machine is below a perfect hand finish")
+	assert_true(f.loss_rate(f.machine(int(m["id"])), "caramel") > 0.0 and f.loss_rate(f.machine(int(m["id"])), "caramel") < 0.12, "and loses less than tier 0")
+
+
+func test_a_hand_finished_bag_sells_for_more_and_keeps_its_mark() -> void:
+	var s := _batch_on_drum(315, "cocoa")
+	var f: PopRules = s["f"]
+	var id := int(s["m"]["id"])
+	var cid := _want(f, 2, "cocoa", 600000)
+	var w: Array = f.finish_window("cocoa")
+	_hold_spoon(f, id, int(w[0]) + 50)
+	for i in 200:
+		f.advance(100)
+		if _sold_at(f, cid) >= 0:
+			break
+	assert_true(_sold_at(f, cid) >= 0, "the cocoa customer bought it")
+	var sale: Dictionary = f.ledger.filter(func(e: Dictionary) -> bool: return int(e["customer"]) == cid)[0]
+	assert_eq(int(sale["quality"]), 100, "a hand-finished bag: quality 100")
+	assert_eq(int(sale["coins"]), f.pack_price("cocoa", 2, 100), "at its price")
+	assert_true(f.pack_price("cocoa", 2, 100) > f.pack_price("cocoa", 2, int(round(80 * 0.85))), "more than the machine's bag")
+	assert_eq(int(f.stats["hand_sold_portions"]), 2, "its two portions were the hand's")
+	assert_eq(int(f.stats["hand_perfect_bags_sold"]), 1, "one hand-finished bag sold at 100")
+	_check_conservation(f, "hand sale")
+
+
+func test_auto_follows_the_queue_and_a_quick_switch_needs_one_tap() -> void:
+	var f := _flavor_floor(317)
+	f.sign_tier = 6
+	var m := _coater(f, "P06", "")
+	assert_true(bool(f.execute({"type": "set_flavor", "id": m["id"], "flavor": "auto"})["ok"]), "AUTO: one tap")
+	_fill_shelf(f)
+	_fill_bin(f, 12)
+	_want(f, 4, "plain", 600000)
+	_want(f, 4, "cocoa", 600000)
+	_want(f, 4, "caramel", 600000)
+	f.drain_events()
+	f.advance(100)
+	var started := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "coat_started")
+	assert_eq(started.size(), 1, "a batch starts")
+	assert_eq(String(started[0]["data"]["flavor"]), "cocoa", "the earliest waiting flavor order first (cocoa before caramel)")
+	assert_true(f.offered_flavors().has("caramel") and f.offered_flavors().has("cocoa"), "AUTO offers both")
+	# A quick switch back to one flavor: the batch on the drum keeps its own.
+	assert_true(bool(f.execute({"type": "set_flavor", "id": m["id"], "flavor": "caramel"})["ok"]), "back to caramel")
+	assert_eq(String(f.machine(int(m["id"]))["held"]["recipe"]), "cocoa", "the drum's batch is still cocoa")
+	var g := _flavor_floor(319)
+	var gm := _coater(g, "P06", "")
+	g.sign_tier = 0
+	g.packer_tier = 0
+	assert_eq(String(g.execute({"type": "set_flavor", "id": gm["id"], "flavor": "auto"}).get("reason", "")), "err.locked", "AUTO needs an open flavor")
+	_check_conservation(f, "auto")
+
+
+func test_a_mixed_order_gets_one_bag_half_caramel_half_cheese() -> void:
+	var f := _flavor_floor(321)
+	f.sign_tier = 6
+	assert_false(f.mix_offered("duo"), "no coaters: no mix")
+	_coater(f, "P06", "caramel")
+	assert_false(f.mix_offered("duo"), "caramel alone: no mix")
+	_coater(f, "P05", "cheese")
+	assert_true(f.mix_offered("duo"), "caramel and cheese offered: the mix is")
+	_fill_shelf(f)
+	_fill_bin(f, 16)
+	var cid := _want(f, 4, "duo", 600000)
+	for i in 400:
+		f.advance(100)
+		if _sold_at(f, cid) >= 0:
+			break
+	assert_true(_sold_at(f, cid) >= 0, "the mix customer bought their bag")
+	var sale: Dictionary = f.ledger.filter(func(e: Dictionary) -> bool: return int(e["customer"]) == cid)[0]
+	assert_eq(String(sale["recipe"]), "duo", "a mixed bag")
+	assert_eq(int(sale["size"]), 4, "four portions")
+	assert_eq(int(sale["coins"]), f.pack_price("duo", 4, int(sale["quality"])), "at the mix's price")
+	assert_eq(int(f.stats["mix_sold"]), 1, "counted")
+	assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "nobody got another bag")
+	# The draw: mixes come only while offered (the same stream otherwise -- Step 34's test).
+	var n := 0
+	for i in 600:
+		var o: Dictionary = f._draw_order()
+		if String(o["recipe"]) == "duo":
+			n += 1
+			assert_eq(int(o["size"]), 4, "a mix is a large bag")
+	assert_true(n > 15 and n < 65, "about 6%% ask for the mix (%d of 600)" % n)
+	_check_conservation(f, "mix")
+
+
+func test_a_mixed_bag_takes_half_of_each_part() -> void:
+	var f := _flavor_floor(323)
+	f.bin.append({"id": f._new_id(), "recipe": "caramel", "quality": 100, "portions": 3, "by": {"7": 3}})
+	f.bin.append({"id": f._new_id(), "recipe": "cheese", "quality": 60, "portions": 3, "by": {"8": 3}})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 6
+	var p: Dictionary = f._take_pack(4, "duo", -1)
+	assert_eq(String(p["recipe"]), "duo", "a mixed bag")
+	assert_eq(f.bin_portions_of("caramel"), 1, "two caramel portions taken")
+	assert_eq(f.bin_portions_of("cheese"), 1, "two cheese portions taken")
+	assert_eq(int(p["quality"]), 80, "its quality: the portions' average")
+	assert_eq(p["by"], {"7": 2, "8": 2}, "each coater's portions in it")
+	# A mix whose part is not a flavor is never offered.
+	assert_false(f.is_mix("caramel"), "a flavor is not a mix")
+	assert_false(f.is_mix("order"), "the menu list is not a mix")
+
+
+func test_a_surplus_becomes_the_special_and_sells_down_sooner() -> void:
+	# Too much spicy (a coater switched away, its fans gone): the board features it.
+	var res := {}
+	for with_promo: bool in [true, false]:
+		var f := _flavor_floor(325)
+		f.sign_tier = 6
+		f.stats["packed"] = 5
+		var m := _coater(f, "P05", "cheese")
+		f.next_arrival_ms = f.flow_ms + 500   # customers come
+		f.bin.append({"id": f._new_id(), "recipe": "spicy", "quality": 80, "portions": 16})
+		f.stats["made_portions"] = int(f.stats["made_portions"]) + 16
+		if not with_promo:
+			f.flavors()["promo"]["surplus_portions"] = 100000   # (a copy of the table: this run never features it)
+		var on_at := -1
+		var gone_at := -1
+		f.level = 6
+		for i in 1200:
+			if f.glass.is_empty():
+				_pop(f)   # butter for everyone else (the queue goes in order)
+			f.advance(1000)
+			if on_at < 0 and f.promoted("spicy"):
+				on_at = f.flow_ms
+			if f.flavor_have("spicy") <= f.pack_size():   # sold down to one small bag
+				gone_at = f.flow_ms
+				break
+		res[with_promo] = {"on": on_at, "gone": gone_at, "sold": int(f.stats.get("flavor_sold", {}).get("spicy", 0)), "abandoned": int(f.stats["abandoned"])}
+		if with_promo:
+			assert_true(on_at >= 20000, "featured after 20 s of surplus (%d)" % on_at)
+			f.advance(1000)   # the board is looked at once a second
+			assert_false(f.promoted("spicy"), "the special ends with the surplus")
+			var sp := 0
+			for e: Dictionary in f.ledger:
+				if String(e["recipe"]) == "spicy":
+					sp += int(e["size"])
+			assert_true(sp >= 12, "the surplus was sold to spicy customers, not waved away (%d portions)" % sp)
+			print("  the special: on at %d ms, surplus gone at %d ms, spicy sold %d" % [on_at, gone_at, res[with_promo]["sold"]])
+		else:
+			print("  no special: surplus gone at %d ms, spicy sold %d" % [gone_at, res[with_promo]["sold"]])
+		_check_sales(f, "promo %s" % with_promo)
+		_check_conservation(f, "promo %s" % with_promo)
+		f.flavors()["promo"]["surplus_portions"] = 4
+		m = {}
+	assert_true(int(res[true]["gone"]) > 0, "the surplus is sold (%s)" % [res[true]])
+	assert_true(int(res[false]["gone"]) < 0 or int(res[true]["gone"]) < int(res[false]["gone"]), "sooner with the special: %s vs %s" % [res[true], res[false]])
+
+
+func test_a_coaters_payback_is_estimated_and_then_measured() -> void:
+	var f := _flavor_floor(327)
+	f.level = 6
+	f.sign_tier = 6
+	var est: Dictionary = f.coater_estimate("P05", "cheese", 0)
+	assert_true(int(est["net_per_min"]) > 0, "cheese pays at sign 6: %s" % est)
+	assert_true(float(est["payback_min"]) > 0.0, "an estimated payback")
+	assert_true(float(est["served_ppm"]) <= float(est["capacity_ppm"]) + 0.01 and float(est["served_ppm"]) <= float(est["demand_ppm"]) + 0.01, "served: the smaller of demand and capacity")
+	var none: Dictionary = f.coater_estimate("P05", "plain", 0)
+	assert_true(none.is_empty(), "butter is not coated")
+	var m := _coater(f, "P06", "caramel")
+	f.machine(int(m["id"]))["paid"] = 120   # (the test's price: a payback within the ledger's 500 rows)
+	f.next_arrival_ms = f.flow_ms + 500
+	for i in 60 * 20:
+		if f.glass.is_empty():
+			_pop(f)
+		f.advance(1000)
+		if f.machine(int(m["id"])).has("paid_back_ms"):
+			break
+	var mm: Dictionary = f.machine(int(m["id"]))
+	# The margin is what its bags sold for over butter's -- recomputed from the ledger.
+	var margin := 0
+	for e: Dictionary in f.ledger:
+		if String(e["recipe"]) == "caramel":
+			margin += int(e["coins"]) - f.pack_price("plain", int(e["size"]), int(e["quality"]))
+	assert_eq(int(mm.get("margin", 0)), margin, "the coater's margin is its bags' price over butter's")
+	assert_eq(f.coater_net(mm), int(mm.get("margin", 0)) - int(mm.get("ingredients_paid", 0)) - int(mm.get("upkeep_paid", 0)), "net: margin - ingredients - upkeep")
+	if mm.has("paid_back_ms"):
+		assert_true(f.coater_net(mm) >= int(mm["paid"]), "paid back when its net reached what it cost")
+	else:
+		assert_true(f.coater_net(mm) > 0, "on its way: %d of %d" % [f.coater_net(mm), int(mm["paid"])])
+	_check_conservation(f, "payback")
+
+
+func test_flavor_craft_twenty_minutes_auto_hand_mixes_and_losses_conserve() -> void:
+	var f := _flavor_floor(329)
+	f.level = 6
+	f.sign_tier = 6
+	f.presses = 30
+	f.execute({"type": "build", "machine": "M07"})
+	f.execute({"type": "build", "machine": "M07"})
+	f.execute({"type": "build", "machine": "M01"})
+	f.execute({"type": "build", "machine": "bagger"})
+	f.next_arrival_ms = f.flow_ms + 500
+	var p05 := _coater(f, "P05", "auto")
+	var p06 := _coater(f, "P06", "auto")
+	var tries := 0
+	for minute in 20:
+		for s in 60:
+			if f.glass.is_empty():
+				_pop(f)
+			if s % 7 == 0:
+				for m: Dictionary in [p05, p06]:
+					if f.can_finish(f.machine(int(m["id"]))):
+						var fl := String(f.machine(int(m["id"]))["held"]["recipe"])
+						var w: Array = f.finish_window(fl)
+						_hold_spoon(f, int(m["id"]), (int(w[0]) + int(w[1])) / 2 + (tries % 3 - 1) * 400)
+						tries += 1
+			f.advance(1000)
+		_check_conservation(f, "minute %d" % minute)
+	assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "every bag the one ordered")
+	assert_true(int(f.stats.get("mix_sold", 0)) > 0, "mixes sold: %d" % int(f.stats.get("mix_sold", 0)))
+	assert_true(int(f.stats.get("hand_portions", 0)) > 0, "the hand finished batches")
+	assert_true(int(f.stats.get("lost_portions", 0)) > 0, "the machine lost some caramel/cocoa/spicy")
+	var by: Dictionary = f.stats.get("flavor_sold", {})
+	assert_true(by.size() >= 3, "several flavors sold: %s" % by)
+	assert_true(int(f.stats["sold_portions"]) <= int(f.stats["made_portions"]), "never sold more than was made")   # (the ledger keeps the last 500 rows)
+
+
+func test_a_bigger_drum_coats_only_what_is_short_from_the_plain_there_is() -> void:
+	var f := _flavor_floor(331)
+	f.sign_tier = 6
+	var m := _coater(f, "P06", "caramel")
+	f.execute({"type": "upgrade_machine", "id": m["id"]})
+	f.execute({"type": "upgrade_machine", "id": m["id"]})
+	_fill_shelf(f)
+	_fill_bin(f, 6)
+	f.drain_events()
+	f.advance(100)
+	var st := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "coat_started")
+	assert_eq(int(st[0]["data"]["portions"]), 6, "tier 2 (up to 8): six wanted (stock 2 + buffer 4), six coated")
+	var g := _flavor_floor(333)
+	g.sign_tier = 6
+	var gm := _coater(g, "P06", "caramel")
+	g.execute({"type": "upgrade_machine", "id": gm["id"]})
+	g.execute({"type": "upgrade_machine", "id": gm["id"]})
+	_fill_shelf(g)
+	_fill_bin(g, 5)
+	_want(g, 4, "caramel", 600000)
+	g.drain_events()
+	g.advance(100)
+	var gs := g.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "coat_started")
+	assert_eq(int(gs[0]["data"]["portions"]), 5, "ten wanted, five plain there: five coated now (not waiting for eight)")
+	_check_conservation(g, "drum")
+
+
+func test_a_flavor_customer_waits_aside_and_the_counter_serves_the_next() -> void:
+	var f := _flavor_floor(335)
+	f.sign_tier = 6
+	_coater(f, "P06", "caramel")
+	_stock(f, 2, 2, "plain")
+	var c1 := _want(f, 2, "caramel", 600000)
+	var c2 := _want(f, 2, "plain", 600000)
+	f.advance(3000)
+	assert_true(_sold_at(f, c2) >= 0, "the butter customer behind was served")
+	assert_eq(_sold_at(f, c1), -1, "the caramel customer still waits (aside, their place kept)")
+	assert_eq(int(f.stats["served_past_aside"]), 1, "counted")
+	# A plain order with no bag still holds the queue (a plain shop is unchanged).
+	var g := _flavor_floor(337)
+	var p1 := _want(g, 4, "plain", 600000)
+	var p2 := _want(g, 2, "plain", 600000)
+	_stock(g, 1, 2, "plain")
+	g.advance(3000)
+	assert_eq(_sold_at(g, p2), -1, "behind a plain order nobody jumps")
+	assert_eq(_sold_at(g, p1), -1, "")
+
+
+func test_the_flavor_scene_is_built_by_the_players_commands() -> void:
+	var f: PopRules = Factory.new(null, 339)
+	assert_false(f.start_scene("nothing"), "an unknown scene changes nothing")
+	assert_true(f.start_scene("flavors"), "the flavor scene")
+	assert_eq(f.machines.map(func(m: Dictionary) -> String: return String(m["type"])), ["cooker", "cooker", "M01", "M12", "P05", "P06"], "two kettles, a hopper, the mixer, the sprayer and the coater")
+	assert_eq(f.state()["coaters"].map(func(c: Dictionary) -> String: return String(c["flavor"])), ["cheese", "caramel"], "cheese and caramel")
+	assert_true(f.hand_open(), "the spoon is open (20 pops)")
+	assert_eq(f.money, 1500, "1500 coins to play with")
+	assert_eq(f.drain_events().size(), 0, "no events left over from the setup")
+	f.advance(60000)
+	_check_conservation(f, "scene")

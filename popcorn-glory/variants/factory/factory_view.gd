@@ -92,6 +92,11 @@ var _stats_key := ""
 var _status := ""
 var _clock := 0.0
 var _cooking := false            ## this press started on the bottom floor
+var _spooning := false           ## Step 35: this press holds a coater's spoon
+var spoon_layer := Node2D.new()  ## Step 35: the spoons, the hold's ring and pour, the finish's flourish
+var _spoon_key := ""
+var _spoon_fx := {}              ## the last finish: {machine, grade, quality, t}
+var _spoon_seen := -1.0          ## seconds a spoon has been on offer without the hand ever using one
 var _floors_key := ""
 
 
@@ -117,6 +122,10 @@ func setup(p_rules: PopRules) -> void:
 		n.queue_free()
 	_icon_cache.clear()
 	_goods_key = ""
+	_spoon_key = ""
+	_spoon_fx = {}
+	_spoon_seen = -1.0
+	_spooning = false
 	_kernel_flights.clear()
 	_nozzle_key = ""
 	_status = ""
@@ -139,6 +148,10 @@ func setup(p_rules: PopRules) -> void:
 		machine_layer.name = "Machines"
 		add_child(machine_layer)
 		move_child(machine_layer, 2)
+		spoon_layer.name = "Spoons"
+		spoon_layer.z_index = 2   # above the machines and the goods, below the open card
+		add_child(spoon_layer)
+		spoon_layer.draw.connect(func() -> void: _draw_spoons(spoon_layer))
 		_icon_root.name = "IconCache"
 		add_child(_icon_root)
 		customer_node.name = "Customer"
@@ -374,6 +387,8 @@ func extra_rects() -> Dictionary:
 		var fr := _flavor_rects(detail_rect())
 		for f: String in fr.keys():
 			out["flavor_%s" % f] = fr[f]   # Step 34: a coater's flavors
+	for id: int in _spoon_ids():
+		out["spoon_%d" % id] = _spoon_rect(id)   # Step 35: the hand's spoon on a coater
 	if not sel_slot.is_empty():
 		var rs := _picker_rects(detail_rect())
 		var choices := _floor_choices(String(sel_slot["floor"]))
@@ -403,6 +418,12 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	if mb.pressed:
 		var f := _floor_at(mb.position)
+		var sp := _spoon_at(mb.position)
+		if sp >= 0:   # Step 35: the hand takes the coater's spoon (hold, let go in the gold)
+			_spooning = true
+			command.emit("finish_press", {"type": "finish_press", "id": sp})
+			accept_event()
+			return
 		if _machine_press(mb.position):
 			accept_event()
 			return
@@ -423,6 +444,11 @@ func _gui_input(event: InputEvent) -> void:
 		elif selected >= 0 and not detail_rect().has_point(mb.position):
 			_clear_machine_selection()
 			toggle_floor(-1)
+		return
+	if _spooning:
+		_spooning = false
+		command.emit("finish_release", {"type": "finish_release"})
+		accept_event()
 		return
 	if _cooking:
 		_cooking = false
@@ -519,6 +545,7 @@ func _process(delta: float) -> void:
 	_step_hint()
 	_step_cues()
 	_step_machine_motion(delta)
+	_step_spoons(delta)
 
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and
@@ -602,6 +629,8 @@ func on_events(events: Array[Dictionary]) -> void:
 			_sound("coin", 1.0, -6.0)
 		elif String(e["type"]) in ["auto_lot", "machine_assisted", "machine_upgraded", "machine_sold", "machine_paused", "kernels_loaded", "overheat"]:
 			_machine_event(e)
+		elif String(e["type"]) in ["finish_start", "finished", "coat_lost", "paid_back", "promo_on"]:
+			_spoon_event(e)   # Step 35
 		elif String(e["type"]) == "station_upgrade":
 			# Each floor's own flourish (Step 24): the station sparkles where it
 			# stands with a rising chime and a clink of its new heads; the sign
@@ -664,6 +693,12 @@ func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
 				ci.draw_circle(p, dr, PopPalette.GOLD)
 			else:
 				ci.draw_arc(p, dr, 0, TAU, 10, Color(1, 1, 1, 0.45), 1.5)
+		# Step 35: the board's special -- a gold star with the flavor's kernel, top left of the board.
+		var specials: Array = rules.flavor_ids().filter(func(f: String) -> bool: return rules.promoted(f))
+		for i in specials.size():
+			var sc := sign.position + Vector2(sign.size.x * (0.02 + 0.3 * i), -sign.size.y * 0.04)
+			PopFactoryArt.star(ci, sc, sign.size.y * 0.3, PopPalette.GOLD, PopTokens.BRASS)
+			PopFactoryArt.flavor_popcorn(ci, sc + Vector2(0, sign.size.y * 0.02), sign.size.y * 0.1, String(specials[i]))
 		if ready == 0 and not (rules.get("queue") as Array).is_empty():
 			# Out of stock with someone waiting: the bag greys and a red no-entry sign sits on it.
 			var bp := sign.get_center() + Vector2(-sign.size.x * 0.18, sign.size.y * 0.3)
@@ -712,8 +747,10 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 		var col := k % per_row
 		var row := k / per_row
 		var at := Vector2(hop.position.x + hop.size.x * (0.2 + 0.2 * col) + (row % 2) * pr * 0.4, hop.end.y - pr * 1.1 - row * pr * 1.2)
-		if k < kinds.size() and String(kinds[k]) not in ["plain", "premium", "bargain"]:
-			PopFactoryArt.flavor_popcorn(ci, at, pr, String(kinds[k]))
+		if k < kinds.size() and String(kinds[k]).trim_suffix("+") not in ["plain", "premium", "bargain"]:
+			PopFactoryArt.flavor_popcorn(ci, at, pr, String(kinds[k]).trim_suffix("+"))
+			if String(kinds[k]).ends_with("+"):   # Step 35: a hand-finished portion shines
+				PopFactoryArt.glint(ci, at + Vector2(pr * 0.5, -pr * 0.6), pr * 0.55)
 		else:
 			PopFactoryArt.popcorn(ci, at, pr)
 	# Step 20: the station at its tier (the nozzles and the bags in it are actors).
@@ -744,7 +781,8 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 				if rec not in ["plain", "premium", "bargain"]:   # Step 34: its flavor's kernels on top
 					PopFactoryArt.flavor_popcorn(ci, foot - Vector2(0, w * 1.05), w * 0.3, rec)
 			elif rec not in ["plain", "premium", "bargain"]:
-				PopFactoryArt.sku_bag(ci, foot, w, rec)   # Step 34: the flavor's own bag
+				var sp: Dictionary = shelved[k] if k < shelved.size() else {}
+				PopFactoryArt.sku_bag(ci, foot, w, rec, false, 0, 2, _hand_mark(sp))   # Step 34: the flavor's own bag (35: the hand's seal)
 			else:
 				PopFactoryArt.bag(ci, foot, w, PopTokens.STEEL_DEEP if barg else PopTokens.MACHINE, false, 0, 2, prem, barg)
 		else:
@@ -900,7 +938,7 @@ func _inventory_key() -> String:
 	var sel := ""
 	if sel_machine >= 0:   # the open machine's own numbers
 		var m: Dictionary = rules.machine(sel_machine)
-		sel = "%s:%d:%d:%s" % [m.get("state", ""), int(m.get("tier", 0)), int(m.get("done", 0)), m.get("flavor", "")]
+		sel = "%s:%d:%d:%s:%d:%d" % [m.get("state", ""), int(m.get("tier", 0)), int(m.get("done", 0)), m.get("flavor", ""), int(m.get("margin", 0)), int(m.get("upkeep_paid", 0))]
 	var lp := ""
 	if rules.parallel_lines():
 		for line in rules.packing_lines():
@@ -908,7 +946,8 @@ func _inventory_key() -> String:
 	return "%d|%d|%d|%d|%s|%s" % [rules.bin_portions(), (rules.get("shelf") as Array).size(), (rules.get("queue") as Array).size(),
 		(rules.get("lift") as Array).size(), (rules.get("packing") as Array).size(), not (rules.get("serving") as Dictionary).is_empty()] + "|%d|%s" % [rules.get("packer_tier"), rules.packer_state()] \
 		+ "|%d|%s|%s|%s|%d" % [sel_machine, sel_slot, sel, lp, rules.get("sign_tier")] \
-		+ "|%d|%d" % [int((rules.get("stats") as Dictionary).get("coated_portions", 0)), int((rules.get("stats") as Dictionary).get("sold", 0))]
+		+ "|%d|%d" % [int((rules.get("stats") as Dictionary).get("coated_portions", 0)), int((rules.get("stats") as Dictionary).get("sold", 0))] \
+		+ "|%s|%d" % [rules.get("promo"), int((rules.get("stats") as Dictionary).get("hand_portions", 0))]   # Step 35: the special, the hand's finishes
 
 
 ## Step 33: what the floor layer draws -- the places (which hold what), the lines, the
@@ -986,6 +1025,7 @@ func _new_actor(kind: String, id: int) -> Node2D:
 		a.easing_to = false
 		a.carrying = false
 		a.recipe = "plain"
+		a.hand = false
 		a.visible = true
 		for meta in ["to", "end_on_arrival"]:
 			if a.has_meta(meta):
@@ -1029,7 +1069,7 @@ func _bin_kinds(n: int) -> Array:
 		for q in int(lot["portions"]):
 			if out.size() >= n:
 				return out
-			out.append(String(lot["recipe"]))
+			out.append(String(lot["recipe"]) + ("+" if lot.has("hand") else ""))
 	return out
 
 
@@ -1165,6 +1205,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				var a := _new_actor(Actor.LOT, lid)
 				a.size_px = _bag_px() * 0.55
 				a.recipe = "plain" if String(e["type"]) == "coat_started" else String(d.get("flavor", "plain"))
+				a.hand = String(e["type"]) == "lot_coated" and String(d.get("hand", "")) != ""
 				var mid := Vector2((bin_at.x + c_at.x) * 0.5, minf(bin_at.y, c_at.y) - 36.0)
 				var path := PackedVector2Array([bin_at, mid, c_at]) if String(e["type"]) == "coat_started" else PackedVector2Array([c_at, mid, bin_at])
 				a.start(path, 0.6, reduced_motion)
@@ -1209,6 +1250,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					b = _new_actor(Actor.BAG, pid)
 					b.size_px = _bag_px()
 				b.recipe = _pack_recipe(pid)
+				b.hand = _hand_mark(_pack_of(pid))
 				b.queue_redraw()
 				b.set_meta("to", "shelf")
 				var k := maxi(0, int(rules.state()["shelf"]) - 1)
@@ -1243,6 +1285,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					bag = _new_actor(Actor.BAG, pid)
 					bag.size_px = _bag_px()
 				bag.recipe = _pack_recipe(pid)
+				bag.hand = _hand_mark(_pack_of(pid))
 				bag.queue_redraw()
 				bag.set_meta("to", "counter")
 				var lane := int(d.get("lane", 0))
@@ -1255,6 +1298,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					customers[cid] = _make_customer(cid, _arrived.get(cid, {}), _door())
 				if customers.has(cid):
 					customers[cid].walk_to(_handoff_spot(lane))
+					customers[cid].hand = bag.hand   # Step 35: they carry out the seal they bought
 			"handed_over":
 				# Step 31: the bag is theirs; they carry it to the auto cashier's drawer and pay there.
 				_end_cargo(int(d["pack"]), "bag")
@@ -1950,7 +1994,7 @@ func _machine_press(p: Vector2) -> bool:
 		for f: String in fr.keys():
 			if (fr[f] as Rect2).has_point(p):   # Step 34: coat this flavor from now on (a locked one clunks)
 				command.emit("set_flavor", {"type": "set_flavor", "id": sel_machine, "flavor": f})
-				_sound("clink" if rules.flavor_open(f) else "thud", 1.3, -10.0)
+				_sound("clink" if (f == "auto" or rules.flavor_open(f)) else "thud", 1.3, -10.0)
 				detail_layer.queue_redraw()
 				return true
 		if (b["sell"] as Rect2).has_point(p):
@@ -1985,7 +2029,7 @@ func _per_min(type: String, tier: int) -> int:
 		return int(round(60000.0 / float(t.get("cycle_ms", 2500)) * float((rules.catalog("M16").get("contract", {}) as Dictionary).get("portions", 2))))
 	if type in ["P05", "P06"]:   # Step 34: a coater's portions a minute, for its flavor at this tier
 		var m: Dictionary = rules.machine(sel_machine) if sel_machine >= 0 else {}
-		var fl := String(m.get("flavor", "")) if not m.is_empty() else String((rules.coater_flavors(type) + [""])[0])
+		var fl := String(rules.coater_flavor(m)) if not m.is_empty() else String((rules.coater_flavors(type) + [""])[0])
 		var batch := float(t.get("batch", 4))
 		var ms := float(rules.flavor(fl).get("coat_ms_per_portion", 1000)) * batch * float(t.get("ms_factor", 1.0))
 		return int(round(60000.0 * batch / maxf(1.0, ms)))
@@ -2195,7 +2239,12 @@ func _draw_machine_node(ci: CanvasItem, id: int) -> void:
 		# Step 34: what it coats -- a kernel of its flavor in a white dot, top left.
 		var fc := Vector2(r.position.x + r.size.x * 0.2, r.position.y + r.size.y * 0.22)
 		ci.draw_circle(fc, r.size.x * 0.13, Color.WHITE)
-		PopFactoryArt.flavor_popcorn(ci, fc, r.size.x * 0.11, String(m.get("flavor", "plain")))
+		if String(m.get("flavor", "")) == "auto":   # Step 35: AUTO -- its two flavors, half each
+			var two: Array = rules.coater_flavors(mtype)
+			PopFactoryArt.flavor_popcorn(ci, fc - Vector2(r.size.x * 0.05, 0), r.size.x * 0.07, String(two[0]))
+			PopFactoryArt.flavor_popcorn(ci, fc + Vector2(r.size.x * 0.05, 0), r.size.x * 0.07, String(two[1]))
+		else:
+			PopFactoryArt.flavor_popcorn(ci, fc, r.size.x * 0.11, String(m.get("flavor", "plain")))
 	PopFactoryArt.state_badge(ci, Vector2(r.end.x - 9, r.position.y + 9), 8.0, String(m["state"]))
 	if int(m["id"]) == sel_machine:
 		var pts := PopMachineArt.round_rect_points(r.grow(3), PopTokens.R_MACHINE)
@@ -2284,6 +2333,9 @@ func _draw_machine_detail(ci: CanvasItem, d: Rect2) -> void:
 		PopFactoryArt.state_badge(ci, g.get_center() + Vector2(4, 4), g.size.x * 0.24, "paused")
 		if type in ["P05", "P06"]:
 			_draw_flavor_chips(ci, d)
+			_draw_payback(ci, d, Vector2(d.position.x, y + fs * 1.4), fs, m)
+	elif type in ["P05", "P06"]:
+		_draw_payback(ci, d, Vector2(d.position.x, y + fs * 1.4), fs, {})
 
 
 ## Step 34: a coater's flavors on its card, right of the numbers under the floor's pause:
@@ -2295,9 +2347,9 @@ func _flavor_rects(d: Rect2) -> Dictionary:
 	var m: Dictionary = rules.machine(sel_machine)
 	if m.is_empty() or not String(m["type"]) in ["P05", "P06"]:
 		return out
-	var fl: Array = rules.coater_flavors(String(m["type"]))
+	var fl: Array = rules.coater_flavors(String(m["type"])) + ["auto"]   # Step 35: AUTO follows the queue
 	var g := _group_rect(d)
-	var cs := clampf(d.size.y * 0.3, 40.0, 72.0)
+	var cs := minf(clampf(d.size.y * 0.3, 40.0, 72.0), d.size.x * 0.5 / float(fl.size()) - 8.0)
 	var y := g.end.y + 10.0
 	for i in fl.size():
 		out[String(fl[i])] = Rect2(Vector2(d.end.x - 8 - (fl.size() - i) * (cs + 8), y), Vector2(cs, cs))
@@ -2309,10 +2361,13 @@ func _draw_flavor_chips(ci: CanvasItem, d: Rect2) -> void:
 	var rs := _flavor_rects(d)
 	for f: String in rs.keys():
 		var r: Rect2 = rs[f]
-		var open := bool(rules.flavor_open(f))
+		var open: bool = bool(rules.flavor_open(f)) if f != "auto" else not (rules._open_flavors_of(String(m["type"])) as Array).is_empty()
 		PopMachineArt._round_rect(ci, r, 8, Color(1, 1, 1, 0.95) if open else Color(0.85, 0.83, 0.8, 0.9))
-		PopFactoryArt.sku_bag(ci, r.position + Vector2(r.size.x * 0.66, r.size.y * 0.9), r.size.x * 0.36, f)
-		PopFactoryArt.flavor_popcorn(ci, r.position + Vector2(r.size.x * 0.3, r.size.y * 0.42), r.size.x * 0.16, f)
+		if f == "auto":
+			_draw_auto_chip(ci, r, rules.coater_flavors(String(m["type"])))
+		else:
+			PopFactoryArt.sku_bag(ci, r.position + Vector2(r.size.x * 0.66, r.size.y * 0.9), r.size.x * 0.36, f)
+			PopFactoryArt.flavor_popcorn(ci, r.position + Vector2(r.size.x * 0.3, r.size.y * 0.42), r.size.x * 0.16, f)
 		if not open:   # a padlock
 			var c := r.get_center()
 			ci.draw_rect(Rect2(c - Vector2(r.size.x * 0.16, -r.size.y * 0.02), Vector2(r.size.x * 0.32, r.size.y * 0.24)), PopPalette.INK)
@@ -2993,3 +3048,284 @@ func _draw_motion_part(n: Node2D) -> void:
 				var a := TAU * q / 4.0
 				n.draw_line(Vector2.ZERO, Vector2(cos(a), sin(a)) * w * 0.22, Color(1, 1, 1, 0.85), 2.5)
 			n.draw_circle(Vector2.ZERO, w * 0.05, PopTokens.STEEL_DEEP)
+
+
+# -- Step 35: the hand's spoon, the coater's payback, AUTO -------------------------------
+## A coater whose batch is on the drum shows a spoon above it (once the hand cooks
+## comfortably). Holding it pours the flavor over the drum and a ring fills towards the
+## flavor's gold; letting go there finishes the batch by hand (gold flourish, the number
+## of its quality, a glint on the lot and a gold seal on its bags). The spoon layer is
+## redrawn every frame only while a spoon is held or a flourish plays.
+
+func _spoon_ids() -> Array:
+	var out: Array = []
+	if rules == null or not bool(rules.hand_open()):
+		return out
+	for x: String in ["P05", "P06"]:
+		for m: Dictionary in rules.of_type(x):
+			if bool(rules.can_finish(m)) or int((rules.get("finishing") as Dictionary).get("machine", -1)) == int(m["id"]):
+				out.append(int(m["id"]))
+	return out
+
+
+func _spoon_rect(id: int) -> Rect2:
+	var m: Dictionary = rules.machine(id)
+	var r := slot_rect(String(m["floor"]), int(m["slot"]))
+	var s := clampf(r.size.x * 0.55, 44.0, 60.0)   # a finger's target even on the dense floor
+	return Rect2(Vector2(r.get_center().x - s * 0.5, r.position.y - s * 0.7), Vector2(s, s))
+
+
+func _spoon_at(p: Vector2) -> int:
+	for id: int in _spoon_ids():
+		if _spoon_rect(id).grow(4).has_point(p):
+			return id
+	return -1
+
+
+func _step_spoons(delta: float) -> void:
+	if rules == null:
+		return
+	var fin: Dictionary = rules.get("finishing")
+	var ids := _spoon_ids()
+	if not _spoon_fx.is_empty():
+		_spoon_fx["t"] = float(_spoon_fx["t"]) + delta
+		if float(_spoon_fx["t"]) > 2.4:
+			_spoon_fx = {}
+			_spoon_key = ""
+	# The 20 s rule: a spoon on offer that the hand has never used gets a slow gold pulse.
+	# (counted over every moment a spoon was on offer -- a batch is on a drum 2-10 s at a time, so
+	# a timer that restarted with each batch never reached 20 s: the first blind player never saw it)
+	var used := not ((rules.get("stats") as Dictionary).get("hand_finish", {}) as Dictionary).is_empty()
+	if used:
+		_spoon_seen = -1.0
+	elif not ids.is_empty():
+		_spoon_seen = maxf(0.0, _spoon_seen) + delta
+	var pulse := _spoon_seen >= 20.0
+	var key := "%s|%s|%s" % [ids, size, sel_machine]
+	if not fin.is_empty() or not _spoon_fx.is_empty() or pulse or key != _spoon_key:
+		_spoon_key = key
+		spoon_layer.queue_redraw()
+
+
+func _draw_spoons(ci: CanvasItem) -> void:
+	if rules == null:
+		return
+	var fin: Dictionary = rules.get("finishing")
+	for id: int in _spoon_ids():
+		var m: Dictionary = rules.machine(id)
+		var h: Dictionary = m["held"]
+		var fl := String(h.get("recipe", rules.coater_flavor(m)))
+		var sr := _spoon_rect(id)
+		var c := sr.get_center()
+		var held := int(fin.get("machine", -1)) == id
+		if held:
+			_draw_pour(ci, id, fl, int(fin.get("ms", 0)))
+		ci.draw_circle(c + Vector2(0, 3), sr.size.x * 0.5, Color(PopPalette.INK, 0.25))   # it stands up off the floor
+		ci.draw_circle(c, sr.size.x * 0.5, PopPalette.GOLD if not held else Color.WHITE)
+		ci.draw_arc(c, sr.size.x * 0.5, 0, TAU, 24, Color.WHITE if not held else PopPalette.GOLD, 3.5)
+		if _spoon_seen >= 20.0 and not held:
+			var a := 0.35 + 0.35 * sin(_clock * 3.0)
+			ci.draw_arc(c, sr.size.x * (0.6 + 0.05 * sin(_clock * 3.0)), 0, TAU, 28, Color(PopPalette.GOLD, a), 4.0)
+		PopFactoryArt.spoon(ci, c + Vector2(0, sr.size.y * 0.04) + (Vector2(0, sr.size.y * 0.12) if held else Vector2.ZERO), sr.size.x * 0.62, fl)
+	if not _spoon_fx.is_empty():
+		_draw_finish_fx(ci)
+
+
+## While held: a ring round the coater fills towards the flavor's gold (and past it, to the
+## drip), and the flavor pours from the spoon onto the drum -- a ribbon of caramel, a cocoa
+## swirl, a fall of cheese or chili dust.
+func _draw_pour(ci: CanvasItem, id: int, fl: String, ms: int) -> void:
+	var m: Dictionary = rules.machine(id)
+	var r := slot_rect(String(m["floor"]), int(m["slot"]))
+	var c := r.get_center()
+	var rad := maxf(r.size.x * 0.62, 46.0)   # readable round a small place too
+	var w: Array = rules.finish_window(fl)
+	var drip := float(int(w[1]) + int(rules.hand_rules().get("drip_ms", 1200)))
+	var a0 := -PI * 0.5
+	ci.draw_arc(c, rad, 0, TAU, 40, Color(PopPalette.INK, 0.25), 7.0)
+	ci.draw_arc(c, rad, a0 + TAU * float(w[0]) / drip, a0 + TAU * float(w[1]) / drip, 16, PopPalette.GOLD, 9.0)
+	var k := PopFactoryArt.flavor_look(fl)
+	var at := clampf(float(ms) / drip, 0.0, 1.0)
+	ci.draw_arc(c, rad, a0, a0 + TAU * at, 40, k["rim"], 5.0)
+	var tip := c + Vector2(cos(a0 + TAU * at), sin(a0 + TAU * at)) * rad
+	ci.draw_circle(tip, 6.0, Color.WHITE)
+	ci.draw_circle(tip, 4.0, k["rim"])
+	var top := _spoon_rect(id).get_center() + Vector2(-_spoon_rect(id).size.x * 0.12, _spoon_rect(id).size.y * 0.3)
+	var drum := c + Vector2(0, -r.size.y * 0.05)
+	var t := _clock * 6.0
+	match fl:
+		"caramel":   # a thick glossy ribbon that sways
+			var pts := PackedVector2Array()
+			for i in 9:
+				var q := float(i) / 8.0
+				pts.append(top.lerp(drum, q) + Vector2(sin(t + q * 5.0) * 5.0 * q, 0))
+			ci.draw_polyline(pts, k["fill"], 7.0)
+			ci.draw_polyline(pts, Color(1, 1, 1, 0.55), 2.0)
+		"cocoa":   # a dark stream that curls into a swirl on the drum
+			ci.draw_line(top, drum, k["stripe"], 5.0)
+			ci.draw_arc(drum, r.size.x * 0.16, t, t + PI * 1.5, 12, k["mark"], 3.0)
+		_:   # dust: specks falling
+			for i in 10:
+				var q := fmod(float(i) * 0.137 + _clock * 1.7, 1.0)
+				var p := top.lerp(drum + Vector2((float(i % 5) - 2.0) * r.size.x * 0.06, 0), q)
+				ci.draw_circle(p, 2.5, k["mark"])
+
+
+## After a release: perfect -- gold rings, a large glint and the quality (100); near -- a
+## smaller ring and its quality; early or late -- a grey puff (the machine goes on).
+## Lasts 2.4 s (a still a second later must show it: AGENTS 2026-11-03).
+func _draw_finish_fx(ci: CanvasItem) -> void:
+	var m: Dictionary = rules.machine(int(_spoon_fx["machine"]))
+	if m.is_empty():
+		return
+	var r := slot_rect(String(m["floor"]), int(m["slot"]))
+	var c := r.get_center()
+	var t := float(_spoon_fx["t"])
+	var g := String(_spoon_fx["grade"])
+	var fade := clampf(1.0 - (t - 1.6) / 0.8, 0.0, 1.0)
+	var font := ThemeDB.fallback_font
+	var fs := int(clampf(r.size.x * 0.42, 18.0, 34.0))
+	if g == "perfect" or g == "near":
+		var col := PopPalette.GOLD if g == "perfect" else Color(0.82, 0.86, 0.92)
+		for i in (3 if g == "perfect" else 1):
+			var k := fmod(t * 0.9 + float(i) * 0.3, 1.0)
+			ci.draw_arc(c, r.size.x * (0.4 + 0.5 * k), 0, TAU, 32, Color(col, (1.0 - k) * fade), 5.0)
+		PopFactoryArt.glint(ci, c + Vector2(r.size.x * 0.28, -r.size.y * 0.3), r.size.x * (0.3 if g == "perfect" else 0.2), Color(1, 1, 1, fade))
+		var txt := str(int(_spoon_fx["quality"]))
+		var tp := c + Vector2(-fs * 0.7, -r.size.y * 0.62 - t * 10.0)
+		ci.draw_string_outline(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 6, Color(PopPalette.INK, fade))
+		ci.draw_string(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(col, fade))
+	else:
+		for i in 4:
+			var o := Vector2(cos(float(i) * 1.7), sin(float(i) * 1.7)) * (8.0 + t * 14.0)
+			ci.draw_circle(c + Vector2(0, -r.size.y * 0.35) + o, 7.0 + t * 3.0, Color(0.7, 0.7, 0.72, 0.5 * fade))
+
+
+func _spoon_event(e: Dictionary) -> void:
+	var d: Dictionary = e["data"]
+	match String(e["type"]):
+		"finish_start":
+			_sound("pop_1", 0.6, -14.0)
+			spoon_layer.queue_redraw()
+		"finished":
+			_spoon_fx = {"machine": int(d["machine"]), "grade": String(d["grade"]), "quality": int(d["quality"]), "t": 0.0}
+			match String(d["grade"]):
+				"perfect":
+					_sound("upgrade", 1.25, -4.0)
+					_sound("clink", 1.6, -8.0)
+					if not reduced_motion:
+						var m: Dictionary = rules.machine(int(d["machine"]))
+						if not m.is_empty():
+							fx.sparkle(slot_rect(String(m["floor"]), int(m["slot"])).get_center(), machine_size() / 900.0, rng, 8, 110.0)
+				"near":
+					_sound("clink", 1.3, -8.0)
+				_:
+					_sound("thud", 1.2, -12.0)
+		"coat_lost":   # crumbs fall from the drum: portions the machine lost
+			var lm: Dictionary = rules.machine(int(d["machine"]))
+			if not lm.is_empty() and not reduced_motion:
+				var lr := slot_rect(String(lm["floor"]), int(lm["slot"]))
+				# A few crumbs of the flavor (not smoke: the first blind player read smoke as burning).
+				fx.burst(Vector2(lr.get_center().x, lr.end.y - 6.0), 3, machine_size() / 2600.0, rng, PopFactoryArt.flavor_look(String(d.get("flavor", "plain")))["fill"])
+		"paid_back":
+			var pm: Dictionary = rules.machine(int(d["machine"]))
+			if not pm.is_empty():
+				_sound("coin", 1.3, -6.0)
+				if not reduced_motion:
+					fx.coin(slot_rect(String(pm["floor"]), int(pm["slot"])).get_center(), machine_size() / 900.0)
+		"promo_on":
+			_sound("clink", 1.0, -8.0)
+			if not reduced_motion:
+				fx.sparkle(_sign_rect().get_center(), machine_size() / 900.0, rng, 6, 90.0)
+
+
+## A pack the model holds, by id (the shelf, the station, the counter, a filler's hands).
+func _pack_of(pid: int) -> Dictionary:
+	if rules == null:
+		return {}
+	for arr: Array in [rules.get("shelf"), rules.get("packing")]:
+		for p: Dictionary in arr:
+			if int(p["id"]) == pid:
+				return p
+	for sv: Dictionary in rules.get("serves"):
+		if int(sv["pack"]["id"]) == pid:
+			return sv["pack"]
+	for m: Dictionary in rules.get("machines"):
+		var h: Dictionary = m["held"]
+		if not h.is_empty() and int(h.get("id", -1)) == pid:
+			return h
+	return {}
+
+
+## The hand's seal goes on a flavored bag the hand finished (its quality 95+).
+func _hand_mark(p: Dictionary) -> bool:
+	return not p.is_empty() and int(p.get("hand", 0)) > 0 and int(p.get("quality", 0)) >= 95
+
+
+## AUTO's chip: the coater's two kernels, a turning arrow between them (it follows the queue).
+func _draw_auto_chip(ci: CanvasItem, r: Rect2, two: Array) -> void:
+	var c := r.get_center()
+	PopFactoryArt.flavor_popcorn(ci, c + Vector2(-r.size.x * 0.2, -r.size.y * 0.12), r.size.x * 0.13, String(two[0]))
+	PopFactoryArt.flavor_popcorn(ci, c + Vector2(r.size.x * 0.2, r.size.y * 0.14), r.size.x * 0.13, String(two[1]))
+	ci.draw_arc(c, r.size.x * 0.32, -PI * 0.15, PI * 0.6, 10, PopPalette.INK, 2.5)
+	ci.draw_arc(c, r.size.x * 0.32, PI * 0.85, PI * 1.6, 10, PopPalette.INK, 2.5)
+	var tip := c + Vector2(cos(PI * 0.6), sin(PI * 0.6)) * r.size.x * 0.32
+	ci.draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-7, -2), tip + Vector2(-1, -8)]), PopPalette.INK)
+
+
+## A coater's payback on its card: a bar of what it has earned back (its bags' price over
+## butter's, less ingredients and upkeep) against what it cost, and the time it took -- or,
+## before buying, the estimate at this sign: a coin with ~+N a minute and a clock with ~M min.
+func _draw_payback(ci: CanvasItem, d: Rect2, at: Vector2, fs: int, m: Dictionary) -> void:
+	var font := ThemeDB.fallback_font
+	var small := int(fs * 0.8)
+	var x := at.x + fs * 2.0
+	var y := at.y
+	if y > d.end.y - 4.0:
+		return
+	if m.is_empty():
+		var type := _slot_type(String(sel_slot.get("floor", "packing")))
+		var open: Array = rules._open_flavors_of(type)
+		if open.is_empty():
+			return
+		var e: Dictionary = rules.coater_estimate(type, String(open[0]))
+		PopMachineArt.draw_coin(ci, Vector2(at.x + fs * 0.9, y - fs * 0.35), fs * 0.38)
+		var net := int(e.get("net_per_min", 0))
+		ci.draw_string(font, Vector2(x, y), "~%+d" % net, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.OK if net > 0 else PopTokens.WARN)
+		if float(e.get("payback_min", -1.0)) > 0.0:
+			_clock_icon(ci, Vector2(x + fs * 3.4, y - fs * 0.35), fs * 0.38)
+			ci.draw_string(font, Vector2(x + fs * 4.0, y), "~%d" % int(ceil(float(e["payback_min"]))), HORIZONTAL_ALIGNMENT_LEFT, -1, small, PopPalette.INK)
+		return
+	var net := int(rules.coater_net(m))
+	var paid := maxi(1, int(m["paid"]))
+	var bar := Rect2(Vector2(x, y - fs * 0.6), Vector2(minf(fs * 4.5, d.size.x * 0.32), fs * 0.45))
+	PopMachineArt.draw_coin(ci, Vector2(at.x + fs * 0.9, y - fs * 0.35), fs * 0.38)
+	ci.draw_rect(bar, Color(PopPalette.INK, 0.15))
+	ci.draw_rect(Rect2(bar.position, Vector2(bar.size.x * clampf(float(net) / float(paid), 0.0, 1.0), bar.size.y)), PopTokens.OK)
+	ci.draw_rect(bar, Color(PopPalette.INK, 0.5), false, 1.5)
+	var tx := bar.end.x + fs * 0.4
+	if m.has("paid_back_ms"):   # earned back: a tick and the minutes it took
+		var tc := Vector2(tx + fs * 0.3, y - fs * 0.35)
+		ci.draw_circle(tc, fs * 0.32, PopTokens.OK)
+		ci.draw_polyline(PackedVector2Array([tc + Vector2(-fs * 0.15, 0), tc + Vector2(-fs * 0.03, fs * 0.12), tc + Vector2(fs * 0.17, -fs * 0.12)]), Color.WHITE, 2.5)
+		ci.draw_string(font, Vector2(tx + fs * 0.8, y), "%d:%02d" % [int(m["paid_back_ms"]) / 60000, (int(m["paid_back_ms"]) / 1000) % 60], HORIZONTAL_ALIGNMENT_LEFT, -1, small, PopPalette.INK)
+	else:
+		ci.draw_string(font, Vector2(tx, y), "%d/%d" % [maxi(0, net), paid], HORIZONTAL_ALIGNMENT_LEFT, -1, small, PopPalette.INK)
+		# The minutes still to go: at the rate it has earned so far (after its first minute), or
+		# the estimate at this sign -- a clock and ~M under the bar.
+		var since := float(flow_since(m)) / 60000.0
+		var rate := float(net) / since if since >= 1.0 and net > 0 else float(rules.coater_estimate(String(m["type"]), String(rules.coater_flavor(m)), int(m["tier"]), paid).get("net_per_min", 0))
+		if rate > 0.0 and y + fs * 1.2 < d.end.y:
+			_clock_icon(ci, Vector2(at.x + fs * 0.9, y + fs * 0.85), fs * 0.32)
+			ci.draw_string(font, Vector2(x, y + fs * 1.2), "~%d" % int(ceil(float(paid - net) / rate)), HORIZONTAL_ALIGNMENT_LEFT, -1, small, PopPalette.INK)
+
+
+func flow_since(m: Dictionary) -> int:
+	return int(rules.get("flow_ms")) - int(m.get("built_ms", 0))
+
+
+func _clock_icon(ci: CanvasItem, c: Vector2, r: float) -> void:
+	ci.draw_circle(c, r, Color.WHITE)
+	ci.draw_arc(c, r, 0, TAU, 16, PopPalette.INK, 2.0)
+	ci.draw_line(c, c + Vector2(0, -r * 0.7), PopPalette.INK, 2.0)
+	ci.draw_line(c, c + Vector2(r * 0.5, 0), PopPalette.INK, 2.0)

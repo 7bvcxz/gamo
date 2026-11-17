@@ -43,7 +43,8 @@ def calls(path):
 
 def audit(run, path):
     counts, flagged, filters = {}, [], set()
-    own = re.compile(r"(scratchpad|\$\w+|\$\{\w+\})(/phone(/play\.mjs)?|/blind\w*/" + re.escape(run) + r")?/?$")
+    # (Step 35: the repo's own phone tool and an evidence run folder count as the player's too)
+    own = re.compile(r"((scratchpad|\$\w+|\$\{\w+\})(/phone(/play\.mjs)?|/blind\w*/" + re.escape(run) + r")?|/tools/blind/play\.mjs|/blind/" + re.escape(run) + r")/?$")
     for name, inp in calls(path):
         counts[name] = counts.get(name, 0) + 1
         if name == "Read":
