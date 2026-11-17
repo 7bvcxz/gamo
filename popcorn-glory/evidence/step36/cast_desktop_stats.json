@@ -1,0 +1,32 @@
+{
+ "video_start_wall": 1794945081861,
+ "audio_start_wall": 1794945103664,
+ "run_start_wall": 1794945103665,
+ "running": {
+  "sold": 21,
+  "happy": 21,
+  "abandoned": 0,
+  "passed_by": 0,
+  "popularity": [
+   50.4,
+   54.6
+  ],
+  "arrived_who": {
+   "classic": 7,
+   "kid": 5,
+   "rush": 6,
+   "student": 6
+  }
+ },
+ "stopped": {
+  "sold": 9,
+  "abandoned": 0,
+  "passed_by": 0,
+  "popularity": [
+   54.6,
+   56.4
+  ]
+ },
+ "conserved": true,
+ "wrong_sku": 0
+}
