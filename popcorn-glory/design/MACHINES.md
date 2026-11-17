@@ -10,9 +10,9 @@
 |---|---|
 | 0 | P01 ●, P02 ●, P03 ●, P04 ●, P05 ●, P06 ●, P07 ●, P08 ● |
 | 2 | M06 ●, M08 ● |
-| 3 | M01 ●, M02 ●, M04 ●, M07 ●, S01 ●, S07 ●, U04 |
-| 4 | M03 ●, M05 ●, M09 ●, M12 ●, S02 ●, S03 ●, S06 ●, U01, U02, U03 |
-| 5 | M10 ●, M11 ●, M13 ●, M14 ●, M15 ●, S04 ●, S05 ●, U05, U06 |
+| 3 | M01 ●, M02 ●, M04 ●, M07 ●, S01 ●, S07 ●, U04 ● |
+| 4 | M03 ●, M05 ●, M09 ●, M12 ●, S02 ●, S03 ●, S06 ●, U01 ●, U02 ●, U03 ● |
+| 5 | M10 ●, M11 ●, M13 ●, M14 ●, M15 ●, S04 ●, S05 ●, U05 ●, U06 |
 | 6 | M16 ●, S08 ●, U07, U08 |
 
 ● = 지금 돈다(Step 26: M07 자동 냄비, P03 부피 충전기, S07 셀프 키오스크).
@@ -73,11 +73,11 @@
 
 | ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| U01 | Maintenance Robot | support · 1 | a robot rolls to a stopped machine | repair (fixes=faults (not unpaid)) | a faulted machine → the machine running again | one per factory | 간판 4 | faults | 600 / 2분 | — / — / — | none until machines can fault (Step 32) | 체계 대기: faults |
-| U02 | Lubrication Station | support · 1 | an oil can tips over a neighbour | neighbor_speed (cycle_minus=0.1, range=adjacent places) | oil → neighbours' cycles 10% shorter | affects only adjacent places | 간판 4 | oil | 500 / 1분 | — / — / — | neighbours 10% faster once oil exists | Step 32 |
-| U03 | Energy Saver | support · 1 | a leaf lamp dims | upkeep (upkeep_per_coin_plus=0.25, applies_to=working machines on its floor) | coins → 25% less upkeep | one per floor | 간판 4 | — | 700 / 0분 | cut 0.25 / cut 0.35 / cut 0.45 | a floor of 4 kettles saves ~4 coins a minute | Step 32 |
-| U04 | Buffer Lift | support · 1 | a crate rises between floors | buffer (bin_plus=12, shelf_plus=4) | — → bin +12 portions, shelf +4 packs | one per factory | 간판 3 | — | 500 / 1분 | bin 12, shelf 4 / bin 24, shelf 6 / bin 36, shelf 8 | fewer stalls when a stage pauses | Step 32 |
-| U05 | Quality Inspector | support · 1 | a magnifier sweeps the shelf | inspect (threshold=60, for=price-minded customers) | packs below quality 60 → bargain packs | covers the shelf | 간판 5 | customer_preferences | 600 / 1분 | — / — / — | none until customers prefer price or quality (Step 36) | 체계 대기: customer_preferences |
+| U01 | Maintenance Robot | support · 1 | a robot rolls from machine to machine | triage (low_wallet=20, pays_first=machines that make, pack or hand over goods) | the wallet → below 20 coins helpers stop first; kettles, packers and lanes keep their coins | covers the factory | 간판 4 | — | 600 / 2분 | — / — / — | no stalled kettles while a helper eats the last coins | 돈다 |
+| U02 | Lubrication Station | support · 1 | an arm oils the machines beside it | neighbor_speed (cycle_minus=0.1, range=adjacent places) | oil → the places beside it on its floor run 10/15/20% faster | on any floor | 간판 4 | oil | 500 / 1분 | minus 0.1 / minus 0.15 / minus 0.2 | two neighbours a tenth faster | 돈다 |
+| U03 | Energy Saver | support · 1 | a leaf glows while its floor works | upkeep (cut=0.25, applies_to=working machines on its floor) | its floor's power → upkeep 25/35/45% lower on its floor | on any floor | 간판 4 | — | 700 / 0분 | cut 0.25 / cut 0.35 / cut 0.45 | a quarter of a busy floor's upkeep | 돈다 |
+| U04 | Buffer Lift | support · 1 | a lift carries crates between the floors | buffer (bin_plus=12, shelf_plus=4) | — → the raw bin +12/24/36 portions, the shelf +4/6/8 packs | on the packing floor | 간판 3 | — | 500 / 1분 | bin 12, shelf 4 / bin 24, shelf 6 / bin 36, shelf 8 | kettles block less, rushes find packs | 돈다 |
+| U05 | Quality Inspector | support · 1 | a lens checks each lot | inspect (threshold=60, for=customers who ask for a bargain) | lots below quality 60 → bargain packs (price 7) sold only to customers who ask; plain packs stay good | on the packing floor | 간판 5 | — | 600 / 1분 | — / — / — | burnt and early lots stop pulling plain prices down | 돈다 |
 | U06 | Sanitation Bot | support · 1 | a bot leaves a trail of bubbles | freshness (prevents=quality loss of aged stock) | stock in the bin → no aging | covers the floor | 간판 5 | aging | 600 / 2분 | — / — / — | none until stock ages | 체계 대기: aging |
 | U07 | Demand Scheduler | support · 1 | a calendar flips to the next rush | schedule (reads=['news', 'preferences']) | news, preferences → the right flavor first | one per factory | 간판 6 | news, flavors | 1200 / 2분 | — / — / — | none until news and flavors (Steps 34, 37) | 체계 대기: news, flavors |
 | U08 | Route Balancer | support · 1 | arrows swap between two lines | balance (needs_lines=2) | goods in a blocked line → the same goods in an idle line | needs two parallel lines | 간판 6 | parallel_lines | 1500 / 2분 | — / — / — | none until parallel lines (Step 33) | 체계 대기: parallel_lines |
@@ -87,8 +87,6 @@
 | 체계 | 기다리는 기계 | 생기는 Step |
 |---|---|---|
 | aging | U06 | 32 |
-| customer_preferences | U05 | 36 |
-| faults | U01 | 32 |
 | flavors | M12, P05, P06, U07 | 34 |
 | news | U07 | 37 |
 | parallel_lines | U08 | 33 |

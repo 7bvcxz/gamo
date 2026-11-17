@@ -1596,25 +1596,24 @@
     "robot",
     "wrench"
    ],
-   "motion": "a robot rolls to a stopped machine",
-   "operation": "restarts machines stopped by a fault",
+   "motion": "a robot rolls from machine to machine",
+   "operation": "keeps the line running when the wallet runs low",
    "contract": {
-    "kind": "repair",
-    "fixes": "faults (not unpaid)"
+    "kind": "triage",
+    "low_wallet": 20,
+    "pays_first": "machines that make, pack or hand over goods"
    },
    "inputs": [
-    "a faulted machine"
+    "the wallet"
    ],
    "outputs": [
-    "the machine running again"
+    "below 20 coins helpers stop first; kettles, packers and lanes keep their coins"
    ],
-   "queue": "one per factory",
+   "queue": "covers the factory",
    "prereq": {
     "sign": 4
    },
-   "requires": [
-    "faults"
-   ],
+   "requires": [],
    "cost": 600,
    "growth": 1.25,
    "upkeep_per_min": 2,
@@ -1629,8 +1628,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "none until machines can fault (Step 32)",
-   "runtime": null,
+   "marginal": "no stalled kettles while a helper eats the last coins",
+   "runtime": "U01",
    "step": 32
   },
   {
@@ -1640,10 +1639,10 @@
    "floor": "support",
    "slots": 1,
    "parts": [
-    "box",
+    "oiler",
     "oilcan"
    ],
-   "motion": "an oil can tips over a neighbour",
+   "motion": "an arm oils the machines beside it",
    "operation": "oils the machines beside it",
    "contract": {
     "kind": "neighbor_speed",
@@ -1654,9 +1653,9 @@
     "oil"
    ],
    "outputs": [
-    "neighbours' cycles 10% shorter"
+    "the places beside it on its floor run 10/15/20% faster"
    ],
-   "queue": "affects only adjacent places",
+   "queue": "on any floor",
    "prereq": {
     "sign": 4
    },
@@ -1668,17 +1667,20 @@
    "upkeep_per_min": 1,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "minus": 0.1
     },
     {
-     "cost": 400
+     "cost": 400,
+     "minus": 0.15
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "minus": 0.2
     }
    ],
-   "marginal": "neighbours 10% faster once oil exists",
-   "runtime": null,
+   "marginal": "two neighbours a tenth faster",
+   "runtime": "U02",
    "step": 32
   },
   {
@@ -1688,23 +1690,23 @@
    "floor": "support",
    "slots": 1,
    "parts": [
-    "box",
+    "saver",
     "leaf"
    ],
-   "motion": "a leaf lamp dims",
+   "motion": "a leaf glows while its floor works",
    "operation": "lowers the upkeep of working machines on its floor",
    "contract": {
     "kind": "upkeep",
-    "upkeep_per_coin_plus": 0.25,
+    "cut": 0.25,
     "applies_to": "working machines on its floor"
    },
    "inputs": [
-    "coins"
+    "its floor's power"
    ],
    "outputs": [
-    "25% less upkeep"
+    "upkeep 25/35/45% lower on its floor"
    ],
-   "queue": "one per floor",
+   "queue": "on any floor",
    "prereq": {
     "sign": 4
    },
@@ -1726,8 +1728,8 @@
      "cut": 0.45
     }
    ],
-   "marginal": "a floor of 4 kettles saves ~4 coins a minute",
-   "runtime": null,
+   "marginal": "a quarter of a busy floor's upkeep",
+   "runtime": "U03",
    "step": 32
   },
   {
@@ -1740,7 +1742,7 @@
     "lift",
     "crate"
    ],
-   "motion": "a crate rises between floors",
+   "motion": "a lift carries crates between the floors",
    "operation": "adds real buffer room between floors",
    "contract": {
     "kind": "buffer",
@@ -1749,9 +1751,9 @@
    },
    "inputs": [],
    "outputs": [
-    "bin +12 portions, shelf +4 packs"
+    "the raw bin +12/24/36 portions, the shelf +4/6/8 packs"
    ],
-   "queue": "one per factory",
+   "queue": "on the packing floor",
    "prereq": {
     "sign": 3
    },
@@ -1776,8 +1778,8 @@
      "shelf": 8
     }
    ],
-   "marginal": "fewer stalls when a stage pauses",
-   "runtime": null,
+   "marginal": "kettles block less, rushes find packs",
+   "runtime": "U04",
    "step": 32
   },
   {
@@ -1787,29 +1789,27 @@
    "floor": "support",
    "slots": 1,
    "parts": [
-    "box",
+    "desk",
     "magnifier"
    ],
-   "motion": "a magnifier sweeps the shelf",
-   "operation": "moves low-quality packs to a bargain shelf",
+   "motion": "a lens checks each lot",
+   "operation": "sends true rejects to a bargain SKU",
    "contract": {
     "kind": "inspect",
     "threshold": 60,
-    "for": "price-minded customers"
+    "for": "customers who ask for a bargain"
    },
    "inputs": [
-    "packs below quality 60"
+    "lots below quality 60"
    ],
    "outputs": [
-    "bargain packs"
+    "bargain packs (price 7) sold only to customers who ask; plain packs stay good"
    ],
-   "queue": "covers the shelf",
+   "queue": "on the packing floor",
    "prereq": {
     "sign": 5
    },
-   "requires": [
-    "customer_preferences"
-   ],
+   "requires": [],
    "cost": 600,
    "growth": 1.25,
    "upkeep_per_min": 1,
@@ -1824,8 +1824,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "none until customers prefer price or quality (Step 36)",
-   "runtime": null,
+   "marginal": "burnt and early lots stop pulling plain prices down",
+   "runtime": "U05",
    "step": 32
   },
   {

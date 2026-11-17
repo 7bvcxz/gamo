@@ -60,6 +60,7 @@ var _hint_key := ""
 ## Step 28: each machine's moving part (drawn once, moved by rotation/position/scale)
 ## and the kernels in flight from a hopper to a kettle.
 var _motion := {}
+var overview := false          ## Step 32: the upkeep overview is open
 var _heat_node: Node2D = null   ## Step 29: the kitchen's thermometer beside its places
 var _heat_shown := -1.0
 var _kernel_flights: Array = []
@@ -132,7 +133,9 @@ func setup(p_rules: PopRules) -> void:
 		detail_layer.name = "Detail"
 		add_child(detail_layer)
 		detail_layer.draw.connect(func() -> void:
-			if selected >= 0:
+			if overview:
+				_draw_overview(detail_layer, detail_rect())
+			elif selected >= 0:
 				_draw_detail(detail_layer, selected, detail_rect()))
 	_floors_key = ""
 	_wide_default = true
@@ -172,6 +175,12 @@ func news_rect() -> Rect2:
 ## The open floor's detail: inside that floor on a portrait screen, in the right
 ## column under the card on a landscape one.
 func detail_rect() -> Rect2:
+	if overview:   # Step 32: over the shop floor, like a machine's detail (on desktop, the side panel)
+		if is_wide():
+			var xo := size.x * 0.62 + 16
+			return Rect2(Vector2(xo, 210), Vector2(size.x - xo - 16, size.y - 230))
+		var tt := floor_rect(TOP)
+		return Rect2(tt.position + Vector2(12, 8), Vector2(tt.size.x - 24, tt.size.y - 16))
 	if selected < 0:
 		return Rect2()
 	if is_wide():
@@ -216,8 +225,12 @@ func extra_rects() -> Dictionary:
 	var c := machine_centre()
 	var r := ring_radius() + machine_size() * 0.045
 	out["ring"] = Rect2(c - Vector2(r, r), Vector2(r * 2.0, r * 2.0))
-	if selected >= 0:
+	if selected >= 0 or overview:
 		out["detail"] = detail_rect()
+	if rules and not (rules.get("machines") as Array).is_empty():
+		out["overview"] = overview_button_rect()   # Step 32
+	if overview:
+		out["pause_all"] = _pause_all_rect()
 	# Step 26: every machine place, and the chosen machine's two buttons.
 	for f: String in FLOOR_NAME:
 		for k in (int(rules.slots(f)) if rules else 0):
@@ -567,10 +580,11 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 		if k < shelf_n:
 			var shelved: Array = rules.get("shelf") if rules else []
 			var prem := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "premium"
+			var barg := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "bargain"
 			if k < shelved.size() and int((shelved[k] as Dictionary).get("size", 2)) == 1:
 				PopFactoryArt.cup(ci, foot, w * 0.9)   # Step 30: a cup
 			else:
-				PopFactoryArt.bag(ci, foot, w, PopTokens.MACHINE, false, 0, 2, prem)
+				PopFactoryArt.bag(ci, foot, w, PopTokens.STEEL_DEEP if barg else PopTokens.MACHINE, false, 0, 2, prem, barg)
 		else:
 			PopMachineArt._round_rect(ci, Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35))
 
@@ -1021,6 +1035,7 @@ func _reconcile_customers() -> void:
 			a.skin = SKIN[id % 5]
 			a.order_size = int(queue[i]["order"]["size"])
 			a.order_premium = String(queue[i]["order"].get("recipe", "plain")) == "premium"
+			a.order_bargain = String(queue[i]["order"].get("recipe", "plain")) == "bargain"
 			a.position = _door() if now_ms > 500 else _queue_spot(i)
 			customers[id] = a
 		customers[id].walk_to(_queue_spot(i))
@@ -1159,7 +1174,7 @@ func card_command() -> Dictionary:
 	if key == "refill":
 		return {"type": "refill", "id": sel_machine}
 	if key.begins_with("build_"):
-		return {"type": "build", "machine": key.trim_prefix("build_"), "slot": int(sel_slot["k"])}
+		return {"type": "build", "machine": key.trim_prefix("build_"), "slot": int(sel_slot["k"]), "floor": String(sel_slot["floor"])}
 	if key == "machine_up":
 		return {"type": "upgrade_machine", "id": sel_machine}
 	match key:
@@ -1533,6 +1548,23 @@ func _clear_machine_selection() -> void:
 func _machine_press(p: Vector2) -> bool:
 	if rules == null:
 		return false
+	# Step 32: the upkeep overview -- its button, and pause / resume everything.
+	if not (rules.get("machines") as Array).is_empty() and overview_button_rect().has_point(p):
+		overview = not overview
+		if overview:
+			_clear_machine_selection()
+			selected = -1
+		detail_layer.queue_redraw()
+		return true
+	if overview:
+		if _pause_all_rect().has_point(p):
+			var any_on := (rules.get("machines") as Array).any(func(x: Dictionary) -> bool: return String(x["state"]) != "paused")
+			command.emit("pause_all", {"type": "pause_all", "paused": any_on})
+			detail_layer.queue_redraw()
+			return true
+		if not detail_rect().has_point(p):
+			overview = false
+			detail_layer.queue_redraw()
 	if not sel_slot.is_empty():
 		var rs := _picker_rects(detail_rect())
 		for i in rs.size():
@@ -1599,6 +1631,7 @@ func _per_min(type: String, tier: int) -> int:
 func _draw_machines(ci: CanvasItem) -> void:
 	if rules == null:
 		return
+	_draw_overview_button(ci)
 	for f: String in FLOOR_NAME:
 		var type := String(MACHINE_OF[f])
 		var open: bool = rules.station_open(type)
@@ -1812,7 +1845,10 @@ func _floor_choices(floor: String) -> Array:
 	var own := String(MACHINE_OF[floor])
 	if rules.station_open(own):
 		out.append(own)
-	var devices: Array = rules.KITCHEN_DEVICES if floor == "kitchen" else (rules.PACKING_DEVICES if floor == "packing" else rules.SHOP_DEVICES)
+	var devices: Array = (rules.KITCHEN_DEVICES if floor == "kitchen" else (rules.PACKING_DEVICES if floor == "packing" else rules.SHOP_DEVICES)).duplicate()
+	for u: String in rules.UTILITY_DEVICES:   # Step 32: support machines stand on any floor (the lift and the inspector on packing)
+		if String(rules.FLOOR_OF[u]) in ["any", floor]:
+			devices.append(u)
 	for id: String in devices:
 		if rules.station_open(id) and rules.catalog_buildable(id):
 			out.append(id)
@@ -1947,6 +1983,19 @@ func _step_machine_motion(delta: float) -> void:
 				node.position = Vector2(r.position.x + r.size.x * (0.25 + 0.3 * fmod(t * 0.5, 1.0) if run else 0.4), r.position.y + r.size.y * 0.32)
 			"S08":   # the robot slides along its rail
 				node.position = Vector2(c.x + (sin(t * 1.6) * r.size.x * 0.2 if run else 0.0), r.position.y + r.size.y * 0.6)
+			# Step 32: the support machines, moving only while they work.
+			"U01":   # the robot rolls from side to side
+				node.position = Vector2(c.x + (sin(t * 1.4) * r.size.x * 0.2 if run else 0.0), r.position.y + r.size.y * 0.9)
+			"U02":   # a drop falls from the spout
+				node.position = Vector2(r.position.x + r.size.x * 0.9, r.position.y + r.size.y * (0.62 + 0.25 * fmod(t * 1.2, 1.0) if run else 0.62))
+				node.visible = run
+			"U03":   # the leaf glows
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.16)
+				node.modulate.a = 0.3 + 0.7 * absf(sin(t * 2.0)) if run else 0.25
+			"U04":   # a crate rides the lift
+				node.position = Vector2(r.position.x + r.size.x * 0.3, r.position.y + r.size.y * (0.75 - 0.5 * absf(sin(t * 0.9)) if run else 0.75))
+			"U05":   # the lamp sweeps the desk
+				node.position = Vector2(r.position.x + r.size.x * (0.4 + 0.3 * absf(sin(t * 1.6)) if run else 0.5), r.position.y + r.size.y * 0.6)
 			"P08":   # the gate swings each pack to its lane
 				node.position = Vector2(c.x, r.position.y + r.size.y * 0.5)
 				node.rotation = (0.45 if fmod(floor(t * 0.8), 2.0) < 1.0 else -0.45) if run else 0.0
@@ -2002,6 +2051,80 @@ func _draw_heat_gauge() -> void:
 	var fill := bar.size.y * v
 	PopMachineArt._round_rect(_heat_node, Rect2(Vector2(bar.position.x, bar.end.y - fill), Vector2(bar.size.x, fill)), 3, col)
 	_heat_node.draw_circle(Vector2(bar.get_center().x, bar.end.y + 6), 7.0, col if v > 0.05 else PopTokens.SKY)
+
+
+## Step 32: the overview's button -- a coin with a clock hand, bottom-left of the kitchen.
+func overview_button_rect() -> Rect2:
+	var low := floor_rect(LOW)
+	var s := clampf(_head_px() * 1.6, 34.0, 52.0)
+	return Rect2(Vector2(low.position.x + 12, low.end.y - s - 12), Vector2(s, s))
+
+
+func _pause_all_rect() -> Rect2:
+	var d := detail_rect()
+	var s := clampf(d.size.x * 0.16, 40.0, 60.0)
+	return Rect2(Vector2(d.end.x - s - 12, d.end.y - s - 12), Vector2(s, s))
+
+
+## The upkeep overview: coins a minute burned by running machines (and held back by
+## paused ones), coins the shop took in the last minute, the net -- red when the wallet
+## covers less than two minutes of the burn -- and one button to pause or resume all.
+func _draw_overview(ci: CanvasItem, d: Rect2) -> void:
+	PopFactoryArt.shadow(ci, d, PopTokens.R_BUTTON)
+	PopMachineArt._round_rect(ci, d, PopTokens.R_BUTTON, Color(1, 1, 1, 0.97))
+	var pts := PopMachineArt.round_rect_points(d, PopTokens.R_BUTTON)
+	pts.append(pts[0])
+	var o: Dictionary = rules.upkeep_overview()
+	ci.draw_polyline(pts, PopTokens.WARN if bool(o["low_wallet"]) else PopPalette.GOLD, 5.0, true)
+	var font := ThemeDB.fallback_font
+	var fs := int(clampf(minf(d.size.x * 0.08, d.size.y * 0.16), 16.0, 30.0))
+	var x := d.position.x + fs * 2.2
+	var y := d.position.y + fs * 1.4
+	var rows := [["burn", "-%s" % str(o["burn_per_min"]), PopTokens.WARN], ["take", "+%d" % int(o["revenue_last_min"]), PopTokens.OK],
+		["net", ("%+.0f" % float(o["net_per_min"])), PopTokens.OK if float(o["net_per_min"]) >= 0.0 else PopTokens.WARN]]
+	for r: Array in rows:
+		var ic := Vector2(d.position.x + fs * 1.0, y - fs * 0.35)
+		match String(r[0]):
+			"burn":   # a coin with a flame
+				PopMachineArt.draw_coin(ci, ic, fs * 0.38)
+				ci.draw_colored_polygon(PackedVector2Array([ic + Vector2(fs * 0.3, -fs * 0.1), ic + Vector2(fs * 0.5, -fs * 0.55), ic + Vector2(fs * 0.62, -fs * 0.05)]), PopTokens.WARN)
+			"take":   # a coin with a bag
+				PopMachineArt.draw_coin(ci, ic, fs * 0.38)
+				PopFactoryArt.bag(ci, ic + Vector2(fs * 0.55, fs * 0.35), fs * 0.32)
+			"net":   # a clock hand: a minute
+				ci.draw_arc(ic, fs * 0.38, 0, TAU, 16, PopPalette.INK, 2.5)
+				ci.draw_line(ic, ic + Vector2(0, -fs * 0.3), PopPalette.INK, 2.5)
+				ci.draw_line(ic, ic + Vector2(fs * 0.22, 0), PopPalette.INK, 2.5)
+		ci.draw_string(font, Vector2(x, y), String(r[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, r[2])
+		y += fs * 1.35
+	# Paused machines: the pause badge and how many.
+	if int(o["paused"]) > 0:
+		PopFactoryArt.state_badge(ci, Vector2(d.position.x + fs, y - fs * 0.35), fs * 0.38, "paused")
+		ci.draw_string(font, Vector2(x, y), "%d" % int(o["paused"]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopPalette.INK)
+	# Pause / resume everything.
+	var b := _pause_all_rect()
+	ci.draw_circle(b.get_center(), b.size.x * 0.5, Color.WHITE)
+	ci.draw_arc(b.get_center(), b.size.x * 0.5, 0, TAU, 24, PopPalette.INK, 2.5)
+	var any_on := (rules.get("machines") as Array).any(func(m: Dictionary) -> bool: return String(m["state"]) != "paused")
+	if any_on:
+		PopFactoryArt.state_badge(ci, b.get_center(), b.size.x * 0.3, "paused")
+	else:
+		var c := b.get_center()
+		var q := b.size.x * 0.22
+		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-q * 0.7, -q), c + Vector2(q, 0), c + Vector2(-q * 0.7, q)]), PopTokens.OK)
+
+
+func _draw_overview_button(ci: CanvasItem) -> void:
+	if rules == null or (rules.get("machines") as Array).is_empty():
+		return
+	var r := overview_button_rect()
+	var c := r.get_center()
+	var low: bool = bool(rules.upkeep_overview()["low_wallet"])
+	ci.draw_circle(c, r.size.x * 0.5, PopTokens.WARN if low else Color(1, 1, 1, 0.92))
+	ci.draw_arc(c, r.size.x * 0.5, 0, TAU, 24, PopPalette.INK, 2.5)
+	PopMachineArt.draw_coin(ci, c + Vector2(-r.size.x * 0.08, r.size.x * 0.06), r.size.x * 0.24)
+	ci.draw_arc(c + Vector2(r.size.x * 0.18, -r.size.x * 0.16), r.size.x * 0.16, 0, TAU, 12, PopPalette.INK, 2.0)
+	ci.draw_line(c + Vector2(r.size.x * 0.18, -r.size.x * 0.16), c + Vector2(r.size.x * 0.18, -r.size.x * 0.27), PopPalette.INK, 2.0)
 
 
 func _draw_motion_part(n: Node2D) -> void:
@@ -2073,6 +2196,16 @@ func _draw_motion_part(n: Node2D) -> void:
 		"S08":
 			n.draw_circle(Vector2(-w * 0.32, -w * 0.12), w * 0.05, PopTokens.STEEL)
 			n.draw_circle(Vector2(w * 0.32, -w * 0.12), w * 0.05, PopTokens.STEEL)
+		"U01":
+			n.draw_circle(Vector2.ZERO, w * 0.03, PopPalette.GOLD)
+		"U02":
+			n.draw_circle(Vector2.ZERO, w * 0.04, PopPalette.GOLD)
+		"U03":
+			n.draw_circle(Vector2.ZERO, w * 0.09, Color(0.5, 0.95, 0.6, 0.8))
+		"U04":
+			n.draw_rect(Rect2(Vector2(-w * 0.1, -w * 0.08), Vector2(w * 0.2, w * 0.16)), Color(0.75, 0.55, 0.3))
+		"U05":
+			n.draw_circle(Vector2.ZERO, w * 0.08, Color(1.0, 0.9, 0.4, 0.45))
 		"P08":
 			n.draw_line(Vector2.ZERO, Vector2(0, w * 0.3), PopTokens.STEEL_DEEP, 4.0)
 			n.draw_circle(Vector2.ZERO, w * 0.05, PopPalette.GOLD)

@@ -1131,7 +1131,7 @@ func test_the_hand_tunes_a_selected_cooker_for_a_few_lots_only() -> void:
 
 # -- Step 27: the 40-machine catalog and its no-fake-effects matrix ----------------
 
-const CONTRACT_KINDS := ["feed", "dose", "regulate", "agitate", "detect", "eject", "produce", "cool", "sort", "capacity", "grade_split",
+const CONTRACT_KINDS := ["triage", "feed", "dose", "regulate", "agitate", "detect", "eject", "produce", "cool", "sort", "capacity", "grade_split",
 	"premix", "stabilize", "recycle", "dispatch", "container", "pack", "weigh", "season", "coat", "seal", "divert", "convey", "ticket",
 	"cashier", "route", "express", "menu", "serve", "float_lane", "repair", "neighbor_speed", "upkeep", "buffer", "inspect",
 	"freshness", "schedule", "balance"]
@@ -1152,6 +1152,9 @@ const RUNTIME_TESTS := {"cooker": "test_upkeep_is_paid_a_coin_at_a_time_and_neve
 	"S03": "test_s03_the_cashier_takes_payment_apart_and_a_paused_one_holds_the_sale", "S04": "test_s04_the_router_serves_whoever_is_ready",
 	"S05": "test_s05_the_express_window_serves_small_orders_apart", "S06": "test_s06_the_menu_board_lets_customers_order_what_is_there",
 	"S08": "test_s08_the_robot_adds_counter_lanes",
+	"U01": "test_u01_the_robot_keeps_coins_for_the_machines_that_make_goods", "U02": "test_u02_the_lubricator_speeds_its_neighbours_only",
+	"U03": "test_u03_the_saver_cuts_its_floors_upkeep", "U04": "test_u04_the_buffer_lift_adds_real_room",
+	"U05": "test_u05_the_inspector_sends_rejects_to_a_bargain_sku",
 	"bagger": "test_the_bagger_packs_real_portions_and_waits_or_holds_honestly",
 	"kiosk": "test_the_kiosk_serves_real_customers_and_pays_while_it_serves"}
 
@@ -1211,7 +1214,7 @@ func test_no_machine_is_sold_that_would_do_nothing() -> void:
 			assert_true(bool(r["ok"]) or String(r["reason"]) in ["err.no_slot", "err.slot_taken"], "%s: a running machine is built (%s)" % [id, r.get("reason", "")])
 			assert_true(RUNTIME_TESTS.has(String(e["runtime"])), "%s: its behaviour has a test" % id)
 			assert_true(has_method(RUNTIME_TESTS[String(e["runtime"])]), "%s: that test exists (%s)" % [id, RUNTIME_TESTS[String(e["runtime"])]])
-	assert_eq(runs, 29, "today: M01-M11, M13-M16, P01-P04, P07, P08, S01-S05, S07, S08 run (M12, P05, P06, S06... see the catalog)")
+	assert_eq(runs, 34, "today: 34 of the 40 run (M12, P05, P06 wait for flavors; U06 aging, U07 news, U08 parallel lines)")
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing invented")
 
 
@@ -2207,3 +2210,195 @@ func test_storefront_edge_cases_exhausted_overflow_failed_and_simultaneous() -> 
 		assert_true(n <= 1, "nobody is sold to twice")
 	assert_true(int(f.stats["sold"]) > sold0, "the lanes finished")
 	_check_conservation(f, "edges")
+
+
+# -- Step 32: U01-U08, upkeep overview, an hour of operation ----------------------------
+
+func _util(seed_value: int = 71) -> PopRules:
+	var f := _shop(seed_value)
+	return f
+
+
+func test_u01_the_robot_keeps_coins_for_the_machines_that_make_goods() -> void:
+	var done := {}
+	for with_robot in [false, true]:
+		var f := _util(73)
+		f.execute({"type": "build", "machine": "M07"})
+		for id in ["M02", "M03", "M04", "M05", "M06", "M08"]:
+			f.execute({"type": "build", "machine": id})
+		if with_robot:
+			f.execute({"type": "build", "machine": "U01", "floor": "packing"})
+		f.machines[0]["kernels"] = 1000
+		f.money = 25
+		var lots := _auto_lots(f, 240000)
+		done[with_robot] = lots.size()
+		assert_true(int(f.money) >= 0, "never a debt")
+		if with_robot:
+			assert_true(int(f.stats.get("saving_ms", 0)) > 0, "the helpers stopped to save coins")
+	assert_true(int(done[true]) > int(done[false]), "with the robot the kettle cooks longer on a thin wallet (%d vs %d lots)" % [done[true], done[false]])
+
+
+func test_u02_the_lubricator_speeds_its_neighbours_only() -> void:
+	var f := _util()
+	f.execute({"type": "build", "machine": "M07", "slot": 0})
+	f.execute({"type": "build", "machine": "M07", "slot": 3})
+	var near: Dictionary = f.machine_at("kitchen", 0)
+	var far: Dictionary = f.machine_at("kitchen", 3)
+	var base := int(f._cooker_cycle(near))
+	assert_true(bool(f.execute({"type": "build", "machine": "U02", "slot": 1, "floor": "kitchen"})["ok"]), "the lubricator stands beside the first kettle")
+	assert_eq(int(f._cooker_cycle(near)), int(round(base * 0.9)), "its neighbour 10% faster")
+	assert_eq(int(f._cooker_cycle(far)), base, "a machine two places away is not")
+
+
+func test_u03_the_saver_cuts_its_floors_upkeep() -> void:
+	var paid := {}
+	for saver in [false, true]:
+		var f := _util(75)
+		f.execute({"type": "build", "machine": "M07"})
+		f.execute({"type": "build", "machine": "M07"})
+		if saver:
+			f.execute({"type": "build", "machine": "U03", "floor": "kitchen"})
+		for m: Dictionary in f.machines:
+			m["kernels"] = 1000
+		_auto_lots(f, 240000)
+		paid[saver] = int(f.stats["upkeep_paid"])
+	assert_true(int(paid[true]) < int(paid[false]) * 0.85, "a quarter less upkeep on its floor (%d vs %d)" % [paid[true], paid[false]])
+	var g := _util()
+	g.execute({"type": "build", "machine": "U03", "floor": "packing"})
+	assert_eq(float(g._energy_cut("kitchen")), 0.0, "only on its own floor")
+
+
+func test_u04_the_buffer_lift_adds_real_room() -> void:
+	var f := _util()
+	var bin0 := int(f.bin_cap())
+	var shelf0 := int(f.shelf_cap())
+	var r := f.execute({"type": "build", "machine": "U04"})
+	assert_true(bool(r["ok"]), "built on the packing floor")
+	assert_eq(String(f.machine(int(r["machine"]))["floor"]), "packing", "between the floors")
+	assert_eq(int(f.bin_cap()), bin0 + 12, "12 more portions in the bin")
+	assert_eq(int(f.shelf_cap()), shelf0 + 4, "4 more packs on the shelf")
+	_stock(f, int(f.shelf_cap()))
+	_check_conservation(f, "a full bigger shelf")
+	f.execute({"type": "pause_machine", "id": int(r["machine"]), "paused": true})
+	assert_eq(int(f.bin_cap()), bin0, "paused, the room is not there (nothing is lost: the goods stay)")
+
+
+func test_u05_the_inspector_sends_rejects_to_a_bargain_sku() -> void:
+	var f := _util()
+	f.execute({"type": "build", "machine": "M07"})
+	assert_true(bool(f.execute({"type": "build", "machine": "U05"})["ok"]), "built")
+	var lot := {"id": 0, "recipe": "plain", "quality": 30, "portions": 4}
+	f._sort_and_grade(lot, "burnt")
+	assert_eq(String(lot["recipe"]), "bargain", "a burnt lot is a bargain")
+	var ok := {"id": 0, "recipe": "plain", "quality": 80, "portions": 4}
+	f._sort_and_grade(ok, "near")
+	assert_eq(String(ok["recipe"]), "plain", "a good lot stays plain")
+	f.bin.append({"id": f._new_id(), "recipe": "bargain", "quality": 30, "portions": 4})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 4
+	var asks := 0
+	for i in 200:
+		if String(f._draw_order()["recipe"]) == "bargain":
+			asks += 1
+	assert_true(asks > 25 and asks < 90, "about a quarter ask for a bargain while there is one (%d)" % asks)
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "bargain", "size": 2}, "patience_ms": 60000})
+	f.advance(15000)
+	var sold: Array = f.ledger.filter(func(e: Dictionary) -> bool: return String(e["recipe"]) == "bargain")
+	assert_true(not sold.is_empty(), "a bargain customer bought a bargain pack")
+	assert_true(int(sold[0]["coins"]) < int(f.pack_price("plain", 2, int(sold[0]["quality"]))), "for less than plain")
+	assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "never to a plain customer")
+	_check_conservation(f, "bargain")
+
+
+func test_u06_u07_u08_wait_for_their_systems() -> void:
+	var f := _util()
+	for id in ["U06", "U07", "U08"]:
+		assert_eq(String(f.execute({"type": "build", "machine": id})["reason"]), "err.not_yet", "%s is not sold before its system exists" % id)
+
+
+func test_the_overview_and_pause_all() -> void:
+	var f := _util()
+	f.next_arrival_ms = 0
+	f.execute({"type": "build", "machine": "M07"})
+	f.execute({"type": "build", "machine": "M01"})
+	f.execute({"type": "build", "machine": "bagger"})
+	f.execute({"type": "build", "machine": "S03"})
+	f.advance(60000)
+	var o: Dictionary = f.upkeep_overview()
+	assert_true(float(o["burn_per_min"]) > 0.0, "running machines burn coins (%s/min)" % o["burn_per_min"])
+	assert_true(int(o["revenue_last_min"]) > 0, "the shop took money in the last minute")
+	assert_almost_equal_net(o)
+	assert_eq((o["machines"] as Array).size(), f.machines.size(), "a line per machine")
+	var ledger_sum := 0
+	for row: Dictionary in o["machines"]:
+		ledger_sum += int(row["paid"])
+	assert_eq(ledger_sum, int(f.stats["upkeep_paid"]), "the per-machine ledger adds up to the upkeep paid")
+	assert_true(bool(f.execute({"type": "pause_all", "paused": true})["ok"]), "pause all")
+	assert_true(f.machines.all(func(m: Dictionary) -> bool: return String(m["state"]) == "paused"), "every machine paused")
+	var paid := int(f.stats["upkeep_paid"])
+	f.advance(60000)
+	assert_eq(int(f.stats["upkeep_paid"]), paid, "a paused factory pays nothing")
+	assert_true(float(f.upkeep_overview()["burn_per_min"]) == 0.0, "and burns nothing")
+	f.execute({"type": "pause_all", "paused": false})
+	assert_true(f.machines.all(func(m: Dictionary) -> bool: return String(m["state"]) != "paused"), "resume all")
+	f.money = 1
+	f.advance(2000)
+	assert_true(bool(f.upkeep_overview()["low_wallet"]), "a thin wallet is flagged")
+	_check_conservation(f, "overview")
+
+
+func assert_almost_equal_net(o: Dictionary) -> void:
+	assert_true(absf(float(o["net_per_min"]) - (float(o["revenue_last_min"]) - float(o["burn_per_min"]))) < 0.2, "net = revenue - burn")
+
+
+func test_an_hour_of_operation_high_and_low_demand_thin_wallet_and_forty_machines() -> void:
+	# One hour of model time per case, a hand popping; conservation and no debt every
+	# minute; the per-machine ledger adds up; a save at half time goes on the same.
+	var cases := {"low_demand": [1, 9, 100000], "high_demand": [6, 9, 100000], "thin_wallet": [6, 9, 30], "full_places": [6, 40, 100000]}
+	for name: String in cases:
+		var c: Array = cases[name]
+		var f: PopRules = Factory.new(null, 77)
+		f.packer_tier = 3
+		f.level = 6
+		f.money = 1 << 20
+		_open(f)
+		_open_sign(f)
+		f.sign_tier = 6
+		var plan := ["M07", "M10", "M07", "M01", "M16", "M13", "M14", "U03", "M08", "M02", "bagger", "P01", "P07", "U04", "S03", "S05", "S08", "S01"]
+		for id: String in plan:
+			if f.machines.size() >= int(c[1]):
+				break
+			f.execute({"type": "build", "machine": id, "floor": "kitchen"})
+		var dist: Array = f.machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "M10")
+		if not dist.is_empty():
+			f.execute({"type": "upgrade_machine", "id": dist[0]["id"]})
+			f.execute({"type": "upgrade_machine", "id": dist[0]["id"]})
+		if int(c[1]) >= 40:
+			# Every place filled (40 instances need Step 33's places; here the floors hold ~20).
+			var k := 0
+			while k < 200:
+				f.execute({"type": "build", "machine": ["M07", "bagger", "S05", "M01", "P07", "S01", "M08", "U02"][k % 8], "floor": ["kitchen", "packing", "shop"][k % 3]})
+				k += 1
+		f.sign_tier = int(c[0])
+		f.money = int(c[2])
+		var b: PopRules = null
+		for minute in 60:
+			for i in 40:
+				if f.glass.is_empty() and int(f.cooldown_left) <= 0 and not f.heating:
+					f.execute({"type": "press"})
+				f.advance(1500)
+				if f.heating:
+					f.execute({"type": "release"})
+			assert_true(int(f.portions_everywhere()) == int(f.stats["made_portions"]), "%s minute %d: every portion is somewhere" % [name, minute])
+			assert_true(int(f.money) >= 0, "%s minute %d: no debt" % [name, minute])
+			if minute == 29:
+				b = Factory.new()
+				assert_true(bool(b.from_save(JSON.parse_string(JSON.stringify(f.to_save())))), "%s: saves at half time" % name)
+				b.advance(60000)
+				assert_true(int(b.portions_everywhere()) == int(b.stats["made_portions"]), "%s: the restored factory keeps every portion" % name)
+		var sum := 0
+		for row: Dictionary in f.upkeep_overview()["machines"]:
+			sum += int(row["paid"])
+		assert_eq(sum, int(f.stats["upkeep_paid"]), "%s: the per-machine ledger adds up" % name)
+		assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "%s: no wrong SKU" % name)
+		if name == "full_places":
+			assert_true(f.machines.size() >= 18, "every place filled: %d machines ran for an hour" % f.machines.size())
