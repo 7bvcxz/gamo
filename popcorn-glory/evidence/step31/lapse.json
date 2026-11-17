@@ -1,0 +1,102 @@
+[
+ {
+  "minute": 1,
+  "sold": 72,
+  "revenue": 859,
+  "money": 77571,
+  "lost": 8,
+  "queue": 7,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 2,
+  "sold": 111,
+  "revenue": 1339,
+  "money": 77991,
+  "lost": 22,
+  "queue": 8,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 3,
+  "sold": 152,
+  "revenue": 1818,
+  "money": 78414,
+  "lost": 39,
+  "queue": 7,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 4,
+  "sold": 193,
+  "revenue": 2316,
+  "money": 78851,
+  "lost": 53,
+  "queue": 7,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 5,
+  "sold": 236,
+  "revenue": 2822,
+  "money": 79299,
+  "lost": 65,
+  "queue": 7,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 6,
+  "sold": 278,
+  "revenue": 3336,
+  "money": 79750,
+  "lost": 78,
+  "queue": 8,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 7,
+  "sold": 317,
+  "revenue": 3810,
+  "money": 80169,
+  "lost": 95,
+  "queue": 7,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 8,
+  "sold": 357,
+  "revenue": 4297,
+  "money": 80597,
+  "lost": 111,
+  "queue": 6,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 9,
+  "sold": 399,
+  "revenue": 4766,
+  "money": 81004,
+  "lost": 123,
+  "queue": 7,
+  "lanes": 4,
+  "paying": 0
+ },
+ {
+  "minute": 10,
+  "sold": 438,
+  "revenue": 5237,
+  "money": 81417,
+  "lost": 141,
+  "queue": 8,
+  "lanes": 4,
+  "paying": 0
+ }
+]
