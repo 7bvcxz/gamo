@@ -118,6 +118,33 @@ func _tick() -> void:
 								_app.on_command("buy_line", {"type": "buy_line", "floor": fl})
 							_app.on_command("build", {"type": "build", "machine": row[0], "floor": fl})
 						rr.money = 3000
+					"V":
+						# Step 34 (picture setup): the flavor factory -- three kettles, a hopper, the flavor
+						# base mixer; packing: a filler, the sprayer on cheese, the coater on caramel, the
+						# sprayer on spicy, the second line with its filler and the coater on cocoa.
+						var rv = _app.rules
+						rv.sign_tier = 6
+						rv.packer_tier = 3
+						rv.level = maxi(int(rv.level), 6)
+						rv.stats["packed"] = maxi(1, int(rv.stats["packed"]))
+						rv.stats["sold"] = maxi(1, int(rv.stats["sold"]))
+						rv.money += 1 << 24
+						for id in ["cooker", "cooker", "cooker", "M01", "M12"]:
+							_app.on_command("build", {"type": "build", "machine": id, "floor": "kitchen"})
+						for row: Array in [["bagger", ""], ["P05", "cheese"], ["P06", "caramel"], ["P05", "spicy"], ["line", ""], ["bagger", ""], ["P06", "cocoa"]]:
+							if String(row[0]) == "line":
+								_app.on_command("buy_line", {"type": "buy_line", "floor": "packing"})
+								continue
+							_app.on_command("build", {"type": "build", "machine": row[0], "floor": "packing"})
+							if String(row[1]) != "":
+								var last: Dictionary = (rv.machines as Array)[(rv.machines as Array).size() - 1]
+								_app.on_command("set_flavor", {"type": "set_flavor", "id": last["id"], "flavor": row[1]})
+						rv.money = 3000
+					"Q":
+						# Step 34 (picture setup): every coater paused -- the same factory with no flavor offered.
+						for qm: Dictionary in _app.rules.machines:
+							if String(qm["type"]) in ["P05", "P06"]:
+								_app.on_command("pause_machine", {"type": "pause_machine", "id": qm["id"], "paused": true})
 					"O":
 						# Step 33: the overview card (`O<id>` with that machine's diagnostics).
 						var vo = _app.frame.play

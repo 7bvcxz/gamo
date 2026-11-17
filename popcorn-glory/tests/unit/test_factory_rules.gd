@@ -33,7 +33,7 @@ func _quiet_shop(f: PopRules) -> void:
 func _check_conservation(f: PopRules, label: String) -> void:
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "%s: every portion made is somewhere" % label)
 	assert_true(f.money >= 0, "%s: money never negative" % label)
-	assert_true(int(f.bin_portions()) <= int(f.state()["bin_cap"]), "%s: the bin within its size" % label)
+	assert_true(int(f.bin_portions()) + int(f.coating_portions()) <= int(f.state()["bin_cap"]), "%s: the bin (and what is being coated) within its size" % label)
 	assert_true(f.shelf.size() <= int(f.state()["shelf_cap"]), "%s: the shelf within its size" % label)
 
 
@@ -409,24 +409,24 @@ func test_recipes_convert_to_their_sku_never_mix_and_orders_get_their_own() -> v
 	var f: PopRules = Factory.new()
 	_open(f)
 	_quiet_shop(f)
-	f.economy.table("factory")["pack_recipes"]["caramel"] = "caramel"
+	f.economy.table("factory")["pack_recipes"]["test_mix"] = "test_mix"
 	f.money = 5000
 	f.execute({"type": "buy_packer"})
 	f.execute({"type": "buy_packer"})   # two heads: the mix test sees both at once
-	_lot(f, "caramel", 1, 100)
+	_lot(f, "test_mix", 1, 100)
 	_lot(f, "plain", 1, 100)
 	f.advance(3000)
-	assert_eq(f.packing.size() + f.shelf.size(), 0, "one caramel and one plain portion never make a pack")
+	assert_eq(f.packing.size() + f.shelf.size(), 0, "one test-mix and one plain portion never make a pack")
 	_lot(f, "plain", 1, 80)
 	f.advance(int(f.packer()["ms"]) + 60)
 	assert_eq(f.shelf.size(), 1, "two plain portions do")
 	assert_eq(String(f.shelf[0]["recipe"]), "plain", "as a plain pack")
-	assert_eq(f.bin_portions_of("caramel"), 1, "the caramel portion still waits")
-	_lot(f, "caramel", 3, 100)
+	assert_eq(f.bin_portions_of("test_mix"), 1, "the test-mix portion still waits")
+	_lot(f, "test_mix", 3, 100)
 	f.advance(int(f.packer()["ms"]) * 2 + 60)
 	var skus: Array = f.shelf.map(func(p: Dictionary) -> String: return String(p["recipe"]))
-	assert_eq(skus.count("caramel"), 2, "four caramel portions became two caramel packs")
-	# A customer who orders plain gets the plain pack even though caramel is on the shelf.
+	assert_eq(skus.count("test_mix"), 2, "four test-mix portions became two test-mix packs")
+	# A customer who orders plain gets the plain pack even though test-mix is on the shelf.
 	f.queue.append({"id": f._new_id(), "order": {"recipe": "plain", "size": 2}, "patience_ms": 60000})
 	f.drain_events()
 	f.advance(100)
@@ -435,9 +435,9 @@ func test_recipes_convert_to_their_sku_never_mix_and_orders_get_their_own() -> v
 	assert_eq(String(f.serving["pack"]["recipe"]), "plain", "with the plain pack it ordered")
 	f.queue.append({"id": f._new_id(), "order": {"recipe": "plain", "size": 2}, "patience_ms": 60000})
 	f.advance(5000)
-	assert_eq(int(f.stats["sold"]), 1, "a second plain order is not given caramel")
+	assert_eq(int(f.stats["sold"]), 1, "a second plain order is not given test-mix")
 	_check_conservation(f, "recipes")
-	f.economy.table("factory")["pack_recipes"].erase("caramel")
+	f.economy.table("factory")["pack_recipes"].erase("test_mix")
 
 
 # -- Step 21: the counter -----------------------------------------------------
@@ -1148,6 +1148,8 @@ const RUNTIME_TESTS := {"cooker": "test_upkeep_is_paid_a_coin_at_a_time_and_neve
 	"P01": "test_p01_the_cup_feeder_makes_cups_a_product_of_their_own", "P02": "test_p02_the_dispenser_opens_large_bags_before_tier_two",
 	"P04": "test_p04_fillers_overfill_and_the_weigher_keeps_the_portion", "P07": "test_p07_the_sealer_shortens_every_packing_cycle",
 	"P08": "test_p08_the_diverter_gives_premium_its_own_lane",
+	"P05": "test_p05_seasons_plain_portions_into_cheese_or_spicy", "P06": "test_p06_coats_caramel_and_cocoa_slowly",
+	"M12": "test_m12_the_mixer_shortens_every_coating_batch",
 	"S01": "test_s01_the_belt_shortens_the_hand_over", "S02": "test_s02_tickets_keep_patience_while_the_pack_is_made",
 	"S03": "test_s03_the_cashier_takes_payment_apart_and_a_paused_one_holds_the_sale", "S04": "test_s04_the_router_serves_whoever_is_ready",
 	"S05": "test_s05_the_express_window_serves_small_orders_apart", "S06": "test_s06_the_menu_board_lets_customers_order_what_is_there",
@@ -1215,7 +1217,7 @@ func test_no_machine_is_sold_that_would_do_nothing() -> void:
 			assert_true(bool(r["ok"]) or String(r["reason"]) in ["err.no_slot", "err.slot_taken"] or (id == "U08" and String(r["reason"]) == "err.needs_lines"), "%s: a running machine is built (%s)" % [id, r.get("reason", "")])
 			assert_true(RUNTIME_TESTS.has(String(e["runtime"])), "%s: its behaviour has a test" % id)
 			assert_true(has_method(RUNTIME_TESTS[String(e["runtime"])]), "%s: that test exists (%s)" % [id, RUNTIME_TESTS[String(e["runtime"])]])
-	assert_eq(runs, 35, "today: 35 of the 40 run (M12, P05, P06 wait for flavors; U06 aging, U07 news)")
+	assert_eq(runs, 38, "today: 38 of the 40 run (Step 34 woke M12, P05, P06; U06 waits for aging, U07 for news)")
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing invented")
 
 
@@ -1580,15 +1582,6 @@ func test_m11_orders_for_premium_only_while_it_is_on_hand_and_plain_streams_unch
 	assert_true(some > 30 and some < 100, "about 30%% ask for premium while it is on hand (%d of 200)" % some)
 
 
-func test_m12_the_flavor_mixer_sleeps_until_flavors() -> void:
-	var f := _adv(null)
-	f.execute({"type": "build", "machine": "M07"})
-	var r := f.execute({"type": "build", "machine": "M12"})
-	assert_false(bool(r["ok"]), "not built: no flavors yet")
-	assert_eq(String(r["reason"]), "err.not_yet", "the honest reason")
-	assert_false(f.catalog_buildable("M12"), "the catalog agrees")
-
-
 func test_m13_many_kettles_overheat_unless_the_vents_run() -> void:
 	var a := _adv(null)
 	_kettles(a, 5)
@@ -1922,14 +1915,6 @@ func test_packing_halts_full_and_idles_empty_and_saves_mid_cycle() -> void:
 	var paid := int(f.stats["upkeep_paid"])
 	f.advance(60000)
 	assert_eq(int(f.stats["upkeep_paid"]), paid, "a stopped floor pays no upkeep")
-
-
-func test_p05_p06_sleep_until_flavors() -> void:
-	var f := _packfloor()
-	for id in ["P05", "P06"]:
-		var r := f.execute({"type": "build", "machine": id})
-		assert_false(bool(r["ok"]), "%s not sold before flavors" % id)
-		assert_eq(String(r["reason"]), "err.not_yet", "the honest reason")
 
 
 func test_the_station_fills_every_head_up_to_the_shelf_room() -> void:
@@ -2765,3 +2750,457 @@ func test_forty_machines_with_an_empty_wallet_stop_and_recover_without_debt() ->
 	assert_true(ran_after, "and kettles ran again with the coins it brought")
 	_check_sales(f, "empty wallet")
 	_check_conservation(f, "empty wallet")
+
+
+# -- Step 34: flavors -----------------------------------------------------------------
+
+const FIVE := ["plain", "cheese", "spicy", "caramel", "cocoa"]
+
+
+## A packing floor with flavors open (sign 6, packing 3), the shop quiet.
+func _flavor_floor(seed_value: int = 71) -> PopRules:
+	var f := _shop(seed_value)
+	f.money = 100000
+	return f
+
+
+func _coater(f: PopRules, type: String, flavor: String) -> Dictionary:
+	var r := f.execute({"type": "build", "machine": type})
+	assert_true(bool(r["ok"]), "%s built (%s)" % [type, r.get("reason", "")])
+	var m: Dictionary = f.machine(int(r.get("machine", -1)))
+	if flavor != "" and not m.is_empty():
+		var s := f.execute({"type": "set_flavor", "id": m["id"], "flavor": flavor})
+		assert_true(bool(s["ok"]), "%s set to %s (%s)" % [type, flavor, s.get("reason", "")])
+	return m
+
+
+## Plain packs at the plain stock targets with one flavor offered (two large, the small
+## ones up to the place one flavor keeps): the station takes no plain from the bin.
+func _fill_shelf(f: PopRules) -> void:
+	for i in 2:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 4, "quality": 80})
+	var n := int(f.shelf_base()) - 3
+	for i in n:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 80})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + n * 2 + 8
+
+
+func _flavor_packs(f: PopRules, flavor: String) -> int:
+	return f.shelf.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == flavor).size()
+
+
+func test_flavor_recipes_are_versioned_clean_data_with_real_tradeoffs() -> void:
+	var f := _flavor_floor()
+	var fl: Dictionary = f.flavors()
+	assert_eq(int(fl.get("version", 0)), 1, "the recipes carry a version")
+	assert_eq(f.flavor_ids(), FIVE, "five flavors in the menu's order")
+	var names: Array = []
+	for id: String in FIVE:
+		var r: Dictionary = f.flavor(id)
+		names.append(String(r["name"]))
+		assert_false(String(r["name"]).to_lower().contains("cheeto"), "%s: no protected product name" % id)
+		if id != "plain":
+			assert_eq(f.recipe_problems(id), [], "%s: a valid recipe" % id)
+			assert_eq(int(r["out"]), int(r["in"]), "%s: coating adds taste, not portions" % id)
+	assert_eq(names, ["Classic Butter", "Cheese Crunch", "Spicy Dust", "Golden Caramel", "Cocoa Swirl"], "their names")
+	var c: Dictionary = f.flavor("cheese")
+	var sp: Dictionary = f.flavor("spicy")
+	var ca: Dictionary = f.flavor("caramel")
+	var co: Dictionary = f.flavor("cocoa")
+	# The tradeoffs (design/STATIONS.md 5): caramel pays more and coats slowly, cheese is quick
+	# and easy, spicy is a small but patient crowd, cocoa is the premium that wants quality.
+	assert_true(int(ca["price"]) > int(c["price"]) and int(ca["coat_ms_per_portion"]) > 3 * int(c["coat_ms_per_portion"]), "caramel: more margin, slower coat")
+	assert_true(float(c["order_share"]) > float(sp["order_share"]) and int(c["coat_ms_per_portion"]) == [c, sp, ca, co].map(func(x: Dictionary) -> int: return int(x["coat_ms_per_portion"])).min(), "cheese: the fastest, a big crowd")
+	assert_true(float(sp["order_share"]) == [c, sp, ca, co].map(func(x: Dictionary) -> float: return float(x["order_share"])).min() and float(sp["patience"]) == [c, sp, ca, co].map(func(x: Dictionary) -> float: return float(x["patience"])).max(), "spicy: the smallest, most patient crowd")
+	assert_true(int(co["price"]) == [c, sp, ca, co].map(func(x: Dictionary) -> int: return int(x["price"])).max() and float(co["quality_weight"]) > float(f.flavor("plain")["quality_weight"]), "cocoa: the dearest, and quality matters most")
+	assert_true(float(ca["quality_weight"]) < float(f.flavor("plain")["quality_weight"]), "caramel forgives a so-so lot")
+	# Each flavor's margin over plain, after its ingredients, is positive (a viable product).
+	for id: String in ["cheese", "spicy", "caramel", "cocoa"]:
+		var r: Dictionary = f.flavor(id)
+		var per_bag := float(r["ingredient_coins"]) * 2.0 / float(r["in"])
+		assert_true(float(r["price"]) - per_bag > 10.0, "%s: worth more than a plain bag after ingredients (%.1f)" % [id, float(r["price"]) - per_bag])
+
+
+func test_a_recipe_that_would_invent_portions_is_refused() -> void:
+	var f := _flavor_floor()
+	var p05 := _coater(f, "P05", "cheese")
+	var recipes: Dictionary = f.flavors()["recipes"]
+	recipes["spicy"]["out"] = 5
+	assert_true(f.recipe_problems("spicy").has("portions"), "out != in is a problem")
+	var r := f.execute({"type": "set_flavor", "id": p05["id"], "flavor": "spicy"})
+	assert_eq(String(r.get("reason", "")), "err.bad_recipe", "it is not chosen")
+	recipes["spicy"]["out"] = 4
+	assert_eq(String(f.execute({"type": "set_flavor", "id": p05["id"], "flavor": "nope"}).get("reason", "")), "err.bad_recipe", "an unknown flavor is refused")
+	assert_eq(String(f.execute({"type": "set_flavor", "id": p05["id"], "flavor": "caramel"}).get("reason", "")), "err.bad_recipe", "the sprayer cannot coat caramel")
+	assert_eq(String(f.execute({"type": "set_flavor", "id": p05["id"], "flavor": "plain"}).get("reason", "")), "err.bad_recipe", "butter is the kettle's, not a coating")
+	assert_eq(String(f.execute({"type": "set_flavor", "id": 9999, "flavor": "cheese"}).get("reason", "")), "err.unknown", "no such machine")
+	# A recipe made invalid under a running coater stops it (it never coats a bad recipe).
+	recipes["cheese"]["in"] = 0
+	_fill_bin(f, 12)
+	f.advance(3000)
+	assert_eq(String(f.machine(int(p05["id"]))["state"]), "idle", "a broken recipe is not coated")
+	assert_eq(f.coating_portions(), 0, "nothing taken")
+	recipes["cheese"]["in"] = 4
+	_check_conservation(f, "bad recipe")
+
+
+func test_flavors_open_in_stages() -> void:
+	var f: PopRules = Factory.new()
+	_open(f)
+	_open_sign(f)
+	f.money = 100000
+	assert_false(f.station_open("P05"), "no sprayer at packing tier 0")
+	f.packer_tier = 2
+	assert_true(f.flavor_open("cheese") and not f.flavor_open("spicy") and not f.flavor_open("caramel"), "packing 2: cheese only")
+	assert_true(f.station_open("P05") and not f.station_open("P06"), "the sprayer opens, the coater waits for caramel")
+	f.sign_tier = 3
+	assert_true(f.flavor_open("caramel") and f.station_open("P06") and not f.flavor_open("cocoa"), "sign 3: caramel and its coater")
+	var p05: Dictionary = _coater(f, "P05", "")
+	assert_eq(String(f.execute({"type": "set_flavor", "id": p05["id"], "flavor": "spicy"}).get("reason", "")), "err.locked", "spicy is locked before sign 4")
+	f.sign_tier = 4
+	assert_true(bool(f.execute({"type": "set_flavor", "id": p05["id"], "flavor": "spicy"})["ok"]), "sign 4: spicy")
+	f.sign_tier = 5
+	assert_false(f.flavor_open("cocoa"), "cocoa wants packing 3 too")
+	f.packer_tier = 3
+	assert_true(f.flavor_open("cocoa"), "packing 3 and sign 5: cocoa -- all five")
+
+
+func test_p05_seasons_plain_portions_into_cheese_or_spicy() -> void:
+	var f := _flavor_floor()
+	var m := _coater(f, "P05", "")
+	assert_eq(String(m["flavor"]), "cheese", "a new sprayer starts on its first open flavor")
+	_fill_shelf(f)   # the plain stock is there: the bin's plain waits for the coater
+	_fill_bin(f, 12)
+	var money0 := f.money
+	f.drain_events()
+	f.advance(100)
+	var started := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "coat_started")
+	assert_eq(started.size(), 1, "a batch starts: the shelf has no cheese")
+	assert_eq(int(started[0]["data"]["portions"]), 4, "four portions (tier 0)")
+	assert_eq(int(started[0]["data"]["ms"]), 4 * 600, "600 ms a portion")
+	assert_eq(money0 - f.money, 2, "the batch's ingredients: 2 coins, paid once")
+	assert_eq(f.bin_portions_of("plain"), 8, "four plain portions left the bin")
+	f.advance(2400 + int(f.packer()["ms"]) + 500)
+	assert_eq(_flavor_packs(f, "cheese"), 1, "a cheese pack on the shelf (its stock, a place kept from plain)")
+	assert_eq(f.bin_portions_of("cheese"), 2, "two cheese portions wait")
+	f.advance(10000)
+	assert_eq(int(f.stats.get("coated", {}).get("cheese", 0)), 4, "no more cheese: nobody asks, the stock is there")
+	assert_eq(String(f.machine(int(m["id"]))["state"]), "idle", "idle while not wanted (no upkeep)")
+	f.shelf.remove_at(f.shelf.size() - 2)   # a plain small bag sold: a place for spicy's stock
+	f.stats["sold_portions"] = int(f.stats["sold_portions"]) + 2
+	assert_true(bool(f.execute({"type": "set_flavor", "id": m["id"], "flavor": "spicy"})["ok"]), "set to spicy")
+	f.advance(4 * 900 + int(f.packer()["ms"]) + 600)
+	assert_eq(_flavor_packs(f, "spicy"), 1, "a spicy pack too")
+	assert_eq(_flavor_packs(f, "cheese"), 1, "the cheese pack is still cheese")
+	_check_conservation(f, "P05")
+
+
+func test_p06_coats_caramel_and_cocoa_slowly() -> void:
+	var f := _flavor_floor()
+	f.sign_tier = 4
+	var m := _coater(f, "P06", "")
+	assert_eq(String(m["flavor"]), "caramel", "the coater starts on caramel")
+	assert_eq(String(f.execute({"type": "set_flavor", "id": m["id"], "flavor": "cocoa"}).get("reason", "")), "err.locked", "cocoa waits for sign 5")
+	_fill_shelf(f)
+	_fill_bin(f, 12)
+	f.advance(100)
+	var h: Dictionary = f.machine(int(m["id"]))["held"]
+	assert_eq(int(h["ms"]), 10000, "a caramel batch: 10 s")
+	assert_eq(String(h["recipe"]), "caramel", "caramel")
+	f.advance(5000)
+	assert_eq(f.bin_portions_of("caramel"), 0, "half way: no caramel yet")
+	assert_eq(f.coating_portions("caramel"), 4, "four portions on the drum")
+	_check_conservation(f, "mid-coat")
+	f.advance(5000 + int(f.packer()["ms"]) + 500)
+	assert_eq(_flavor_packs(f, "caramel"), 1, "a caramel pack")
+	f.sign_tier = 5
+	assert_true(bool(f.execute({"type": "set_flavor", "id": m["id"], "flavor": "cocoa"})["ok"]), "sign 5: cocoa")
+	_fill_bin(f, 8)
+	f.drain_events()
+	var cocoa: Array = []
+	for i in 300:   # caramel's buffer batch (if one is on the drum) finishes first
+		f.advance(100)
+		cocoa = f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "coat_started" and String(e["data"]["flavor"]) == "cocoa")
+		if not cocoa.is_empty():
+			break
+	assert_eq(cocoa.size(), 1, "a cocoa batch starts")
+	assert_eq(int(cocoa[0]["data"]["cost"]), 6, "a cocoa batch's ingredients: 6 coins")
+	assert_eq(int(cocoa[0]["data"]["ms"]), 12000, "cocoa: 12 s")
+	# A tier-1 coater: six portions, 0.85x the time, the coins scaled (ceil 6 x 6 / 4 = 9).
+	assert_eq(f.ingredient_cost("cocoa", 6), 9, "coins scale with the batch")
+	_check_conservation(f, "P06")
+
+
+func test_m12_the_mixer_shortens_every_coating_batch() -> void:
+	var f := _flavor_floor()
+	var m := _coater(f, "P06", "caramel")
+	assert_eq(f.coat_ms(m, "caramel", 4), 10000, "without the mixer: 10 s")
+	var mix := f.execute({"type": "build", "machine": "M12"})
+	assert_true(bool(mix["ok"]), "the mixer is built (%s)" % mix.get("reason", ""))
+	assert_eq(f.coat_ms(m, "caramel", 4), 9000, "with it: 1 s off")
+	f.execute({"type": "upgrade_machine", "id": mix["machine"]})
+	f.execute({"type": "upgrade_machine", "id": mix["machine"]})
+	assert_eq(f.coat_ms(m, "caramel", 4), 8200, "tier 2: 1.8 s off")
+	assert_eq(f.coat_ms(m, "cheese", 2), 600, "never below half a batch (1.2 s -> 0.6 s)")
+	# It works (and pays) only while a coater coats.
+	f.advance(3000)
+	assert_eq(String(f.machine(int(mix["machine"]))["state"]), "idle", "no coating: idle")
+	_fill_bin(f, 8)
+	f.advance(3000)
+	assert_eq(String(f.machine(int(mix["machine"]))["state"]), "run", "a coater coats: it works")
+	_check_conservation(f, "M12")
+
+
+func test_conversion_arithmetic_and_prices() -> void:
+	var f := _flavor_floor()
+	assert_eq(f.pack_price("plain", 2, 100), 10, "Classic Butter, a small bag: 10")
+	assert_eq(f.pack_price("plain", 2, 50), 8, "at quality 50: 8 (as before flavors)")
+	assert_eq(f.pack_price("cheese", 2, 100), 13, "cheese 13")
+	assert_eq(f.pack_price("cheese", 2, 50), 10, "cheese at 50: 13 x 0.8")
+	assert_eq(f.pack_price("caramel", 2, 50), 16, "caramel forgives: 18 x 0.9")
+	assert_eq(f.pack_price("cocoa", 2, 50), 15, "cocoa does not: 22 x 0.7")
+	assert_eq(f.pack_price("cheese", 4, 100), 23, "a large cheese bag: 18 x 13 / 10")
+	assert_eq(f.pack_price("spicy", 1, 100), 9, "a spicy cup: 6 x 16 / 10")
+	# Quality is the portions' average through the coating (nothing invented or lost).
+	var m := _coater(f, "P05", "cheese")
+	f.execute({"type": "upgrade_machine", "id": m["id"]})
+	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 100, "portions": 3})
+	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 40, "portions": 3})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 6
+	f.advance(100)
+	var h: Dictionary = f.machine(int(m["id"]))["held"]
+	assert_eq(int(h["portions"]), 6, "tier 1: six portions")
+	assert_eq(int(h["quality"]), 70, "the average quality (3 x 100 + 3 x 40) / 6")
+	assert_eq(int(h["ms"]), int(round(6 * 600 * 0.85)), "0.85 x the time")
+	f.advance(int(h["ms"]) + 100)
+	assert_eq(f.bin_portions_of("cheese") + f.shelf.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "cheese").size() * 2 + f.packing.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "cheese").size() * 2, 6, "six cheese portions out")
+	_check_conservation(f, "arithmetic")
+
+
+func test_all_five_flavors_go_from_the_kettle_to_a_sale() -> void:
+	var f := _flavor_floor(73)
+	f.level = 6
+	f.sign_tier = 6
+	f.money = 100000
+	_coater(f, "P05", "cheese")
+	_coater(f, "P05", "spicy")
+	_coater(f, "P06", "caramel")
+	_coater(f, "P06", "cocoa")
+	var ids := {}
+	for fl: String in FIVE:
+		ids[fl] = _want(f, 2, fl, 600000)
+	# Real popcorn from the hand kettle (every portion made by a pop).
+	for i in 40:
+		if f.glass.is_empty():
+			_pop(f)
+		f.advance(1500)
+	for fl: String in FIVE:
+		assert_true(_sold_at(f, int(ids[fl])) >= 0, "%s: the customer bought it" % fl)
+	for e: Dictionary in f.ledger:
+		assert_eq(String(e["recipe"]), String(e["ordered_recipe"]), "every sale the flavor ordered")
+		assert_eq(int(e["coins"]), f.pack_price(String(e["recipe"]), int(e["size"]), int(e["quality"])), "at its price")
+	assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "no wrong flavor")
+	var by: Dictionary = f.stats.get("flavor_sold", {})
+	for fl: String in ["cheese", "spicy", "caramel", "cocoa"]:
+		assert_true(int(by.get(fl, 0)) >= 1, "%s counted as sold" % fl)
+	assert_true(int(f.stats["ingredient_coins"]) > 0, "ingredients were paid for")
+	_check_sales(f, "five flavors")
+	_check_conservation(f, "five flavors")
+
+
+func test_a_coater_without_coins_waits_and_never_owes() -> void:
+	var f := _flavor_floor()
+	var m := _coater(f, "P06", "caramel")
+	_fill_bin(f, 12)
+	f.money = 3
+	f.advance(2000)
+	assert_eq(String(f.machine(int(m["id"]))["state"]), "unpaid", "3 coins: caramel's 4 cannot be paid")
+	assert_eq(f.coating_portions(), 0, "it took nothing")
+	assert_eq(f.money, 3, "and owes nothing")
+	assert_true(int(f.stats.get("ingredient_short_ms", 0)) > 0, "the shortage is measured")
+	f.money = 4
+	f.advance(100)
+	assert_eq(f.coating_portions("caramel"), 4, "four coins: it coats")
+	assert_eq(f.money, 0, "the batch took them all")
+	f.advance(20000)
+	assert_true(f.money >= 0, "upkeep it cannot pay pauses it (never a debt)")
+	_check_conservation(f, "short of coins")
+
+
+func test_a_coater_leaves_the_plain_orders_their_popcorn() -> void:
+	var f := _flavor_floor()
+	var m := _coater(f, "P05", "cheese")
+	_want(f, 2)
+	_want(f, 2)
+	_fill_bin(f, 7)   # 7 - 4 waiting for plain orders = 3: not a batch of 4
+	f.advance(100)
+	assert_eq(f.coating_portions(), 0, "the plain orders' popcorn is not coated")
+	f.advance(int(f.packer()["ms"]) * 3 + 2000)
+	assert_eq(int(f.stats["sold"]), 1 + 2, "both plain customers bought plain")   # _open_sign counts one
+	_check_conservation(f, "plain first")
+
+
+func test_no_instant_flavor_switch_and_packed_stock_keeps_its_flavor() -> void:
+	var f := _flavor_floor()
+	f.sign_tier = 5
+	var m := _coater(f, "P06", "caramel")
+	_fill_shelf(f)
+	_fill_bin(f, 16)
+	f.advance(4000)
+	assert_true(bool(f.execute({"type": "set_flavor", "id": m["id"], "flavor": "cocoa"})["ok"]), "switched mid-batch")
+	assert_eq(String(f.machine(int(m["id"]))["held"]["recipe"]), "caramel", "the batch on the drum is still caramel")
+	f.drain_events()
+	f.advance(6100)
+	var done := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "lot_coated")
+	assert_eq(String(done[0]["data"]["flavor"]), "caramel", "it comes out caramel")
+	f.advance(int(f.packer()["ms"]) + 13000)
+	assert_eq(_flavor_packs(f, "caramel"), 1, "the caramel pack stays caramel")
+	assert_true(f.bin_portions_of("cocoa") + _flavor_packs(f, "cocoa") * 2 + f.coating_portions("cocoa") >= 4, "the next batch is cocoa")
+	_check_conservation(f, "switch")
+
+
+func test_flavor_orders_come_only_while_a_flavor_is_offered() -> void:
+	var a := _flavor_floor(77)
+	var b := _flavor_floor(77)
+	var plain_a: Array = []
+	var plain_b: Array = []
+	for i in 200:
+		plain_a.append(a._draw_order())
+		plain_b.append(b._draw_order())
+	assert_eq(plain_a, plain_b, "the same stream")
+	assert_true(plain_a.all(func(o: Dictionary) -> bool: return String(o["recipe"]) == "plain"), "no coater: everyone orders butter")
+	var m := _coater(a, "P05", "cheese")
+	var n := 0
+	for i in 400:
+		if String(a._draw_order()["recipe"]) == "cheese":
+			n += 1
+	assert_true(n > 40 and n < 90, "a working sprayer: about 16%% ask for cheese (%d of 400)" % n)
+	a.execute({"type": "pause_machine", "id": m["id"], "paused": true})
+	var none := 0
+	for i in 200:
+		if String(a._draw_order()["recipe"]) != "plain":
+			none += 1
+	assert_eq(none, 0, "paused and none on hand: nobody asks for it")
+	# Spicy fans wait longer.
+	a.sign_tier = 6
+	a.execute({"type": "set_flavor", "id": m["id"], "flavor": "spicy"})
+	a.execute({"type": "pause_machine", "id": m["id"], "paused": false})
+	var base := int((a.economy.table("factory")["customers"] as Dictionary)["patience_ms"])
+	var seen := false
+	for i in 300:
+		a._arrive()
+		var c: Dictionary = a.queue.pop_back() if not a.queue.is_empty() else {}
+		if not c.is_empty() and String(c["order"]["recipe"]) == "spicy":
+			assert_eq(int(c["patience_ms"]), int(round(base * 1.6)), "a spicy fan waits 1.6x")
+			seen = true
+			break
+	assert_true(seen, "a spicy fan came")
+
+
+func test_flavors_and_plain_share_the_shelf_without_blocking_it() -> void:
+	var f := _flavor_floor(79)
+	f.next_arrival_ms = 0
+	f.level = 8
+	for i in 3:
+		f.execute({"type": "build", "machine": "cooker"})
+	assert_true(bool(f.execute({"type": "build", "machine": "M01"})["ok"]), "a kernel hopper (the kettles keep cooking)")
+	f.execute({"type": "build", "machine": "bagger"})
+	_coater(f, "P05", "cheese")
+	_coater(f, "P06", "caramel")
+	_coater(f, "P05", "spicy")
+	assert_true(bool(f.execute({"type": "buy_line", "floor": "packing"})["ok"]), "a second packing line")
+	f.execute({"type": "build", "machine": "bagger"})   # line 1's filler (a line without one gets no popcorn)
+	_coater(f, "P06", "cocoa")
+	f.money = 5000
+	var worst_extra := 0
+	for minute in 20:
+		f.advance(60000)
+		_check_conservation(f, "minute %d" % minute)
+		for fl: String in ["cheese", "spicy", "caramel", "cocoa"]:
+			var waiting: int = f.queue.filter(func(c: Dictionary) -> bool: return String(c["order"]["recipe"]) == fl).size()
+			worst_extra = maxi(worst_extra, _flavor_packs(f, fl) - 1 - waiting)
+	assert_true(worst_extra <= 1, "a flavor never piles up on the shelf (worst: %d over its stock and orders)" % worst_extra)
+	var by: Dictionary = f.stats.get("flavor_sold", {})
+	for fl: String in ["cheese", "spicy", "caramel", "cocoa"]:
+		assert_true(int(by.get(fl, 0)) >= 2, "%s sold in 20 minutes (%d)" % [fl, int(by.get(fl, 0))])
+	var plain_sold: int = f.ledger.filter(func(e: Dictionary) -> bool: return String(e["recipe"]) == "plain").size()
+	assert_true(plain_sold > f.ledger.size() / 3, "butter is still most of the trade (%d of %d)" % [plain_sold, f.ledger.size()])
+	assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "every customer got their flavor")
+	_check_sales(f, "shared shelf")
+
+
+func test_parallel_lines_coat_and_pack_each_flavor_on_its_own_line() -> void:
+	var f := _flavor_floor(81)
+	f.money = 1 << 20
+	for id in ["bagger", "P07", "U04", "P04"]:
+		f.execute({"type": "build", "machine": id})
+	f.execute({"type": "buy_line", "floor": "packing"})
+	f.execute({"type": "build", "machine": "bagger"})   # line 1's filler
+	var c1 := _coater(f, "P05", "cheese")   # line 1
+	assert_eq(int(f.line_of("packing", int(c1["slot"]))), 1, "the sprayer stands on line 1")
+	f.execute({"type": "sell_machine", "id": f.machine_at("packing", 1)["id"]})   # free a line-0 place
+	var c0 := _coater(f, "P06", "caramel")
+	assert_eq(int(f.line_of("packing", int(c0["slot"]))), 0, "the coater on line 0")
+	var flavor_lines := {}
+	for i in 12:
+		var lot := {"id": f._new_id(), "recipe": "plain", "quality": 80, "portions": 4}
+		f.stats["made_portions"] = int(f.stats["made_portions"]) + 4
+		f.lift.append({"lot": lot, "left_ms": 50})
+		f.advance(1500)
+		for l: Dictionary in f.bin:
+			if f.is_flavor(String(l["recipe"])):
+				var key := "%s@%d" % [l["recipe"], int(l.get("line", 0))]
+				flavor_lines[key] = true
+	f.advance(20000)
+	for k: String in flavor_lines.keys():
+		assert_true(k in ["cheese@1", "caramel@0"], "a coated lot stays on its coater's line (%s)" % k)
+	assert_true(_flavor_packs(f, "cheese") >= 1 and _flavor_packs(f, "caramel") >= 1, "both lines packed their flavor")
+	# Line 1 loses its filler: its cheese goes back to line 0 (never stranded).
+	var b1: Dictionary = f.line_fillers(1)[0]
+	f.bin.append({"id": f._new_id(), "recipe": "cheese", "quality": 80, "portions": 4, "line": 1})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 4
+	assert_true(bool(f.execute({"type": "sell_machine", "id": b1["id"]})["ok"]) or not (b1["held"] as Dictionary).is_empty(), "the filler sold")
+	f.advance(25000)
+	assert_eq(f.bin.filter(func(l: Dictionary) -> bool: return int(l.get("line", 0)) == 1 and String(l["recipe"]) == "cheese").size(), 0, "no cheese stranded on line 1")
+	_check_conservation(f, "lines")
+
+
+func test_a_coater_mid_batch_saves_and_restores() -> void:
+	var f := _flavor_floor(83)
+	var m := _coater(f, "P06", "caramel")
+	_fill_bin(f, 12)
+	f.advance(3300)
+	var raw: Dictionary = f.to_save()
+	var g: PopRules = Factory.new(null, 83)
+	assert_true(g.from_save(raw), "restored")
+	var gm: Dictionary = g.machine(int(m["id"]))
+	assert_eq(String(gm["flavor"]), "caramel", "its flavor")
+	assert_eq(int(gm["held"]["left_ms"]), int(f.machine(int(m["id"]))["held"]["left_ms"]), "its batch, part-coated")
+	f.advance(20000)
+	g.advance(20000)
+	assert_eq(g.stats, f.stats, "the same factory after the restart")
+	_check_conservation(g, "restored")
+	# A save with a flavor the coater cannot coat comes back with its first.
+	var bad: Dictionary = f.to_save()
+	for x: Dictionary in bad["machines"]:
+		x["flavor"] = "cheese"
+	var h: PopRules = Factory.new(null, 83)
+	assert_true(h.from_save(bad), "a hand-edited save loads")
+	assert_eq(String(h.machine(int(m["id"]))["flavor"]), "caramel", "with a flavor it can coat")
+
+
+func test_coating_portions_keep_their_place_in_the_bin() -> void:
+	var f := _flavor_floor(85)
+	_coater(f, "P06", "caramel")
+	_fill_shelf(f)   # the station is blocked: nothing else takes from the bin
+	var cap := int(f.bin_cap())
+	_fill_bin(f, cap)
+	f.advance(100)
+	assert_eq(f.coating_portions(), 4, "a batch on the drum")
+	f.execute({"type": "build", "machine": "cooker"})
+	var k: Dictionary = f.machines[f.machines.size() - 1]
+	k["held"] = {"id": f._new_id(), "recipe": "plain", "quality": 80, "portions": 4}
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + 4
+	f.advance(200)
+	assert_eq(String(f.machine(int(k["id"]))["state"]), "blocked", "the kettle waits: the drum's portions come back to the bin")
+	_check_conservation(f, "room")

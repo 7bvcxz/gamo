@@ -38,6 +38,10 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "machines", "letter": "", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/catalog/catalog_view.gd",
 		"color": Color(0.84, 0.21, 0.17)},
+	# Step 34: the five flavors side by side, their coating moving (a design sheet).
+	{"id": "flavors", "letter": "", "listed": false, "wide": true,
+		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/flavors/flavors_view.gd",
+		"color": Color(0.84, 0.21, 0.17)},
 	{"id": "stub", "letter": "S", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/stub/stub_view.gd",
 		"color": Color(0.5, 0.5, 0.5)},

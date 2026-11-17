@@ -275,6 +275,43 @@ func _scenario(name: String, out: Dictionary) -> void:
 				f.advance(1500)
 				if f.heating:
 					f.execute({"type": "release"})
+		"flavor_hour", "flavor_hour_paused", "flavor_only_cheese", "flavor_only_spicy", "flavor_only_caramel", "flavor_only_cocoa":
+			# Step 34: an hour of Step 32's support-machine factory with two packing lines and four
+			# coaters (cheese, caramel on line 0; spicy, cocoa on line 1) and the flavor base mixer.
+			# `_paused`: the same machines, every coater paused all hour (no flavor is offered) --
+			# the like-for-like baseline. `only_x`: one coater works, the others are paused.
+			f.sign_tier = 6
+			f.packer_tier = 3
+			f.level = 6
+			f.stats["sold"] = 1
+			f.stats["packed"] = 1
+			f.money = 1 << 30
+			for id in ["M07", "M10", "M07", "M01", "M16", "U02", "U03", "U01", "M13", "M12"]:
+				f.execute({"type": "build", "machine": id, "floor": "kitchen"})
+			var coaters := {}
+			for row: Array in [["bagger", ""], ["P07", ""], ["P05", "cheese"], ["P06", "caramel"], ["line", ""], ["bagger", ""], ["U04", ""], ["P05", "spicy"], ["P06", "cocoa"]]:
+				if String(row[0]) == "line":
+					f.execute({"type": "buy_line", "floor": "packing"})
+					continue
+				var r: Dictionary = f.execute({"type": "build", "machine": row[0], "floor": "packing"})
+				assert(bool(r["ok"]), "flavor factory: %s (%s)" % [row[0], r.get("reason", "")])
+				if String(row[1]) != "":
+					f.execute({"type": "set_flavor", "id": r["machine"], "flavor": row[1]})
+					coaters[String(row[1])] = int(r["machine"])
+			for id in ["S03", "S05", "S08", "S01"]:
+				f.execute({"type": "build", "machine": id, "floor": "shop"})
+			for fl: String in coaters.keys():
+				var keep := name == "flavor_hour" or name == "flavor_only_" + fl
+				if not keep:
+					f.execute({"type": "pause_machine", "id": coaters[fl], "paused": true})
+			f.money = 2000
+			f.stats["sold"] = 0
+			for i in 2400:
+				if i % 3 == 0 and f.glass.is_empty() and int(f.cooldown_left) <= 0 and not f.heating:
+					f.execute({"type": "press"})
+				f.advance(1500)
+				if f.heating:
+					f.execute({"type": "release"})
 		"advanced_kitchen":   # Step 29: the same room with the advanced kitchen, no hand, 30 minutes
 			f.sign_tier = 6
 			f.packer_tier = 3
@@ -324,7 +361,19 @@ func _scenario(name: String, out: Dictionary) -> void:
 		"overheat_stops": int(f.stats.get("overheat_stops", 0)), "rotary_lots": int(f.stats.get("rotary_lots", 0)),
 		"per_machine": f.upkeep_overview()["machines"] if name in ["hour_utility", "forty_hour"] else [],
 		"machines": f.machines.size(), "lines": f.floor_lines.duplicate(), "moved_lots": int(f.stats.get("moved_lots", 0)), "line_blocked_ms": int(f.stats.get("line_blocked_ms", 0)),
-		"net_per_min": (float(f.stats["revenue"]) - float(f.stats["upkeep_paid"]) - float(f.stats.get("kernels_paid", 0)) - float(f.stats.get("oil_paid", 0))) / maxf(1.0, minutes), "presses_refused": f.stats["glass_wait_ms"]}
+		"net_per_min": (float(f.stats["revenue"]) - float(f.stats["upkeep_paid"]) - float(f.stats.get("kernels_paid", 0)) - float(f.stats.get("oil_paid", 0)) - float(f.stats.get("ingredient_coins", 0))) / maxf(1.0, minutes), "presses_refused": f.stats["glass_wait_ms"]}
+	if name.begins_with("flavor"):   # Step 34: each flavor's trade
+		out[name]["flavor_sold"] = f.stats.get("flavor_sold", {})
+		out[name]["flavor_revenue"] = f.stats.get("flavor_revenue", {})
+		out[name]["coated"] = f.stats.get("coated", {})
+		out[name]["ingredient_coins"] = int(f.stats.get("ingredient_coins", 0))
+		out[name]["abandoned"] = int(f.stats["abandoned"])
+		out[name]["wrong_sku"] = int(f.stats.get("wrong_sku", 0))
+		var plain_sold := 0
+		for e: Dictionary in f.ledger:
+			if String(e["recipe"]) == "plain":
+				plain_sold += 1
+		out[name]["plain_sold_last_500"] = plain_sold
 
 
 func _init() -> void:
@@ -356,7 +405,8 @@ func _init() -> void:
 	g.close()
 	var scen := {}
 	if only == "":
-		for name in ["zero_customers", "overproduction", "max_customers", "sales_burst", "cookers_10", "cookers_20", "cookers_40", "advanced_kitchen", "hour_utility", "forty_hour", "forty_hour_no_u08"]:
+		for name in ["zero_customers", "overproduction", "max_customers", "sales_burst", "cookers_10", "cookers_20", "cookers_40", "advanced_kitchen", "hour_utility", "forty_hour", "forty_hour_no_u08",
+				"flavor_hour", "flavor_hour_paused", "flavor_only_cheese", "flavor_only_spicy", "flavor_only_caramel", "flavor_only_cocoa"]:
 			_scenario(name, scen)
 	summary["_scenarios"] = scen
 	var s := FileAccess.open(out + "/summary.json", FileAccess.WRITE)

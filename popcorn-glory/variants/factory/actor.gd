@@ -25,6 +25,8 @@ var mood := "wait"             ## a customer's face (Step 21)
 var order_size := 0            ## Step 23: the bag they want, shown in a bubble while they wait (0: none)
 var order_premium := false     ## Step 29: they ask for the premium SKU (a gold bag in the bubble)
 var order_bargain := false     ## Step 32: they ask for a bargain (a grey tagged bag)
+var order_recipe := "plain"    ## Step 34: the flavor they want (its bag in the bubble)
+var recipe := "plain"          ## Step 34: a lot's or a bag's flavor (and the bag a customer carries)
 ## The journey: waypoints and the seconds for the whole of it. `steps` (reduced
 ## motion) holds at each waypoint instead of gliding between them.
 var path: PackedVector2Array = PackedVector2Array()
@@ -90,17 +92,24 @@ func _along(k: float) -> Vector2:
 func _draw() -> void:
 	match kind:
 		LOT:
-			for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
-				draw_circle(o * size_px, size_px * 0.5, Color(0.85, 0.64, 0.25))
-			for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
-				draw_circle(o * size_px, size_px * 0.4, PopPalette.CREAM)
+			if PopFactoryArt.FLAVOR_LOOK.has(recipe) and recipe != "plain":   # Step 34: a coated lot
+				for o: Vector2 in [Vector2(-0.55, 0.15), Vector2(0.5, 0.2), Vector2(0, -0.4)]:
+					PopFactoryArt.flavor_popcorn(self, o * size_px, size_px * 0.62, recipe)
+			else:
+				for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
+					draw_circle(o * size_px, size_px * 0.5, Color(0.85, 0.64, 0.25))
+				for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
+					draw_circle(o * size_px, size_px * 0.4, PopPalette.CREAM)
 		BAG:
-			PopFactoryArt.bag(self, Vector2.ZERO, size_px, PopTokens.MACHINE, open, fill, of)
+			if recipe == "plain":
+				PopFactoryArt.bag(self, Vector2.ZERO, size_px, PopTokens.MACHINE, open, fill, of)
+			else:
+				PopFactoryArt.sku_bag(self, Vector2.ZERO, size_px, recipe, open, fill, of)
 		NOZZLE:
 			PopFactoryArt.nozzle(self, size_px, scoop)
 		CUSTOMER:
 			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood)
 			if order_size > 0 and not carrying:
-				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * 3.75), size_px, order_size, order_premium, order_bargain)
+				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * 3.75), size_px, order_size, order_premium, order_bargain, order_recipe)
 			if carrying:
-				PopFactoryArt.bag(self, Vector2(size_px * 1.2, -size_px * 0.4), size_px * 0.9)
+				PopFactoryArt.sku_bag(self, Vector2(size_px * 1.2, -size_px * 0.4), size_px * 0.9, recipe)

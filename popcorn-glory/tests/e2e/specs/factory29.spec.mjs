@@ -59,7 +59,9 @@ test('the advanced kitchen: picker, rotary popper, premium SKU sold only to prem
   const rects = (await pop.state()).rects;
   const picks = Object.keys(rects).filter((k) => k.startsWith('pick_'));
   expect(picks.length, `the picker lists the open kitchen machines (${picks})`).toBeGreaterThanOrEqual(14);
-  expect(rects.pick_M12, 'the flavor mixer is not sold before flavors').toBeUndefined();
+  // Step 34 woke the flavor base mixer (it shortens coating batches); U07 still waits for the news.
+  expect(rects.pick_M12, 'the flavor mixer is sold since flavors (Step 34)').toBeTruthy();
+  expect(rects.pick_U07, 'the demand scheduler is not sold before the news').toBeUndefined();
   await pop.shot('factory29_picker');
   await build(pop, [[2, 'cooker'], [3, 'M16'], [4, 'M01'], [5, 'M09'], [6, 'M11'], [7, 'M13'], [8, 'M14'], [9, 'M15']]);
   let s = await pop.state();

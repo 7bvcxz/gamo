@@ -39,7 +39,8 @@ test('the packing floor: cups, the weigher, the sealer, honest SKUs', async ({ p
   await pop.tap('slot_packing_0');
   const rects = (await pop.state()).rects;
   for (const id of ['bagger', 'P01', 'P02', 'P04', 'P07', 'P08']) expect(rects[`pick_${id}`], `${id} in the packing picker`).toBeTruthy();
-  for (const id of ['P05', 'P06']) expect(rects[`pick_${id}`], `${id} is not sold before flavors`).toBeUndefined();
+  // Step 34: the sprayer and the coater are sold with their flavors (packing 2 + cheese; sign 3 + caramel).
+  for (const id of ['P05', 'P06']) expect(!!rects[`pick_${id}`], `${id} sold with its open flavor`).toBe((await pop.state()).run.flavors.some((f) => f.open && f.id !== 'plain' && (id === 'P05' ? ['cheese', 'spicy'] : ['caramel', 'cocoa']).includes(f.id)));
   await pop.shot('factory30_picker');
   await build(pop, 'packing', [[0, 'bagger'], [1, 'P01'], [2, 'P04'], [3, 'P07']]);
   let s = await pop.state();

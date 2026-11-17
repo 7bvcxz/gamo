@@ -16,7 +16,8 @@
   "portion_variance",
   "multi_queue",
   "four_lanes",
-  "parallel_lines"
+  "parallel_lines",
+  "flavors"
  ],
  "machines": [
   {
@@ -599,9 +600,9 @@
     "flavor base"
    ],
    "outputs": [
-    "flavored lots without the coating wait"
+    "every coater's batch 1.0/1.4/1.8 s shorter (never below half)"
    ],
-   "queue": "asleep until flavors open",
+   "queue": "works while a coater coats",
    "prereq": {
     "sign": 4
    },
@@ -613,18 +614,21 @@
    "upkeep_per_min": 2,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "saved_ms": 1000
     },
     {
-     "cost": 400
+     "cost": 400,
+     "saved_ms": 1400
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "saved_ms": 1800
     }
    ],
-   "marginal": "none until flavors (Step 34)",
+   "marginal": "caramel and cocoa batches (10-12 s) come out sooner where the coater is the limit",
    "runtime": "M12",
-   "step": 29
+   "step": 34
   },
   {
    "id": "M13",
@@ -1039,15 +1043,20 @@
    "operation": "seasons plain portions into a flavor",
    "contract": {
     "kind": "season",
-    "makes": "flavored portions"
+    "makes": "flavored portions",
+    "flavors": [
+     "cheese",
+     "spicy"
+    ]
    },
    "inputs": [
-    "flavors"
+    "plain portions of its line",
+    "ingredient coins a batch"
    ],
    "outputs": [
-    "flavored portions"
+    "Cheese Crunch or Spicy Dust portions on its line"
    ],
-   "queue": "asleep until flavors open",
+   "queue": "a batch of 4/6/8 portions at a time; coats only what orders and the shelf's flavor stock want",
    "prereq": {
     "packer": 2
    },
@@ -1059,18 +1068,24 @@
    "upkeep_per_min": 2,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "batch": 4,
+     "ms_factor": 1.0
     },
     {
-     "cost": 400
+     "cost": 400,
+     "batch": 6,
+     "ms_factor": 0.85
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "batch": 8,
+     "ms_factor": 0.7
     }
    ],
-   "marginal": "none until flavors (Step 34)",
+   "marginal": "a flavor's customers (8-22% of new ones) buy a bag worth 13-16 instead of leaving",
    "runtime": "P05",
-   "step": 30
+   "step": 34
   },
   {
    "id": "P06",
@@ -1082,19 +1097,24 @@
     "coater"
    ],
    "motion": "caramel cascades over a turning drum",
-   "operation": "coats portions with caramel",
+   "operation": "coats portions with caramel or cocoa",
    "contract": {
     "kind": "coat",
-    "makes": "caramel portions",
-    "slow": true
+    "makes": "caramel or cocoa portions",
+    "slow": true,
+    "flavors": [
+     "caramel",
+     "cocoa"
+    ]
    },
    "inputs": [
-    "flavors"
+    "plain portions of its line",
+    "ingredient coins a batch"
    ],
    "outputs": [
-    "caramel portions"
+    "Golden Caramel or Cocoa Swirl portions on its line"
    ],
-   "queue": "asleep until flavors open",
+   "queue": "a slow batch of 4/6/8 portions; coats only what orders and the shelf's flavor stock want",
    "prereq": {
     "packer": 2
    },
@@ -1106,18 +1126,24 @@
    "upkeep_per_min": 3,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "batch": 4,
+     "ms_factor": 1.0
     },
     {
-     "cost": 400
+     "cost": 400,
+     "batch": 6,
+     "ms_factor": 0.85
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "batch": 8,
+     "ms_factor": 0.7
     }
    ],
-   "marginal": "none until flavors (Step 34)",
+   "marginal": "caramel (18) and cocoa (22) bags for the customers who ask for them",
    "runtime": "P06",
-   "step": 30
+   "step": 34
   },
   {
    "id": "P07",

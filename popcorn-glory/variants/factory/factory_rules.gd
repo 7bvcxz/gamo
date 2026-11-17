@@ -59,7 +59,7 @@ var auto_rng_state := 0
 var _arng := RandomNumberGenerator.new()
 var order_rng_state := 0    ## Step 23: the orders' own generator (so orders never move arrival times)
 ## Step 23: what each stage finished in the last minute (flow ms), for the bottleneck cues.
-var recent := {"lots": [], "packs": [], "sales": []}
+var recent := {"lots": [], "packs": [], "sales": [], "ingredients": []}   ## Step 34: a coin of ingredients a time
 var _orng := RandomNumberGenerator.new()
 var shelf: Array = []       ## sealed packs, oldest first: {id, recipe, size, quality}
 var queue: Array = []       ## customers waiting, head first: {id, order: {recipe, size}, patience_ms}
@@ -174,6 +174,9 @@ func station_open(station: String) -> bool:
 			return int(stats["sold"]) >= 1 or sign_tier > 0
 		"auto", "cooker":
 			return sign_tier >= int(_auto().get("unlock_sign", 2)) or _count("cooker") > 0
+		"P05", "P06":   # Step 34: a coater opens with its packing tier and one of its flavors
+			var pp: Dictionary = catalog(station).get("prereq", {})
+			return (sign_tier >= int(pp.get("sign", 0)) and packer_tier >= int(pp.get("packer", 0)) and not _open_flavors_of(station).is_empty()) or _count(station) > 0
 		"M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "P01", "P02", "P04", "P05", "P06", "P07", "P08", "S01", "S02", "S03", "S04", "S05", "S06", "S08", "U01", "U02", "U03", "U04", "U05", "U06", "U07", "U08":
 			var p: Dictionary = catalog(station).get("prereq", {})
 			var needs_kettle := (p.get("machines", []) as Array).has("M07")
@@ -241,11 +244,25 @@ func pack_size() -> int:
 
 
 func pack_price(recipe: String, size: int, quality: int) -> int:
-	var base := int((_t()["price"] as Dictionary).get(recipe, 0)) * size / pack_size()
+	var unit := _unit_price(recipe)
+	var base := unit * size / pack_size()
 	for z: Dictionary in _t().get("sizes", []):
 		if int(z["size"]) == size:   # Step 23: the bag's own price (the large one is cheaper per portion)
-			base = int(z["price"]) * int((_t()["price"] as Dictionary).get(recipe, 0)) / 10
+			base = int(z["price"]) * unit / 10
+	# Step 34: a coated flavor's price leans on quality by its own weight (caramel forgives,
+	# cocoa does not); plain, premium and bargain keep the 0.6 + 0.4 x quality of Step 17.
+	if is_flavor(recipe):
+		var w := float(flavor(recipe).get("quality_weight", 0.4))
+		return maxi(1, int(round(base * (1.0 - w + w * float(quality) / 100.0))))
 	return maxi(1, int(round(base * (0.6 + 0.4 * float(quality) / 100.0))))
+
+
+## A small bag's price at quality 100: the price table, or a flavor's own (Step 34).
+func _unit_price(recipe: String) -> int:
+	var table: Dictionary = _t()["price"]
+	if table.has(recipe):
+		return int(table[recipe])
+	return int(flavor(recipe).get("price", 0))
 
 
 func bin_portions() -> int:
@@ -317,6 +334,8 @@ func _act(kind: String, cmd: Dictionary) -> Dictionary:
 			return {"ok": true}
 		"refill":
 			return _refill(int(cmd.get("id", -1)))
+		"set_flavor":   # Step 34: what a coater coats from now on
+			return _set_flavor(int(cmd.get("id", -1)), String(cmd.get("flavor", "")))
 	if kind == "press" and not glass.is_empty():
 		# The glass still holds a lot (the bin is full): no heat until it pours.
 		return {"ok": false, "reason": "err.kettle_full"}
@@ -377,7 +396,7 @@ func _flow_step(dt: int) -> void:
 	# a lot bigger than the whole bin (kettle level 7+, or a burst at 6) used to
 	# wait for room that could never come, and stopped the factory for good.
 	if not glass.is_empty():
-		var room := bin_cap() - bin_portions() - lift_portions()
+		var room := bin_cap() - bin_portions() - lift_portions() - coating_portions()
 		var want := int(glass["portions"])
 		var full_bin := bin_cap()
 		if room >= want:
@@ -678,13 +697,18 @@ func upkeep_overview() -> Dictionary:
 			paused_burn += pm
 		elif String(m["state"]) in ["run", "unpaid", "saving"]:
 			burn += pm
-		per_machine.append({"id": m["id"], "type": m["type"], "floor": m["floor"], "state": m["state"], "per_min": snappedf(pm, 0.01), "paid": int(m.get("upkeep_paid", 0)), "cost": int(m.get("paid", 0)), "done": int(m.get("done", 0))})
+		per_machine.append({"id": m["id"], "type": m["type"], "floor": m["floor"], "state": m["state"], "per_min": snappedf(pm, 0.01), "paid": int(m.get("upkeep_paid", 0)), "cost": int(m.get("paid", 0)), "done": int(m.get("done", 0)), "ingredients": int(m.get("ingredients_paid", 0))})
 	var took := 0
 	for e: Dictionary in ledger:
 		if int(e["t"]) > flow_ms - 60000:
 			took += int(e["coins"])
-	return {"burn_per_min": snappedf(burn, 0.1), "paused_per_min": snappedf(paused_burn, 0.1), "revenue_last_min": took,
-		"net_per_min": snappedf(float(took) - burn, 0.1), "low_wallet": float(money) < burn * 2.0 and burn > 0.0,
+	# Step 34: the coaters' ingredients bought in the last minute are spent money too.
+	var ingr := 0
+	for t: int in recent.get("ingredients", []):
+		if t > flow_ms - 60000:
+			ingr += 1
+	return {"burn_per_min": snappedf(burn, 0.1), "paused_per_min": snappedf(paused_burn, 0.1), "revenue_last_min": took, "ingredients_last_min": ingr,
+		"net_per_min": snappedf(float(took) - burn - float(ingr), 0.1), "low_wallet": float(money) < burn * 2.0 and burn > 0.0,
 		"paused": machines.filter(func(m: Dictionary) -> bool: return String(m["state"]) == "paused").size(), "machines": per_machine}
 
 
@@ -838,6 +862,7 @@ func _recipe_for(sku: String, size: int, line: int = -1) -> String:
 ## popcorn an order needs into another bag).
 func _next_pack(allowed: Array = [], line: int = -1) -> Dictionary:
 	var covered := {}
+	var held := 0   # Step 34: shelf places kept for flavor orders being coated
 	var counts := _on_hand_counts()   # Step 33: counted once (forty machines asked per order)
 	# The line's recipes in the bin, oldest first, and their portions (one pass, not one a lot).
 	var order: Array = []
@@ -864,9 +889,17 @@ func _next_pack(allowed: Array = [], line: int = -1) -> Dictionary:
 			if pack_sku(rr) == String(o["recipe"]) and int(portions[rr]) >= int(o["size"]):
 				r = rr
 				break
+		# Step 34: a flavor order whose popcorn is still plain is the coater's to make -- the
+		# floor packs on meanwhile (waiting for it here held every other order and the coater's
+		# own plain popcorn in a full bin: found by the shared-shelf test).
+		if r == "" and is_flavor(String(o["recipe"])) and int(portions.get(String(o["recipe"]), 0)) == 0:
+			held += 1   # ... and its pack keeps a place: packs for the queue behind it never fill the shelf it needs
+			continue
+		if r != "" and held > 0 and shelf_room(pack_sku(r)) - held <= 0:
+			return {}
 		return {} if r == "" else {"recipe": r, "size": int(o["size"]), "for": "order"}
 	var cap := shelf_base()
-	var reserved := 0
+	var reserved := _flavor_stock_reserved()   # Step 34: the offered flavors' small stock
 	var open := sizes_open()
 	for z: Dictionary in open:
 		reserved += int(z.get("stock", 0))
@@ -882,7 +915,11 @@ func _next_pack(allowed: Array = [], line: int = -1) -> Dictionary:
 				continue
 			var sku := pack_sku(r)
 			var t := mini(target, 1) if sku in ["premium", "bargain"] else target
+			if is_flavor(sku):   # Step 34: its own stock of small bags; larger ones only for orders
+				t = int(flavor(sku).get("stock", 0)) if size == pack_size() else 0
 			if int(counts.get("%s|%d" % [sku, size], 0)) < t:
+				if held > 0 and shelf_room(sku) - held <= 0:
+					return {}
 				return {"recipe": r, "size": size, "for": "stock"}
 	return {}
 
@@ -906,6 +943,18 @@ func _draw_order() -> Dictionary:
 	if recipe == "plain" and _device_on("U05") and (bin_portions_of("bargain") >= size or on_hand("bargain", size) > 0):
 		if _orng.randf() < float(bgo.get("order_share", 0.25)):
 			recipe = "bargain"
+	# Step 34: while flavors are offered, their customers ask for them by their shares (one
+	# draw, only then -- a plain-only order stream is the same as before flavors).
+	if recipe == "plain":
+		var offered := offered_flavors()
+		if not offered.is_empty():
+			var u := _orng.randf()
+			var acc := 0.0
+			for f: String in offered:
+				acc += float(flavor(f).get("order_share", 0.0))
+				if u < acc:
+					recipe = f
+					break
 	order_rng_state = int(_orng.state)
 	# Step 31, S06 the menu board: a new customer sees what is on the shelf and orders a
 	# size that is there when theirs is not (no extra draw: the order stream is the same).
@@ -949,6 +998,254 @@ func bin_portions_of(recipe: String, line: int = -1) -> int:
 ## seasoning step of a later Step changes it, never the portions).
 func pack_sku(recipe: String) -> String:
 	return String((_t().get("pack_recipes", {}) as Dictionary).get(recipe, recipe))
+
+
+# -- Step 34: flavors --------------------------------------------------------------
+## Classic Butter is the base popcorn (`plain`, popped with butter in the kettle); the
+## other flavors are coated on the packing floor by P05 (seasoning) and P06 (coating)
+## from plain portions of their line -- the same portions, never more or fewer.
+
+const COATERS := ["P05", "P06"]
+
+
+func flavors() -> Dictionary:
+	return _t().get("flavors", {})
+
+
+func flavor(id: String) -> Dictionary:
+	return ((flavors().get("recipes", {}) as Dictionary).get(id, {}) as Dictionary)
+
+
+func flavor_ids() -> Array:
+	return flavors().get("order", [])
+
+
+## A coated flavor (not the base butter, not premium or bargain).
+func is_flavor(recipe: String) -> bool:
+	return recipe != String(flavors().get("base", "plain")) and not flavor(recipe).is_empty()
+
+
+## A flavor opens by the packing and sign tiers its recipe names (one new choice at a time).
+func flavor_open(id: String) -> bool:
+	var r := flavor(id)
+	if r.is_empty():
+		return false
+	var u: Dictionary = r.get("unlock", {})
+	return packer_tier >= int(u.get("packer", 0)) and sign_tier >= int(u.get("sign", 0))
+
+
+## What is wrong with a recipe (empty: it can be coated). A recipe that would make or lose
+## portions, has no price, or names a machine that cannot coat it is refused.
+func recipe_problems(id: String) -> Array:
+	var r := flavor(id)
+	var out: Array = []
+	if r.is_empty():
+		return ["unknown"]
+	if not is_flavor(id):
+		return ["base"]
+	if int(r.get("in", 0)) <= 0 or int(r.get("out", 0)) != int(r.get("in", 0)):
+		out.append("portions")   # coating adds taste, not portions
+	if int(r.get("price", 0)) <= 0:
+		out.append("price")
+	if not COATERS.has(String(r.get("machine", ""))):
+		out.append("machine")
+	if int(r.get("coat_ms_per_portion", 0)) <= 0 or int(r.get("ingredient_coins", -1)) < 0:
+		out.append("time")
+	return out
+
+
+## The flavors a coater type can make (data: the recipes' machine), in the menu's order.
+func coater_flavors(type: String) -> Array:
+	return flavor_ids().filter(func(f: String) -> bool: return String(flavor(f).get("machine", "")) == type)
+
+
+func _open_flavors_of(type: String) -> Array:
+	return coater_flavors(type).filter(func(f: String) -> bool: return flavor_open(f) and recipe_problems(f).is_empty())
+
+
+func coater_flavor(m: Dictionary) -> String:
+	return String(m.get("flavor", ""))
+
+
+## The flavors customers can ask for now: a coater set to it works (not paused, unpaid or
+## saving), or some of it is on hand -- the order of the menu.
+func offered_flavors() -> Array:
+	var out: Array = []
+	for f: String in flavor_ids():
+		if not is_flavor(f):
+			continue
+		var on := false
+		for x: String in COATERS:
+			for m: Dictionary in _devices(x):
+				if coater_flavor(m) == f and flavor_open(f):
+					on = true
+		if not on and (bin_portions_of(f) > 0 or coating_portions(f) > 0):
+			on = true
+		if not on:
+			for p: Dictionary in shelf + packing:
+				if String(p["recipe"]) == f:
+					on = true
+					break
+		if on:
+			out.append(f)
+	return out
+
+
+## Portions being coated (in the coaters, of one flavor or all): they belong to the bin's room.
+func coating_portions(f: String = "") -> int:
+	var n := 0
+	for x: String in COATERS:
+		for m: Dictionary in of_type(x):
+			var h: Dictionary = m["held"]
+			if not h.is_empty() and (f == "" or String(h["recipe"]) == f):
+				n += int(h["portions"])
+	return n
+
+
+## The shelf places the offered flavors' small stock keeps from plain's.
+func _flavor_stock_reserved() -> int:
+	var n := 0
+	for f: String in offered_flavors():
+		n += int(flavor(f).get("stock", 0))
+	return n
+
+
+## Whether a flavor is short: what orders and its stock want, against what is coated,
+## being coated, packed or packing (so a coater never coats what nobody wants).
+func _flavor_wanted(f: String) -> bool:
+	var have := bin_portions_of(f) + coating_portions(f)
+	for p: Dictionary in shelf + packing:
+		if String(p["recipe"]) == f:
+			have += pack_portions(p)
+	for m: Dictionary in of_type("bagger"):
+		var h: Dictionary = m["held"]
+		if not h.is_empty() and String(h["recipe"]) == f:
+			have += pack_portions(h)
+	var want := int(flavor(f).get("stock", 0)) * pack_size()
+	# ... and a slow flavor's buffer coated and waiting in the bin: a large order is packed at
+	# once instead of holding the queue for a whole batch (data: buffer; the Step 34 sim).
+	want += int(flavor(f).get("buffer", 0))
+	for c: Dictionary in queue:
+		if String(c["order"]["recipe"]) == f:
+			want += int(c["order"]["size"])
+	return have < want
+
+
+## Plain portions the waiting plain orders still need (not covered by plain packs on hand):
+## a coater leaves them in the bin.
+func _plain_reserved() -> int:
+	var counts := _on_hand_counts()
+	var need := 0
+	for c: Dictionary in queue:
+		var o: Dictionary = c["order"]
+		if String(o["recipe"]) != "plain":
+			continue
+		var key := "plain|%d" % int(o["size"])
+		if int(counts.get(key, 0)) > 0:
+			counts[key] = int(counts[key]) - 1
+		else:
+			need += int(o["size"])
+	return need
+
+
+## A batch's coins: the recipe's ingredient coins for `in` portions, scaled to the batch.
+func ingredient_cost(f: String, batch: int) -> int:
+	var r := flavor(f)
+	return int(ceil(float(r.get("ingredient_coins", 0)) * float(batch) / float(maxi(1, int(r.get("in", 4))))))
+
+
+func coater_batch(m: Dictionary) -> int:
+	return int(_machine_tier(m).get("batch", flavor(coater_flavor(m)).get("in", 4)))
+
+
+## A batch's coating time: per portion x the batch x the coater's tier; the flavor base
+## mixer (M12) takes its saved_ms off (never below half); a lubricator (U02) next to it helps.
+func coat_ms(m: Dictionary, f: String, batch: int) -> int:
+	var ms := float(flavor(f).get("coat_ms_per_portion", 1000)) * float(batch) * float(_machine_tier(m).get("ms_factor", 1.0))
+	if _device_on("M12"):
+		ms = maxf(ms * 0.5, ms - float(_tier_value("M12", "saved_ms", 1000)))
+	return int(round(ms * lube_factor(m)))
+
+
+func _set_flavor(id: int, f: String) -> Dictionary:
+	var m := machine(id)
+	if m.is_empty() or not COATERS.has(String(m["type"])):
+		return {"ok": false, "reason": "err.unknown"}
+	if not coater_flavors(String(m["type"])).has(f) or not recipe_problems(f).is_empty():
+		return {"ok": false, "reason": "err.bad_recipe"}
+	if not flavor_open(f):
+		return {"ok": false, "reason": "err.locked"}
+	m["flavor"] = f   # a batch already coating keeps its own flavor; packed stock never changes
+	_emit("flavor_set", {"machine": id, "flavor": f})
+	return {"ok": true, "flavor": f}
+
+
+## A coater: with its flavor short, it takes a batch of plain portions of its line (leaving
+## what plain orders need), pays the batch's ingredients (no coins: it waits, never a debt),
+## coats for its time while paying upkeep, and puts the same portions back on its line as
+## the flavor. Nothing wanted: idle, no upkeep. Paused: the batch waits in the machine.
+func _coater_step(m: Dictionary, dt: int) -> void:
+	var h: Dictionary = m["held"]
+	var line := line_of("packing", int(m["slot"]))
+	if h.is_empty():
+		var f := coater_flavor(m)
+		if not flavor_open(f) or not recipe_problems(f).is_empty() or not _flavor_wanted(f):
+			m["state"] = "idle"
+			return
+		var batch := coater_batch(m)
+		# Its line's plain makes the batch; the plain orders' popcorn (on any line) stays.
+		if bin_portions_of("plain", line) < batch or bin_portions_of("plain") - _plain_reserved() < batch:
+			m["state"] = "starved"
+			stats["coater_starved_ms"] = int(stats.get("coater_starved_ms", 0)) + dt
+			return
+		var cost := ingredient_cost(f, batch)
+		if money < cost:
+			m["state"] = "unpaid"
+			stats["ingredient_short_ms"] = int(stats.get("ingredient_short_ms", 0)) + dt
+			return
+		money -= cost
+		for i in cost:
+			_note("ingredients")
+		stats["ingredient_coins"] = int(stats.get("ingredient_coins", 0)) + cost
+		m["ingredients_paid"] = int(m.get("ingredients_paid", 0)) + cost
+		var taken := _take_pack(batch, "plain", line)
+		var ms := coat_ms(m, f, batch)
+		m["held"] = {"id": _new_id(), "recipe": f, "quality": taken["quality"], "portions": batch, "left_ms": ms, "ms": ms, "line": line, "lots": taken["lots"]}
+		m["state"] = "run"
+		_emit("coat_started", {"machine": m["id"], "flavor": f, "portions": batch, "ms": ms, "cost": cost, "lot": m["held"]["id"]})
+		return
+	if int(h["left_ms"]) > 0:
+		if not _pay(m, dt):
+			return
+		m["state"] = "run"
+		h["left_ms"] = int(h["left_ms"]) - dt
+		return
+	var lot := {"id": h["id"], "recipe": h["recipe"], "quality": h["quality"], "portions": h["portions"]}
+	if parallel_lines():
+		lot["line"] = int(h["line"])
+	bin.append(lot)
+	m["held"] = {}
+	m["done"] = int(m.get("done", 0)) + 1
+	stats["coated_portions"] = int(stats.get("coated_portions", 0)) + int(h["portions"])
+	var by: Dictionary = stats.get("coated", {})
+	by[String(h["recipe"])] = int(by.get(String(h["recipe"]), 0)) + int(h["portions"])
+	stats["coated"] = by
+	_emit("lot_coated", {"machine": m["id"], "lot": lot["id"], "flavor": lot["recipe"], "portions": lot["portions"], "line": lot_line(lot)})
+
+
+## M12 the flavor base mixer: it works (and pays) while a coater coats; its effect is in coat_ms.
+func _premix_step(m: Dictionary, dt: int) -> void:
+	var busy := false
+	for x: String in COATERS:
+		for c: Dictionary in of_type(x):
+			if String(c["state"]) == "run":
+				busy = true
+	if not busy:
+		m["state"] = "idle"
+		return
+	if not _pay(m, dt):
+		return
+	m["state"] = "run"
 
 
 ## Takes `size` portions of `recipe` from the bin's oldest lots of it (FIFO)
@@ -1218,6 +1515,16 @@ func line_portions(line: int) -> int:
 	return n
 
 
+## Step 34: a line's popcorn still to be worked (coated flavor stock waiting for its orders is
+## not a line's load -- counted, a line holding spicy and cocoa got no plain to coat them from).
+func _line_load(line: int) -> int:
+	var n := 0
+	for lot: Dictionary in bin:
+		if lot_line(lot) == line and not _moving(lot) and not is_flavor(String(lot["recipe"])):
+			n += int(lot["portions"])
+	return n
+
+
 ## Dispatch: a landing lot goes to the working line with the least popcorn per
 ## packer (ties: the first line) -- deterministic, and a line that cannot pack gets nothing.
 func _route(lot: Dictionary) -> void:
@@ -1229,7 +1536,7 @@ func _route(lot: Dictionary) -> void:
 		if not line_working(line):
 			continue
 		var heads := line_fillers(line).filter(func(x: Dictionary) -> bool: return String(x["state"]) not in ["paused", "unpaid", "saving"]).size() + (1 if line == 0 else 0)
-		var load := float(line_portions(line)) / float(maxi(1, heads))
+		var load := float(_line_load(line)) / float(maxi(1, heads))
 		if load < best_load:
 			best_load = load
 			best = line
@@ -1401,6 +1708,8 @@ func _build(type: String, slot: int, on_floor: String = "") -> Dictionary:
 		return {"ok": false, "reason": "err.locked"}
 	if type == "U08" and not parallel_lines():
 		return {"ok": false, "reason": "err.needs_lines"}   # Step 33: it balances two lines or does nothing
+	if COATERS.has(type) and _open_flavors_of(type).is_empty():
+		return {"ok": false, "reason": "err.locked"}   # Step 34: none of its flavors is open yet
 	var floor := String(FLOOR_OF[type])
 	if floor == "any":   # Step 32: a support machine stands where it is put
 		floor = on_floor if on_floor in ["kitchen", "packing", "shop"] else "kitchen"
@@ -1418,6 +1727,8 @@ func _build(type: String, slot: int, on_floor: String = "") -> Dictionary:
 	money -= cost
 	var m := {"id": next_machine_id, "type": type, "floor": floor, "slot": slot, "tier": 0, "state": "idle", "kernels": int(_auto().get("kernel_buffer", 5)) if KETTLES.has(type) else 0,
 		"left_ms": int(_machine_tier_of(type, 0).get("cycle_ms", c.get("cycle_ms", 6000))), "held": {}, "upkeep_ms": 0, "paid": cost, "assist": 0}
+	if COATERS.has(type):
+		m["flavor"] = String(_open_flavors_of(type)[0])   # Step 34: changed on its card
 	next_machine_id += 1
 	machines.append(m)
 	_type_index_key = -1
@@ -1562,6 +1873,10 @@ func _machines_step(dt: int) -> void:
 				_utility_step(m, dt)
 			"U08":
 				_balancer_step(m, dt)
+			"P05", "P06":
+				_coater_step(m, dt)
+			"M12":
+				_premix_step(m, dt)
 			"M01":
 				_hopper_step(m, dt)
 			"M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M13", "M14", "M15":
@@ -1573,7 +1888,7 @@ func _machines_step(dt: int) -> void:
 func _cooker_step(m: Dictionary, dt: int) -> void:
 	if not (m["held"] as Dictionary).is_empty():
 		var lot: Dictionary = m["held"]
-		var room := bin_cap() - bin_portions() - lift_portions()
+		var room := bin_cap() - bin_portions() - lift_portions() - coating_portions()
 		if room < int(lot["portions"]):
 			m["state"] = "blocked"
 			stats["auto_blocked_ms"] = int(stats["auto_blocked_ms"]) + dt
@@ -1838,9 +2153,11 @@ func demand_wants_lot() -> bool:
 		var target := int(z.get("stock", 0)) if z.has("stock") else cap - reserved
 		var on := on_hand("plain", size) + on_hand("premium", size)
 		want += maxi(0, target - on) * size
+	for f: String in offered_flavors():   # Step 34: each offered flavor's small stock
+		want += maxi(0, int(flavor(f).get("stock", 0)) - on_hand(f, pack_size())) * pack_size()
 	var supply := bin_portions() + lift_portions() + int(glass.get("portions", 0))
 	for m: Dictionary in machines:
-		supply += int((m["held"] as Dictionary).get("portions", 0)) if _is_kettle(m) else 0
+		supply += int((m["held"] as Dictionary).get("portions", 0)) if _is_kettle(m) or COATERS.has(String(m["type"])) else 0
 	return want > supply
 
 
@@ -2080,6 +2397,13 @@ func _sell(sv: Dictionary) -> void:
 	if String(p["recipe"]) == "premium":
 		stats["premium_sold"] = int(stats.get("premium_sold", 0)) + 1
 		stats["premium_revenue"] = int(stats.get("premium_revenue", 0)) + coins
+	if is_flavor(String(p["recipe"])):   # Step 34: each flavor's sales and coins
+		var fs: Dictionary = stats.get("flavor_sold", {})
+		fs[String(p["recipe"])] = int(fs.get(String(p["recipe"]), 0)) + 1
+		stats["flavor_sold"] = fs
+		var fr: Dictionary = stats.get("flavor_revenue", {})
+		fr[String(p["recipe"])] = int(fr.get(String(p["recipe"]), 0)) + coins
+		stats["flavor_revenue"] = fr
 	if String(p["recipe"]) != String(c["order"]["recipe"]):
 		stats["wrong_sku"] = int(stats.get("wrong_sku", 0)) + 1   # must stay 0 (tests)
 	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "ordered": c["order"]["size"], "ordered_recipe": c["order"]["recipe"], "quality": p["quality"], "coins": coins})
@@ -2105,7 +2429,12 @@ func _arrive() -> void:
 		stats["passed_by"] = int(stats["passed_by"]) + 1
 		_emit("customer_passed", {})
 		return
-	var c := {"id": _new_id(), "order": _draw_order(), "patience_ms": int(f["patience_ms"])}
+	var order := _draw_order()
+	# Step 34: a flavor's customers wait by its willingness (spicy fans wait longest).
+	var patience := int(f["patience_ms"])
+	if is_flavor(String(order["recipe"])):
+		patience = int(round(patience * float(flavor(String(order["recipe"])).get("patience", 1.0))))
+	var c := {"id": _new_id(), "order": order, "patience_ms": patience}
 	queue.append(c)
 	stats["arrived"] = int(stats["arrived"]) + 1
 	_emit("customer_arrived", {"customer": c["id"], "order": c["order"]})
@@ -2237,6 +2566,10 @@ func _apply_save(d: Dictionary) -> void:
 	for m: Dictionary in machines:
 		if String(m.get("type", "")) == "cooker" and not m.has("kernels"):
 			m["kernels"] = int(_auto().get("kernel_buffer", 5))
+	# Step 34: a coater's flavor is one of its own (a hand-edited or older save gets its first).
+	for m: Dictionary in machines:
+		if COATERS.has(String(m.get("type", ""))) and not coater_flavors(String(m["type"])).has(String(m.get("flavor", ""))):
+			m["flavor"] = String(coater_flavors(String(m["type"]))[0])
 	next_machine_id = maxi(int(d.get("next_machine_id", 1)), machines.size() + 1)
 	bn_ring = (d.get("bn_ring", []) as Array).duplicate() if typeof(d.get("bn_ring", [])) == TYPE_ARRAY else []
 	if String(d.get("auto_rng_state", "")).is_valid_int():
@@ -2313,6 +2646,21 @@ func state() -> Dictionary:
 		lp.append(line_portions(line))
 	s["line_portions"] = lp
 	s["moving_lots"] = bin.filter(func(l: Dictionary) -> bool: return _moving(l)).size()
+	# Step 34: the flavors -- open, offered, their stock and portions, each coater's flavor.
+	var fl: Array = []
+	for f: String in flavor_ids():
+		var on_shelf := 0
+		for p: Dictionary in shelf:
+			if String(p["recipe"]) == f:
+				on_shelf += 1
+		fl.append({"id": f, "name": String(flavor(f).get("name", f)), "open": flavor_open(f), "offered": f == "plain" or offered_flavors().has(f),
+			"price": pack_price(f, pack_size(), 100), "shelf": on_shelf, "bin": bin_portions_of(f), "coating": coating_portions(f),
+			"waiting": queue.filter(func(c: Dictionary) -> bool: return String(c["order"]["recipe"]) == f).size()})
+	s["flavors"] = fl
+	s["coaters"] = machines.filter(func(m: Dictionary) -> bool: return COATERS.has(String(m["type"]))).map(func(m: Dictionary) -> Dictionary: return {"id": m["id"], "type": m["type"],
+		"flavor": String(m.get("flavor", "")), "state": m["state"], "held": String((m["held"] as Dictionary).get("recipe", "")), "line": line_of("packing", int(m["slot"])),
+		"left_ms": int((m["held"] as Dictionary).get("left_ms", 0)), "ms": int((m["held"] as Dictionary).get("ms", 0)), "batches": int(m.get("done", 0)), "ingredients": int(m.get("ingredients_paid", 0))})
+	s["orders_recipe"] = queue.map(func(c: Dictionary) -> String: return String(c["order"]["recipe"]))
 	return s
 
 

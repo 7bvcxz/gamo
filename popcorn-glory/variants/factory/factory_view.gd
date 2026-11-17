@@ -371,6 +371,9 @@ func extra_rects() -> Dictionary:
 		out["m_pause"] = b["pause"]
 		out["m_sell"] = b["sell"]
 		out["m_group"] = _group_rect(detail_rect())   # Step 33: the floor's pause (for the tests)
+		var fr := _flavor_rects(detail_rect())
+		for f: String in fr.keys():
+			out["flavor_%s" % f] = fr[f]   # Step 34: a coater's flavors
 	if not sel_slot.is_empty():
 		var rs := _picker_rects(detail_rect())
 		var choices := _floor_choices(String(sel_slot["floor"]))
@@ -704,10 +707,15 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 	var cap := int(rules.state()["bin_cap"]) if rules else 1
 	var per_row := 4
 	var pr := hop.size.x / float(per_row + 1) * 0.55
+	var kinds := _bin_kinds(mini(portions, cap))   # Step 34: each portion in its flavor
 	for k in mini(portions, cap):
 		var col := k % per_row
 		var row := k / per_row
-		PopFactoryArt.popcorn(ci, Vector2(hop.position.x + hop.size.x * (0.2 + 0.2 * col) + (row % 2) * pr * 0.4, hop.end.y - pr * 1.1 - row * pr * 1.2), pr)
+		var at := Vector2(hop.position.x + hop.size.x * (0.2 + 0.2 * col) + (row % 2) * pr * 0.4, hop.end.y - pr * 1.1 - row * pr * 1.2)
+		if k < kinds.size() and String(kinds[k]) not in ["plain", "premium", "bargain"]:
+			PopFactoryArt.flavor_popcorn(ci, at, pr, String(kinds[k]))
+		else:
+			PopFactoryArt.popcorn(ci, at, pr)
 	# Step 20: the station at its tier (the nozzles and the bags in it are actors).
 	if rules:
 		PopFactoryArt.packer(ci, _station_rect(), int(rules.packer()["look"]), int(rules.packer()["per_cycle"]))
@@ -730,8 +738,13 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 			var shelved: Array = rules.get("shelf") if rules else []
 			var prem := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "premium"
 			var barg := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "bargain"
+			var rec := String((shelved[k] as Dictionary).get("recipe", "plain")) if k < shelved.size() else "plain"
 			if k < shelved.size() and int((shelved[k] as Dictionary).get("size", 2)) == 1:
 				PopFactoryArt.cup(ci, foot, w * 0.9)   # Step 30: a cup
+				if rec not in ["plain", "premium", "bargain"]:   # Step 34: its flavor's kernels on top
+					PopFactoryArt.flavor_popcorn(ci, foot - Vector2(0, w * 1.05), w * 0.3, rec)
+			elif rec not in ["plain", "premium", "bargain"]:
+				PopFactoryArt.sku_bag(ci, foot, w, rec)   # Step 34: the flavor's own bag
 			else:
 				PopFactoryArt.bag(ci, foot, w, PopTokens.STEEL_DEEP if barg else PopTokens.MACHINE, false, 0, 2, prem, barg)
 		else:
@@ -887,14 +900,15 @@ func _inventory_key() -> String:
 	var sel := ""
 	if sel_machine >= 0:   # the open machine's own numbers
 		var m: Dictionary = rules.machine(sel_machine)
-		sel = "%s:%d:%d" % [m.get("state", ""), int(m.get("tier", 0)), int(m.get("done", 0))]
+		sel = "%s:%d:%d:%s" % [m.get("state", ""), int(m.get("tier", 0)), int(m.get("done", 0)), m.get("flavor", "")]
 	var lp := ""
 	if rules.parallel_lines():
 		for line in rules.packing_lines():
 			lp += "%d," % rules.line_portions(line)
 	return "%d|%d|%d|%d|%s|%s" % [rules.bin_portions(), (rules.get("shelf") as Array).size(), (rules.get("queue") as Array).size(),
 		(rules.get("lift") as Array).size(), (rules.get("packing") as Array).size(), not (rules.get("serving") as Dictionary).is_empty()] + "|%d|%s" % [rules.get("packer_tier"), rules.packer_state()] \
-		+ "|%d|%s|%s|%s|%d" % [sel_machine, sel_slot, sel, lp, rules.get("sign_tier")]
+		+ "|%d|%s|%s|%s|%d" % [sel_machine, sel_slot, sel, lp, rules.get("sign_tier")] \
+		+ "|%d|%d" % [int((rules.get("stats") as Dictionary).get("coated_portions", 0)), int((rules.get("stats") as Dictionary).get("sold", 0))]
 
 
 ## Step 33: what the floor layer draws -- the places (which hold what), the lines, the
@@ -971,6 +985,7 @@ func _new_actor(kind: String, id: int) -> Node2D:
 		a.steps = false
 		a.easing_to = false
 		a.carrying = false
+		a.recipe = "plain"
 		a.visible = true
 		for meta in ["to", "end_on_arrival"]:
 			if a.has_meta(meta):
@@ -985,6 +1000,37 @@ func _new_actor(kind: String, id: int) -> Node2D:
 			cargo_stats["made"] = int(cargo_stats["made"]) + 1
 	a.model_id = id
 	return a
+
+
+## Step 34: the flavor of a pack the model holds (shelf, station, serving, a filler's hands).
+func _pack_recipe(pid: int) -> String:
+	if rules == null:
+		return "plain"
+	for arr: Array in [rules.get("shelf"), rules.get("packing")]:
+		for p: Dictionary in arr:
+			if int(p["id"]) == pid:
+				return String(p["recipe"])
+	for sv: Dictionary in rules.get("serves"):
+		if int(sv["pack"]["id"]) == pid:
+			return String(sv["pack"]["recipe"])
+	for m: Dictionary in rules.get("machines"):
+		var h: Dictionary = m["held"]
+		if not h.is_empty() and int(h.get("id", -1)) == pid:
+			return String(h.get("recipe", "plain"))
+	return "plain"
+
+
+## Step 34: the bin's portions oldest first, by flavor (one entry a portion, up to n).
+func _bin_kinds(n: int) -> Array:
+	var out: Array = []
+	if rules == null:
+		return out
+	for lot: Dictionary in rules.get("bin"):
+		for q in int(lot["portions"]):
+			if out.size() >= n:
+				return out
+			out.append(String(lot["recipe"]))
+	return out
 
 
 func _log(id: int, kind: String, what: String) -> void:
@@ -1106,6 +1152,25 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				_log(int(d["lot"]), "lot", "start")
 			"lot_binned":
 				_end_cargo(int(d["lot"]), "lot")
+			"coat_started", "lot_coated":
+				# Step 34: plain popcorn hops from the bin into the coater; the batch comes back
+				# in its flavor (the same portions, a new colour).
+				if _cargo_full() or rules == null or (rules.machine(int(d["machine"])) as Dictionary).is_empty():
+					continue
+				var cm: Dictionary = rules.machine(int(d["machine"]))
+				var cr := slot_rect(String(cm["floor"]), int(cm["slot"]))
+				var bin_at := _bin_top()
+				var c_at := Vector2(cr.get_center().x, cr.position.y + cr.size.y * 0.3)
+				var lid := int(d["lot"])
+				var a := _new_actor(Actor.LOT, lid)
+				a.size_px = _bag_px() * 0.55
+				a.recipe = "plain" if String(e["type"]) == "coat_started" else String(d.get("flavor", "plain"))
+				var mid := Vector2((bin_at.x + c_at.x) * 0.5, minf(bin_at.y, c_at.y) - 36.0)
+				var path := PackedVector2Array([bin_at, mid, c_at]) if String(e["type"]) == "coat_started" else PackedVector2Array([c_at, mid, bin_at])
+				a.start(path, 0.6, reduced_motion)
+				a.set_meta("end_on_arrival", true)
+				cargo[-lid if String(e["type"]) == "coat_started" else lid] = a
+				_sound("pop_1", 0.8 if String(e["type"]) == "coat_started" else 1.6, -20.0)
 			"pack_started":
 				# Step 20: an empty open bag indexes in under its head; its fill follows the model's clock.
 				var pid := int(d["pack"])
@@ -1113,6 +1178,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				bag.size_px = _bag_px()
 				bag.open = true
 				bag.of = int(d["size"])
+				bag.recipe = String(d.get("recipe", "plain"))
 				bag.position = _entry_foot()
 				filling[pid] = {"t0": int(e["t"]), "ms": int(d.get("ms", 3000)), "head": int(d.get("head", 0)), "size": int(d["size"]),
 					"dropped": 0, "landed": 0, "sealed": false, "bag": bag, "puffs": []}
@@ -1142,6 +1208,8 @@ func _flow_events(events: Array[Dictionary]) -> void:
 						continue
 					b = _new_actor(Actor.BAG, pid)
 					b.size_px = _bag_px()
+				b.recipe = _pack_recipe(pid)
+				b.queue_redraw()
 				b.set_meta("to", "shelf")
 				var k := maxi(0, int(rules.state()["shelf"]) - 1)
 				var sh: Array = rules.get("shelf")
@@ -1174,6 +1242,8 @@ func _flow_events(events: Array[Dictionary]) -> void:
 						continue
 					bag = _new_actor(Actor.BAG, pid)
 					bag.size_px = _bag_px()
+				bag.recipe = _pack_recipe(pid)
+				bag.queue_redraw()
 				bag.set_meta("to", "counter")
 				var lane := int(d.get("lane", 0))
 				var hand := _handoff_spot(lane) - Vector2(_head_px() * 1.4, _head_px() * 0.8)
@@ -1277,6 +1347,8 @@ func _make_customer(id: int, order: Dictionary, at: Vector2) -> Node2D:
 	a.order_size = int(order.get("size", 0))
 	a.order_premium = String(order.get("recipe", "plain")) == "premium"
 	a.order_bargain = String(order.get("recipe", "plain")) == "bargain"
+	a.order_recipe = String(order.get("recipe", "plain"))
+	a.recipe = a.order_recipe   # the bag they carry out is the flavor they asked for
 	a.position = at
 	return a
 
@@ -1480,6 +1552,7 @@ func _step_station(delta: float) -> void:
 		while int(f["dropped"]) < size_n and k >= 0.2 + 0.5 * (float(f["dropped"]) + 0.5) / float(size_n):
 			var puff := _new_actor(Actor.LOT, int(pid))
 			puff.size_px = _bag_px() * 0.22
+			puff.recipe = String((f["bag"] as Node2D).get("recipe"))
 			var tip := _head_tip(h, maxi(1, n))
 			var mouth := foot - Vector2(0, _bag_px() * 1.35)
 			puff.start(PackedVector2Array([tip, mouth]), 0.22, reduced_motion)
@@ -1873,6 +1946,13 @@ func _machine_press(p: Vector2) -> bool:
 		if (b["pause"] as Rect2).has_point(p):
 			command.emit("pause_machine", {"type": "pause_machine", "id": sel_machine, "paused": String(m["state"]) != "paused"})
 			return true
+		var fr := _flavor_rects(detail_rect())
+		for f: String in fr.keys():
+			if (fr[f] as Rect2).has_point(p):   # Step 34: coat this flavor from now on (a locked one clunks)
+				command.emit("set_flavor", {"type": "set_flavor", "id": sel_machine, "flavor": f})
+				_sound("clink" if rules.flavor_open(f) else "thud", 1.3, -10.0)
+				detail_layer.queue_redraw()
+				return true
 		if (b["sell"] as Rect2).has_point(p):
 			command.emit("sell_machine", {"type": "sell_machine", "id": sel_machine})
 			if rules.machine(sel_machine).is_empty():
@@ -1903,6 +1983,12 @@ func _per_min(type: String, tier: int) -> int:
 	var t: Dictionary = rules._machine_tier_of(type, tier)
 	if type == "M16":   # Step 29: the rotary popper makes portions itself
 		return int(round(60000.0 / float(t.get("cycle_ms", 2500)) * float((rules.catalog("M16").get("contract", {}) as Dictionary).get("portions", 2))))
+	if type in ["P05", "P06"]:   # Step 34: a coater's portions a minute, for its flavor at this tier
+		var m: Dictionary = rules.machine(sel_machine) if sel_machine >= 0 else {}
+		var fl := String(m.get("flavor", "")) if not m.is_empty() else String((rules.coater_flavors(type) + [""])[0])
+		var batch := float(t.get("batch", 4))
+		var ms := float(rules.flavor(fl).get("coat_ms_per_portion", 1000)) * batch * float(t.get("ms_factor", 1.0))
+		return int(round(60000.0 * batch / maxf(1.0, ms)))
 	if rules.forty().has(type) and not rules.catalog(type).has("cycle_ms") and type.begins_with("M"):
 		return 0   # a device does not make goods itself; its effect is in the detail
 	match type:
@@ -1976,7 +2062,7 @@ func _step_machine_nodes() -> void:
 			_mnodes[id] = n
 		var node: Node2D = _mnodes[id]
 		var r := slot_rect(String(m["floor"]), int(m["slot"]))
-		var key := "%s|%d|%d|%s|%s|%s" % [m["state"], int(m["tier"]), int(m.get("kernels", 0)), id == sel_machine or id == ov_machine, r, _icon_texture(String(m["type"]), int(m["tier"]), r.grow(-4).size, String(m["floor"])) != null]
+		var key := "%s|%d|%d|%s|%s|%s|%s" % [m["state"], int(m["tier"]), int(m.get("kernels", 0)), id == sel_machine or id == ov_machine, r, _icon_texture(String(m["type"]), int(m["tier"]), r.grow(-4).size, String(m["floor"])) != null, m.get("flavor", "")]
 		if String(node.get_meta("key", "")) != key:
 			node.set_meta("key", key)
 			node.queue_redraw()
@@ -2105,6 +2191,11 @@ func _draw_machine_node(ci: CanvasItem, id: int) -> void:
 		var g := Rect2(Vector2(r.position.x + 6, r.end.y - 9), Vector2(r.size.x - 12, 5))
 		ci.draw_rect(g, Color(PopPalette.INK, 0.15))
 		ci.draw_rect(Rect2(g.position, Vector2(g.size.x * clampf(float(m.get("kernels", 0)) / buf, 0.0, 1.0), g.size.y)), Color(0.85, 0.62, 0.25))
+	if mtype in ["P05", "P06"]:
+		# Step 34: what it coats -- a kernel of its flavor in a white dot, top left.
+		var fc := Vector2(r.position.x + r.size.x * 0.2, r.position.y + r.size.y * 0.22)
+		ci.draw_circle(fc, r.size.x * 0.13, Color.WHITE)
+		PopFactoryArt.flavor_popcorn(ci, fc, r.size.x * 0.11, String(m.get("flavor", "plain")))
 	PopFactoryArt.state_badge(ci, Vector2(r.end.x - 9, r.position.y + 9), 8.0, String(m["state"]))
 	if int(m["id"]) == sel_machine:
 		var pts := PopMachineArt.round_rect_points(r.grow(3), PopTokens.R_MACHINE)
@@ -2191,6 +2282,45 @@ func _draw_machine_detail(ci: CanvasItem, d: Rect2) -> void:
 		ci.draw_arc(g.get_center(), g.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
 		PopFactoryArt.state_badge(ci, g.get_center() + Vector2(-3, -3), g.size.x * 0.24, "paused")
 		PopFactoryArt.state_badge(ci, g.get_center() + Vector2(4, 4), g.size.x * 0.24, "paused")
+		if type in ["P05", "P06"]:
+			_draw_flavor_chips(ci, d)
+
+
+## Step 34: a coater's flavors on its card, right of the numbers under the floor's pause:
+## each its kernel and its bag (the chosen one ringed gold; a locked one grey with a padlock).
+func _flavor_rects(d: Rect2) -> Dictionary:
+	var out := {}
+	if rules == null or sel_machine < 0:
+		return out
+	var m: Dictionary = rules.machine(sel_machine)
+	if m.is_empty() or not String(m["type"]) in ["P05", "P06"]:
+		return out
+	var fl: Array = rules.coater_flavors(String(m["type"]))
+	var g := _group_rect(d)
+	var cs := clampf(d.size.y * 0.3, 40.0, 72.0)
+	var y := g.end.y + 10.0
+	for i in fl.size():
+		out[String(fl[i])] = Rect2(Vector2(d.end.x - 8 - (fl.size() - i) * (cs + 8), y), Vector2(cs, cs))
+	return out
+
+
+func _draw_flavor_chips(ci: CanvasItem, d: Rect2) -> void:
+	var m: Dictionary = rules.machine(sel_machine)
+	var rs := _flavor_rects(d)
+	for f: String in rs.keys():
+		var r: Rect2 = rs[f]
+		var open := bool(rules.flavor_open(f))
+		PopMachineArt._round_rect(ci, r, 8, Color(1, 1, 1, 0.95) if open else Color(0.85, 0.83, 0.8, 0.9))
+		PopFactoryArt.sku_bag(ci, r.position + Vector2(r.size.x * 0.66, r.size.y * 0.9), r.size.x * 0.36, f)
+		PopFactoryArt.flavor_popcorn(ci, r.position + Vector2(r.size.x * 0.3, r.size.y * 0.42), r.size.x * 0.16, f)
+		if not open:   # a padlock
+			var c := r.get_center()
+			ci.draw_rect(Rect2(c - Vector2(r.size.x * 0.16, -r.size.y * 0.02), Vector2(r.size.x * 0.32, r.size.y * 0.24)), PopPalette.INK)
+			ci.draw_arc(c + Vector2(0, r.size.y * 0.02), r.size.x * 0.1, PI, TAU, 10, PopPalette.INK, 3.0)
+		if String(m.get("flavor", "")) == f:
+			var pts := PopMachineArt.round_rect_points(r.grow(3), 9)
+			pts.append(pts[0])
+			ci.draw_polyline(pts, PopPalette.GOLD, 4.0, true)
 
 
 func _group_rect(d: Rect2) -> Rect2:
@@ -2397,6 +2527,16 @@ func _step_machine_motion(delta: float) -> void:
 				node.visible = run
 			"P04":   # the pan dips and settles
 				node.position = Vector2(c.x, r.position.y + r.size.y * (0.36 + (0.04 * absf(sin(t * 5.0)) if run else 0.0)))
+			"P05":   # Step 34: the seasoning falls in a mist of its flavor's colour
+				node.position = Vector2(c.x, r.position.y + r.size.y * (0.5 + 0.12 * fmod(t * 1.8, 1.0) if run else 0.5))
+				node.visible = run
+				_motion_flavor(node, m)
+			"P06":   # Step 34: the drum turns under its ribbon (caramel) or swirl (cocoa)
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.62)
+				node.visible = run or not (m["held"] as Dictionary).is_empty()
+				if run:
+					node.rotation += delta * 2.2
+				_motion_flavor(node, m)
 			"P07":   # the jaws crimp
 				node.position = Vector2(c.x, r.position.y + r.size.y * (0.4 + (0.24 * maxf(0.0, sin(t * 3.0)) if run else 0.0)))
 			# Step 31: the storefront, moving only while it serves.
@@ -2738,9 +2878,35 @@ func _draw_overview_button(ci: CanvasItem) -> void:
 	ci.draw_line(c + Vector2(r.size.x * 0.18, -r.size.x * 0.16), c + Vector2(r.size.x * 0.18, -r.size.x * 0.27), PopPalette.INK, 2.0)
 
 
+## Step 34: a coater's motion node draws the flavor it is coating (or set to): redrawn when it changes.
+func _motion_flavor(node: Node2D, m: Dictionary) -> void:
+	var fl := String((m["held"] as Dictionary).get("recipe", m.get("flavor", "plain")))
+	if String(node.get_meta("flavor", "")) != fl:
+		node.set_meta("flavor", fl)
+		node.queue_redraw()
+
+
 func _draw_motion_part(n: Node2D) -> void:
 	var w := float(n.get_meta("size"))
 	match String(n.get_meta("type")):
+		"P05":   # a cone of dust under the nozzle
+			var k := PopFactoryArt.flavor_look(String(n.get_meta("flavor", "cheese")))
+			for q in 7:
+				var x := (float(q % 4) - 1.5) * w * 0.07 * (1.0 + float(q / 4))
+				n.draw_circle(Vector2(x, float(q / 4) * w * 0.07), w * 0.025, k["mark"] if q % 2 == 0 else k["fill"])
+			if String(n.get_meta("flavor", "")) == "spicy":
+				n.draw_circle(Vector2(w * 0.12, -w * 0.04), w * 0.02, Color(1.0, 0.9, 0.35))
+		"P06":   # a ribbon over the drum: caramel runs, cocoa swirls
+			var fl := String(n.get_meta("flavor", "caramel"))
+			var k := PopFactoryArt.flavor_look(fl)
+			if fl == "cocoa":
+				n.draw_arc(Vector2.ZERO, w * 0.2, 0, PI * 1.5, 14, k["stripe"], maxf(3.0, w * 0.06))
+				n.draw_arc(Vector2.ZERO, w * 0.11, PI, PI * 2.6, 10, k["mark"], maxf(2.0, w * 0.04))
+			else:
+				n.draw_arc(Vector2.ZERO, w * 0.24, PI * 1.05, PI * 1.95, 14, k["band"], maxf(4.0, w * 0.08))
+				for q in 3:
+					var a := PI * (1.2 + 0.3 * q)
+					n.draw_circle(Vector2(cos(a), sin(a)) * w * 0.24 + Vector2(0, w * 0.05), w * 0.03, k["stripe"])
 		"M08":
 			for q in 3:
 				var a := TAU * q / 3.0

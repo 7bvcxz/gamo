@@ -2,7 +2,7 @@
 
 `data/machines.json`이 단일 원본이다(생성: `tools/catalog/build_catalog.py`, 이 문서: `tools/catalog/catalog_doc.py`). 그림은 게임 안 `#machines`(실제 자리 크기, 다섯 묶음 × 8, 그 아래 40대가 층에 접힌 배치). 수치는 [proposal].
 
-**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch, cup_sku, portion_variance, multi_queue, four_lanes, parallel_lines.
+**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch, cup_sku, portion_variance, multi_queue, four_lanes, parallel_lines, flavors.
 
 ## 해금 지도 (간판 단계 → 열리는 기계)
 
@@ -37,7 +37,7 @@
 | M09 | Kernel Sorter | kitchen · 1 | a sieve shakes out unpopped kernels | sort (regrade={'early': 'near', 'late': 'near'}, portion_loss=1) | early/late lots → the same lot at near grade, one portion fewer | between the kettles and the lift | 간판 4 · +M07 | — | 600 / 3분 | — / — / — | quality 50/60 -> 80 for a portion each | 돈다 |
 | M10 | Multi-Pot Distributor | kitchen · 1 | pipes branch to several pots | capacity (kitchen_slots_plus=2) | — → two more kitchen places (three, four at its tiers) | one place; its extra places must be empty to sell it | 간판 5 · +M07 | — | 1200 / 2분 | plus 2 / plus 3 / plus 4 | more kettles where the kitchen's places were the limit | 돈다 |
 | M11 | Quality Sensor | kitchen · 1 | a light sorts lots left and right | grade_split (threshold=90, premium_price=1.2) | lots of quality >= 90 → premium packs (price x1.2), sold only to customers who ask for premium | premium and plain never share a pack | 간판 5 · 포장대 2 | — | 900 / 2분 | — / — / — | perfect hand lots and tuned kettle lots sell for 20% more | 돈다 |
-| M12 | Flavor Base Mixer | kitchen · 1 | a whisk turns in a bowl | premix (for=flavored lots, time_saved_ms=1000) | flavor base → flavored lots without the coating wait | asleep until flavors open | 간판 4 | flavors | 700 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| M12 | Flavor Base Mixer | kitchen · 1 | a whisk turns in a bowl | premix (for=flavored lots, time_saved_ms=1000) | flavor base → every coater's batch 1.0/1.4/1.8 s shorter (never below half) | works while a coater coats | 간판 4 | flavors | 700 / 2분 | saved_ms 1000 / saved_ms 1400 / saved_ms 1800 | caramel and cocoa batches (10-12 s) come out sooner where the coater is the limit | 돈다 |
 | M13 | Vent Stabilizer | kitchen · 1 | vents breathe in turn | stabilize (prevents=overheat stops, when_kettles_at_least=3) | the kitchen's heat → no overheat stops | covers the floor | 간판 5 · +M07 | heat_model | 800 / 2분 | — / — / — | three or more kettles keep cooking instead of stopping to cool | 돈다 |
 | M14 | Heat Recycler | kitchen · 1 | a coil glows while kettles run | recycle (kettle_upkeep_minus=1, only_while=a kettle is cooking) | the kettles' waste heat → 1 coin a minute less upkeep per cooking kettle (never below 1) | covers the floor | 간판 5 · +M07 | — | 900 / 0분 | minus 1 / minus 2 / minus 3 | -25% kettle upkeep at tier 0 | 돈다 |
 | M15 | Smart Job Dispatcher | kitchen · 1 | a screen points kettles at jobs | dispatch (chooses=when each kettle cooks) | the shelf's counts, the orders waiting → no lots nobody needs: kernels, oil and upkeep saved | covers the floor | 간판 5 · +M07 | — | 1000 / 2분 | — / — / — | pays for itself when the kettles out-cook the shop | 돈다 |
@@ -51,8 +51,8 @@
 | P02 | Bag Dispenser | packing · 1 | a flat bag opens and drops | container (container=large bag, opens_size=4) | flat large bags → the large bag on sale before the station's tier 2 | one per floor | 포장대 1 | — | 400 / 1분 | — / — / — | large-bag orders (35%) served from tier 1 | 돈다 |
 | P03 | Volumetric Filler | packing · 1 | a nozzle fills a bag by volume | pack (makes=packs, cycle_ms=5000) | portions in the bin → a sealed pack on the shelf | holds a sealed pack while the shelf is full | 포장대 1 | — | 350 / 3분 | cycle_ms 5000 / cycle_ms 4000 / cycle_ms 3200 | +12 packs a minute (tier 0) | 돈다 |
 | P04 | Portion Weigher | packing · 1 | a pan dips and settles under each pack | weigh (returns_overfill=True, slower_ms=500) | the fillers' packs → exact packs: the overfilled portion back in the bin, 0.5 s slower | covers the floor's fillers | 포장대 2 | — | 500 / 2분 | slower_ms 500 / slower_ms 400 / slower_ms 300 | about one pack in seven keeps its extra portion | 돈다 |
-| P05 | Seasoning Sprayer | packing · 1 | a mist of seasoning falls on the portions | season (makes=flavored portions) | flavors → flavored portions | asleep until flavors open | 포장대 2 | flavors | 700 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
-| P06 | Caramel Coater | packing · 1 | caramel cascades over a turning drum | coat (makes=caramel portions, slow=True) | flavors → caramel portions | asleep until flavors open | 포장대 2 | flavors | 900 / 3분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| P05 | Seasoning Sprayer | packing · 1 | a mist of seasoning falls on the portions | season (makes=flavored portions, flavors=['cheese', 'spicy']) | plain portions of its line, ingredient coins a batch → Cheese Crunch or Spicy Dust portions on its line | a batch of 4/6/8 portions at a time; coats only what orders and the shelf's flavor stock want | 포장대 2 | flavors | 700 / 2분 | batch 4, ms_factor 1.0 / batch 6, ms_factor 0.85 / batch 8, ms_factor 0.7 | a flavor's customers (8-22% of new ones) buy a bag worth 13-16 instead of leaving | 돈다 |
+| P06 | Caramel Coater | packing · 1 | caramel cascades over a turning drum | coat (makes=caramel or cocoa portions, slow=True, flavors=['caramel', 'cocoa']) | plain portions of its line, ingredient coins a batch → Golden Caramel or Cocoa Swirl portions on its line | a slow batch of 4/6/8 portions; coats only what orders and the shelf's flavor stock want | 포장대 2 | flavors | 900 / 3분 | batch 4, ms_factor 1.0 / batch 6, ms_factor 0.85 / batch 8, ms_factor 0.7 | caramel (18) and cocoa (22) bags for the customers who ask for them | 돈다 |
 | P07 | Auto Sealer | packing · 1 | jaws press and crimp each bag | seal (station_cycle_minus=0.25) | filled packs → the station's, the fillers' and the cup feeder's cycles 25/30/35% shorter | covers the floor | 포장대 2 | — | 600 / 2분 | minus 0.25 / minus 0.3 / minus 0.35 | a quarter more packs from the same heads | 돈다 |
 | P08 | Package Conveyor Diverter | packing · 1 | an arm swings each pack to its lane | divert (shelf_lanes=per SKU) | sealed packs → premium packs on their own lane (2/3/4 places) -- they never take plain places (flavors' lanes later) | covers the shelf | 포장대 3 | — | 1200 / 2분 | lane 2 / lane 3 / lane 4 | plain keeps its whole shelf while premium waits | 돈다 |
 
@@ -79,7 +79,7 @@
 | U04 | Buffer Lift | support · 1 | a lift carries crates between the floors | buffer (bin_plus=12, shelf_plus=4) | — → the raw bin +12/24/36 portions, the shelf +4/6/8 packs | on the packing floor | 간판 3 | — | 500 / 1분 | bin 12, shelf 4 / bin 24, shelf 6 / bin 36, shelf 8 | kettles block less, rushes find packs | 돈다 |
 | U05 | Quality Inspector | support · 1 | a lens checks each lot | inspect (threshold=60, for=customers who ask for a bargain) | lots below quality 60 → bargain packs (price 7) sold only to customers who ask; plain packs stay good | on the packing floor | 간판 5 | — | 600 / 1분 | — / — / — | burnt and early lots stop pulling plain prices down | 돈다 |
 | U06 | Sanitation Bot | support · 1 | a bot leaves a trail of bubbles | freshness (prevents=quality loss of aged stock) | stock in the bin → no aging | covers the floor | 간판 5 | aging | 600 / 2분 | — / — / — | none until stock ages | 체계 대기: aging |
-| U07 | Demand Scheduler | support · 1 | a calendar flips to the next rush | schedule (reads=['news', 'preferences']) | news, preferences → the right flavor first | one per factory | 간판 6 | news, flavors | 1200 / 2분 | — / — / — | none until news and flavors (Steps 34, 37) | 체계 대기: news, flavors |
+| U07 | Demand Scheduler | support · 1 | a calendar flips to the next rush | schedule (reads=['news', 'preferences']) | news, preferences → the right flavor first | one per factory | 간판 6 | news, flavors | 1200 / 2분 | — / — / — | none until news and flavors (Steps 34, 37) | 체계 대기: news |
 | U08 | Route Balancer | support · 1 | arrows swap between two lines | balance (needs_lines=2, move=a lot at a time per line, the oldest first) | goods in a stopped or crowded line → the same goods in an idle line | needs two parallel packing lines; moves 1/2/3 lots at once | 간판 6 | parallel_lines | 1500 / 2분 | parallel 1, move_ms 1500 / parallel 2, move_ms 1100 / parallel 3, move_ms 800 | a paused or crowded packing line's popcorn reaches an idle filler instead of waiting | 돈다 |
 
 ## 다른 체계와의 고리 (아직 없는 것)
@@ -87,7 +87,6 @@
 | 체계 | 기다리는 기계 | 생기는 Step |
 |---|---|---|
 | aging | U06 | 32 |
-| flavors | M12, P05, P06, U07 | 34 |
 | news | U07 | 37 |
 
 ## 40대가 함께 (Step 33)

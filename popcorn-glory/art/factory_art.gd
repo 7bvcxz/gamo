@@ -56,6 +56,97 @@ static func popcorn(ci: CanvasItem, c: Vector2, s: float) -> void:
 		ci.draw_circle(c + o * s, s * 0.45, PopPalette.CREAM)
 
 
+
+# -- Step 34: the five flavors ------------------------------------------------------
+## Each flavor's look: the popped kernel (fill, its rim), the coating's mark (dust, sheen,
+## ribbon, swirl), the bag's stripes and band. Original shapes and colours (no brand art).
+const FLAVOR_LOOK := {
+	"plain": {"fill": Color(1.0, 0.965, 0.91), "rim": Color(0.85, 0.64, 0.25), "mark": Color(1.0, 0.86, 0.36), "stripe": Color(0.91, 0.27, 0.23), "band": Color(0.91, 0.27, 0.23)},
+	"cheese": {"fill": Color(1.0, 0.72, 0.22), "rim": Color(0.86, 0.47, 0.08), "mark": Color(0.93, 0.5, 0.06), "stripe": Color(1.0, 0.6, 0.1), "band": Color(1.0, 0.82, 0.2)},
+	"spicy": {"fill": Color(0.98, 0.45, 0.25), "rim": Color(0.72, 0.13, 0.1), "mark": Color(0.6, 0.06, 0.06), "stripe": Color(0.85, 0.13, 0.12), "band": Color(0.3, 0.12, 0.12)},
+	"caramel": {"fill": Color(0.9, 0.6, 0.24), "rim": Color(0.6, 0.33, 0.08), "mark": Color(1.0, 0.9, 0.62), "stripe": Color(0.78, 0.45, 0.12), "band": Color(0.96, 0.74, 0.3)},
+	"cocoa": {"fill": Color(0.52, 0.32, 0.2), "rim": Color(0.3, 0.17, 0.1), "mark": Color(0.98, 0.9, 0.78), "stripe": Color(0.4, 0.23, 0.14), "band": Color(0.98, 0.9, 0.78)},
+}
+
+
+static func flavor_look(recipe: String) -> Dictionary:
+	return FLAVOR_LOOK.get(recipe, FLAVOR_LOOK["plain"])
+
+
+## A popped kernel of a flavor at `c` (`s` its size): butter's sheen, cheese's dust, spicy's
+## red flecks and a spark, caramel's glossy coat and drip, cocoa's cream swirl.
+static func flavor_popcorn(ci: CanvasItem, c: Vector2, s: float, recipe: String) -> void:
+	var k := flavor_look(recipe)
+	var puffs := [Vector2(-0.5, 0.2), Vector2(0.45, 0.15), Vector2(0, -0.35), Vector2(0.1, 0.45)]
+	for o: Vector2 in puffs:
+		ci.draw_circle(c + o * s, s * 0.55, k["rim"])
+	for o: Vector2 in puffs:
+		ci.draw_circle(c + o * s, s * 0.45, k["fill"])
+	if s < 9.0:
+		# Small (the bin's portions, a cup's top): one mark -- specks under a pixel are not seen
+		# and each is a draw call (Step 34: the goods layer went 80 -> 229 calls with them).
+		ci.draw_circle(c + Vector2(0.1, -0.1) * s, maxf(1.0, s * 0.16), k["mark"])
+		return
+	match recipe:
+		"cheese":   # orange dust
+			for o: Vector2 in [Vector2(-0.55, 0.1), Vector2(0.3, 0.3), Vector2(0.1, -0.45), Vector2(-0.15, 0.55), Vector2(0.6, 0.0)]:
+				ci.draw_circle(c + o * s, maxf(0.8, s * 0.09), k["mark"])
+		"spicy":   # dark red flecks and one bright spark
+			for o: Vector2 in [Vector2(-0.4, 0.25), Vector2(0.4, 0.05), Vector2(0.05, -0.3), Vector2(0.2, 0.55)]:
+				ci.draw_circle(c + o * s, maxf(0.8, s * 0.08), k["mark"])
+			var sp := c + Vector2(0.55, -0.55) * s
+			ci.draw_line(sp + Vector2(-s * 0.22, 0), sp + Vector2(s * 0.22, 0), Color(1.0, 0.9, 0.35), maxf(1.0, s * 0.08))
+			ci.draw_line(sp + Vector2(0, -s * 0.22), sp + Vector2(0, s * 0.22), Color(1.0, 0.9, 0.35), maxf(1.0, s * 0.08))
+		"caramel":   # a glossy highlight and a drip
+			ci.draw_circle(c + Vector2(-0.15, -0.45) * s, s * 0.14, Color(1, 1, 1, 0.75))
+			ci.draw_circle(c + Vector2(0.45, 0.62) * s, s * 0.16, k["rim"])
+		"cocoa":   # a cream swirl across the top
+			ci.draw_arc(c + Vector2(0, -0.1) * s, s * 0.35, PI * 1.1, PI * 2.2, 8, k["mark"], maxf(1.0, s * 0.12))
+		_:   # butter: a sheen
+			ci.draw_circle(c + Vector2(-0.2, -0.45) * s, s * 0.13, Color(1, 1, 1, 0.8))
+			ci.draw_circle(c + Vector2(0.35, 0.05) * s, s * 0.1, k["mark"])
+
+
+## A sealed bag of an SKU: plain, premium and bargain as before; a flavor has its own
+## stripes, band and mark (a cheese wedge, a chili, a caramel drip, a cocoa swirl).
+static func sku_bag(ci: CanvasItem, foot: Vector2, w: float, recipe: String, open: bool = false, fill: int = 0, of: int = 2) -> void:
+	if not FLAVOR_LOOK.has(recipe) or recipe == "plain" or open:
+		bag(ci, foot, w, PopTokens.STEEL_DEEP if recipe == "bargain" else PopTokens.MACHINE, open, fill, of, recipe == "premium", recipe == "bargain")
+		if open and FLAVOR_LOOK.has(recipe) and recipe != "plain" and fill > 0:
+			flavor_popcorn(ci, foot - Vector2(0, w * 1.5 + w * 0.02), w * 0.2, recipe)
+		return
+	var k := flavor_look(recipe)
+	var h := w * 1.5
+	var p := foot - Vector2(w * 0.5, h)
+	var pts := PackedVector2Array([p, p + Vector2(w, 0), p + Vector2(w * 0.88, h), p + Vector2(w * 0.12, h)])
+	ci.draw_colored_polygon(pts, Color.WHITE)
+	ci.draw_line(p + Vector2(w * 0.3, 0), p + Vector2(w * 0.33, h), k["stripe"], maxf(2.0, w * 0.1))
+	ci.draw_line(p + Vector2(w * 0.7, 0), p + Vector2(w * 0.67, h), k["stripe"], maxf(2.0, w * 0.1))
+	ci.draw_rect(Rect2(p, Vector2(w, w * 0.26)), k["band"])
+	var loop := pts.duplicate()
+	loop.append(p)
+	ci.draw_polyline(loop, k["rim"], PopTokens.LINE_PART)
+	var m := p + Vector2(w * 0.5, h * 0.58)
+	var r := w * 0.22
+	match recipe:
+		"cheese":   # a wedge with holes
+			ci.draw_colored_polygon(PackedVector2Array([m + Vector2(-r, r * 0.7), m + Vector2(r, r * 0.7), m + Vector2(r, -r * 0.5)]), Color(1.0, 0.85, 0.25))
+			ci.draw_polyline(PackedVector2Array([m + Vector2(-r, r * 0.7), m + Vector2(r, r * 0.7), m + Vector2(r, -r * 0.5), m + Vector2(-r, r * 0.7)]), k["rim"], maxf(1.0, w * 0.04))
+			ci.draw_circle(m + Vector2(r * 0.45, r * 0.25), r * 0.18, k["rim"])
+			ci.draw_circle(m + Vector2(-r * 0.1, r * 0.45), r * 0.13, k["rim"])
+		"spicy":   # a chili
+			ci.draw_colored_polygon(PackedVector2Array([m + Vector2(-r * 0.9, -r * 0.5), m + Vector2(r * 0.4, -r * 0.6), m + Vector2(r * 0.9, r * 0.8), m + Vector2(0, r * 0.1)]), Color(0.88, 0.12, 0.1))
+			ci.draw_line(m + Vector2(-r * 0.9, -r * 0.5), m + Vector2(-r * 1.1, -r * 0.95), Color(0.25, 0.6, 0.2), maxf(1.5, w * 0.06))
+		"caramel":   # drips under the band
+			for q in 3:
+				var x := p.x + w * (0.22 + 0.28 * q)
+				ci.draw_line(Vector2(x, p.y + w * 0.26), Vector2(x, p.y + w * (0.4 + 0.1 * float(q % 2))), k["band"], maxf(2.0, w * 0.09))
+				ci.draw_circle(Vector2(x, p.y + w * (0.4 + 0.1 * float(q % 2))), maxf(1.2, w * 0.05), k["band"])
+			flavor_popcorn(ci, m, w * 0.16, recipe)
+		"cocoa":   # a swirl
+			ci.draw_arc(m, r * 0.8, 0, PI * 1.6, 12, k["stripe"], maxf(1.5, w * 0.07))
+			ci.draw_arc(m, r * 0.4, PI, PI * 2.6, 10, k["stripe"], maxf(1.5, w * 0.07))
+
 ## A striped paper bag, bottom-centre anchored at `foot`, `w` wide. Sealed by
 ## default (a folded top and a gold label: Step 20); `open` while it is being
 ## filled, with `fill` puffs of popcorn showing at the mouth.
@@ -272,7 +363,7 @@ static func shop_sign(ci: CanvasItem, r: Rect2, look: int, mono: Color = Color(0
 
 ## Step 23: what a customer wants, in a bubble over their head -- a small bag,
 ## or a bigger bag with a fuller top for the large one (no words, no numbers).
-static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int, premium: bool = false, bargain: bool = false) -> void:
+static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int, premium: bool = false, bargain: bool = false, recipe: String = "") -> void:
 	var w := head * 1.5
 	var h := head * 1.35
 	var r := Rect2(tail - Vector2(w * 0.5, h + head * 0.25), Vector2(w, h))
@@ -280,12 +371,21 @@ static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int, 
 	ci.draw_colored_polygon(PackedVector2Array([tail, tail + Vector2(-head * 0.2, -head * 0.3), tail + Vector2(head * 0.2, -head * 0.3)]), Color(1, 1, 1, 0.95))
 	var big := size > 2
 	var bw := head * (0.62 if big else 0.42)
+	var fl := recipe != "" and FLAVOR_LOOK.has(recipe) and recipe != "plain"
 	if size == 1:   # Step 30: a cup
 		cup(ci, Vector2(r.get_center().x, r.end.y - head * 0.16), head * 0.5)
+		if fl:   # Step 34: a flavored cup shows its kernels on top
+			flavor_popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.16 - head * 0.6), head * 0.16, recipe)
 		return
-	bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw, PopTokens.STEEL_DEEP if bargain else PopTokens.MACHINE, false, 0, 2, premium, bargain)
+	if fl:
+		sku_bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw, recipe)
+	else:
+		bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw, PopTokens.STEEL_DEEP if bargain else PopTokens.MACHINE, false, 0, 2, premium, bargain)
 	if big:
-		popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28)
+		if fl:
+			flavor_popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28, recipe)
+		else:
+			popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28)
 
 
 ## Step 26: the three machines, in a slot `r` (bottom-centre on the slot's floor).
