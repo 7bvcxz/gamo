@@ -787,18 +787,28 @@ func _head_px() -> float:
 ## A queue too long for one row wraps into a second row behind it (heads above
 ## the front row's shoulders), so a big shop never piles people on each other.
 func _queue_spot(i: int) -> Vector2:
+	# Step 31: the queue stands right of the counter's lanes, up to the shop's machines;
+	# who does not fit there waits in a second row behind the lanes (never off the floor --
+	# rows that climbed upward hid customers behind the awning once four places and four
+	# lanes took the room).
 	var c := counter_rect()
+	var hp := _head_px()
 	var lanes := int(rules.lanes()) if rules else 1
-	var x0 := maxf(c.position.x + c.size.x * 0.42, _handoff_spot(lanes - 1).x + _head_px() * 2.5)
+	var x0 := maxf(c.position.x + c.size.x * 0.42, _handoff_spot(lanes - 1).x + hp * 2.2)
 	var cap := maxi(1, int(rules.queue_cap())) if rules else 5
-	var room := floor_rect(TOP).end.x - _head_px() * 1.6 - x0
-	if rules and rules.station_open("kiosk"):
-		room -= _head_px() * 2.6 * int(rules.slots("shop"))   # Step 26: the kiosks' places by the door
-	var per_row := clampi(int(room / (_head_px() * 2.3)), 1, cap)
-	var gap := minf(_head_px() * 2.7, room / float(per_row))
-	var row := i / per_row
-	var col := i % per_row
-	return Vector2(x0 + gap * col + gap * 0.5 * row, c.position.y + 2 - _head_px() * 1.3 * row)
+	var x_end := floor_rect(TOP).end.x - hp * 1.6
+	if rules:
+		x_end = slot_rect("shop", int(rules.slots("shop")) - 1).position.x - hp * 0.5
+	var room := maxf(0.0, x_end - x0)
+	var first := clampi(int(room / (hp * 2.3)), 0, cap)
+	if i < first:
+		var gap := minf(hp * 2.7, room / float(maxi(1, first)))
+		return Vector2(x0 + gap * (float(i) + 0.5), c.position.y + 2)
+	var j := i - first
+	var left := cap - first
+	var start := c.position.x + c.size.x * 0.22
+	var gap2 := minf(hp * 2.3, (x_end - start) / float(maxi(1, left)))
+	return Vector2(start + gap2 * (float(j) + 0.5), c.position.y + 2 - hp * 1.25)
 
 
 ## The hand-over places, one per lane, from the counter's left part rightwards
@@ -1014,7 +1024,8 @@ func _reconcile_customers() -> void:
 			a.position = _door() if now_ms > 500 else _queue_spot(i)
 			customers[id] = a
 		customers[id].walk_to(_queue_spot(i))
-		customers[id].z_index = -1 if _queue_spot(i).y < _queue_spot(0).y - 1.0 else 0
+		# The second row stands behind the first (z 0 is still above the floor; -1 hid them under it).
+		customers[id].z_index = 0 if _queue_spot(i).y < counter_rect().position.y - 1.0 else 1
 		# Their face follows their patience (calm, then impatient below a third).
 		var left := float(queue[i]["patience_ms"]) / float(rules.economy.table("factory")["customers"]["patience_ms"])
 		var mood := "impatient" if left < 0.34 else "wait"
