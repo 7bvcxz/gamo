@@ -1099,20 +1099,29 @@ func _kitchen_busy() -> bool:
 
 
 ## M01 the kernel hopper: buys kernels from the wallet (kernel_price a lot) and tops
-## up to four kettles, a lot a second; it works (and pays) only while one needs it.
+## up its four kettles (the first hopper the first four kettles, the second the next
+## four, ...), the emptiest first, a lot a second; it works (and pays) only while one
+## of them needs it.
 func _hopper_step(m: Dictionary, dt: int) -> void:
 	var a := _auto()
 	var buffer := int(_tier_value("M01", "buffer", int(a.get("kernel_buffer", 5)) * 8)) / 8
 	buffer = maxi(int(a.get("kernel_buffer", 5)), buffer)
 	var price := int(a.get("kernel_price", 1))
-	var fed := 0
+	var mine := 0
+	for x: Dictionary in machines:
+		if String(x["type"]) == "M01":
+			if int(x["id"]) == int(m["id"]):
+				break
+			mine += 1
+	var k := 0
 	var hungry: Dictionary = {}
 	for c: Dictionary in machines:
-		if String(c["type"]) == "cooker" and fed < 4:
-			fed += 1
-			if int(c.get("kernels", 0)) < buffer:
+		if String(c["type"]) != "cooker":
+			continue
+		if k >= mine * 4 and k < mine * 4 + 4 and int(c.get("kernels", 0)) < buffer:
+			if hungry.is_empty() or int(c.get("kernels", 0)) < int(hungry.get("kernels", 0)):
 				hungry = c
-				break
+		k += 1
 	if hungry.is_empty():
 		m["state"] = "idle"
 		return

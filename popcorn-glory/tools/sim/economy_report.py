@@ -72,7 +72,7 @@ by = {}
 for b in buys:
     by.setdefault(b["what"], []).append(b)
 L.insert(len(L) - 2, "")
-own = {"buy": "production", "buy_packer": "packaging", "buy_sign": "demand", "buy_auto": "production", "build_kiosk": "service"}
+own = {"buy": "production", "buy_packer": "packaging", "buy_sign": "demand", "buy_auto": "production", "build_kiosk": "service", "build_hopper": "production"}
 for w, bs in sorted(by.items()):
     mine = [b for b in bs if b["bottleneck"] == own[w] or (w == "buy_sign" and b["bottleneck"] == "")]
     pm = [float(b["payback_min"]) for b in mine if float(b["payback_min"]) > 0]

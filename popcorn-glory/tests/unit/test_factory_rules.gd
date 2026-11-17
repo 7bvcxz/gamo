@@ -1253,6 +1253,23 @@ func test_m01_the_hopper_buys_kernels_and_keeps_kettles_cooking() -> void:
 	assert_eq(int(c.stats["kernels_paid"]), refill, "at the kernels' price")
 
 
+func test_m01_each_hopper_feeds_its_own_four_kettles() -> void:
+	var f := _kitchen()
+	for i in 5:
+		f.execute({"type": "build", "machine": "M07", "slot": i})
+	f.execute({"type": "build", "machine": "M01", "slot": 5})
+	for m: Dictionary in f.machines:
+		if String(m["type"]) == "cooker":
+			m["kernels"] = 0
+	f.advance(10000)
+	var kettles: Array = f.machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "cooker")
+	assert_true(int(kettles[0]["kernels"]) + int(kettles[1]["kernels"]) + int(kettles[2]["kernels"]) + int(kettles[3]["kernels"]) > 0, "one hopper feeds the first four kettles")
+	assert_eq(int(kettles[4]["kernels"]), 0, "not the fifth")
+	f.execute({"type": "build", "machine": "M01", "slot": 6})
+	f.advance(10000)
+	assert_true(int(kettles[4]["kernels"]) > 0 or String(kettles[4]["state"]) == "run", "a second hopper feeds the fifth")
+
+
 func test_m02_the_oil_doser_pays_for_oil_and_raises_quality() -> void:
 	var a := _kitchen(5)
 	a.execute({"type": "build", "machine": "M07"})

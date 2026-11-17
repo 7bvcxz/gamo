@@ -83,6 +83,16 @@ func _shop(f: PopRules, policy: String, log: Array, t: int) -> void:
 		want = "buy_sign"
 	if policy == "auto" and f.station_open("auto") and _affordable(f, "buy_auto", 1.5):
 		want = "buy_auto"
+	# Step 28: kettles hold five lots of kernels; an automating player keeps a hopper (M01)
+	# for every four of them, as soon as the hopper is open and affordable.
+	if policy == "auto":
+		var kettles: int = f.machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "cooker").size()
+		var hoppers: int = f.machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "M01").size()
+		if hoppers * 4 < kettles and f.station_open("M01") and f.build_cost("M01") >= 0 and float(f.money) >= float(f.build_cost("M01")) and f._free_slot("kitchen") >= 0:
+			var hp := int(f.build_cost("M01"))
+			if bool(f.execute({"type": "build", "machine": "M01"})["ok"]):
+				log.append({"t": t, "what": "build_hopper", "cost": hp, "sales_before": 0, "rev_at": 0, "bottleneck": "production"})
+			return
 	if want == "build_kiosk":
 		if f.station_open("kiosk") and f.build_cost("kiosk") >= 0 and float(f.money) >= float(f.build_cost("kiosk")) * factor and f._free_slot("shop") >= 0:
 			var price := int(f.build_cost("kiosk"))
@@ -131,7 +141,9 @@ func _run(hand: String, policy: String, minutes: int, seed_value: int, rows: Arr
 				spent_now += int(b["cost"])
 			# Conservation, every minute: every portion is somewhere; every coin is accounted for.
 			assert(int(f.portions_everywhere()) == made, "portions")
-			assert(int(f.money) == int(f.stats["revenue"]) - spent_now - int(f.stats["upkeep_paid"]), "money")
+			# Step 28: the kitchen's inputs (kernels bought by the hopper or a refill, oil) are spent too.
+			var inputs := int(f.stats.get("kernels_paid", 0)) + int(f.stats.get("oil_paid", 0))
+			assert(int(f.money) == int(f.stats["revenue"]) - spent_now - int(f.stats["upkeep_paid"]) - inputs, "money")
 			assert(int(f.money) >= 0, "never negative")
 			rows.append({"run": "%s/%s" % [hand, policy], "min": m, "money": f.money, "revenue": f.stats["revenue"], "sold": f.stats["sold"],
 				"lost": int(f.stats["abandoned"]) + int(f.stats["passed_by"]), "visitors": f.stats["visitors"],
@@ -217,8 +229,16 @@ func _scenario(name: String, out: Dictionary) -> void:
 			f.stats["sold"] = 1
 			var n := int(name.split("_")[1])
 			f.money = 1 << 30
-			for i in n:
-				f.execute({"type": "buy_auto"})
+			# Step 28: as many kettles as the kitchen's places hold beside a hopper for every
+			# four of them (kettles hold five lots of kernels; the hoppers buy the rest).
+			var places := int(f.slots("kitchen"))
+			var kettles := 0
+			while kettles < n and kettles + 1 + ceili((kettles + 1) / 4.0) <= places:
+				if not bool(f.execute({"type": "buy_auto"})["ok"]):
+					break
+				kettles += 1
+			for i in ceili(kettles / 4.0):
+				f.execute({"type": "build", "machine": "M01"})
 			f.money = 0
 			f.stats["sold"] = 0
 			f.advance(1800000)
@@ -229,7 +249,8 @@ func _scenario(name: String, out: Dictionary) -> void:
 		"lost": int(f.stats["abandoned"]) + int(f.stats["passed_by"]), "upkeep": f.stats["upkeep_paid"], "money": f.money,
 		"stock_portions": int(f.portions_everywhere()) - int(f.stats["sold_portions"]), "unpaid_ms": f.stats["auto_unpaid_ms"],
 		"blocked_ms": f.stats["auto_blocked_ms"], "bin": f.bin_portions(), "shelf": f.shelf.size(), "glass": int(f.glass.get("portions", 0)),
-		"net_per_min": (float(f.stats["revenue"]) - float(f.stats["upkeep_paid"])) / maxf(1.0, minutes), "presses_refused": f.stats["glass_wait_ms"]}
+		"inputs": int(f.stats.get("kernels_paid", 0)) + int(f.stats.get("oil_paid", 0)),
+		"net_per_min": (float(f.stats["revenue"]) - float(f.stats["upkeep_paid"]) - float(f.stats.get("kernels_paid", 0)) - float(f.stats.get("oil_paid", 0))) / maxf(1.0, minutes), "presses_refused": f.stats["glass_wait_ms"]}
 
 
 func _init() -> void:
