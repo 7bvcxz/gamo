@@ -1349,6 +1349,19 @@ func test_m08_the_fan_shortens_the_hand_cooldown_and_the_kettles_cycle() -> void
 	assert_eq(int(f._cooker_cycle(k)), 6000 - 300, "an auto kettle's cycle 0.3 s shorter")
 
 
+func test_a_kettle_saved_before_kernels_loads_with_a_full_buffer() -> void:
+	var f := _kitchen()
+	f.execute({"type": "build", "machine": "M07"})
+	var d: Dictionary = JSON.parse_string(JSON.stringify(f.to_save()))
+	for m: Dictionary in d["machines"]:
+		m.erase("kernels")   # what 0.26 / 0.27 wrote
+	var g: PopRules = Factory.new()
+	assert_true(bool(g.from_save(d)), "an old save loads")
+	assert_eq(int(g.machines[0]["kernels"]), int(g.economy.table("factory")["auto_cooker"]["kernel_buffer"]), "its kettle has a full buffer of kernels")
+	g.advance(7000)
+	assert_true(String(g.machines[0]["state"]) != "starved", "and keeps cooking")
+
+
 func test_a_fully_equipped_auto_kettle_still_loses_to_a_skilled_hand_per_attempt() -> void:
 	# Issue 28.3: with every basic device helping, an auto lot is a good lot -- never a
 	# perfect one, and smaller than a perfect pop of the hand's kettle at the same level.

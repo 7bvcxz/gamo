@@ -1347,6 +1347,11 @@ func _apply_save(d: Dictionary) -> void:
 			machines.append({"id": machines.size() + 1, "type": "cooker", "floor": "kitchen", "slot": k, "tier": 0, "state": String(c.get("state", "idle")),
 				"left_ms": int(c.get("left_ms", 6000)), "held": c.get("held", {}), "upkeep_ms": int(c.get("upkeep_ms", 0)), "paid": 300, "assist": 0})
 			k += 1
+	# Step 28: a kettle saved before kernels existed (0.25-0.27) comes back with a full
+	# buffer -- the save keeps cooking; it is not starved by an update.
+	for m: Dictionary in machines:
+		if String(m.get("type", "")) == "cooker" and not m.has("kernels"):
+			m["kernels"] = int(_auto().get("kernel_buffer", 5))
 	next_machine_id = maxi(int(d.get("next_machine_id", 1)), machines.size() + 1)
 	bn_ring = (d.get("bn_ring", []) as Array).duplicate() if typeof(d.get("bn_ring", [])) == TYPE_ARRAY else []
 	if String(d.get("auto_rng_state", "")).is_valid_int():

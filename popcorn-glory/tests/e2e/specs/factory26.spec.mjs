@@ -26,6 +26,12 @@ test('a cooker, a bagger and a kiosk: built from the screen, working with real g
     await pop.tap('upgrade');
     await expect.poll(async () => (await pop.state()).run.machines.some((m) => m.type === type), { message: `${type} built` }).toBe(true);
   }
+  // Step 28: a kettle holds five lots of kernels; the hopper (M01) buys more and keeps it cooking.
+  await pop.tap('slot_kitchen_1');
+  await expect.poll(async () => !!(await pop.state()).rects.pick_M01, { message: 'the hopper in the picker' }).toBe(true);
+  await pop.tap('pick_M01');
+  await pop.tap('upgrade');
+  await expect.poll(async () => (await pop.state()).run.machines.some((m) => m.type === 'M01'), { message: 'hopper built' }).toBe(true);
   const spentBefore = (await pop.state()).run;
   await pop.shot('factory26_built');
   // Two minutes of play: a hand pops now and then, the machines do the rest.
