@@ -516,8 +516,15 @@ func test_nobody_jumps_the_queue() -> void:
 
 # -- Step 22: foot traffic, the sign, the save --------------------------------
 
+## Step 36: the shop's popularity moves foot traffic; tests that measure the sign or a line's
+## throughput hold it still (its own test: test_popularity_*).
+func _steady(f: PopRules) -> PopRules:
+	f.economy.table("factory")["reputation"]["arrival_effect"] = 0.0
+	return f
+
+
 func _traffic(tier: int, seed_value: int, minutes: int) -> Array:
-	var f: PopRules = Factory.new(null, seed_value)
+	var f: PopRules = _steady(Factory.new(null, seed_value))
 	f.sign_tier = tier
 	f.advance(minutes * 60000)
 	return f.arrival_log.duplicate()
@@ -802,7 +809,7 @@ func test_the_station_and_the_sign_open_one_at_a_time() -> void:
 
 ## A hand that pops whenever the kettle is free, at most every `every_ms`, for `minutes`.
 func _played(sign: int, packer: int, level: int, every_ms: int, minutes: int) -> PopRules:
-	var f: PopRules = Factory.new(null, 20261116)
+	var f: PopRules = _steady(Factory.new(null, 20261116))
 	f.sign_tier = sign
 	f.packer_tier = packer
 	f.level = level
@@ -938,7 +945,7 @@ func test_a_good_hand_beats_one_cooker_per_batch_and_cookers_win_by_numbers() ->
 	assert_true(float(f.kettle_capacity()) > auto_avg * 1.4, "a perfect hand batch (%d) beats a cooker's batch (%.1f)" % [f.kettle_capacity(), auto_avg])
 	# Over five minutes at sign 6: the hand alone vs the hand resting while 8 cookers work.
 	var hand := _played(6, 3, 4, 2000, 5)
-	var crew: PopRules = Factory.new(null, 20261116)
+	var crew: PopRules = _steady(Factory.new(null, 20261116))
 	crew.sign_tier = 6
 	crew.packer_tier = 3
 	crew.level = 4
@@ -2407,7 +2414,7 @@ const FORTY_PLAN := [["M07", "kitchen"], ["bagger", "packing"], ["S03", "shop"],
 
 ## A factory with the first `n` machines of the plan built (lines bought when a floor fills).
 func _forty(n: int, seed_value: int = 81) -> PopRules:
-	var f: PopRules = Factory.new(null, seed_value)
+	var f: PopRules = _steady(Factory.new(null, seed_value))
 	f.packer_tier = 3
 	f.sign_tier = 6
 	f.level = 6
@@ -2715,7 +2722,7 @@ func test_forty_machines_are_the_same_whatever_the_frame_rate_and_after_a_restar
 		assert_eq(runs[i], runs[0], "the same factory at chunk %d as at 16 ms" % [[16, 33, 100, 1000][i]])
 	var a := _forty(44, 87)
 	a.advance(61000)
-	var b: PopRules = Factory.new()
+	var b: PopRules = _steady(Factory.new())
 	assert_true(bool(b.from_save(JSON.parse_string(JSON.stringify(a.to_save())))), "saves mid-cycle")
 	a.advance(60000)
 	b.advance(60000)
@@ -3641,3 +3648,211 @@ func test_the_flavor_scene_is_built_by_the_players_commands() -> void:
 	assert_eq(f.drain_events().size(), 0, "no events left over from the setup")
 	f.advance(60000)
 	_check_conservation(f, "scene")
+
+
+# -- Step 36: the cast, their tastes, the shop's popularity -------------------------------
+
+const CAST := ["classic", "kid", "student", "rush", "elder"]
+
+
+func _all_flavors(seed_value: int) -> PopRules:
+	var f := _flavor_floor(seed_value)
+	f.sign_tier = 6
+	f.stats["visitors"] = 100
+	f.stats["arrived"] = 100
+	for row: Array in [["P05", "cheese"], ["P05", "spicy"], ["P06", "caramel"], ["P06", "cocoa"]]:
+		_coater(f, row[0], row[1])
+	return f
+
+
+func test_the_cast_is_five_original_people_in_clean_data() -> void:
+	var f: PopRules = Factory.new()
+	var c: Dictionary = f.cast()
+	assert_eq(c.get("order", []), CAST, "five people in the menu's order")
+	var total := 0.0
+	for w: String in CAST:
+		var p: Dictionary = f.person(w)
+		total += float(p["weight"])
+		assert_false(String(p["name"]).to_lower().contains("cheeto"), "%s: an original name" % w)
+		assert_true(float(p["patience"]) > 0.0 and int(p["tolerance"]) >= 1, "%s: a temper and a queue they will join" % w)
+	assert_true(absf(total - 1.0) < 0.001, "the weights add up to one (%.3f)" % total)
+	assert_true(float(f.person("rush")["patience"]) < float(f.person("classic")["patience"]) and float(f.person("elder")["patience"]) > float(f.person("classic")["patience"]), "the hurried wait least, the connoisseur most")
+
+
+func test_newcomers_meet_a_classic_customer_ordering_butter_first() -> void:
+	var f: PopRules = Factory.new(null, 401)
+	assert_eq(String(f.queue[0]["who"]), "classic", "the first customer is the classic one")
+	assert_eq(f.queue[0]["order"], {"recipe": "plain", "size": 2}, "asking for a small Classic Butter")
+	# Even with every flavor and the large bag open, the first ones stay classic.
+	var g := _flavor_floor(403)
+	g.sign_tier = 6
+	g.queue.clear()
+	g.stats["visitors"] = 0
+	g.stats["arrived"] = 0
+	_coater(g, "P05", "cheese")
+	_coater(g, "P06", "caramel")
+	for i in 4:
+		g._arrive()
+	for c: Dictionary in g.queue:
+		assert_eq([String(c["who"]), c["order"]], ["classic", {"recipe": "plain", "size": 2}], "newcomer %d" % c["id"])
+	var seen := {}
+	for i in 200:
+		g._arrive()
+		if not g.queue.is_empty():
+			seen[String(g.queue[g.queue.size() - 1]["who"])] = true
+			g.queue.pop_back()
+	assert_eq(seen.size(), 5, "then all five come: %s" % [seen.keys()])
+
+
+func test_each_person_has_their_tastes_and_flavor_prices_put_some_off() -> void:
+	var f := _all_flavors(405)
+	var share := {}
+	for w: String in CAST:
+		var n := {}
+		var large := 0
+		for i in 3000:
+			var o: Dictionary = f._draw_order(w)
+			n[String(o["recipe"])] = int(n.get(String(o["recipe"]), 0)) + 1
+			if int(o["size"]) == 4:
+				large += 1
+		share[w] = {"sweet": float(int(n.get("caramel", 0)) + int(n.get("cocoa", 0))) / 3000.0, "savoury": float(int(n.get("cheese", 0)) + int(n.get("spicy", 0))) / 3000.0,
+			"plain": float(n.get("plain", 0)) / 3000.0, "large": float(large) / 3000.0}
+	print("  tastes: %s" % [share])
+	assert_true(share["kid"]["sweet"] > share["classic"]["sweet"] * 2.0, "the sweet tooth asks for caramel and cocoa (%.2f vs %.2f)" % [share["kid"]["sweet"], share["classic"]["sweet"]])
+	assert_true(share["student"]["savoury"] > share["classic"]["savoury"] * 2.0, "the snack hunter asks for cheese and spicy")
+	assert_true(share["classic"]["plain"] > share["kid"]["plain"], "the butter fan stays with butter")
+	assert_true(share["rush"]["large"] > share["kid"]["large"] * 2.0, "the hurried buy big, the kids small")
+	# Price sensitivity: the same like, a dearer flavor weighs less for the price-sensitive.
+	assert_true(f.taste("student", "cocoa") < f.taste("elder", "cocoa") / 1.6 * 0.5, "cocoa (22) puts the student off, not the connoisseur")
+	assert_eq(f.taste("", "cheese"), 1.0, "no person: Step 35's weights unchanged")
+
+
+func test_a_queue_longer_than_they_will_wait_in_and_their_patience() -> void:
+	var f := _all_flavors(407)
+	f.queue.clear()
+	var base := int((f.economy.table("factory")["customers"] as Dictionary)["patience_ms"])
+	for i in 3:
+		_want(f, 2, "plain", 600000)
+	var joined := {}
+	var walked := {}
+	for i in 600:
+		f._arrive()
+		while f.queue.size() > 3:
+			var c: Dictionary = f.queue.pop_back()
+			joined[String(c["who"])] = int(joined.get(String(c["who"]), 0)) + 1
+			var mult := float(f.person(String(c["who"]))["patience"])
+			var o: Dictionary = c["order"]
+			if f.is_flavor(String(o["recipe"])):
+				mult *= float(f.flavor(String(o["recipe"]))["patience"])
+			elif f.is_mix(String(o["recipe"])):
+				mult *= float(f.mix(String(o["recipe"]))["patience"])
+			assert_eq(int(c["patience0"]), int(round(int(round(base * (mult / float(f.person(String(c["who"]))["patience"])))) * float(f.person(String(c["who"]))["patience"]))), "patience: the base x the flavor x the person")
+	walked = f.stats.get("passed_by_who", {})
+	assert_eq(int(joined.get("rush", 0)), 0, "with three waiting, the hurried never join")
+	assert_true(int(walked.get("rush", 0)) > 50, "they walk past instead (%d)" % int(walked.get("rush", 0)))
+	assert_true(int(joined.get("classic", 0)) > 100, "the others join")
+	assert_eq(int(f.stats["abandoned"]), 0, "walking past is not giving up")
+
+
+func test_popularity_rises_with_happy_customers_falls_with_waits_and_moves_foot_traffic() -> void:
+	var f: PopRules = Factory.new(null, 409)
+	assert_eq(f.stars(), 3, "an average shop: 50 = 3 stars")
+	assert_true(absf(f.arrival_factor() - 1.0) < 0.001, "and the sign's own foot traffic")
+	f.popularity = 100.0
+	assert_true(absf(f.arrival_factor() - 1.2) < 0.001, "100: 20% more people")
+	assert_eq(f.stars(), 5, "five stars")
+	f.popularity = 0.0
+	assert_true(absf(f.arrival_factor() - 0.8) < 0.001, "0: 20% fewer")
+	# Measured: the same sign, popularity held at 100 vs 50 (no sales, no waits move it).
+	var means := []
+	for pop in [50.0, 100.0]:
+		var g: PopRules = Factory.new(null, 411)
+		g.economy.table("factory")["reputation"]["happy"] = 0.0
+		g.economy.table("factory")["reputation"]["left"] = 0.0
+		g.popularity = pop
+		g.sign_tier = 3
+		g.advance(3600000)
+		var log: Array = g.arrival_log
+		means.append(float(int(log[log.size() - 1]) - int(log[2])) / float(log.size() - 3))
+	assert_true(absf(means[0] / means[1] - 1.2) < 0.08, "a five-star shop gets customers 1.2x as often (%.0f vs %.0f ms)" % means)
+	# Happy sales lift it, waits that end in leaving lower it, never past 0..100.
+	var h := _shop(413)
+	h.popularity = 50.0
+	_stock(h, 1)
+	var c1 := _want(h, 2, "plain", 60000)
+	h.queue[h.queue.size() - 1]["patience0"] = 60000
+	h.advance(4000)
+	assert_true(_sold_at(h, c1) >= 0, "served")
+	assert_true(absf(h.popularity - 50.2) < 0.001, "a happy customer: +0.2 (%.2f)" % h.popularity)
+	_want(h, 4, "plain", 1000)
+	h.queue[h.queue.size() - 1]["patience0"] = 1000
+	h.advance(2000)
+	assert_true(absf(h.popularity - 49.2) < 0.001, "one who gave up waiting: -1 (%.2f)" % h.popularity)
+	h.popularity = 0.5
+	_want(h, 4, "plain", 500)
+	h.advance(1000)
+	assert_eq(h.popularity, 0.0, "never below 0")
+	assert_eq(int(h.state()["stars"]), 0, "the board shows it")
+	_check_conservation(h, "popularity")
+
+
+func test_event_modifiers_and_the_favorite() -> void:
+	var f := _all_flavors(415)
+	f.set_demand_mods({"arrivals": 2.0, "flavors": {"cheese": 0.0}})
+	assert_true(absf(f.arrival_factor() - 2.0) < 0.001, "an event can bring twice the people")
+	for i in 800:
+		assert_true(String(f._draw_order("student")["recipe"]) != "cheese", "and switch a flavor off")
+	f.set_demand_mods({})
+	f.order_log = ["plain", "caramel", "caramel", "cheese"]
+	assert_eq(f.favorite(), "caramel", "the favorite: the most asked for lately")
+	assert_eq(String(f.state()["favorite"]), "caramel", "on the state")
+
+
+func test_a_niche_flavor_open_before_its_machine_is_never_asked_for() -> void:
+	var f := _flavor_floor(417)
+	f.sign_tier = 4   # spicy is open
+	f.stats["visitors"] = 100
+	f.stats["arrived"] = 100
+	assert_true(f.flavor_open("spicy"), "spicy open")
+	_coater(f, "P05", "cheese")
+	for w: String in CAST:
+		for i in 400:
+			assert_true(String(f._draw_order(w)["recipe"]) != "spicy", "%s: no spicy before a sprayer makes it" % w)
+
+
+func test_a_crowded_shop_keeps_its_queue_cap_and_order_and_nobody_waits_forever() -> void:
+	var f := _shop(419)
+	f.next_arrival_ms = f.flow_ms + 100
+	var cap := int(f.queue_cap())
+	var longest := 0
+	for i in 600:
+		f.advance(1000)
+		longest = maxi(longest, f.queue.size())
+		for c: Dictionary in f.queue:
+			assert_true(int(c["patience_ms"]) <= int(c["patience0"]), "patience only runs down")
+	assert_true(longest <= cap, "never more than the cap in the queue (%d <= %d)" % [longest, cap])
+	assert_true(int(f.stats["passed_by"]) > 0, "the rest walk past")
+	assert_true(int(f.stats["abandoned"]) > 0 and f.popularity < 50.0, "an empty shelf: they give up, the popularity drops (%.0f)" % f.popularity)
+	_check_conservation(f, "crowd")
+
+
+func test_the_cast_and_the_popularity_save_and_go_on_the_same() -> void:
+	var f := _all_flavors(421)
+	f.level = 6
+	f.next_arrival_ms = f.flow_ms + 100
+	for i in 60:
+		if f.glass.is_empty():
+			_pop(f)
+		f.advance(1000)
+	var g: PopRules = Factory.new(null, 421)
+	assert_true(g.from_save(JSON.parse_string(JSON.stringify(f.to_save()))), "restored")
+	assert_eq(g.popularity, f.popularity, "the popularity")
+	for x: PopRules in [f, g]:
+		for i in 60:
+			if x.glass.is_empty():
+				_pop(x)
+			x.advance(1000)
+	assert_eq(JSON.stringify(g.to_save()), JSON.stringify(f.to_save()), "the same people come and order the same")
+	assert_true((f.stats.get("arrived_who", {}) as Dictionary).size() >= 4, "several kinds came: %s" % [f.stats.get("arrived_who", {})])
+	_check_sales(f, "cast")
+	_check_conservation(g, "cast")

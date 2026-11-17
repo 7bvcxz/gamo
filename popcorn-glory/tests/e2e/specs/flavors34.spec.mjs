@@ -118,7 +118,9 @@ test('five flavors are coated, packed, asked for and sold in the browser', async
 
   // Run: the hand pops now and then; game time in steps (the model runs as it does live).
   const seen = new Set();
-  for (let i = 0; i < 60; i++) {
+  // (Step 36: the cast asks for cocoa less often -- price-sensitive students and butter fans -- so up
+  // to ten game minutes; it stops as soon as all five have sold)
+  for (let i = 0; i < 120; i++) {
     s = await pop.state();
     if (!s.run.heating && Object.keys(s.run.glass).length === 0 && i % 2 === 0) {
       await pop.hold('ring', Math.round(s.run.window[0] + (s.run.window[1] - s.run.window[0]) * 0.25));

@@ -343,7 +343,7 @@ func test_faces_follow_patience_the_sale_and_leaving() -> void:
 	f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
 	var actor: Node2D = v.customers[first]
 	await _frames(40, 100)
-	assert_eq(String(actor.mood), "happy", "served: happy, carrying the bag")
+	assert_eq(String(actor.mood), "thanks", "served: thanks (Step 36: an arm up and a heart), carrying the bag")
 	assert_true(actor.carrying, "with the bag")
 	# The others, with no more stock, leave sad.
 	var left_sad := false

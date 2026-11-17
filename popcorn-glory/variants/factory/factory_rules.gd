@@ -49,6 +49,11 @@ var _prng := RandomNumberGenerator.new()
 var overheat_left := 0     ## Step 29: ms the kettles still stop to cool
 var finishing := {}        ## Step 35: the hand's spoon on a coater's batch ({machine, ms}; {} when not)
 var promo := {}            ## Step 35: flavor -> flow ms its surplus began (a key with "on": the board's special)
+var popularity := 50.0     ## Step 36: the shop's reputation (0-100; stars on the board, foot traffic)
+var cast_rng_state := 0    ## Step 36: who comes in (its own generator: orders and arrivals keep theirs)
+var _crng := RandomNumberGenerator.new()
+var demand_mods := {}      ## Step 36: event modifiers ({"arrivals": x, "flavors": {f: x}}) -- Step 37's news sets them
+var order_log: Array = []  ## Step 36: the last orders' recipes (the board's favorite)
 ## Step 33: each floor's lines (1 = the first; data: factory.lines adds places per line).
 ## Two or more packing lines make the raw bin parallel lines: every lot that lands is
 ## routed to one line, and a line's fillers pack only its own goods (the station is line 1).
@@ -97,6 +102,9 @@ func _init(p_economy: PopEconomy = null, seed_value: int = 20261116) -> void:
 	auto_rng_state = int(_arng.state)
 	_prng.seed = seed_value + 15485863
 	pack_rng_state = int(_prng.state)
+	_crng.seed = seed_value + 32452843
+	cast_rng_state = int(_crng.state)
+	popularity = float(_t().get("reputation", {}).get("start", 50.0))
 	# The first customer is already waiting when the shop opens (design/FACTORY_FLOW.md 5).
 	_arrive()
 	var f := _t()["customers"] as Dictionary
@@ -502,7 +510,8 @@ func _flow_step(dt: int) -> void:
 		c["patience_ms"] = int(c["patience_ms"]) - dt
 		if int(c["patience_ms"]) <= 0:
 			stats["abandoned"] = int(stats["abandoned"]) + 1
-			_emit("customer_left", {"customer": c["id"], "why": "waited"})
+			_reputation(float((_t().get("reputation", {}) as Dictionary).get("left", -3.0)), "left")
+			_emit("customer_left", {"customer": c["id"], "why": "waited", "who": String(c.get("who", "classic"))})
 		else:
 			stay.append(c)
 	queue = stay
@@ -965,18 +974,22 @@ func _next_pack(allowed: Array = [], line: int = -1) -> Dictionary:
 
 ## Customers' orders: the small bag, or once the large one is open, the large
 ## one by its share -- drawn from the orders' own generator.
-func _draw_order() -> Dictionary:
+func _draw_order(who: String = "") -> Dictionary:
 	var size := pack_size()
 	_orng.state = order_rng_state
+	var p := person(who)
 	for z: Dictionary in sizes_open():
-		if z.has("order_share") and _orng.randf() < float(z["order_share"]):
+		var share := float(z.get("order_share", 0.0))
+		if z.has("order_share") and int(z["size"]) > pack_size():
+			share = minf(0.95, share * float(p.get("large", 1.0)))   # Step 36: who buys big
+		if z.has("order_share") and _orng.randf() < share:
 			size = int(z["size"])
 	# Step 29: while premium popcorn is on hand (M11 sorts it), some customers ask for it --
 	# and only they buy it (the draw happens only then, so plain-only order streams are unchanged).
 	var recipe := "plain"
 	var pr: Dictionary = _t().get("premium", {})
 	if _device_on("M11") and (bin_portions_of("premium") >= size or on_hand("premium", size) > 0):
-		if _orng.randf() < float(pr.get("order_share", 0.3)):
+		if _orng.randf() < minf(0.95, float(pr.get("order_share", 0.3)) * like(who, "premium")):
 			recipe = "premium"
 	var bgo: Dictionary = _t().get("bargain", {})
 	if recipe == "plain" and _device_on("U05") and (bin_portions_of("bargain") >= size or on_hand("bargain", size) > 0):
@@ -991,13 +1004,13 @@ func _draw_order() -> Dictionary:
 			var acc := 0.0
 			for f: String in offered:
 				# Step 35: the board's special (a surplus) is asked for share_mult times as often.
-				acc += float(flavor(f).get("order_share", 0.0)) * (float(promo_rules().get("share_mult", 1.0)) if promoted(f) else 1.0)
+				acc += float(flavor(f).get("order_share", 0.0)) * (float(promo_rules().get("share_mult", 1.0)) if promoted(f) else 1.0) * taste(who, f)
 				if u < acc:
 					recipe = f
 					break
 			if recipe == "plain":   # Step 35: a mixed bag (the same draw; none offered, the same stream)
 				for x: String in offered_mixes():
-					acc += float(mix(x).get("order_share", 0.0))
+					acc += float(mix(x).get("order_share", 0.0)) * taste(who, x)
 					if u < acc:
 						recipe = x
 						size = int(mix(x).get("size", 4))
@@ -2790,6 +2803,8 @@ func reseed(seed_value: int) -> void:
 	auto_rng_state = int(_arng.state)
 	_prng.seed = seed_value + 15485863
 	pack_rng_state = int(_prng.state)
+	_crng.seed = seed_value + 32452843
+	cast_rng_state = int(_crng.state)
 	queue.clear()
 	arrival_log.clear()
 	stats["arrived"] = 0
@@ -2861,6 +2876,11 @@ func _sell(sv: Dictionary) -> void:
 				_check_payback(cm)
 	if String(p["recipe"]) != String(c["order"]["recipe"]):
 		stats["wrong_sku"] = int(stats.get("wrong_sku", 0)) + 1   # must stay 0 (tests)
+	# Step 36: a customer served while still in good humour adds to the shop's popularity.
+	var rp: Dictionary = _t().get("reputation", {})
+	if float(c.get("patience_ms", 0)) >= float(c.get("patience0", c.get("patience_ms", 1))) * float(rp.get("happy_share", 0.34)):
+		stats["happy_sales"] = int(stats.get("happy_sales", 0)) + 1
+		_reputation(float(rp.get("happy", 1.0)), "happy")
 	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "ordered": c["order"]["size"], "ordered_recipe": c["order"]["recipe"], "quality": p["quality"], "coins": coins})
 	if ledger.size() > 500:
 		ledger.pop_front()
@@ -2872,6 +2892,97 @@ func _sell(sv: Dictionary) -> void:
 	_earn(coins, {"from": "sale", "customer": c["id"], "pack": p["id"]})
 
 
+# -- Step 36: the cast, their tastes, the shop's popularity -------------------------------
+
+func cast() -> Dictionary:
+	return _t().get("cast", {})
+
+
+func person(who: String) -> Dictionary:
+	return ((cast().get("people", {}) as Dictionary).get(who, {}) as Dictionary)
+
+
+func newcomers() -> int:
+	return int(cast().get("newcomers", 0))
+
+
+## Who walks in: the classic one for the first newcomers, then by weight (its own generator).
+func _draw_who() -> String:
+	var order: Array = cast().get("order", [])
+	if order.is_empty():
+		return "classic"
+	if int(stats.get("visitors", 0)) <= newcomers():
+		return String(order[0])
+	_crng.state = cast_rng_state
+	var u := _crng.randf()
+	cast_rng_state = int(_crng.state)
+	var total := 0.0
+	for w: String in order:
+		total += float(person(w).get("weight", 0.0))
+	var acc := 0.0
+	for w: String in order:
+		acc += float(person(w).get("weight", 0.0)) / maxf(0.0001, total)
+		if u < acc:
+			return w
+	return String(order[order.size() - 1])
+
+
+## How much someone likes a recipe (1 when the cast has nothing to say).
+func like(who: String, recipe: String) -> float:
+	return float((person(who).get("likes", {}) as Dictionary).get(recipe, 1.0))
+
+
+## A flavor's (or mix's) weight for someone: their like, put off by its price over butter's by
+## their price sensitivity, times an event's modifier.
+func taste(who: String, recipe: String) -> float:
+	var t := like(who, recipe)
+	var sens := float(person(who).get("price_sens", 0.0))
+	var price := float(_unit_price(recipe))
+	if sens > 0.0 and price > 0.0:
+		t *= pow(float(_unit_price("plain")) / price, sens)
+	return t * float((demand_mods.get("flavors", {}) as Dictionary).get(recipe, 1.0))
+
+
+## The reputation's one consequence (and an event's): how much sooner the next customer comes.
+func arrival_factor() -> float:
+	var r: Dictionary = _t().get("reputation", {})
+	var k := 1.0 + float(r.get("arrival_effect", 0.0)) * (popularity - 50.0) / 50.0
+	return maxf(0.1, k * float(demand_mods.get("arrivals", 1.0)))
+
+
+func _reputation(delta: float, why: String) -> void:
+	var before := stars()
+	popularity = float(roundi(clampf(popularity + delta, 0.0, 100.0) * 100.0)) / 100.0   # in hundredths (exact through a save)
+	if stars() != before:
+		_emit("stars", {"stars": stars(), "why": why})
+
+
+## Stars on the board: one per 20 points (0-5).
+func stars() -> int:
+	return clampi(int(floor(popularity / 20.0 + 0.5)), 0, 5)
+
+
+## The recipe asked for most among the last orders (ties: the menu's order).
+func favorite() -> String:
+	var n := {}
+	for r: String in order_log:
+		n[r] = int(n.get(r, 0)) + 1
+	var best := ""
+	for r: String in n.keys():
+		if best == "" or int(n[r]) > int(n[best]):
+			best = r
+	return best
+
+
+## Customers a minute now: the sign's foot traffic with the popularity and events.
+func customers_per_min() -> float:
+	return 60000.0 / float(maxi(1, mean_wait_ms(sign_tier))) * arrival_factor()
+
+
+func set_demand_mods(mods: Dictionary) -> void:
+	demand_mods = mods.duplicate(true)
+
+
 func _arrive() -> void:
 	var f := _t()["customers"] as Dictionary
 	# Every visitor is logged (Step 22): those who join the queue ("arrived")
@@ -2880,21 +2991,34 @@ func _arrive() -> void:
 	if arrival_log.size() > 400:
 		arrival_log.pop_front()
 	stats["visitors"] = int(stats.get("visitors", 0)) + 1
-	if queue.size() >= queue_cap():
+	var who := _draw_who()
+	# Step 36: each walks past a queue longer than they will wait in (never a penalty).
+	if queue.size() >= mini(queue_cap(), int(person(who).get("tolerance", 99))):
 		stats["passed_by"] = int(stats["passed_by"]) + 1
-		_emit("customer_passed", {})
+		var pb: Dictionary = stats.get("passed_by_who", {})
+		pb[who] = int(pb.get(who, 0)) + 1
+		stats["passed_by_who"] = pb
+		_emit("customer_passed", {"who": who})
 		return
-	var order := _draw_order()
+	# Step 36: the first customers are classic ones asking for a small Classic Butter.
+	var order := {"recipe": "plain", "size": pack_size()} if int(stats.get("arrived", 0)) < newcomers() else _draw_order(who)
 	# Step 34: a flavor's customers wait by its willingness (spicy fans wait longest).
 	var patience := int(f["patience_ms"])
 	if is_flavor(String(order["recipe"])):
 		patience = int(round(patience * float(flavor(String(order["recipe"])).get("patience", 1.0))))
 	elif is_mix(String(order["recipe"])):
 		patience = int(round(patience * float(mix(String(order["recipe"])).get("patience", 1.0))))
-	var c := {"id": _new_id(), "order": order, "patience_ms": patience}
+	patience = int(round(patience * float(person(who).get("patience", 1.0))))   # Step 36: their temper
+	var c := {"id": _new_id(), "order": order, "patience_ms": patience, "patience0": patience, "who": who}
 	queue.append(c)
 	stats["arrived"] = int(stats["arrived"]) + 1
-	_emit("customer_arrived", {"customer": c["id"], "order": c["order"]})
+	var by: Dictionary = stats.get("arrived_who", {})
+	by[who] = int(by.get(who, 0)) + 1
+	stats["arrived_who"] = by
+	order_log.append(String(order["recipe"]))
+	if order_log.size() > 30:
+		order_log.pop_front()
+	_emit("customer_arrived", {"customer": c["id"], "order": c["order"], "who": who})
 
 
 ## The next customer: a triangular wait between min and max around `mode`
@@ -2911,6 +3035,7 @@ func _schedule_arrival() -> void:
 	var c := (mo - lo) / (hi - lo)
 	var wait := lo + sqrt(u * (hi - lo) * (mo - lo)) if u < c else hi - sqrt((1.0 - u) * (hi - lo) * (hi - mo))
 	rng_state = int(_rng.state)
+	wait /= arrival_factor()   # Step 36: popularity and events bring people in sooner (or later)
 	wait = clampf(wait, float(f["min_gap_ms"]), float(f["drought_ms"]))
 	next_arrival_ms = flow_ms + FLOW_STEP_MS + int(wait)
 
@@ -2924,13 +3049,14 @@ const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo"
 	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
 const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
 ## Step 23 fields: optional (a 0.22 save has none).
-const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines", "next_machine_id", "auto_rng_state", "bn_ring", "promo"]
+const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines", "next_machine_id", "auto_rng_state", "bn_ring", "promo", "popularity", "popularity_c", "cast_rng_state", "demand_mods", "order_log"]
 
 
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
-		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state), "paying": paying.duplicate(true), "floor_lines": floor_lines.duplicate(), "promo": promo.duplicate(true)}
+		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state), "paying": paying.duplicate(true), "floor_lines": floor_lines.duplicate(), "promo": promo.duplicate(true),
+		"popularity": popularity, "popularity_c": roundi(popularity * 100.0), "cast_rng_state": str(cast_rng_state), "demand_mods": demand_mods.duplicate(true), "order_log": order_log.duplicate()}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -3030,6 +3156,14 @@ func _apply_save(d: Dictionary) -> void:
 	next_machine_id = maxi(int(d.get("next_machine_id", 1)), machines.size() + 1)
 	promo = (d.get("promo", {}) as Dictionary).duplicate(true) if typeof(d.get("promo", {})) == TYPE_DICTIONARY else {}   # Step 35
 	finishing = {}   # a hold does not outlive the page
+	# Step 36 (optional: a 0.35 save has none -- a shop of average popularity, its cast from here).
+	popularity = clampf(float(d.get("popularity", _t().get("reputation", {}).get("start", 50.0))), 0.0, 100.0) if typeof(d.get("popularity", 0)) in [TYPE_INT, TYPE_FLOAT] else 50.0
+	if typeof(d.get("popularity_c")) == TYPE_INT:
+		popularity = float(clampi(int(d["popularity_c"]), 0, 10000)) / 100.0
+	if String(d.get("cast_rng_state", "")).is_valid_int():
+		cast_rng_state = String(d["cast_rng_state"]).to_int()
+	demand_mods = (d.get("demand_mods", {}) as Dictionary).duplicate(true) if typeof(d.get("demand_mods", {})) == TYPE_DICTIONARY else {}
+	order_log = (d.get("order_log", []) as Array).duplicate() if typeof(d.get("order_log", [])) == TYPE_ARRAY else []
 	bn_ring = (d.get("bn_ring", []) as Array).duplicate() if typeof(d.get("bn_ring", [])) == TYPE_ARRAY else []
 	if String(d.get("auto_rng_state", "")).is_valid_int():
 		auto_rng_state = String(d["auto_rng_state"]).to_int()
@@ -3126,6 +3260,12 @@ func state() -> Dictionary:
 	s["mixes"] = mix_ids().map(func(x: String) -> Dictionary: return {"id": x, "name": String(mix(x).get("name", x)), "offered": mix_offered(x), "parts": mix(x).get("parts", []),
 		"waiting": queue.filter(func(c: Dictionary) -> bool: return String(c["order"]["recipe"]) == x).size()})
 	s["promo"] = flavor_ids().filter(func(f: String) -> bool: return promoted(f))
+	# Step 36: the cast in the queue, the shop's popularity and what it does, the favorite.
+	s["popularity"] = snappedf(popularity, 0.1)
+	s["stars"] = stars()
+	s["customers_per_min"] = snappedf(customers_per_min(), 0.1)
+	s["favorite"] = favorite()
+	s["queue_who"] = queue.map(func(c: Dictionary) -> String: return String(c.get("who", "classic")))
 	for cs: Dictionary in s["coaters"]:
 		var cm := machine(int(cs["id"]))
 		cs["mode"] = String(cm.get("flavor", ""))

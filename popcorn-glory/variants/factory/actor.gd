@@ -28,6 +28,7 @@ var order_bargain := false     ## Step 32: they ask for a bargain (a grey tagged
 var order_recipe := "plain"    ## Step 34: the flavor they want (its bag in the bubble)
 var recipe := "plain"          ## Step 34: a lot's or a bag's flavor (and the bag a customer carries)
 var hand := false              ## Step 35: finished by the hand (a glint on the lot, the gold seal on the bag)
+var who := "classic"           ## Step 36: which of the cast (their silhouette)
 ## The journey: waypoints and the seconds for the whole of it. `steps` (reduced
 ## motion) holds at each waypoint instead of gliding between them.
 var path: PackedVector2Array = PackedVector2Array()
@@ -111,8 +112,9 @@ func _draw() -> void:
 		NOZZLE:
 			PopFactoryArt.nozzle(self, size_px, scoop)
 		CUSTOMER:
-			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood)
+			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood, who)
 			if order_size > 0 and not carrying:
-				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * 3.75), size_px, order_size, order_premium, order_bargain, order_recipe)
+				var lift := {"rush": 0.4, "kid": -0.4}.get(who, 0.0) as float   # Step 36: over their own head
+				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * (3.75 + lift)), size_px, order_size, order_premium, order_bargain, order_recipe)
 			if carrying:
 				PopFactoryArt.sku_bag(self, Vector2(size_px * 1.2, -size_px * 0.4), size_px * 0.9, recipe, false, 0, 2, hand)

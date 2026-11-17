@@ -363,12 +363,48 @@ static func awning(ci: CanvasItem, r: Rect2, stripes: int = 10) -> void:
 ## A customer, bottom-centre anchored at `foot`, height ~ 2.6 x head radius.
 ## Step 21: a face by `mood` -- "wait" (calm), "impatient" (flat mouth, a sweat
 ## drop), "happy" (a smile, rosy cheeks), "sad" (a frown) -- read without words.
-static func customer(ci: CanvasItem, foot: Vector2, head: float, body: Color, skin: Color, mood: String = "wait") -> void:
-	PopMachineArt._round_rect(ci, Rect2(foot - Vector2(head * 1.05, head * 1.8), Vector2(head * 2.1, head * 1.8)), head * 0.8, body)
-	var c := foot - Vector2(0, head * 2.6)
-	ci.draw_circle(c, head, skin)
-	ci.draw_arc(c, head, 0, TAU, 24, PopPalette.INK, 3.0)
+## Step 36: a customer of the cast -- each its own silhouette (a sweet tooth is small with a
+## cap, a snack hunter wears headphones and a strap, the hurried one is tall with a tie, the
+## connoisseur has white hair and round glasses; the butter fan is the plain one). Moods: wait,
+## impatient, happy, thanks (an arm up and a heart), sad (head down, leaving).
+static func customer(ci: CanvasItem, foot: Vector2, head: float, body: Color, skin: Color, mood: String = "wait", who: String = "classic") -> void:
 	var ink := PopPalette.INK
+	var tall := {"kid": 1.35, "rush": 2.15, "elder": 1.7}.get(who, 1.8) as float
+	var hs := head * (0.86 if who == "kid" else 1.0)
+	if mood == "thanks":   # an arm up behind the body
+		ci.draw_line(foot - Vector2(head * 0.9, head * tall * 0.85), foot - Vector2(head * 1.5, head * (tall + 1.3)), body.darkened(0.15), maxf(3.0, head * 0.36))
+		ci.draw_circle(foot - Vector2(head * 1.5, head * (tall + 1.35)), head * 0.24, skin)
+	PopMachineArt._round_rect(ci, Rect2(foot - Vector2(head * 1.05, head * tall), Vector2(head * 2.1, head * tall)), head * 0.8, body)
+	var c := foot - Vector2(0, head * tall + hs * 0.8)
+	if mood == "sad":
+		c += Vector2(head * 0.12, head * 0.18)   # head down
+	match who:
+		"student":   # a bag strap across the body
+			ci.draw_line(foot - Vector2(head * 0.8, head * tall * 0.95), foot - Vector2(-head * 0.75, head * 0.15), body.darkened(0.35), maxf(2.0, head * 0.18))
+		"rush":   # a tie
+			ci.draw_colored_polygon(PackedVector2Array([foot - Vector2(0, head * tall * 0.95), foot - Vector2(head * 0.16, head * tall * 0.75), foot - Vector2(0, head * tall * 0.35), foot - Vector2(-head * 0.16, head * tall * 0.75)]), Color(0.75, 0.15, 0.2))
+	if who == "elder":   # white hair puffs behind the head
+		ci.draw_circle(c + Vector2(-hs * 0.85, -hs * 0.2), hs * 0.42, Color(0.95, 0.95, 0.97))
+		ci.draw_circle(c + Vector2(hs * 0.85, -hs * 0.2), hs * 0.42, Color(0.95, 0.95, 0.97))
+	ci.draw_circle(c, hs, skin)
+	ci.draw_arc(c, hs, 0, TAU, 24, ink, 3.0)
+	match who:
+		"kid":   # a cap with a brim
+			ci.draw_colored_polygon(_arc_poly(c, hs * 1.02, PI, TAU), body.lightened(0.15).lerp(Color(0.9, 0.25, 0.3), 0.6))
+			ci.draw_line(c + Vector2(hs * 0.2, -hs * 0.05), c + Vector2(hs * 1.45, -hs * 0.05), Color(0.7, 0.15, 0.2), maxf(2.0, hs * 0.2))
+		"student":   # headphones
+			ci.draw_arc(c, hs * 1.12, PI * 1.05, PI * 1.95, 12, ink, maxf(2.0, hs * 0.18))
+			ci.draw_circle(c + Vector2(-hs * 1.05, hs * 0.05), hs * 0.26, Color(0.25, 0.55, 0.85))
+			ci.draw_circle(c + Vector2(hs * 1.05, hs * 0.05), hs * 0.26, Color(0.25, 0.55, 0.85))
+		"rush":   # slicked hair
+			ci.draw_colored_polygon(_arc_poly(c + Vector2(0, -hs * 0.08), hs * 0.98, PI * 1.05, PI * 1.98), Color(0.25, 0.18, 0.14))
+		"classic":   # a little tuft
+			ci.draw_arc(c + Vector2(hs * 0.1, -hs * 0.95), hs * 0.25, PI, TAU, 6, ink, 2.5)
+	if who == "elder":   # round glasses
+		ci.draw_arc(c + Vector2(-hs * 0.36, -hs * 0.12), hs * 0.24, 0, TAU, 12, ink, 2.0)
+		ci.draw_arc(c + Vector2(hs * 0.36, -hs * 0.12), hs * 0.24, 0, TAU, 12, ink, 2.0)
+	var head_s := head
+	head = hs
 	var e := head * 0.13
 	ci.draw_circle(c + Vector2(-head * 0.36, -head * 0.12), e, ink)
 	ci.draw_circle(c + Vector2(head * 0.36, -head * 0.12), e, ink)
@@ -380,12 +416,30 @@ static func customer(ci: CanvasItem, foot: Vector2, head: float, body: Color, sk
 			ci.draw_circle(c + Vector2(head * 0.6, head * 0.22), head * 0.16, Color(1.0, 0.55, 0.55, 0.6))
 		"sad":
 			ci.draw_arc(m + Vector2(0, head * 0.22), head * 0.3, PI + 0.4, TAU - 0.4, 10, ink, 2.5)
+		"thanks":   # a big smile and a heart over the raised hand
+			ci.draw_arc(m + Vector2(0, -head * 0.18), head * 0.4, 0.2, PI - 0.2, 10, ink, 2.5)
+			heart(ci, foot - Vector2(head_s * 1.5, head_s * (tall + 2.0)), head_s * 0.32)
 		"impatient":
 			ci.draw_line(m + Vector2(-head * 0.26, 0), m + Vector2(head * 0.26, 0), ink, 2.5)
 			var d := c + Vector2(head * 0.95, -head * 0.55)
 			ci.draw_colored_polygon(PackedVector2Array([d + Vector2(0, -head * 0.3), d + Vector2(head * 0.16, 0), d + Vector2(0, head * 0.12), d + Vector2(-head * 0.16, 0)]), PopTokens.SKY)
 		_:
 			ci.draw_arc(m + Vector2(0, -head * 0.1), head * 0.22, 0.4, PI - 0.4, 8, ink, 2.5)
+
+
+static func _arc_poly(c: Vector2, r: float, a0: float, a1: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in 11:
+		var a := lerpf(a0, a1, float(i) / 10.0)
+		pts.append(c + Vector2(cos(a), sin(a)) * r)
+	return pts
+
+
+## Step 36: a small heart (a customer's thanks, the board's favorite).
+static func heart(ci: CanvasItem, c: Vector2, r: float, col: Color = Color(0.92, 0.3, 0.4)) -> void:
+	ci.draw_circle(c + Vector2(-r * 0.45, -r * 0.2), r * 0.52, col)
+	ci.draw_circle(c + Vector2(r * 0.45, -r * 0.2), r * 0.52, col)
+	ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-r * 0.95, 0), c + Vector2(r * 0.95, 0), c + Vector2(0, r * 0.95)]), col)
 
 
 ## Step 21: the shop's bell (it swings when the next customer is about to come in).

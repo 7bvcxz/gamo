@@ -108,6 +108,8 @@ func setup(p_rules: PopRules) -> void:
 		a.queue_free()
 	customers.clear()
 	_arrived.clear()
+	_who.clear()
+	passers.clear()
 	cargo.clear()
 	_pool = {"lot": [], "bag": []}
 	leaving.clear()
@@ -693,6 +695,36 @@ func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
 				ci.draw_circle(p, dr, PopPalette.GOLD)
 			else:
 				ci.draw_arc(p, dr, 0, TAU, 10, Color(1, 1, 1, 0.45), 1.5)
+		# Step 36: the shop's popularity -- five small stars along the board's top, gold as earned.
+		var nst := int(rules.stars())
+		for q in 5:
+			var sp := sign.position + Vector2(sign.size.x * (0.14 + 0.18 * q), sign.size.y * 1.06)
+			PopFactoryArt.star(ci, sp, sign.size.y * 0.075, PopPalette.GOLD if q < nst else Color(1, 1, 1, 0.35), PopTokens.BRASS if q < nst else Color(PopPalette.INK, 0.25))
+		# ... what people ask for most lately: a heart with its kernel, right of the board.
+		var fav := String(rules.favorite())
+		if fav != "":
+			var hc := sign.position + Vector2(sign.size.x * 1.13, sign.size.y * 0.22)
+			PopFactoryArt.heart(ci, hc, sign.size.y * 0.16)
+			if PopFactoryArt.MIX_PARTS.has(fav):
+				PopFactoryArt.flavor_popcorn(ci, hc + Vector2(-sign.size.y * 0.06, sign.size.y * 0.28), sign.size.y * 0.06, String(PopFactoryArt.MIX_PARTS[fav][0]))
+				PopFactoryArt.flavor_popcorn(ci, hc + Vector2(sign.size.y * 0.06, sign.size.y * 0.28), sign.size.y * 0.06, String(PopFactoryArt.MIX_PARTS[fav][1]))
+			else:
+				PopFactoryArt.flavor_popcorn(ci, hc + Vector2(0, sign.size.y * 0.28), sign.size.y * 0.08, fav if PopFactoryArt.FLAVOR_LOOK.has(fav) else "plain")
+		# ... and a flavor someone waits for with none on the shelf: its kernel with a red bar.
+		var out_of: Array = []
+		var on_shelf := {}
+		for pk: Dictionary in rules.get("shelf"):
+			on_shelf[String(pk["recipe"])] = true
+		for qc: Dictionary in rules.get("queue"):
+			var rr := String(qc["order"]["recipe"])
+			if rr not in ["plain", "premium", "bargain"] and not on_shelf.has(rr) and not out_of.has(rr) and out_of.size() < 2:
+				out_of.append(rr)
+		for i in out_of.size():
+			var oc := sign.position + Vector2(sign.size.x * 1.13, sign.size.y * (0.68 + 0.3 * i))
+			ci.draw_circle(oc, sign.size.y * 0.12, Color(1, 1, 1, 0.9))
+			var part := String(PopFactoryArt.MIX_PARTS[out_of[i]][0]) if PopFactoryArt.MIX_PARTS.has(out_of[i]) else String(out_of[i])
+			PopFactoryArt.flavor_popcorn(ci, oc, sign.size.y * 0.07, part)
+			ci.draw_line(oc + Vector2(-sign.size.y * 0.1, sign.size.y * 0.1), oc + Vector2(sign.size.y * 0.1, -sign.size.y * 0.1), PopTokens.WARN, maxf(2.0, sign.size.y * 0.035))
 		# Step 35: the board's special -- a gold star with the flavor's kernel, top left of the board.
 		var specials: Array = rules.flavor_ids().filter(func(f: String) -> bool: return rules.promoted(f))
 		for i in specials.size():
@@ -947,7 +979,8 @@ func _inventory_key() -> String:
 		(rules.get("lift") as Array).size(), (rules.get("packing") as Array).size(), not (rules.get("serving") as Dictionary).is_empty()] + "|%d|%s" % [rules.get("packer_tier"), rules.packer_state()] \
 		+ "|%d|%s|%s|%s|%d" % [sel_machine, sel_slot, sel, lp, rules.get("sign_tier")] \
 		+ "|%d|%d" % [int((rules.get("stats") as Dictionary).get("coated_portions", 0)), int((rules.get("stats") as Dictionary).get("sold", 0))] \
-		+ "|%s|%d" % [rules.get("promo"), int((rules.get("stats") as Dictionary).get("hand_portions", 0))]   # Step 35: the special, the hand's finishes
+		+ "|%s|%d" % [rules.get("promo"), int((rules.get("stats") as Dictionary).get("hand_portions", 0))] \
+		+ "|%d|%s" % [rules.stars(), rules.favorite()]   # Step 35: the special, the hand's finishes; 36: stars, favorite
 
 
 ## Step 33: what the floor layer draws -- the places (which hold what), the lines, the
@@ -1321,7 +1354,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				if customers.has(cid):
 					var c: Node2D = customers[cid]
 					c.carrying = true
-					c.mood = "happy"
+					c.mood = "thanks"   # Step 36: an arm up and a heart on the way out
 					c.queue_redraw()
 					if not reduced_motion:
 						fx.sparkle(c.position + Vector2(0, -_head_px() * 3.2), machine_size() / 1400.0, rng, 3, 60.0)
@@ -1332,8 +1365,25 @@ func _flow_events(events: Array[Dictionary]) -> void:
 			"customer_arrived":
 				_sound("ding", 1.7, -16.0)
 				_arrived[int(d["customer"])] = d.get("order", {})
+				_who[int(d["customer"])] = String(d.get("who", "classic"))
+				if _who.size() > 96:
+					_who.erase(_who.keys()[0])
 				if _arrived.size() > 64:
 					_arrived.erase(_arrived.keys()[0])
+			"customer_passed":   # Step 36: someone looks at the queue and walks on by (no blame)
+				if not reduced_motion and passers.size() < 4:
+					var pa := _new_actor(Actor.CUSTOMER, -100000 - int(rules.get("flow_ms")))
+					pa.size_px = _head_px() * 0.9
+					pa.who = String(d.get("who", "classic"))
+					pa.body = CUSTOMER_COLOURS[passers.size() % 5].lerp(Color.WHITE, 0.25)
+					pa.skin = SKIN[(passers.size() + 2) % 5]
+					pa.mood = "wait"
+					pa.order_size = 0
+					var py := counter_rect().position.y - _head_px() * 0.4
+					pa.position = Vector2(floor_rect(TOP).end.x - _head_px() * 1.2, py)   # inside the floor (never over the card column)
+					pa.modulate = Color(1, 1, 1, 0.75)
+					pa.walk_to(Vector2(floor_rect(TOP).end.x - _head_px() * 6.0, py))
+					passers.append(pa)
 			"customer_left":
 				var cid := int(d["customer"])
 				if customers.has(cid):
@@ -1368,12 +1418,13 @@ func _reconcile_customers() -> void:
 		var id := int(queue[i]["id"])
 		want[id] = i
 		if not customers.has(id):
+			_who[id] = String(queue[i].get("who", _who.get(id, "classic")))
 			customers[id] = _make_customer(id, queue[i]["order"], _door() if now_ms > 500 else _queue_spot(i))
 		customers[id].walk_to(_queue_spot(i))
 		# The second row stands behind the first (z 0 is still above the floor; -1 hid them under it).
 		customers[id].z_index = 0 if _queue_spot(i).y < counter_rect().position.y - 1.0 else 1
 		# Their face follows their patience (calm, then impatient below a third).
-		var left := float(queue[i]["patience_ms"]) / float(rules.economy.table("factory")["customers"]["patience_ms"])
+		var left := float(queue[i]["patience_ms"]) / float(queue[i].get("patience0", rules.economy.table("factory")["customers"]["patience_ms"]))   # Step 36: of their own patience
 		var mood := "impatient" if left < 0.34 else "wait"
 		if customers[id].mood != mood:
 			customers[id].mood = mood
@@ -1393,6 +1444,7 @@ func _make_customer(id: int, order: Dictionary, at: Vector2) -> Node2D:
 	a.order_bargain = String(order.get("recipe", "plain")) == "bargain"
 	a.order_recipe = String(order.get("recipe", "plain"))
 	a.recipe = a.order_recipe   # the bag they carry out is the flavor they asked for
+	a.who = String(_who.get(id, "classic"))   # Step 36: which of the cast
 	a.position = at
 	return a
 
@@ -1400,6 +1452,8 @@ func _make_customer(id: int, order: Dictionary, at: Vector2) -> Node2D:
 ## Step 33: who came in (their order), for a customer served in the same step they arrived
 ## -- a shop with lanes to spare used to sell to people who were never drawn.
 var _arrived := {}
+var _who := {}          ## Step 36: customer id -> which of the cast
+var passers: Array = [] ## Step 36: people walking past the storefront (a queue too long for them)
 
 
 func _step_actors(delta: float) -> void:
@@ -1423,6 +1477,18 @@ func _step_actors(delta: float) -> void:
 		else:
 			still.append(c)
 	leaving = still
+	# Step 36: passers-by walk a few steps along the storefront, then turn back out of sight.
+	var on: Array = []
+	for pa: Node2D in passers:
+		pa.step(delta)
+		if not pa.easing_to:
+			if pa.has_meta("back"):
+				pa.queue_free()
+				continue
+			pa.set_meta("back", true)
+			pa.walk_to(Vector2(floor_rect(TOP).end.x - _head_px() * 1.2, pa.position.y))
+		on.append(pa)
+	passers = on
 
 
 ## For the tests: the journeys in flight and the record of them.
@@ -1439,6 +1505,7 @@ func debug_state() -> Dictionary:
 	return {"flying": flying, "customers": customers.size(), "leaving": leaving.size(), "log": cargo_log.duplicate(),
 		"filling": fill, "nozzles": nozzles.size(), "packer_status": _status,
 		"moods": customers.values().map(func(a: Node2D) -> String: return a.mood), "bell": bell_swinging(),
+		"who": customers.values().map(func(a: Node2D) -> String: return a.who), "passers": passers.size(), "leaving_moods": leaving.map(func(a: Node2D) -> String: return a.mood),
 		"cue": _cue if cue_node.visible else "", "bubbles": customers.values().map(func(a: Node2D) -> int: return a.order_size),
 		"cargo_stats": cargo_stats.duplicate(), "cargo_now": cargo.size(), "pool": {"lot": (_pool["lot"] as Array).size(), "bag": (_pool["bag"] as Array).size()},
 		"redraws": redraws.duplicate(), "machine_nodes": _mnodes.size(), "actor_nodes": actor_layer.get_child_count(), "dense": {"kitchen": dense("kitchen"), "packing": dense("packing"), "shop": dense("shop")},
@@ -1745,7 +1812,8 @@ func _draw_sign_numbers(ci: CanvasItem, d: Rect2) -> void:
 	var nxt: Dictionary = rules.shop_sign(st + 1)
 	var font := ThemeDB.fallback_font
 	var fs := int(clampf(d.size.x * 0.1, 18.0, 30.0))
-	var rows := [["people", "%.1f" % (60000.0 / rules.mean_wait_ms(st)), "%.1f" % (60000.0 / rules.mean_wait_ms(st + 1)), not top],
+	var k := float(rules.arrival_factor())   # Step 36: the popularity's effect (shown in the row below)
+	var rows := [["people", "%.1f" % (60000.0 / rules.mean_wait_ms(st) * k), "%.1f" % (60000.0 / rules.mean_wait_ms(st + 1) * k), not top],
 		["clock", "%.1f" % (rules.mean_wait_ms(st) / 1000.0), "%.1f" % (rules.mean_wait_ms(st + 1) / 1000.0), not top],
 		["lanes", str(int(now["lanes"])), str(int(nxt["lanes"])), int(nxt["lanes"]) > int(now["lanes"])]]
 	var y := d.position.y + fs * 1.3
@@ -1768,6 +1836,11 @@ func _draw_sign_numbers(ci: CanvasItem, d: Rect2) -> void:
 			ci.draw_string(font, Vector2(x2, y), ">", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.5))
 			ci.draw_string(font, Vector2(x2 + fs * 0.9, y), String(row[2]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.OK if bool(row[3]) else Color(PopPalette.INK, 0.45))
 		y += fs * 1.35
+	# Step 36: the stars and what they do -- five stars, then x1.00 (how much more often people come).
+	for q in 5:
+		PopFactoryArt.star(ci, Vector2(d.position.x + fs * (0.7 + 0.62 * q), y - fs * 0.35), fs * 0.26, PopPalette.GOLD if q < int(rules.stars()) else Color(PopPalette.INK, 0.12), PopTokens.BRASS)
+	ci.draw_string(font, Vector2(d.position.x + fs * 4.0, y), "x%.2f" % k, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.OK if k > 1.001 else (PopTokens.WARN if k < 0.999 else PopPalette.INK))
+	y += fs * 1.35
 	# The spread: where the next customer can come, from the shortest to the longest wait (now, and next below it).
 	var full := 20000.0
 	var bar := Rect2(Vector2(d.position.x + fs * 0.6, y - fs * 0.7), Vector2(d.size.x - fs * 1.2, fs * 0.36))
