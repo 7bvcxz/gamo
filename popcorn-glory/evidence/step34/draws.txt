@@ -1,0 +1,9 @@
+Step 34 draw calls (Xvfb 1280x800, tools/capture.gd --draws, the flavor factory of step V after 45 s of play)
+                                   all   Goods layer  Actors
+V,Q (same machines, coaters paused) 740   111          141
+V (four flavors)                    910   245          176
+V, flavor bags drawn as plain bags  880   211          148
+V, flavor kernels drawn as plain    895   235          173
+=> the flavor drawing itself costs about 30 calls (bags) + 15 (kernels); the rest of the
+   +170 is more goods on screen (a fuller bin, more packs and customers) with flavors on.
+   Step 33's 44-machine desktop was ~950 calls.

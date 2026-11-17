@@ -1,0 +1,31 @@
+{
+ "video_start_wall": 1794921195476,
+ "sheet_start_wall": 1794921197301,
+ "audio_start_wall": 1794921243499,
+ "run_start_wall": 1794921243500,
+ "machines": 8,
+ "coaters": [
+  "cheese",
+  "caramel",
+  "spicy",
+  "cocoa"
+ ],
+ "sold": 45,
+ "revenue": 713,
+ "flavor_sold": {
+  "caramel": 5,
+  "cheese": 5,
+  "cocoa": 2,
+  "spicy": 4
+ },
+ "coated": {
+  "caramel": 20,
+  "cheese": 16,
+  "cocoa": 16,
+  "spicy": 12
+ },
+ "ingredients": 65,
+ "plain_sold": 13,
+ "conserved": true,
+ "wrong_sku": 0
+}
