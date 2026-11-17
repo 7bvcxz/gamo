@@ -20,22 +20,6 @@ const PLAN = [['M07', 'kitchen'], ['bagger', 'packing'], ['S03', 'shop'], ['M01'
   ['U05', 'packing'], ['M07', 'kitchen'], ['U03', 'kitchen'], ['bagger', 'packing'], ['M07', 'kitchen'], ['M05', 'kitchen'],
   ['U02', 'kitchen'], ['M07', 'kitchen'], ['P04', 'packing']];
 
-// A hidden tab the way a browser makes one: visibilityState says hidden and animation frames
-// wait until the page is shown again (AGENTS.md 2026-11-01: Playwright cannot hide a page).
-const HIDE = () => {
-  window.__hidden = false;
-  const raf = window.requestAnimationFrame.bind(window);
-  const held = [];
-  window.requestAnimationFrame = (cb) => { if (window.__hidden) { held.push(cb); return 0; } return raf(cb); };
-  Object.defineProperty(document, 'visibilityState', { get: () => (window.__hidden ? 'hidden' : 'visible') });
-  Object.defineProperty(document, 'hidden', { get: () => window.__hidden });
-  window.__hide = (on) => {
-    window.__hidden = on;
-    document.dispatchEvent(new Event('visibilitychange'));
-    if (!on) for (const cb of held.splice(0)) raf(cb);
-  };
-};
-
 async function memory(pop) {
   const cdp = await pop.page.context().newCDPSession(pop.page);
   await cdp.send('HeapProfiler.enable');
@@ -120,7 +104,6 @@ async function buildAll(pop) {
 
 test('forty-four machines at once: built by hand, readable, routed, recovering, measured', async ({ pop }, testInfo) => {
   test.setTimeout(900_000);
-  await pop.page.addInitScript(HIDE);
   await opened(pop);
   await buildAll(pop);
   let s = await pop.state();
@@ -154,10 +137,12 @@ test('forty-four machines at once: built by hand, readable, routed, recovering, 
   // balancer only moves a stopped line's goods).
   const ran = new Set();
   const done0 = Object.fromEntries(s.run.machines.map((m) => [m.id, m.done]));
+  let people = 0;
   for (let i = 0; i < 36; i++) {
     if (i % 2 === 0) await popIfFree(pop);
     const r = await pop.call('dev_advance', 2500);
     for (const m of r.state.run.machines) if (m.state === 'run' || m.done > (done0[m.id] || 0)) ran.add(m.id);
+    people = Math.max(people, r.state.view.customers + r.state.view.leaving);
     expect(r.state.run.portions_everywhere, 'every portion is somewhere').toBe(r.state.run.stats.made_portions);
     expect(r.state.run.money).toBeGreaterThanOrEqual(0);
   }
@@ -170,6 +155,8 @@ test('forty-four machines at once: built by hand, readable, routed, recovering, 
   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);
   expect(s.run.stats.wrong_sku || 0).toBe(0);
   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);
+  // A shop with lanes to spare serves people the step they come in: they are still drawn.
+  expect(people, 'the customers who buy are on screen').toBeGreaterThan(0);
 
   // The overview: three rates, no more lines to buy, a machine's diagnostics without closing.
   await toggleOverview(pop, true);
@@ -231,10 +218,10 @@ test('forty-four machines at once: built by hand, readable, routed, recovering, 
   // A hidden tab: the factory waits (no frames, no time); shown again it goes on from where
   // it was -- at most a second of catch-up, never the whole absence at once.
   const before = (await pop.state()).run.now_ms;
-  await pop.page.evaluate(() => window.__hide(true));
+  await pop.tab(true);
   await pop.page.waitForTimeout(6000);
   const hidden = (await pop.state()).run.now_ms;
-  await pop.page.evaluate(() => window.__hide(false));
+  await pop.tab(false);
   await pop.page.waitForTimeout(2500);
   s = await pop.state();
   testInfo.annotations.push({ type: 'hidden', description: JSON.stringify({ before, hidden, after: s.run.now_ms }) });

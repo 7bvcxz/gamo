@@ -102,6 +102,7 @@ func setup(p_rules: PopRules) -> void:
 	for a in actor_layer.get_children():
 		a.queue_free()
 	customers.clear()
+	_arrived.clear()
 	cargo.clear()
 	_pool = {"lot": [], "bag": []}
 	leaving.clear()
@@ -1166,8 +1167,9 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				else:
 					if _cargo_full():
 						var cid0 := int(d["customer"])
-						if customers.has(cid0):
-							customers[cid0].walk_to(_handoff_spot(int(d.get("lane", 0))))
+						if not customers.has(cid0):
+							customers[cid0] = _make_customer(cid0, _arrived.get(cid0, {}), _door())
+						customers[cid0].walk_to(_handoff_spot(int(d.get("lane", 0))))
 						continue
 					bag = _new_actor(Actor.BAG, pid)
 					bag.size_px = _bag_px()
@@ -1178,6 +1180,8 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				cargo[pid] = bag
 				_log(pid, "bag", "redirect" if redirected else "serve")
 				var cid := int(d["customer"])
+				if not customers.has(cid):   # served the step they came in: they still walk in
+					customers[cid] = _make_customer(cid, _arrived.get(cid, {}), _door())
 				if customers.has(cid):
 					customers[cid].walk_to(_handoff_spot(lane))
 			"handed_over":
@@ -1212,6 +1216,9 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				_log(pid, "bag", "sold")
 			"customer_arrived":
 				_sound("ding", 1.7, -16.0)
+				_arrived[int(d["customer"])] = d.get("order", {})
+				if _arrived.size() > 64:
+					_arrived.erase(_arrived.keys()[0])
 			"customer_left":
 				var cid := int(d["customer"])
 				if customers.has(cid):
@@ -1246,15 +1253,7 @@ func _reconcile_customers() -> void:
 		var id := int(queue[i]["id"])
 		want[id] = i
 		if not customers.has(id):
-			var a := _new_actor(Actor.CUSTOMER, id)
-			a.size_px = _head_px()
-			a.body = CUSTOMER_COLOURS[id % 5]
-			a.skin = SKIN[id % 5]
-			a.order_size = int(queue[i]["order"]["size"])
-			a.order_premium = String(queue[i]["order"].get("recipe", "plain")) == "premium"
-			a.order_bargain = String(queue[i]["order"].get("recipe", "plain")) == "bargain"
-			a.position = _door() if now_ms > 500 else _queue_spot(i)
-			customers[id] = a
+			customers[id] = _make_customer(id, queue[i]["order"], _door() if now_ms > 500 else _queue_spot(i))
 		customers[id].walk_to(_queue_spot(i))
 		# The second row stands behind the first (z 0 is still above the floor; -1 hid them under it).
 		customers[id].z_index = 0 if _queue_spot(i).y < counter_rect().position.y - 1.0 else 1
@@ -1267,6 +1266,23 @@ func _reconcile_customers() -> void:
 	var sv: Dictionary = rules.get("serving")
 	if not sv.is_empty():
 		want[int(sv["customer"]["id"])] = -1
+
+
+func _make_customer(id: int, order: Dictionary, at: Vector2) -> Node2D:
+	var a := _new_actor(Actor.CUSTOMER, id)
+	a.size_px = _head_px()
+	a.body = CUSTOMER_COLOURS[id % 5]
+	a.skin = SKIN[id % 5]
+	a.order_size = int(order.get("size", 0))
+	a.order_premium = String(order.get("recipe", "plain")) == "premium"
+	a.order_bargain = String(order.get("recipe", "plain")) == "bargain"
+	a.position = at
+	return a
+
+
+## Step 33: who came in (their order), for a customer served in the same step they arrived
+## -- a shop with lanes to spare used to sell to people who were never drawn.
+var _arrived := {}
 
 
 func _step_actors(delta: float) -> void:
