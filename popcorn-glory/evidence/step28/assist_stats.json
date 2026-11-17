@@ -1,0 +1,69 @@
+{
+ "stats": {
+  "abandoned": 0,
+  "arrived": 10,
+  "auto_blocked_ms": 0,
+  "auto_lots": 5,
+  "auto_near": 1,
+  "auto_perfect": 4,
+  "auto_portions": 15,
+  "auto_unpaid_ms": 0,
+  "counter_empty_ms": 4900,
+  "glass_wait_ms": 0,
+  "kernels_paid": 5,
+  "lots": 4,
+  "made_portions": 33,
+  "oil_paid": 5,
+  "packed": 7,
+  "packer_blocked_ms": 0,
+  "packer_starved_ms": 12150,
+  "passed_by": 0,
+  "revenue": 70,
+  "sold": 7,
+  "sold_portions": 14,
+  "upkeep_paid": 1,
+  "visitors": 10
+ },
+ "machines": [
+  {
+   "type": "cooker",
+   "state": "run",
+   "assist": 1
+  },
+  {
+   "type": "M01",
+   "state": "idle",
+   "assist": 0
+  },
+  {
+   "type": "M02",
+   "state": "run",
+   "assist": 0
+  },
+  {
+   "type": "M03",
+   "state": "run",
+   "assist": 0
+  },
+  {
+   "type": "M04",
+   "state": "run",
+   "assist": 0
+  },
+  {
+   "type": "M05",
+   "state": "run",
+   "assist": 0
+  },
+  {
+   "type": "M06",
+   "state": "run",
+   "assist": 0
+  },
+  {
+   "type": "M08",
+   "state": "run",
+   "assist": 0
+  }
+ ]
+}
