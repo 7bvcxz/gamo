@@ -226,7 +226,7 @@ func extra_rects() -> Dictionary:
 		var b := _machine_buttons()
 		out["m_pause"] = b["pause"]
 		out["m_sell"] = b["sell"]
-	if not sel_slot.is_empty() and String(sel_slot["floor"]) in ["kitchen", "packing"]:
+	if not sel_slot.is_empty():
 		var rs := _picker_rects(detail_rect())
 		var choices := _floor_choices(String(sel_slot["floor"]))
 		for i in rs.size():
@@ -805,9 +805,14 @@ func _queue_spot(i: int) -> Vector2:
 ## (a bigger shop reveals more of them; Step 22).
 func _handoff_spot(lane: int = 0) -> Vector2:
 	var c := counter_rect()
-	if lane >= 100:   # Step 26: a kiosk's customer stands in front of it
-		return Vector2(slot_rect("shop", lane - 100).get_center().x, c.position.y + 2)
-	return Vector2(c.position.x + c.size.x * 0.26 + _head_px() * 2.5 * lane, c.position.y + 2)
+	if lane >= 100:   # Step 26: a kiosk's customer stands in front of it (Step 31: the express window's too)
+		return Vector2(slot_rect("shop", lane - (200 if lane >= 200 else 100)).get_center().x, c.position.y + 2)
+	# Step 31: up to six counter lanes share the space left of the shop's machines.
+	var start := c.position.x + c.size.x * 0.26
+	var room := slot_rect("shop", int(rules.slots("shop")) - 1).position.x - _head_px() * 1.2 - start if rules else 0.0
+	var n := maxi(2, int(rules.lanes())) if rules else 2
+	var step := minf(_head_px() * 2.5, room / float(n)) if room > 0.0 else _head_px() * 2.5
+	return Vector2(start + step * lane, c.position.y + 2)
 
 
 func _door() -> Vector2:
@@ -938,9 +943,24 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				var cid := int(d["customer"])
 				if customers.has(cid):
 					customers[cid].walk_to(_handoff_spot(lane))
+			"handed_over":
+				# Step 31: the bag is theirs; they carry it to the auto cashier's drawer and pay there.
+				_end_cargo(int(d["pack"]), "bag")
+				var hcid := int(d["customer"])
+				if customers.has(hcid):
+					var hc: Node2D = customers[hcid]
+					hc.carrying = true
+					hc.queue_redraw()
+					for mm: Dictionary in rules.get("machines"):
+						if String(mm["type"]) == "S03":
+							hc.walk_to(Vector2(slot_rect("shop", int(mm["slot"])).get_center().x, counter_rect().position.y + 2))
+							break
 			"sale":
 				var pid := int(d["pack"])
 				_end_cargo(pid, "bag")
+				if not reduced_motion and customers.has(int(d["customer"])):
+					var cc: Node2D = customers[int(d["customer"])]
+					fx.burst(cc.position + Vector2(0, -_head_px() * 2.0), 3, machine_size() / 1500.0, rng, PopPalette.GOLD, 0.7, 0.8)   # coins pop
 				var cid := int(d["customer"])
 				if customers.has(cid):
 					var c: Node2D = customers[cid]
@@ -1468,12 +1488,15 @@ func slot_rect(floor: String, k: int) -> Rect2:
 			var w := (x1 - x0) / float(maxi(1, int(rules.slots("packing")) if rules else 3)) - 6.0
 			return Rect2(Vector2(x0 + k * (w + 6.0), r.position.y + r.size.y * 0.06), Vector2(w, r.size.y * 0.28))
 		"shop":
+			# Step 31: four places in one row at the counter's right end -- below the
+			# news button (top right), right of the lanes.
 			var r := floor_rect(TOP)
 			var hp := _head_px()
-			var w := hp * 2.3
-			var x := r.end.x - hp * 1.6 - (k + 1) * hp * 2.6
+			var w := hp * 1.6
+			var x := r.end.x - hp * 1.2 - (k + 1) * w * 1.08
 			var bottom := counter_rect().position.y
-			return Rect2(Vector2(x, bottom - w * 1.2), Vector2(w, w * 1.2))
+			var h := w * 1.2
+			return Rect2(Vector2(x, bottom - h), Vector2(w, h))
 	return Rect2()
 
 
@@ -1499,7 +1522,7 @@ func _clear_machine_selection() -> void:
 func _machine_press(p: Vector2) -> bool:
 	if rules == null:
 		return false
-	if not sel_slot.is_empty() and String(sel_slot["floor"]) in ["kitchen", "packing"]:
+	if not sel_slot.is_empty():
 		var rs := _picker_rects(detail_rect())
 		for i in rs.size():
 			if (rs[i] as Rect2).has_point(p):
@@ -1645,7 +1668,7 @@ func _draw_machine_detail(ci: CanvasItem, d: Rect2) -> void:
 		tier = int(m["tier"])
 	else:
 		type = _slot_type(String(sel_slot["floor"]))
-		if String(sel_slot["floor"]) in ["kitchen", "packing"]:
+		if true:
 			# The picker: every machine of this floor that can be built now, the chosen one ringed.
 			var choices := _floor_choices(String(sel_slot["floor"]))
 			var rs := _picker_rects(d)
@@ -1757,7 +1780,7 @@ func _machine_event(e: Dictionary) -> void:
 ## Which machine an empty place would get: the shop and packing floors have one
 ## kind; the kitchen's picker (in the detail) chooses among the open ones.
 func _slot_type(floor: String) -> String:
-	if not floor in ["kitchen", "packing"]:
+	if not floor in ["kitchen", "packing", "shop"]:
 		return String(MACHINE_OF[floor])
 	var choices := _floor_choices(floor)
 	if choices.is_empty():
@@ -1778,7 +1801,7 @@ func _floor_choices(floor: String) -> Array:
 	var own := String(MACHINE_OF[floor])
 	if rules.station_open(own):
 		out.append(own)
-	var devices: Array = rules.KITCHEN_DEVICES if floor == "kitchen" else (rules.PACKING_DEVICES if floor == "packing" else [])
+	var devices: Array = rules.KITCHEN_DEVICES if floor == "kitchen" else (rules.PACKING_DEVICES if floor == "packing" else rules.SHOP_DEVICES)
 	for id: String in devices:
 		if rules.station_open(id) and rules.catalog_buildable(id):
 			out.append(id)
@@ -1895,6 +1918,24 @@ func _step_machine_motion(delta: float) -> void:
 				node.position = Vector2(c.x, r.position.y + r.size.y * (0.36 + (0.04 * absf(sin(t * 5.0)) if run else 0.0)))
 			"P07":   # the jaws crimp
 				node.position = Vector2(c.x, r.position.y + r.size.y * (0.4 + (0.24 * maxf(0.0, sin(t * 3.0)) if run else 0.0)))
+			# Step 31: the storefront, moving only while it serves.
+			"S01":   # a bag rides the belt up to the counter
+				node.position = Vector2(r.position.x + r.size.x * (0.18 + 0.66 * fmod(t * 0.8, 1.0) if run else 0.5), r.position.y + r.size.y * (0.66 - 0.2 * (fmod(t * 0.8, 1.0) if run else 0.5)))
+				node.visible = run
+			"S02":   # a ticket curls out
+				node.position = Vector2(c.x, r.position.y + r.size.y * (0.48 + (0.1 * fmod(t * 0.9, 1.0) if run else 0.0)))
+			"S03":   # a coin drops into the drawer
+				node.position = Vector2(r.position.x + r.size.x * 0.7, r.position.y + r.size.y * (0.3 + 0.3 * fmod(t * 1.3, 1.0) if run else 0.62))
+				node.visible = run
+			"S04":   # the lamp points left and right
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.3)
+				node.rotation = sin(t * 2.5) * 0.7 if run else 0.0
+			"S05":   # the bell rings (bobs)
+				node.position = Vector2(r.position.x + r.size.x * 0.8, r.position.y + r.size.y * (0.16 + (0.03 * absf(sin(t * 9.0)) if run else 0.0)))
+			"S06":   # the lit line scrolls
+				node.position = Vector2(r.position.x + r.size.x * (0.25 + 0.3 * fmod(t * 0.5, 1.0) if run else 0.4), r.position.y + r.size.y * 0.32)
+			"S08":   # the robot slides along its rail
+				node.position = Vector2(c.x + (sin(t * 1.6) * r.size.x * 0.2 if run else 0.0), r.position.y + r.size.y * 0.6)
 			"P08":   # the gate swings each pack to its lane
 				node.position = Vector2(c.x, r.position.y + r.size.y * 0.5)
 				node.rotation = (0.45 if fmod(floor(t * 0.8), 2.0) < 1.0 else -0.45) if run else 0.0
@@ -2005,6 +2046,22 @@ func _draw_motion_part(n: Node2D) -> void:
 		"P07":
 			n.draw_rect(Rect2(Vector2(-w * 0.28, -w * 0.05), Vector2(w * 0.56, w * 0.06)), PopTokens.WARN)
 			n.draw_rect(Rect2(Vector2(-w * 0.28, w * 0.01), Vector2(w * 0.56, w * 0.03)), Color(1, 1, 1, 0.8))
+		"S01":
+			PopFactoryArt.bag(n, Vector2.ZERO, w * 0.14)
+		"S02":
+			n.draw_rect(Rect2(Vector2(-w * 0.08, 0), Vector2(w * 0.16, w * 0.14)), Color.WHITE)
+			n.draw_line(Vector2(-w * 0.05, w * 0.05), Vector2(w * 0.05, w * 0.05), PopPalette.INK, 1.5)
+		"S03":
+			PopMachineArt.draw_coin(n, Vector2.ZERO, w * 0.07)
+		"S04":
+			n.draw_colored_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w * 0.3, -w * 0.08), Vector2(w * 0.3, w * 0.08)]), Color(1.0, 0.9, 0.4, 0.75))
+		"S05":
+			n.draw_circle(Vector2.ZERO, w * 0.06, PopPalette.GOLD)
+		"S06":
+			n.draw_line(Vector2.ZERO, Vector2(w * 0.25, 0), PopPalette.GOLD, 2.5)
+		"S08":
+			n.draw_circle(Vector2(-w * 0.32, -w * 0.12), w * 0.05, PopTokens.STEEL)
+			n.draw_circle(Vector2(w * 0.32, -w * 0.12), w * 0.05, PopTokens.STEEL)
 		"P08":
 			n.draw_line(Vector2.ZERO, Vector2(0, w * 0.3), PopTokens.STEEL_DEEP, 4.0)
 			n.draw_circle(Vector2.ZERO, w * 0.05, PopPalette.GOLD)

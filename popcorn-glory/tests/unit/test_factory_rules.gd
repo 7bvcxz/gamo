@@ -1148,6 +1148,10 @@ const RUNTIME_TESTS := {"cooker": "test_upkeep_is_paid_a_coin_at_a_time_and_neve
 	"P01": "test_p01_the_cup_feeder_makes_cups_a_product_of_their_own", "P02": "test_p02_the_dispenser_opens_large_bags_before_tier_two",
 	"P04": "test_p04_fillers_overfill_and_the_weigher_keeps_the_portion", "P07": "test_p07_the_sealer_shortens_every_packing_cycle",
 	"P08": "test_p08_the_diverter_gives_premium_its_own_lane",
+	"S01": "test_s01_the_belt_shortens_the_hand_over", "S02": "test_s02_tickets_keep_patience_while_the_pack_is_made",
+	"S03": "test_s03_the_cashier_takes_payment_apart_and_a_paused_one_holds_the_sale", "S04": "test_s04_the_router_serves_whoever_is_ready",
+	"S05": "test_s05_the_express_window_serves_small_orders_apart", "S06": "test_s06_the_menu_board_lets_customers_order_what_is_there",
+	"S08": "test_s08_the_robot_adds_counter_lanes",
 	"bagger": "test_the_bagger_packs_real_portions_and_waits_or_holds_honestly",
 	"kiosk": "test_the_kiosk_serves_real_customers_and_pays_while_it_serves"}
 
@@ -1207,7 +1211,7 @@ func test_no_machine_is_sold_that_would_do_nothing() -> void:
 			assert_true(bool(r["ok"]) or String(r["reason"]) in ["err.no_slot", "err.slot_taken"], "%s: a running machine is built (%s)" % [id, r.get("reason", "")])
 			assert_true(RUNTIME_TESTS.has(String(e["runtime"])), "%s: its behaviour has a test" % id)
 			assert_true(has_method(RUNTIME_TESTS[String(e["runtime"])]), "%s: that test exists (%s)" % [id, RUNTIME_TESTS[String(e["runtime"])]])
-	assert_eq(runs, 22, "today: M01-M11, M13-M16, P01-P04, P07, P08 and S07 run (M12, P05, P06 sleep until flavors)")
+	assert_eq(runs, 29, "today: M01-M11, M13-M16, P01-P04, P07, P08, S01-S05, S07, S08 run (M12, P05, P06, S06... see the catalog)")
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing invented")
 
 
@@ -1938,3 +1942,258 @@ func test_the_station_fills_every_head_up_to_the_shelf_room() -> void:
 	f.advance(50)
 	assert_eq(f.packing.size(), heads, "every head starts a pack while the shelf has room for it (%d heads)" % heads)
 	_check_conservation(f, "full heads")
+
+
+# -- Step 31: S01-S08, the storefront ---------------------------------------------------
+
+func _shop(seed_value: int = 61) -> PopRules:
+	var f: PopRules = Factory.new(null, seed_value)
+	_quiet_shop(f)
+	f.sign_tier = 6
+	f.packer_tier = 3
+	f.money = 100000
+	_open(f)
+	_open_sign(f)
+	return f
+
+
+func _stock(f: PopRules, n: int, size: int = 2, recipe: String = "plain") -> void:
+	for i in n:
+		f.shelf.append({"id": f._new_id(), "recipe": recipe, "size": size, "quality": 80})
+		f.stats["made_portions"] = int(f.stats["made_portions"]) + size
+
+
+func _want(f: PopRules, size: int, recipe: String = "plain", patience: int = 60000) -> int:
+	var id: int = f._new_id()
+	f.queue.append({"id": id, "order": {"recipe": recipe, "size": size}, "patience_ms": patience})
+	return id
+
+
+func _sold_at(f: PopRules, id: int) -> int:
+	for e: Dictionary in f.ledger:
+		if int(e["customer"]) == id:
+			return int(e["t"])
+	return -1
+
+
+func test_s01_the_belt_shortens_the_hand_over() -> void:
+	var a := _shop()
+	var base := int(a.counter_service_ms())
+	assert_true(bool(a.execute({"type": "build", "machine": "S01"})["ok"]), "the belt is built")
+	assert_eq(int(a.counter_service_ms()), base - 600, "0.6 s shorter")
+	_stock(a, 1)
+	var id := _want(a, 2)
+	var t0 := int(a.flow_ms)
+	a.advance(base)
+	assert_true(_sold_at(a, id) >= 0 and _sold_at(a, id) - t0 <= base - 600 + 100, "the sale comes sooner")
+	_check_conservation(a, "belt")
+
+
+func test_s02_tickets_keep_patience_while_the_pack_is_made() -> void:
+	for with_printer in [false, true]:
+		var f := _shop()
+		f.packer_tier = 0
+		if with_printer:
+			f.execute({"type": "build", "machine": "S02"})
+		var id := _want(f, 2, "plain", 3000)
+		_fill_bin(f, 2)
+		f.advance(3500)
+		var left: int = int(f.stats["abandoned"])
+		if with_printer:
+			assert_eq(int(left), 0, "with a ticket the customer waits for the pack being made")
+			assert_true(_sold_at(f, id) >= 0 or f.queue.size() == 1 or not f.serves.is_empty(), "and is still there to buy it")
+			assert_true(int(f.stats.get("ticket_saved_ms", 0)) > 0, "patience kept")
+		else:
+			assert_eq(int(left), 1, "without, a 3 s customer leaves before the 4 s pack is sealed")
+
+
+func test_s03_the_cashier_takes_payment_apart_and_a_paused_one_holds_the_sale() -> void:
+	var f := _shop()
+	var base := int(f.counter_service_ms())
+	var cid: int = f.execute({"type": "build", "machine": "S03"})["machine"]
+	_stock(f, 6)
+	for i in 4:
+		_want(f, 2)
+	f.advance(int(round(base * 0.65)) + 100)
+	assert_true(f.paying.size() > 0 or int(f.stats["sold"]) > 0, "lanes hand over sooner and customers pay at the drawer")
+	var money_before := int(f.money)
+	f.execute({"type": "pause_machine", "id": cid, "paused": true})
+	var waiting: int = f.paying.size()
+	f.advance(5000)
+	assert_true(f.paying.size() >= waiting, "a paused drawer takes no money")
+	assert_true(int(f.money) == money_before, "and no sale happens without payment")
+	_check_conservation(f, "paused payment (packs in the customers' hands are counted)")
+	f.execute({"type": "pause_machine", "id": cid, "paused": false})
+	f.advance(20000)
+	assert_eq(f.paying.size(), 0, "resumed, everyone pays")
+	assert_true(int(f.money) > money_before, "and the sales happen")
+	_check_conservation(f, "cashier")
+	var g := _shop()
+	var gid: int = g.execute({"type": "build", "machine": "S03"})["machine"]
+	_stock(g, 2)
+	_want(g, 2)
+	g.advance(int(round(base * 0.65)) + 100)
+	g.paying[0]["cashier"] = -1
+	assert_true(bool(g.execute({"type": "sell_machine", "id": gid})["ok"]), "an idle drawer sells")
+	g.advance(100)
+	assert_eq(g.paying.size(), 0, "with no drawer, the clerk takes the money")
+	_check_conservation(g, "sold drawer")
+
+
+func test_s04_the_router_serves_whoever_is_ready() -> void:
+	for routed in [false, true]:
+		var f := _shop()
+		if routed:
+			f.execute({"type": "build", "machine": "S04"})
+		_stock(f, 3, 2)
+		var big := _want(f, 4)      # nothing large on the shelf
+		var small := _want(f, 2)
+		f.advance(5000)
+		if routed:
+			assert_true(_sold_at(f, small) >= 0, "the router sends the small order past the waiting large one")
+			assert_true(int(f.stats.get("routed", 0)) >= 1, "counted")
+		else:
+			assert_eq(_sold_at(f, small), -1, "without it, nobody jumps the line")
+		assert_eq(_sold_at(f, big), -1, "the large order still waits for its bag")
+		_check_conservation(f, "router")
+
+
+func test_s05_the_express_window_serves_small_orders_apart() -> void:
+	var f := _shop()
+	var x: int = f.execute({"type": "build", "machine": "S05"})["machine"]
+	f.sign_tier = 3   # one counter lane: the large orders hold it
+	_stock(f, 1, 4)
+	_stock(f, 2, 2)
+	_stock(f, 1, 1)
+	f.execute({"type": "build", "machine": "P01"})
+	_want(f, 4)
+	_want(f, 4)
+	var s2 := _want(f, 2)
+	f.advance(1700)
+	assert_true(_sold_at(f, s2) >= 0, "a small order is served at the express window while large ones queue")
+	assert_true(int(f.machine(x).get("done", 0)) >= 1, "by the window")
+	var e: Dictionary = f.ledger.filter(func(l: Dictionary) -> bool: return int(l["customer"]) == s2)[0]
+	assert_true(int(e["size"]) <= 2, "never a large bag at the express window")
+	_check_conservation(f, "express")
+
+
+func test_s06_the_menu_board_lets_customers_order_what_is_there() -> void:
+	var a := _shop(63)
+	var b := _shop(63)
+	b.execute({"type": "build", "machine": "S06"})
+	for f: PopRules in [a, b]:
+		_stock(f, 6, 2)   # only small bags
+	var miss_a := 0
+	var miss_b := 0
+	for i in 200:
+		var oa: Dictionary = a._draw_order()
+		var ob: Dictionary = b._draw_order()
+		if a._matching_pack(oa) < 0:
+			miss_a += 1
+		if b._matching_pack(ob) < 0:
+			miss_b += 1
+	assert_true(miss_a > 30, "without the board many order a large bag that is not there (%d)" % miss_a)
+	assert_eq(miss_b, 0, "with it, every new order is for what is on the shelf")
+	assert_true(int(b.stats.get("menu_switched", 0)) > 0, "counted")
+
+
+func test_s08_the_robot_adds_counter_lanes() -> void:
+	var f := _shop()
+	var base := int(f.lanes())
+	var r: int = f.execute({"type": "build", "machine": "S08"})["machine"]
+	assert_eq(int(f.lanes()), base + 2, "two more counter lanes")
+	f.execute({"type": "upgrade_machine", "id": r})
+	f.execute({"type": "upgrade_machine", "id": r})
+	assert_eq(int(f.lanes()), base + 4, "four at its best tier")
+	_stock(f, 8)
+	for i in 8:
+		_want(f, 2)
+	f.advance(100)
+	assert_eq(f.serves.size(), base + 4, "that many hand-overs at once")
+	f.advance(3000)
+	assert_true(int(f.stats["sold"]) >= base + 4, "all of them finish together")
+	_check_conservation(f, "robot")
+
+
+func test_two_to_eight_lanes_under_seeded_waves_with_honest_sales() -> void:
+	# One customer about every 15 s (sign 1), then faster waves (3, 5, 6); the shelf is kept
+	# stocked (as a big kitchen would) so the counter is what is measured: the sign's lanes
+	# against a full storefront (robot, express window, cashier, router, kiosk).
+	var results := {}
+	for full in [false, true]:
+		var f: PopRules = Factory.new(null, 65)
+		f.packer_tier = 3
+		f.money = 100000
+		_open(f)
+		_open_sign(f)
+		if full:
+			f.sign_tier = 6
+			f.execute({"type": "build", "machine": "M07"})
+			for id in ["S08", "S05", "S03", "S04"]:
+				assert_true(bool(f.execute({"type": "build", "machine": id})["ok"]), "%s built" % id)
+			var r: int = f.machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "S08")[0]["id"]
+			f.execute({"type": "upgrade_machine", "id": r})
+			f.execute({"type": "upgrade_machine", "id": r})
+			f.execute({"type": "sell_machine", "id": f.machines[0]["id"]})
+		var sold0 := int(f.stats["sold"])
+		var k := 0
+		for wave in [1, 3, 5, 6]:
+			f.sign_tier = wave
+			for i in 160:
+				var cap := int(f.economy.table("factory")["shelf_packs"])
+				while f.shelf.size() < cap:
+					var size := 4 if k % 3 == 0 else 2
+					f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": size, "quality": 80})
+					f.stats["made_portions"] = int(f.stats["made_portions"]) + size
+					k += 1
+				f.advance(750)
+		_check_conservation(f, "waves %s" % ("full" if full else "sign only"))
+		assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "no wrong SKU")
+		for e: Dictionary in f.ledger:
+			assert_eq(int(e["size"]), int(e["ordered"]), "each sale the size ordered")
+		results[full] = {"sold": int(f.stats["sold"]) - sold0, "lost": int(f.stats["abandoned"]) + int(f.stats["passed_by"]), "lanes": int(f.lanes())}
+	assert_eq(int(results[false]["lanes"]), 2, "the sign's own lanes: 2")
+	assert_true(int(results[true]["lanes"]) + 1 >= 7, "the full storefront: %d counter lanes + the express window" % results[true]["lanes"])
+	assert_true(int(results[true]["sold"]) > int(results[false]["sold"]), "and sells more (%d vs %d)" % [results[true]["sold"], results[false]["sold"]])
+	assert_true(int(results[true]["lost"]) < int(results[false]["lost"]), "losing fewer customers (%d vs %d)" % [results[true]["lost"], results[false]["lost"]])
+
+
+func test_storefront_edge_cases_exhausted_overflow_failed_and_simultaneous() -> void:
+	var f := _shop()
+	for id in ["S08", "S04", "S05"]:
+		f.execute({"type": "build", "machine": id})
+	# Exhausted inventory: customers but no packs -- nothing sold, nobody served.
+	for i in 3:
+		_want(f, 2, "plain", 4000)
+	var sold_before := int(f.stats["sold"])
+	f.advance(3000)
+	assert_eq(int(f.stats["sold"]), sold_before, "no packs, no sales -- whatever machines stand there")
+	assert_true(f.serves.is_empty(), "nobody served from nothing")
+	# Failed sale: their patience runs out.
+	f.advance(2000)
+	assert_eq(int(f.stats["abandoned"]), 3, "they leave unserved (a failed sale, no money)")
+	assert_eq(int(f.money), 100000 - int(f.machines.reduce(func(n: int, m: Dictionary) -> int: return n + int(m["paid"]), 0)) - int(f.stats["upkeep_paid"]), "no money moved but purchases and upkeep")
+	# Queue overflow: arrivals past the cap walk by.
+	f.next_arrival_ms = int(f.flow_ms)
+	var cap := int(f.queue_cap())
+	for i in cap:
+		_want(f, 2)
+	var passed := int(f.stats["passed_by"])
+	f.advance(200)
+	assert_true(int(f.stats["passed_by"]) > passed, "a full queue turns arrivals away")
+	assert_true(f.queue.size() <= cap, "and never grows past its cap")
+	# Simultaneous completion: many lanes finish in the same step, each sale once.
+	f.queue.clear()
+	f.next_arrival_ms = 1 << 40
+	_stock(f, 6)
+	var ids: Array = []
+	for i in 6:
+		ids.append(_want(f, 2))
+	f.advance(100)
+	var sold0 := int(f.stats["sold"])
+	f.advance(3000)
+	var each := ids.map(func(id: int) -> int: return f.ledger.filter(func(e: Dictionary) -> bool: return int(e["customer"]) == id).size())
+	for n: int in each:
+		assert_true(n <= 1, "nobody is sold to twice")
+	assert_true(int(f.stats["sold"]) > sold0, "the lanes finished")
+	_check_conservation(f, "edges")

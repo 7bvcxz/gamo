@@ -62,6 +62,7 @@ var queue: Array = []       ## customers waiting, head first: {id, order: {recip
 ## Step 21: the counter's lanes, each handing one pack over: {customer, pack,
 ## left_ms, lane}. `serving` is the first of them (the one-lane shop, Step 17).
 var serves: Array = []
+var paying: Array = []      ## Step 31: customers with their pack, waiting at the auto cashier: {customer, pack, left_ms, cashier}
 var serving: Dictionary:
 	get:
 		return serves[0] if not serves.is_empty() else {}
@@ -169,7 +170,7 @@ func station_open(station: String) -> bool:
 			return int(stats["sold"]) >= 1 or sign_tier > 0
 		"auto", "cooker":
 			return sign_tier >= int(_auto().get("unlock_sign", 2)) or _count("cooker") > 0
-		"M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "P01", "P02", "P04", "P05", "P06", "P07", "P08":
+		"M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "P01", "P02", "P04", "P05", "P06", "P07", "P08", "S01", "S02", "S03", "S04", "S05", "S06", "S08":
 			var p: Dictionary = catalog(station).get("prereq", {})
 			var needs_kettle := (p.get("machines", []) as Array).has("M07")
 			return sign_tier >= int(p.get("sign", 0)) and packer_tier >= int(p.get("packer", 0)) and (not needs_kettle or _count("cooker") > 0) or _count(station) > 0
@@ -268,6 +269,8 @@ func portions_everywhere() -> int:
 		n += pack_portions(p)
 	for sv: Dictionary in serves:
 		n += pack_portions(sv["pack"])
+	for pv: Dictionary in paying:
+		n += pack_portions(pv["pack"])
 	for m: Dictionary in machines:
 		var h: Dictionary = m["held"]
 		if not h.is_empty():
@@ -440,7 +443,15 @@ func _flow_step(dt: int) -> void:
 		_schedule_arrival()
 	# 5. Patience: everyone waiting (not the one being served) loses dt.
 	var stay: Array = []
+	var ticketed := _orders_being_made() if _device_on("S02") else {}
 	for c: Dictionary in queue:
+		# Step 31, S02 the ticket printer: a customer whose pack is being made keeps their patience.
+		var key := "%s|%d" % [c["order"]["recipe"], c["order"]["size"]]
+		if int(ticketed.get(key, 0)) > 0:
+			ticketed[key] = int(ticketed[key]) - 1
+			stats["ticket_saved_ms"] = int(stats.get("ticket_saved_ms", 0)) + dt
+			stay.append(c)
+			continue
 		c["patience_ms"] = int(c["patience_ms"]) - dt
 		if int(c["patience_ms"]) <= 0:
 			stats["abandoned"] = int(stats["abandoned"]) + 1
@@ -450,44 +461,157 @@ func _flow_step(dt: int) -> void:
 	queue = stay
 	# 6. The counter: every lane hands its pack over; a free lane takes the head
 	# of the queue (in order -- nobody jumps it) when a matching pack is there.
+	# Step 31: with the auto cashier (S03) a hand-over is shorter and the customer
+	# then pays at the drawer; the router (S04) sends whoever's pack is ready to a
+	# free lane; the express window (S05) serves small orders on its own lane.
 	var going: Array = []
 	for sv: Dictionary in serves:
 		sv["left_ms"] = int(sv["left_ms"]) - dt
 		if int(sv["left_ms"]) <= 0:
-			_sell(sv)
+			if bool(sv.get("pay_at_cashier", false)):
+				paying.append({"customer": sv["customer"], "pack": sv["pack"], "left_ms": 0, "cashier": -1, "lane": sv["lane"]})
+				_emit("handed_over", {"customer": sv["customer"]["id"], "pack": sv["pack"]["id"], "lane": sv["lane"]})
+			else:
+				_sell(sv)
 		else:
 			going.append(sv)
 	serves = going
+	_cashiers_step(dt)
 	if serves.is_empty() and queue.is_empty():
 		stats["counter_empty_ms"] = int(stats["counter_empty_ms"]) + dt
 	while _counter_serving() < lanes() and not queue.is_empty():
-		var head: Dictionary = queue[0]
-		var idx := _matching_pack(head["order"])
-		if idx < 0:
+		var qi := _next_customer(0)
+		if qi < 0:
 			break
+		var head: Dictionary = queue[qi]
+		var idx := _matching_pack(head["order"])
 		var pack: Dictionary = shelf[idx]
 		shelf.remove_at(idx)
-		queue.remove_at(0)
+		queue.remove_at(qi)
+		if qi > 0:
+			stats["routed"] = int(stats.get("routed", 0)) + 1
 		var lane := _free_lane()
-		serves.append({"customer": head, "pack": pack, "left_ms": int(t["service_ms"]), "lane": lane})
+		var cashier := _cashier_ready()
+		var ms := counter_service_ms(cashier)
+		serves.append({"customer": head, "pack": pack, "left_ms": ms, "lane": lane, "pay_at_cashier": cashier})
 		_emit("serve_started", {"customer": head["id"], "pack": pack["id"], "lane": lane})
-	# Step 26: self-serve kiosks take the next customer when the counter's lanes are busy.
+	# Step 26: self-serve kiosks take the next customer when the counter's lanes are busy;
+	# Step 31: the express window takes the next small order.
 	for m: Dictionary in machines:
 		if queue.is_empty():
 			break
-		if String(m["type"]) != "kiosk" or String(m["state"]) in ["paused", "unpaid"] or _kiosk_busy(int(m["id"])):
+		var kind := String(m["type"])
+		if not kind in ["kiosk", "S05"] or String(m["state"]) in ["paused", "unpaid"] or _kiosk_busy(int(m["id"])):
 			continue
-		var head: Dictionary = queue[0]
+		var cap_size := int((_t().get("counter_machines", {}) as Dictionary).get("express_max_size", 2)) if kind == "S05" else 0
+		var qi := _next_customer(cap_size)
+		if qi < 0:
+			continue
+		var head: Dictionary = queue[qi]
 		var idx := _matching_pack(head["order"])
-		if idx < 0:
-			break
 		var pack: Dictionary = shelf[idx]
 		shelf.remove_at(idx)
-		queue.remove_at(0)
+		queue.remove_at(qi)
+		if qi > 0:
+			stats["routed" if kind == "kiosk" else "express_jumped"] = int(stats.get("routed" if kind == "kiosk" else "express_jumped", 0)) + 1
 		var ms := int(_machine_tier(m).get("service_ms", 2500))
-		serves.append({"customer": head, "pack": pack, "left_ms": ms, "lane": 100 + int(m["slot"]), "kiosk": int(m["id"])})
+		var lane := (100 if kind == "kiosk" else 200) + int(m["slot"])
+		serves.append({"customer": head, "pack": pack, "left_ms": ms, "lane": lane, "kiosk": int(m["id"])})
 		m["state"] = "run"
-		_emit("serve_started", {"customer": head["id"], "pack": pack["id"], "lane": 100 + int(m["slot"]), "kiosk": int(m["id"])})
+		_emit("serve_started", {"customer": head["id"], "pack": pack["id"], "lane": lane, "kiosk": int(m["id"])})
+
+
+## Step 31: which customer a free lane takes. Without the router only the head of the
+## queue (nobody jumps it); with the router (S04, two or more counter lanes) the first
+## one whose pack is on the shelf. `max_size` > 0: the express window's small orders
+## (the first eligible one in queue order -- it has its own line).
+func _next_customer(max_size: int) -> int:
+	var look_past := max_size > 0 or (_device_on("S04") and lanes() >= 2)
+	for i in queue.size():
+		var o: Dictionary = queue[i]["order"]
+		if max_size > 0 and int(o["size"]) > max_size:
+			continue
+		if _matching_pack(o) >= 0:
+			return i
+		if not look_past:
+			return -1
+	return -1
+
+
+## A counter hand-over's time: the base, minus the pickup belt (S01), and only the
+## handing part when an auto cashier (S03) will take the payment.
+func counter_service_ms(at_cashier: bool = false) -> int:
+	var ms := int(_t()["service_ms"])
+	if _device_on("S01"):
+		ms -= _tier_value("S01", "minus", 600)
+	ms = maxi(600, ms)
+	if at_cashier:
+		ms = int(round(ms * (1.0 - float((_t().get("counter_machines", {}) as Dictionary).get("pay_share", 0.35)))))
+	return ms
+
+
+## Is an auto cashier working (not paused, not unpaid)? Then lanes hand over and the
+## customer pays at its drawer.
+func _cashier_ready() -> bool:
+	return _device_on("S03")
+
+
+## The drawers: each working cashier takes the first customer waiting to pay and
+## needs its tier's time; the sale (money) happens when they have paid. A paused
+## cashier's customers wait -- nobody pays nothing, nothing is sold early.
+func _cashiers_step(dt: int) -> void:
+	if not paying.is_empty() and not machines.any(func(x: Dictionary) -> bool: return String(x["type"]) == "S03"):
+		for pv: Dictionary in paying:   # no drawer left (sold): the clerk takes the money
+			_sell(pv)
+		paying.clear()
+		return
+	for m: Dictionary in machines:
+		if String(m["type"]) != "S03" or String(m["state"]) in ["paused", "unpaid"]:
+			continue
+		var mine: Dictionary = {}
+		for pv: Dictionary in paying:
+			if int(pv["cashier"]) == int(m["id"]):
+				mine = pv
+				break
+		if mine.is_empty():
+			for pv: Dictionary in paying:
+				if int(pv["cashier"]) < 0:
+					pv["cashier"] = int(m["id"])
+					pv["left_ms"] = int(_machine_tier(m).get("pay_ms", 900))
+					mine = pv
+					break
+		if mine.is_empty():
+			continue
+		mine["left_ms"] = int(mine["left_ms"]) - dt
+		if int(mine["left_ms"]) <= 0:
+			paying.erase(mine)
+			m["done"] = int(m.get("done", 0)) + 1
+			_sell(mine)
+
+
+## Step 31, S02: the orders a pack is being made for right now (the station's heads,
+## the fillers' and cup feeder's hands), by SKU and size.
+func _orders_being_made() -> Dictionary:
+	var out := {}
+	var making: Array = packing.duplicate()
+	for m: Dictionary in machines:
+		if String(m["type"]) in ["bagger", "P01"] and not (m["held"] as Dictionary).is_empty():
+			making.append(m["held"])
+	for p: Dictionary in making:
+		var key := "%s|%d" % [p["recipe"], p["size"]]
+		out[key] = int(out.get(key, 0)) + 1
+	return out
+
+
+## Step 31: the storefront's devices work (and pay) while the shop has customers.
+func _shop_device_step(m: Dictionary, dt: int) -> void:
+	var busy := not queue.is_empty() or not serves.is_empty() or (String(m["type"]) == "S03" and paying.any(func(pv: Dictionary) -> bool: return int(pv["cashier"]) == int(m["id"])))
+	if not busy:
+		m["state"] = "idle"
+		return
+	if not _pay(m, dt):
+		return
+	m["state"] = "run"
 
 
 ## The oldest recipe in the bin with a whole pack's portions ("" = none): a
@@ -637,6 +761,17 @@ func _draw_order() -> Dictionary:
 		if _orng.randf() < float(pr.get("order_share", 0.3)):
 			recipe = "premium"
 	order_rng_state = int(_orng.state)
+	# Step 31, S06 the menu board: a new customer sees what is on the shelf and orders a
+	# size that is there when theirs is not (no extra draw: the order stream is the same).
+	if _device_on("S06") and _matching_pack({"recipe": recipe, "size": size}) < 0:
+		var choices: Array = station_sizes()
+		if _device_on("P01"):
+			choices.append(1)
+		for z: int in choices:
+			if _matching_pack({"recipe": recipe, "size": z}) >= 0:
+				stats["menu_switched"] = int(stats.get("menu_switched", 0)) + 1
+				size = z
+				break
 	return {"recipe": recipe, "size": size}
 
 
@@ -713,7 +848,12 @@ func _matching_pack(order: Dictionary) -> int:
 
 ## The counter's lanes (data: factory.counter.lanes; Step 24's shop tree adds more).
 func lanes() -> int:
-	return maxi(maxi(1, int((_t().get("counter", {}) as Dictionary).get("lanes", 1))), int(shop_sign().get("lanes", 1)))
+	var n := maxi(maxi(1, int((_t().get("counter", {}) as Dictionary).get("lanes", 1))), int(shop_sign().get("lanes", 1)))
+	# Step 31, S08 the serving robot: more counter lanes (its best tier).
+	var plus := 0
+	for d: Dictionary in _devices("S08"):
+		plus = maxi(plus, int(_machine_tier(d).get("plus", 2)))
+	return n + plus
 
 
 # -- Step 22: the sign and the foot traffic ------------------------------------
@@ -759,7 +899,8 @@ func _buy_sign() -> Dictionary:
 const FLOOR_OF := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop",
 	"M01": "kitchen", "M02": "kitchen", "M03": "kitchen", "M04": "kitchen", "M05": "kitchen", "M06": "kitchen", "M08": "kitchen",
 	"M09": "kitchen", "M10": "kitchen", "M11": "kitchen", "M12": "kitchen", "M13": "kitchen", "M14": "kitchen", "M15": "kitchen", "M16": "kitchen",
-	"P01": "packing", "P02": "packing", "P04": "packing", "P05": "packing", "P06": "packing", "P07": "packing", "P08": "packing"}
+	"P01": "packing", "P02": "packing", "P04": "packing", "P05": "packing", "P06": "packing", "P07": "packing", "P08": "packing",
+	"S01": "shop", "S02": "shop", "S03": "shop", "S04": "shop", "S05": "shop", "S06": "shop", "S08": "shop"}
 ## Step 28: the kitchen's devices that serve the kettles (each a catalog id and its own runtime).
 const KITCHEN_DEVICES := ["M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16"]
 ## Step 29: what cooks lots on its own (the auto kettle and the rotary popper): kernels,
@@ -767,6 +908,8 @@ const KITCHEN_DEVICES := ["M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09"
 const KETTLES := ["cooker", "M16"]
 ## Step 30: the packing floor's machines besides the bagger (P03).
 const PACKING_DEVICES := ["P01", "P02", "P04", "P05", "P06", "P07", "P08"]
+## Step 31: the storefront's machines besides the kiosk (S07).
+const SHOP_DEVICES := ["S01", "S02", "S03", "S04", "S05", "S06", "S08"]
 const CATALOG_PATH := "res://data/machines.json"
 var _forty: Dictionary = {}
 
@@ -925,7 +1068,7 @@ func _sell_machine(id: int) -> Dictionary:
 	var m := machine(id)
 	if m.is_empty():
 		return {"ok": false, "reason": "err.unknown"}
-	if not (m["held"] as Dictionary).is_empty() or _kiosk_busy(id):
+	if not (m["held"] as Dictionary).is_empty() or _kiosk_busy(id) or paying.any(func(pv: Dictionary) -> bool: return int(pv["cashier"]) == id):
 		return {"ok": false, "reason": "err.busy"}
 	if String(m["type"]) == "M10":
 		var left := int((_t().get("slots", {}) as Dictionary).get("kitchen", 0)) + _kitchen_plus(id)
@@ -1026,8 +1169,10 @@ func _machines_step(dt: int) -> void:
 				_bagger_step(m, dt)
 			"P02", "P04", "P07", "P08":
 				_packing_device_step(m, dt)
-			"kiosk":
+			"kiosk", "S05":
 				_kiosk_step(m, dt)
+			"S01", "S02", "S03", "S04", "S06", "S08":
+				_shop_device_step(m, dt)
 			"M01":
 				_hopper_step(m, dt)
 			"M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M13", "M14", "M15":
@@ -1564,7 +1709,7 @@ const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines"
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
-		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state)}
+		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state), "paying": paying.duplicate(true)}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -1641,6 +1786,7 @@ func _apply_save(d: Dictionary) -> void:
 	# Step 29: the kitchen's heat (optional: a 0.28 save has none -- a cool kitchen).
 	kitchen_heat = clampf(float(d.get("kitchen_heat", 0.0)), 0.0, 1000.0) if typeof(d.get("kitchen_heat", 0.0)) in [TYPE_INT, TYPE_FLOAT] else 0.0
 	overheat_left = maxi(0, int(d.get("overheat_left", 0))) if typeof(d.get("overheat_left", 0)) in [TYPE_INT, TYPE_FLOAT] else 0
+	paying = (d.get("paying", []) as Array).duplicate(true) if typeof(d.get("paying", [])) == TYPE_ARRAY else []
 	if String(d.get("pack_rng_state", "")).is_valid_int():
 		pack_rng_state = String(d["pack_rng_state"]).to_int()
 	# Step 28: a kettle saved before kernels existed (0.25-0.27) comes back with a full
@@ -1710,6 +1856,8 @@ func state() -> Dictionary:
 	s["kitchen_slots"] = slots("kitchen")
 	s["premium_on_shelf"] = shelf.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "premium").size()
 	s["premium_in_bin"] = bin_portions_of("premium")
+	s["paying"] = paying.size()   # Step 31: customers at the auto cashier
+	s["counter_lanes"] = lanes()
 	return s
 
 

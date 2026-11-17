@@ -13,7 +13,9 @@
   "premium_sku",
   "dispatch",
   "cup_sku",
-  "portion_variance"
+  "portion_variance",
+  "multi_queue",
+  "four_lanes"
  ],
  "machines": [
   {
@@ -1218,20 +1220,20 @@
    "floor": "shop",
    "slots": 1,
    "parts": [
-    "belt",
+    "pickup",
     "bag"
    ],
-   "motion": "a belt carries packs to the counter",
+   "motion": "a belt carries packs from the shelf to the counter",
    "operation": "brings packs from the shelf to the counter",
    "contract": {
     "kind": "convey",
     "service_ms_minus": 600
    },
    "inputs": [
-    "packs on the shelf"
+    "sealed packs"
    ],
    "outputs": [
-    "packs at the counter"
+    "the counter's hand-over 0.6/0.8/1.0 s shorter"
    ],
    "queue": "covers the counter",
    "prereq": {
@@ -1255,8 +1257,8 @@
      "minus": 1000
     }
    ],
-   "marginal": "a lane hands over in 1.8 s instead of 2.4 (+33%)",
-   "runtime": null,
+   "marginal": "a quarter more hand-overs a minute",
+   "runtime": "S01",
    "step": 31
   },
   {
@@ -1266,20 +1268,20 @@
    "floor": "shop",
    "slots": 1,
    "parts": [
-    "box",
+    "printer",
     "ticket"
    ],
-   "motion": "a ticket curls out of a slot",
+   "motion": "tickets curl out and hang over the queue",
    "operation": "takes orders from the queue early",
    "contract": {
     "kind": "ticket",
     "patience_paused_while": "their pack is being made"
    },
    "inputs": [
-    "waiting customers"
+    "the queue's orders"
    ],
    "outputs": [
-    "fewer leave while their bag is made"
+    "a customer whose pack is being made does not lose patience"
    ],
    "queue": "covers the queue",
    "prereq": {
@@ -1300,8 +1302,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "customers who wait for a pack in progress do not leave",
-   "runtime": null,
+   "marginal": "fewer customers leave while the station packs their bag",
+   "runtime": "S02",
    "step": 31
   },
   {
@@ -1311,23 +1313,22 @@
    "floor": "shop",
    "slots": 1,
    "parts": [
-    "box",
-    "screen",
-    "coin"
+    "cashier",
+    "screen"
    ],
-   "motion": "a till flashes and drops change",
+   "motion": "coins clink into a drawer",
    "operation": "takes payment apart from handing over",
    "contract": {
     "kind": "cashier",
-    "lane_concurrent": 2
+    "pay_share": 0.35
    },
    "inputs": [
-    "a customer at a lane"
+    "customers with their pack"
    ],
    "outputs": [
-    "that lane serves two at once"
+    "counter lanes free 35% sooner; payments one at a time (0.9/0.7/0.5 s)"
    ],
-   "queue": "one per lane",
+   "queue": "one drawer",
    "prereq": {
     "sign": 4
    },
@@ -1337,17 +1338,20 @@
    "upkeep_per_min": 2,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "pay_ms": 900
     },
     {
-     "cost": 400
+     "cost": 400,
+     "pay_ms": 700
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "pay_ms": 500
     }
    ],
-   "marginal": "a lane's capacity doubles",
-   "runtime": null,
+   "marginal": "a third more counter throughput while the drawer keeps up",
+   "runtime": "S03",
    "step": 31
   },
   {
@@ -1357,28 +1361,26 @@
    "floor": "shop",
    "slots": 1,
    "parts": [
-    "post",
-    "rope"
+    "router",
+    "arrows_cross"
    ],
-   "motion": "ropes swing to open a second line",
-   "operation": "splits the queue across lanes",
+   "motion": "a light points the next customer to a free lane",
+   "operation": "sends whoever's pack is ready to a free lane",
    "contract": {
     "kind": "route",
     "needs_lanes": 2
    },
    "inputs": [
-    "the queue"
+    "the queue, the shelf"
    ],
    "outputs": [
-    "customers to the shortest lane"
+    "no customer waits behind one whose pack is not ready"
    ],
-   "queue": "only with two or more lanes",
+   "queue": "needs two counter lanes",
    "prereq": {
-    "sign": 6
+    "sign": 5
    },
-   "requires": [
-    "multi_queue"
-   ],
+   "requires": [],
    "cost": 700,
    "growth": 1.25,
    "upkeep_per_min": 1,
@@ -1393,8 +1395,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "none until lanes have their own queues (Step 31)",
-   "runtime": null,
+   "marginal": "mixed orders (cups, premium, large) stop blocking the line",
+   "runtime": "S04",
    "step": 31
   },
   {
@@ -1404,22 +1406,22 @@
    "floor": "shop",
    "slots": 1,
    "parts": [
-    "window",
+    "express",
     "bag"
    ],
-   "motion": "a small window slides open",
-   "operation": "serves customers who want only a small bag, apart",
+   "motion": "a little window with its own bell",
+   "operation": "serves customers who want a cup or a small bag, apart",
    "contract": {
     "kind": "express",
-    "serves": "small bag orders"
+    "serves": "orders of at most 2 portions"
    },
    "inputs": [
-    "small-bag orders"
+    "small orders"
    ],
    "outputs": [
-    "served at the window, out of turn"
+    "an extra lane for small orders (1.5/1.2/0.9 s)"
    ],
-   "queue": "one window",
+   "queue": "its own lane",
    "prereq": {
     "sign": 5
    },
@@ -1429,17 +1431,20 @@
    "upkeep_per_min": 2,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "service_ms": 1500
     },
     {
-     "cost": 400
+     "cost": 400,
+     "service_ms": 1200
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "service_ms": 900
     }
    ],
-   "marginal": "small-bag customers stop waiting behind large orders",
-   "runtime": null,
+   "marginal": "small orders no longer wait behind large ones",
+   "runtime": "S05",
    "step": 31
   },
   {
@@ -1449,28 +1454,25 @@
    "floor": "shop",
    "slots": 1,
    "parts": [
-    "board",
-    "lights"
+    "menuboard"
    ],
-   "motion": "the board lights the flavors in stock",
-   "operation": "lets customers choose among the flavors in stock",
+   "motion": "the board lights what is in stock",
+   "operation": "lets new customers choose among what is in stock",
    "contract": {
     "kind": "menu",
-    "substitution": "customer's choice among stocked flavors"
+    "substitution": "a new customer orders a size that is on the shelf (later also flavors)"
    },
    "inputs": [
-    "the shelf's flavors"
+    "the shelf"
    ],
    "outputs": [
-    "fewer leave for a missing flavor"
+    "fewer orders for what is not there"
    ],
    "queue": "covers the shop",
    "prereq": {
     "sign": 4
    },
-   "requires": [
-    "flavors"
-   ],
+   "requires": [],
    "cost": 500,
    "growth": 1.25,
    "upkeep_per_min": 1,
@@ -1485,8 +1487,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "none until flavors (Step 34)",
-   "runtime": null,
+   "marginal": "fewer customers wait for a size that is out",
+   "runtime": "S06",
    "step": 31
   },
   {
@@ -1542,46 +1544,46 @@
    "name": "Multi-Lane Serving Robot",
    "group": "storefront",
    "floor": "shop",
-   "slots": 2,
+   "slots": 1,
    "parts": [
-    "robot",
-    "rail"
+    "servebot"
    ],
-   "motion": "a robot slides along a rail between lanes",
-   "operation": "hands packs over at whichever lane needs it",
+   "motion": "a robot with arms slides along the counter",
+   "operation": "serves at extra counter lanes",
    "contract": {
     "kind": "float_lane",
-    "needs_lanes": 4
+    "lanes_plus": 2
    },
    "inputs": [
-    "busy lanes"
+    "the queue, the shelf"
    ],
    "outputs": [
-    "an extra hand-over at the busiest lane"
+    "2/3/4 more counter lanes"
    ],
-   "queue": "two places wide",
+   "queue": "covers the counter",
    "prereq": {
     "sign": 6
    },
-   "requires": [
-    "four_lanes"
-   ],
+   "requires": [],
    "cost": 2000,
    "growth": 1.25,
    "upkeep_per_min": 4,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "plus": 2
     },
     {
-     "cost": 400
+     "cost": 400,
+     "plus": 3
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "plus": 4
     }
    ],
-   "marginal": "none until four lanes (Step 31)",
-   "runtime": null,
+   "marginal": "up to 6 counter lanes; with kiosks and the express window, 8",
+   "runtime": "S08",
    "step": 31
   },
   {

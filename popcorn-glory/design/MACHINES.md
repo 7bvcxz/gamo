@@ -2,7 +2,7 @@
 
 `data/machines.json`이 단일 원본이다(생성: `tools/catalog/build_catalog.py`, 이 문서: `tools/catalog/catalog_doc.py`). 그림은 게임 안 `#machines`(실제 자리 크기, 다섯 묶음 × 8, 그 아래 40대가 층에 접힌 배치). 수치는 [proposal].
 
-**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch, cup_sku, portion_variance.
+**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch, cup_sku, portion_variance, multi_queue, four_lanes.
 
 ## 해금 지도 (간판 단계 → 열리는 기계)
 
@@ -10,10 +10,10 @@
 |---|---|
 | 0 | P01 ●, P02 ●, P03 ●, P04 ●, P05 ●, P06 ●, P07 ●, P08 ● |
 | 2 | M06 ●, M08 ● |
-| 3 | M01 ●, M02 ●, M04 ●, M07 ●, S01, S07 ●, U04 |
-| 4 | M03 ●, M05 ●, M09 ●, M12 ●, S02, S03, S06, U01, U02, U03 |
-| 5 | M10 ●, M11 ●, M13 ●, M14 ●, M15 ●, S05, U05, U06 |
-| 6 | M16 ●, S04, S08, U07, U08 |
+| 3 | M01 ●, M02 ●, M04 ●, M07 ●, S01 ●, S07 ●, U04 |
+| 4 | M03 ●, M05 ●, M09 ●, M12 ●, S02 ●, S03 ●, S06 ●, U01, U02, U03 |
+| 5 | M10 ●, M11 ●, M13 ●, M14 ●, M15 ●, S04 ●, S05 ●, U05, U06 |
+| 6 | M16 ●, S08 ●, U07, U08 |
 
 ● = 지금 돈다(Step 26: M07 자동 냄비, P03 부피 충전기, S07 셀프 키오스크).
 
@@ -60,14 +60,14 @@
 
 | ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| S01 | Pickup Belt | shop · 1 | a belt carries packs to the counter | convey (service_ms_minus=600) | packs on the shelf → packs at the counter | covers the counter | 간판 3 | — | 400 / 1분 | minus 600 / minus 800 / minus 1000 | a lane hands over in 1.8 s instead of 2.4 (+33%) | Step 31 |
-| S02 | Order Ticket Printer | shop · 1 | a ticket curls out of a slot | ticket (patience_paused_while=their pack is being made) | waiting customers → fewer leave while their bag is made | covers the queue | 간판 4 | — | 500 / 1분 | — / — / — | customers who wait for a pack in progress do not leave | Step 31 |
-| S03 | Auto Cashier | shop · 1 | a till flashes and drops change | cashier (lane_concurrent=2) | a customer at a lane → that lane serves two at once | one per lane | 간판 4 | — | 600 / 2분 | — / — / — | a lane's capacity doubles | Step 31 |
-| S04 | Queue Router | shop · 1 | ropes swing to open a second line | route (needs_lanes=2) | the queue → customers to the shortest lane | only with two or more lanes | 간판 6 | multi_queue | 700 / 1분 | — / — / — | none until lanes have their own queues (Step 31) | 체계 대기: multi_queue |
-| S05 | Express Window | shop · 1 | a small window slides open | express (serves=small bag orders) | small-bag orders → served at the window, out of turn | one window | 간판 5 | — | 800 / 2분 | — / — / — | small-bag customers stop waiting behind large orders | Step 31 |
-| S06 | Menu Display Board | shop · 1 | the board lights the flavors in stock | menu (substitution=customer's choice among stocked flavors) | the shelf's flavors → fewer leave for a missing flavor | covers the shop | 간판 4 | flavors | 500 / 1분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| S01 | Pickup Belt | shop · 1 | a belt carries packs from the shelf to the counter | convey (service_ms_minus=600) | sealed packs → the counter's hand-over 0.6/0.8/1.0 s shorter | covers the counter | 간판 3 | — | 400 / 1분 | minus 600 / minus 800 / minus 1000 | a quarter more hand-overs a minute | 돈다 |
+| S02 | Order Ticket Printer | shop · 1 | tickets curl out and hang over the queue | ticket (patience_paused_while=their pack is being made) | the queue's orders → a customer whose pack is being made does not lose patience | covers the queue | 간판 4 | — | 500 / 1분 | — / — / — | fewer customers leave while the station packs their bag | 돈다 |
+| S03 | Auto Cashier | shop · 1 | coins clink into a drawer | cashier (pay_share=0.35) | customers with their pack → counter lanes free 35% sooner; payments one at a time (0.9/0.7/0.5 s) | one drawer | 간판 4 | — | 600 / 2분 | pay_ms 900 / pay_ms 700 / pay_ms 500 | a third more counter throughput while the drawer keeps up | 돈다 |
+| S04 | Queue Router | shop · 1 | a light points the next customer to a free lane | route (needs_lanes=2) | the queue, the shelf → no customer waits behind one whose pack is not ready | needs two counter lanes | 간판 5 | — | 700 / 1분 | — / — / — | mixed orders (cups, premium, large) stop blocking the line | 돈다 |
+| S05 | Express Window | shop · 1 | a little window with its own bell | express (serves=orders of at most 2 portions) | small orders → an extra lane for small orders (1.5/1.2/0.9 s) | its own lane | 간판 5 | — | 800 / 2분 | service_ms 1500 / service_ms 1200 / service_ms 900 | small orders no longer wait behind large ones | 돈다 |
+| S06 | Menu Display Board | shop · 1 | the board lights what is in stock | menu (substitution=a new customer orders a size that is on the shelf (later also flavors)) | the shelf → fewer orders for what is not there | covers the shop | 간판 4 | — | 500 / 1분 | — / — / — | fewer customers wait for a size that is out | 돈다 |
 | S07 | Self-Service Kiosk | shop · 1 | a screen lights and a bag drops | serve (service_ms=3000) | the next customer, their pack → a sale | takes the next customer only when the lanes are busy | 간판 3 | — | 500 / 3분 | service_ms 3000 / service_ms 2400 / service_ms 1900 | +20 customers a minute when the counter is the limit | 돈다 |
-| S08 | Multi-Lane Serving Robot | shop · 2 | a robot slides along a rail between lanes | float_lane (needs_lanes=4) | busy lanes → an extra hand-over at the busiest lane | two places wide | 간판 6 | four_lanes | 2000 / 4분 | — / — / — | none until four lanes (Step 31) | 체계 대기: four_lanes |
+| S08 | Multi-Lane Serving Robot | shop · 1 | a robot with arms slides along the counter | float_lane (lanes_plus=2) | the queue, the shelf → 2/3/4 more counter lanes | covers the counter | 간판 6 | — | 2000 / 4분 | plus 2 / plus 3 / plus 4 | up to 6 counter lanes; with kiosks and the express window, 8 | 돈다 |
 
 ## 보조 (U01–U08, Step 32)
 
@@ -89,9 +89,7 @@
 | aging | U06 | 32 |
 | customer_preferences | U05 | 36 |
 | faults | U01 | 32 |
-| flavors | M12, P05, P06, S06, U07 | 34 |
-| four_lanes | S08 | 31 |
-| multi_queue | S04 | 31 |
+| flavors | M12, P05, P06, U07 | 34 |
 | news | U07 | 37 |
 | parallel_lines | U08 | 33 |
 

@@ -507,6 +507,46 @@ static func catalog_icon(ci: CanvasItem, r: Rect2, parts: Array, group: String, 
 				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.4, h * 0.5), o + Vector2(w * 0.6, h * 0.5), o + Vector2(w * 0.32, h * 0.9), o + Vector2(w * 0.1, h * 0.9)]), c.call(PopTokens.STEEL))
 				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.4, h * 0.5), o + Vector2(w * 0.6, h * 0.5), o + Vector2(w * 0.9, h * 0.9), o + Vector2(w * 0.68, h * 0.9)]), c.call(PopPalette.GOLD))
 				ci.draw_circle(o + Vector2(w * 0.5, h * 0.5), w * 0.08, c.call(body))
+			# Step 31: the storefront's silhouettes (cream and gold: the storefront group).
+			"pickup":   # S01: a short inclined belt on legs, a bag riding it
+				for q in 2:
+					ci.draw_line(o + Vector2(w * (0.2 + 0.56 * q), h * (0.7 - 0.2 * q)), o + Vector2(w * (0.2 + 0.56 * q), h * 0.92), c.call(PopTokens.STEEL_DEEP), 3.0)
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.08, h * 0.66), o + Vector2(w * 0.9, h * 0.42), o + Vector2(w * 0.92, h * 0.52), o + Vector2(w * 0.1, h * 0.76)]), c.call(PopTokens.STEEL))
+				for q in 5:
+					ci.draw_circle(o + Vector2(w * (0.16 + 0.17 * q), h * (0.71 - 0.049 * q)), w * 0.025, c.call(PopTokens.STEEL_DEEP))
+			"printer":   # S02: a ticket printer on a post
+				ci.draw_rect(Rect2(o + Vector2(w * 0.46, h * 0.6), Vector2(w * 0.08, h * 0.3)), c.call(PopTokens.STEEL_DEEP))
+				vgrad(ci, Rect2(o + Vector2(w * 0.24, h * 0.36), Vector2(w * 0.52, h * 0.26)), c.call(body.lightened(0.2)), c.call(body), 6, c.call(body.darkened(0.3)), 2.0)
+				ci.draw_rect(Rect2(o + Vector2(w * 0.3, h * 0.44), Vector2(w * 0.4, h * 0.04)), c.call(PopPalette.INK))
+			"cashier":   # S03: a till with a drawer and a coin slot
+				vgrad(ci, Rect2(o + Vector2(w * 0.14, h * 0.5), Vector2(w * 0.72, h * 0.4)), c.call(body.lightened(0.2)), c.call(body), 6, c.call(body.darkened(0.3)), 2.0)
+				ci.draw_rect(Rect2(o + Vector2(w * 0.2, h * 0.76), Vector2(w * 0.6, h * 0.08)), c.call(body.darkened(0.25)))
+				if not m:
+					PopMachineArt.draw_coin(ci, o + Vector2(w * 0.7, h * 0.62), w * 0.08)
+			"router":   # S04: a pole with a pointing lamp
+				ci.draw_rect(Rect2(o + Vector2(w * 0.47, h * 0.3), Vector2(w * 0.06, h * 0.6)), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.3, h * 0.88), Vector2(w * 0.4, h * 0.05)), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.3), w * 0.16, c.call(body))
+			"express":   # S05: a small window booth with its own awning and bell
+				vgrad(ci, Rect2(o + Vector2(w * 0.14, h * 0.3), Vector2(w * 0.72, h * 0.6)), c.call(body.lightened(0.25)), c.call(body), 5, c.call(body.darkened(0.3)), 2.0)
+				ci.draw_rect(Rect2(o + Vector2(w * 0.26, h * 0.42), Vector2(w * 0.48, h * 0.24)), c.call(Color(0.75, 0.92, 1.0)))
+				for q in 4:
+					ci.draw_rect(Rect2(o + Vector2(w * (0.1 + 0.2 * q), h * 0.22), Vector2(w * 0.1, h * 0.1)), c.call(PopTokens.WARN if q % 2 == 0 else Color.WHITE))
+			"menuboard":   # S06: a dark menu board on two legs, lit lines
+				for q in 2:
+					ci.draw_line(o + Vector2(w * (0.26 + 0.48 * q), h * 0.6), o + Vector2(w * (0.22 + 0.56 * q), h * 0.92), c.call(PopTokens.STEEL_DEEP), 3.0)
+				PopMachineArt._round_rect(ci, Rect2(o + Vector2(w * 0.12, h * 0.16), Vector2(w * 0.76, h * 0.48)), 5, c.call(Color(0.22, 0.24, 0.27)))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.12, h * 0.16), Vector2(w * 0.76, h * 0.06)), c.call(body))
+				for q in 3:
+					ci.draw_line(o + Vector2(w * 0.22, h * (0.32 + 0.1 * q)), o + Vector2(w * (0.6 - 0.08 * q), h * (0.32 + 0.1 * q)), c.call(PopPalette.CREAM), 2.0)
+			"servebot":   # S08: a robot on a rail with two arms
+				ci.draw_rect(Rect2(o + Vector2(w * 0.04, h * 0.88), Vector2(w * 0.92, h * 0.05)), c.call(PopTokens.STEEL_DEEP))
+				PopMachineArt._round_rect(ci, Rect2(o + Vector2(w * 0.32, h * 0.42), Vector2(w * 0.36, h * 0.44)), 6, c.call(body))
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.3), w * 0.13, c.call(Color.WHITE))
+				ci.draw_circle(o + Vector2(w * 0.45, h * 0.29), w * 0.025, ink)
+				ci.draw_circle(o + Vector2(w * 0.55, h * 0.29), w * 0.025, ink)
+				ci.draw_line(o + Vector2(w * 0.32, h * 0.52), o + Vector2(w * 0.12, h * 0.4), c.call(PopTokens.STEEL_DEEP), 3.0)
+				ci.draw_line(o + Vector2(w * 0.68, h * 0.52), o + Vector2(w * 0.88, h * 0.4), c.call(PopTokens.STEEL_DEEP), 3.0)
 			"drum":
 				ci.draw_circle(o + Vector2(w * 0.5, h * 0.55), w * 0.32, c.call(body))
 				ci.draw_arc(o + Vector2(w * 0.5, h * 0.55), w * 0.22, 0, TAU, 20, c.call(Color.WHITE), 3.0)
