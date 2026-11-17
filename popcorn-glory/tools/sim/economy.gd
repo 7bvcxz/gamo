@@ -222,6 +222,24 @@ func _scenario(name: String, out: Dictionary) -> void:
 							f.stats["arrived"] = int(f.stats["arrived"]) + 1
 				pop.call()
 				f.advance(250)
+		"advanced_kitchen":   # Step 29: the same room with the advanced kitchen, no hand, 30 minutes
+			f.sign_tier = 6
+			f.packer_tier = 3
+			f.level = 8
+			f.stats["sold"] = 1
+			f.money = 1 << 30
+			f.execute({"type": "build", "machine": "M07"})
+			var dist: int = int(f.execute({"type": "build", "machine": "M10"}).get("machine", -1))
+			f.execute({"type": "upgrade_machine", "id": dist})
+			f.execute({"type": "upgrade_machine", "id": dist})
+			for i in 5:
+				f.execute({"type": "build", "machine": "M07"})
+			for id in ["M16", "M01", "M01", "M13", "M14", "M15"]:
+				f.execute({"type": "build", "machine": id})
+			assert(f.machines.size() == 12, "advanced kitchen built")
+			f.money = 0
+			f.stats["sold"] = 0
+			f.advance(1800000)
 		"cookers_10", "cookers_20", "cookers_40":   # n cookers at sign 6, station 3, kettle 8, no hand, 30 minutes
 			f.sign_tier = 6
 			f.packer_tier = 3
@@ -250,6 +268,7 @@ func _scenario(name: String, out: Dictionary) -> void:
 		"stock_portions": int(f.portions_everywhere()) - int(f.stats["sold_portions"]), "unpaid_ms": f.stats["auto_unpaid_ms"],
 		"blocked_ms": f.stats["auto_blocked_ms"], "bin": f.bin_portions(), "shelf": f.shelf.size(), "glass": int(f.glass.get("portions", 0)),
 		"inputs": int(f.stats.get("kernels_paid", 0)) + int(f.stats.get("oil_paid", 0)),
+		"overheat_stops": int(f.stats.get("overheat_stops", 0)), "rotary_lots": int(f.stats.get("rotary_lots", 0)),
 		"net_per_min": (float(f.stats["revenue"]) - float(f.stats["upkeep_paid"]) - float(f.stats.get("kernels_paid", 0)) - float(f.stats.get("oil_paid", 0))) / maxf(1.0, minutes), "presses_refused": f.stats["glass_wait_ms"]}
 
 
@@ -282,7 +301,7 @@ func _init() -> void:
 	g.close()
 	var scen := {}
 	if only == "":
-		for name in ["zero_customers", "overproduction", "max_customers", "sales_burst", "cookers_10", "cookers_20", "cookers_40"]:
+		for name in ["zero_customers", "overproduction", "max_customers", "sales_burst", "cookers_10", "cookers_20", "cookers_40", "advanced_kitchen"]:
 			_scenario(name, scen)
 	summary["_scenarios"] = scen
 	var s := FileAccess.open(out + "/summary.json", FileAccess.WRITE)

@@ -60,6 +60,8 @@ var _hint_key := ""
 ## Step 28: each machine's moving part (drawn once, moved by rotation/position/scale)
 ## and the kernels in flight from a hopper to a kettle.
 var _motion := {}
+var _heat_node: Node2D = null   ## Step 29: the kitchen's thermometer beside its places
+var _heat_shown := -1.0
 var _kernel_flights: Array = []
 ## Step 23: the bottleneck cue (a soft outline round the floor that holds the
 ## next one back, pulsing by its alpha -- drawn once per floor change) and the
@@ -431,7 +433,7 @@ func on_events(events: Array[Dictionary]) -> void:
 			_gain(int(e["data"].get("amount", 0)))
 			_gains[-1]["at"] = at
 			_sound("coin", 1.0, -6.0)
-		elif String(e["type"]) in ["auto_lot", "machine_assisted", "machine_upgraded", "machine_sold", "machine_paused", "kernels_loaded"]:
+		elif String(e["type"]) in ["auto_lot", "machine_assisted", "machine_upgraded", "machine_sold", "machine_paused", "kernels_loaded", "overheat"]:
 			_machine_event(e)
 		elif String(e["type"]) == "station_upgrade":
 			# Each floor's own flourish (Step 24): the station sparkles where it
@@ -563,7 +565,9 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 	for k in shelf_cap:
 		var foot := Vector2(r.position.x + r.size.x * 0.62 + (k % per) * w * 1.2 + w * 0.6, belt.position.y - (k / per) * w * 1.65)
 		if k < shelf_n:
-			PopFactoryArt.bag(ci, foot, w)
+			var shelved: Array = rules.get("shelf") if rules else []
+			var prem := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "premium"
+			PopFactoryArt.bag(ci, foot, w, PopTokens.MACHINE, false, 0, 2, prem)
 		else:
 			PopMachineArt._round_rect(ci, Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35))
 
@@ -983,6 +987,7 @@ func _reconcile_customers() -> void:
 			a.body = CUSTOMER_COLOURS[id % 5]
 			a.skin = SKIN[id % 5]
 			a.order_size = int(queue[i]["order"]["size"])
+			a.order_premium = String(queue[i]["order"].get("recipe", "plain")) == "premium"
 			a.position = _door() if now_ms > 500 else _queue_spot(i)
 			customers[id] = a
 		customers[id].walk_to(_queue_spot(i))
@@ -1538,9 +1543,11 @@ func _machine_press(p: Vector2) -> bool:
 
 
 func _per_min(type: String, tier: int) -> int:
+	var t: Dictionary = rules._machine_tier_of(type, tier)
+	if type == "M16":   # Step 29: the rotary popper makes portions itself
+		return int(round(60000.0 / float(t.get("cycle_ms", 2500)) * float((rules.catalog("M16").get("contract", {}) as Dictionary).get("portions", 2))))
 	if rules.forty().has(type) and not rules.catalog(type).has("cycle_ms") and type.begins_with("M"):
 		return 0   # a device does not make goods itself; its effect is in the detail
-	var t: Dictionary = rules._machine_tier_of(type, tier)
 	match type:
 		"cooker":
 			var a: Dictionary = rules.catalog("cooker")
@@ -1590,7 +1597,7 @@ func _draw_machines(ci: CanvasItem) -> void:
 					ci.draw_circle(Vector2(r.position.x + 8 + q * 11, r.position.y + 8), 4.0, PopPalette.GOLD)
 			else:
 				PopFactoryArt.machine_icon(ci, r.grow(-4), type, int(m["tier"]))
-			if mtype == "cooker":
+			if mtype in ["cooker", "M16"]:
 				# Step 28: its kernels, a gauge along the bottom (empty = it starves).
 				var buf := float(rules.catalog("cooker").get("kernel_buffer", 5))
 				var g := Rect2(Vector2(r.position.x + 6, r.end.y - 9), Vector2(r.size.x - 12, 5))
@@ -1657,7 +1664,11 @@ func _draw_machine_detail(ci: CanvasItem, d: Rect2) -> void:
 	var now := _per_min(type, tier) if not m.is_empty() else 0
 	var nxt := _per_min(type, tier + 1 if not m.is_empty() else 0)
 	var x := d.position.x + fs * 2.0
-	PopFactoryArt.machine_icon(ci, Rect2(Vector2(d.position.x + 4, y - fs), Vector2(fs * 1.6, fs * 1.4)), type, 0)
+	var head := Rect2(Vector2(d.position.x + 4, y - fs), Vector2(fs * 1.6, fs * 1.4))
+	if rules.forty().has(type):
+		PopFactoryArt.catalog_icon(ci, head, rules.forty()[type]["parts"], String(rules.forty()[type]["group"]))
+	else:
+		PopFactoryArt.machine_icon(ci, head, type, 0)
 	ci.draw_string(font, Vector2(x, y), str(now), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopPalette.INK)
 	if nxt != now:
 		ci.draw_string(font, Vector2(x + fs * 2.0, y), ">", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.5))
@@ -1706,6 +1717,13 @@ func _machine_event(e: Dictionary) -> void:
 			if not reduced_motion:
 				fx.burst(at, 3, s, rng, PopPalette.CREAM if String(d.get("grade", "")) != "perfect" else PopPalette.GOLD, 0.6, 0.7)
 			_sound("pop_1", 1.3, -18.0)
+		"overheat":   # Step 29: the kitchen too hot -- a hiss, steam from every kettle
+			_sound("hiss", 0.8, -10.0)
+			if not reduced_motion:
+				for k: Dictionary in rules.get("machines"):
+					if String(k["type"]) in ["cooker", "M16"]:
+						fx.burst(slot_rect("kitchen", int(k["slot"])).get_center(), 4, s, rng, Color(0.95, 0.95, 0.97), 0.5, 0.9)
+			floor_layer.queue_redraw()
 		"machine_assisted":
 			if not reduced_motion:
 				fx.sparkle(at, s * 1.6, rng, 4, 80.0)
@@ -1757,11 +1775,29 @@ func _kitchen_choices() -> Array:
 
 
 func _picker_rects(d: Rect2) -> Array:
+	# Step 29: up to fifteen kitchen machines -- a grid in the panel's free part (right of
+	# the numbers on a wide panel, below them on a tall one), as big as fits (<= 52 px).
 	var out: Array = []
 	var choices := _kitchen_choices()
-	var s := minf(44.0, (d.size.x - 16) / maxf(1.0, float(choices.size())))
-	for i in choices.size():
-		out.append(Rect2(Vector2(d.position.x + 8 + i * s, d.end.y - s - 6), Vector2(s - 4, s - 4)))
+	var n := choices.size()
+	if n == 0:
+		return out
+	var fs := clampf(d.size.x * 0.1, 16.0, 28.0)
+	var area := Rect2(Vector2(d.position.x + d.size.x * 0.36, d.position.y + 8), Vector2(d.size.x * 0.64 - 8, d.size.y - 16))
+	if d.size.x < d.size.y * 1.5:
+		area = Rect2(Vector2(d.position.x + 8, d.position.y + fs * 5.0), Vector2(d.size.x - 16, d.size.y - fs * 5.0 - 8))
+	var best := 0.0
+	var cols := n
+	for rows in range(1, 6):
+		var c := ceili(float(n) / rows)
+		var sz := minf(52.0, minf(area.size.x / c, area.size.y / rows))
+		if sz > best:
+			best = sz
+			cols = c
+	for i in n:
+		var col := i % cols
+		var row := i / cols
+		out.append(Rect2(area.position + Vector2(col * best, row * best), Vector2(best - 4, best - 4)))
 	return out
 
 
@@ -1812,8 +1848,32 @@ func _step_machine_motion(delta: float) -> void:
 				node.rotation = -0.45 + 0.45 * sin(t * 3.0) if run else -0.45
 			"cooker":
 				node.position = Vector2(c.x, r.position.y + r.size.y * 0.2 - (absf(sin(t * 6.0)) * 3.0 if run else 0.0))
+			# Step 29: the advanced kitchen moves only while it works, like the rest.
+			"M09":   # the tray shakes; kernels hop on it
+				node.position = Vector2(c.x + (sin(t * 38.0) * r.size.x * 0.025 if run else 0.0), r.position.y + r.size.y * 0.47)
+			"M10":   # kernels run down the branches to one pot, then the other
+				var k := fmod(t * 0.9, 1.0) if run else 0.0
+				var side := -1.0 if fmod(floor(t * 0.9), 2.0) < 1.0 else 1.0
+				node.position = Vector2(c.x + side * r.size.x * 0.3 * k, r.position.y + r.size.y * (0.3 + 0.32 * k))
+				node.visible = run
+			"M11":   # the beam sweeps the belt
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.48)
+				node.rotation = sin(t * 3.0) * 0.35 if run else 0.0
+			"M13":   # the louvres breathe
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.56)
+				node.scale = Vector2(1, 0.55 + 0.45 * absf(sin(t * 2.2)) if run else 1.0)
+			"M14":   # the coil glows
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.64)
+				node.modulate.a = 0.35 + 0.65 * absf(sin(t * 2.5)) if run else 0.25
+			"M15":   # an arrow runs across the screen
+				node.position = Vector2(r.position.x + r.size.x * (0.32 + 0.36 * fmod(t * 0.8, 1.0) if run else 0.5), r.position.y + r.size.y * 0.57)
+			"M16":   # the drum turns
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.55)
+				if run:
+					node.rotation += delta * 4.0
 			_:
 				node.position = c
+	_step_heat_gauge()
 	for id in _motion.keys():
 		if not alive.has(id):
 			(_motion[id] as Node2D).queue_free()
@@ -1826,6 +1886,43 @@ func _step_machine_motion(delta: float) -> void:
 		else:
 			still.append(p)
 	_kernel_flights = still
+
+
+## Step 29: the kitchen's heat, a slim thermometer left of its places -- shown once two
+## kettles cook (one cannot overheat a room); blue to red, flashing red while the
+## kettles stop to cool. Redrawn only when the reading moves.
+func _step_heat_gauge() -> void:
+	var kettles: int = (rules.get("machines") as Array).filter(func(m: Dictionary) -> bool: return String(m["type"]) in ["cooker", "M16"]).size()
+	if _heat_node == null:
+		_heat_node = Node2D.new()
+		_heat_node.draw.connect(_draw_heat_gauge)
+		actor_layer.add_child(_heat_node)
+	_heat_node.visible = kettles >= 2
+	if not _heat_node.visible:
+		return
+	var lim := float((rules.economy.table("factory").get("heat", {}) as Dictionary).get("limit", 100))
+	var v := clampf(float(rules.get("kitchen_heat")) / lim, 0.0, 1.0)
+	var hot := int(rules.get("overheat_left")) > 0
+	var key: float = v + (2.0 + floor(_clock * 4.0) if hot else 0.0)
+	if absf(key - _heat_shown) > 0.01:
+		_heat_shown = key
+		_heat_node.queue_redraw()
+
+
+func _draw_heat_gauge() -> void:
+	var a := slot_rect("kitchen", 0)
+	var b := slot_rect("kitchen", maxi(0, int(rules.slots("kitchen")) - 1))
+	var bar := Rect2(Vector2(a.position.x - 13, a.position.y + 6), Vector2(7, b.end.y - a.position.y - 22))
+	var lim := float((rules.economy.table("factory").get("heat", {}) as Dictionary).get("limit", 100))
+	var v := clampf(float(rules.get("kitchen_heat")) / lim, 0.0, 1.0)
+	var hot := int(rules.get("overheat_left")) > 0
+	var col := PopTokens.SKY.lerp(PopTokens.WARN, v)
+	if hot and fmod(_clock * 4.0, 2.0) < 1.0:
+		col = Color.WHITE
+	PopMachineArt._round_rect(_heat_node, bar, 3, Color(PopPalette.INK, 0.15))
+	var fill := bar.size.y * v
+	PopMachineArt._round_rect(_heat_node, Rect2(Vector2(bar.position.x, bar.end.y - fill), Vector2(bar.size.x, fill)), 3, col)
+	_heat_node.draw_circle(Vector2(bar.get_center().x, bar.end.y + 6), 7.0, col if v > 0.05 else PopTokens.SKY)
 
 
 func _draw_motion_part(n: Node2D) -> void:
@@ -1853,3 +1950,24 @@ func _draw_motion_part(n: Node2D) -> void:
 			n.draw_line(Vector2.ZERO, Vector2(w * 0.4, 0), PopTokens.STEEL_DEEP, 3.0)
 		"cooker":
 			n.draw_rect(Rect2(Vector2(-w * 0.3, -2), Vector2(w * 0.6, 4)), PopTokens.MACHINE_LINE)
+		"M09":
+			for q in 4:
+				n.draw_circle(Vector2((q - 1.5) * w * 0.12, (q % 2) * w * 0.03 - w * 0.02), w * 0.03, Color(0.85, 0.62, 0.25))
+		"M10":
+			n.draw_circle(Vector2.ZERO, w * 0.035, Color(0.85, 0.62, 0.25))
+		"M11":
+			n.draw_line(Vector2.ZERO, Vector2(0, w * 0.32), Color(1.0, 0.85, 0.3, 0.9), 3.0)
+			n.draw_circle(Vector2.ZERO, w * 0.045, PopPalette.GOLD)
+		"M13":
+			for q in 3:
+				n.draw_rect(Rect2(Vector2(-w * 0.16, (q - 1) * w * 0.12 - w * 0.025), Vector2(w * 0.32, w * 0.05)), Color(1, 1, 1, 0.85))
+		"M14":
+			for q in 4:
+				n.draw_arc(Vector2((q - 1.5) * w * 0.13, 0), w * 0.07, PI, TAU, 8, Color(1.0, 0.55, 0.2), 3.0)
+		"M15":
+			n.draw_colored_polygon(PackedVector2Array([Vector2(-w * 0.05, -w * 0.05), Vector2(w * 0.06, 0), Vector2(-w * 0.05, w * 0.05)]), PopTokens.OK)
+		"M16":
+			for q in 4:
+				var a := TAU * q / 4.0
+				n.draw_line(Vector2.ZERO, Vector2(cos(a), sin(a)) * w * 0.22, Color(1, 1, 1, 0.85), 2.5)
+			n.draw_circle(Vector2.ZERO, w * 0.05, PopTokens.STEEL_DEEP)

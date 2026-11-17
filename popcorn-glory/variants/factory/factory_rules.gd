@@ -43,6 +43,8 @@ var glass_held_ms := 0      ## Step 24: how long the glass has been holding back
 var machines: Array = []
 var next_machine_id := 1
 var assist_target := -1    ## the machine the player has selected (a perfect pop tunes it)
+var kitchen_heat := 0.0    ## Step 29: the kitchen's heat (0 .. heat.limit)
+var overheat_left := 0     ## Step 29: ms the kettles still stop to cool
 ## The cookers among them (Step 25's name; the same dictionaries).
 var cookers: Array:
 	get:
@@ -163,10 +165,10 @@ func station_open(station: String) -> bool:
 			return int(stats["sold"]) >= 1 or sign_tier > 0
 		"auto", "cooker":
 			return sign_tier >= int(_auto().get("unlock_sign", 2)) or _count("cooker") > 0
-		"M01", "M02", "M03", "M04", "M05", "M06", "M08":
+		"M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16":
 			var p: Dictionary = catalog(station).get("prereq", {})
 			var needs_kettle := (p.get("machines", []) as Array).has("M07")
-			return sign_tier >= int(p.get("sign", 0)) and (not needs_kettle or _count("cooker") > 0) or _count(station) > 0
+			return sign_tier >= int(p.get("sign", 0)) and packer_tier >= int(p.get("packer", 0)) and (not needs_kettle or _count("cooker") > 0) or _count(station) > 0
 		"bagger", "kiosk":
 			var need: Dictionary = catalog(station).get("unlock", {})
 			return (packer_tier >= int(need.get("packer", 0)) and sign_tier >= int(need.get("sign", 0))) or _count(station) > 0
@@ -320,6 +322,8 @@ func _resolve(kind: String) -> Dictionary:
 			am["assist"] = mini(int(_auto().get("assist_lots", 3)), int(am["assist"]) + int(_auto().get("assist_lots", 3)))
 			_emit("machine_assisted", {"machine": assist_target, "lots": am["assist"]})
 	var lot := {"id": _new_id(), "recipe": "plain", "quality": int(GRADE_QUALITY[kind]), "portions": portions}
+	_sort_and_grade(lot, kind)   # Step 29: M09 re-pops early/late kernels, M11 sends top lots to premium
+	portions = int(lot["portions"])
 	glass = lot
 	stats["made_portions"] = int(stats["made_portions"]) + portions
 	stats["lots"] = int(stats["lots"]) + 1
@@ -546,9 +550,20 @@ func _next_pack() -> Dictionary:
 	for z: Dictionary in open:
 		var size := int(z["size"])
 		var target := int(z.get("stock", 0)) if z.has("stock") else cap - reserved
-		var r := packable_recipe(size)
-		if r != "" and on_hand(pack_sku(r), size) < target:
-			return {"recipe": r, "size": size, "for": "stock"}
+		# Each SKU in the bin (oldest first) against its own target; premium keeps one
+		# pack of a size in stock (only premium customers buy it: Step 29).
+		var seen := {}
+		for lot: Dictionary in bin:
+			var r := String(lot["recipe"])
+			if seen.has(r):
+				continue
+			seen[r] = true
+			if bin_portions_of(r) < size:
+				continue
+			var sku := pack_sku(r)
+			var t := mini(target, 1) if sku == "premium" else target
+			if on_hand(sku, size) < t:
+				return {"recipe": r, "size": size, "for": "stock"}
 	return {}
 
 
@@ -560,8 +575,15 @@ func _draw_order() -> Dictionary:
 	for z: Dictionary in sizes_open():
 		if z.has("order_share") and _orng.randf() < float(z["order_share"]):
 			size = int(z["size"])
+	# Step 29: while premium popcorn is on hand (M11 sorts it), some customers ask for it --
+	# and only they buy it (the draw happens only then, so plain-only order streams are unchanged).
+	var recipe := "plain"
+	var pr: Dictionary = _t().get("premium", {})
+	if _device_on("M11") and (bin_portions_of("premium") >= size or on_hand("premium", size) > 0):
+		if _orng.randf() < float(pr.get("order_share", 0.3)):
+			recipe = "premium"
 	order_rng_state = int(_orng.state)
-	return {"recipe": "plain", "size": size}
+	return {"recipe": recipe, "size": size}
 
 
 func _note(stage: String) -> void:
@@ -681,9 +703,13 @@ func _buy_sign() -> Dictionary:
 ## others; `slots` how many places each floor has.
 
 const FLOOR_OF := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop",
-	"M01": "kitchen", "M02": "kitchen", "M03": "kitchen", "M04": "kitchen", "M05": "kitchen", "M06": "kitchen", "M08": "kitchen"}
+	"M01": "kitchen", "M02": "kitchen", "M03": "kitchen", "M04": "kitchen", "M05": "kitchen", "M06": "kitchen", "M08": "kitchen",
+	"M09": "kitchen", "M10": "kitchen", "M11": "kitchen", "M12": "kitchen", "M13": "kitchen", "M14": "kitchen", "M15": "kitchen", "M16": "kitchen"}
 ## Step 28: the kitchen's devices that serve the kettles (each a catalog id and its own runtime).
-const KITCHEN_DEVICES := ["M01", "M02", "M03", "M04", "M05", "M06", "M08"]
+const KITCHEN_DEVICES := ["M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16"]
+## Step 29: what cooks lots on its own (the auto kettle and the rotary popper): kernels,
+## hoppers, the heat and the dispatcher treat them alike.
+const KETTLES := ["cooker", "M16"]
 const CATALOG_PATH := "res://data/machines.json"
 var _forty: Dictionary = {}
 
@@ -728,7 +754,23 @@ func _auto() -> Dictionary:
 
 
 func slots(floor: String) -> int:
-	return int((_t().get("slots", {}) as Dictionary).get(floor, 0))
+	var n := int((_t().get("slots", {}) as Dictionary).get(floor, 0))
+	if floor == "kitchen":
+		n += _kitchen_plus()
+	return n
+
+
+## Step 29, M10 the multi-pot distributor: more kitchen places (each distributor its tier's).
+func _kitchen_plus(skip_id: int = -1) -> int:
+	var n := 0
+	for m: Dictionary in machines:
+		if String(m["type"]) == "M10" and int(m["id"]) != skip_id:
+			n += int(_machine_tier(m).get("plus", 2))
+	return n
+
+
+func _is_kettle(m: Dictionary) -> bool:
+	return KETTLES.has(String(m.get("type", "")))
 
 
 func machine(id: int) -> Dictionary:
@@ -802,7 +844,7 @@ func _build(type: String, slot: int) -> Dictionary:
 	if money < cost:
 		return {"ok": false, "reason": "err.not_enough_money"}
 	money -= cost
-	var m := {"id": next_machine_id, "type": type, "floor": floor, "slot": slot, "tier": 0, "state": "idle", "kernels": int(_auto().get("kernel_buffer", 5)) if type == "cooker" else 0,
+	var m := {"id": next_machine_id, "type": type, "floor": floor, "slot": slot, "tier": 0, "state": "idle", "kernels": int(_auto().get("kernel_buffer", 5)) if KETTLES.has(type) else 0,
 		"left_ms": int(_machine_tier_of(type, 0).get("cycle_ms", c.get("cycle_ms", 6000))), "held": {}, "upkeep_ms": 0, "paid": cost, "assist": 0}
 	next_machine_id += 1
 	machines.append(m)
@@ -828,6 +870,11 @@ func _sell_machine(id: int) -> Dictionary:
 		return {"ok": false, "reason": "err.unknown"}
 	if not (m["held"] as Dictionary).is_empty() or _kiosk_busy(id):
 		return {"ok": false, "reason": "err.busy"}
+	if String(m["type"]) == "M10":
+		var left := int((_t().get("slots", {}) as Dictionary).get("kitchen", 0)) + _kitchen_plus(id)
+		for x: Dictionary in machines:
+			if String(x["floor"]) == "kitchen" and int(x["slot"]) >= left and int(x["id"]) != id:
+				return {"ok": false, "reason": "err.slot_taken"}   # its places hold machines
 	var refund := int(m["paid"]) / 2
 	money += refund
 	machines.erase(m)
@@ -890,7 +937,13 @@ func _counter_serving() -> int:
 ## Upkeep for `dt` of work, a whole coin at a time; false (and the machine
 ## pauses as "unpaid") when a coin is due and there is none -- never a debt.
 func _pay(m: Dictionary, dt: int) -> bool:
-	var per_coin := maxi(1, 60000 / maxi(1, int(catalog(String(m["type"]))["upkeep_per_min"])))
+	var per_min := int(catalog(String(m["type"]))["upkeep_per_min"])
+	# Step 29, M14 the heat recycler: a cooking kettle's own heat pays part of its keep (never all of it).
+	if _is_kettle(m) and _device_on("M14"):
+		per_min = maxi(1, per_min - _tier_value("M14", "minus", 1))
+	if per_min <= 0:
+		return true
+	var per_coin := maxi(1, 60000 / maxi(1, per_min))
 	var owed := int(m["upkeep_ms"]) + dt
 	if owed >= per_coin:
 		if money < 1:
@@ -905,11 +958,12 @@ func _pay(m: Dictionary, dt: int) -> bool:
 
 
 func _machines_step(dt: int) -> void:
+	_heat_step(dt)
 	for m: Dictionary in machines:
 		if String(m["state"]) == "paused":
 			continue
 		match String(m["type"]):
-			"cooker":
+			"cooker", "M16":
 				_cooker_step(m, dt)
 			"bagger":
 				_bagger_step(m, dt)
@@ -917,7 +971,7 @@ func _machines_step(dt: int) -> void:
 				_kiosk_step(m, dt)
 			"M01":
 				_hopper_step(m, dt)
-			"M02", "M03", "M04", "M05", "M06", "M08":
+			"M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M13", "M14", "M15":
 				_device_step(m, dt)
 
 
@@ -938,14 +992,23 @@ func _cooker_step(m: Dictionary, dt: int) -> void:
 	if int(m.get("kernels", 0)) <= 0:
 		m["state"] = "starved"
 		return
+	# Step 29: the kitchen too hot (no vent stabilizer) -- every kettle stops to cool.
+	if overheat_left > 0:
+		m["state"] = "overheat"
+		return
+	# Step 29, M15 the dispatcher: a new lot starts only when the shelf and the orders need it.
+	if int(m["left_ms"]) >= _cooker_cycle(m) and _device_on("M15") and not demand_wants_lot():
+		m["state"] = "waiting"
+		stats["dispatch_held_ms"] = int(stats.get("dispatch_held_ms", 0)) + dt
+		return
 	if not _pay(m, dt):
 		return
 	m["state"] = "run"
-	m["left_ms"] = int(m["left_ms"]) - dt
+	m["left_ms"] = mini(int(m["left_ms"]), _cooker_cycle(m)) - dt
 	if int(m["left_ms"]) <= 0:
 		m["left_ms"] = _cooker_cycle(m)
 		m["kernels"] = int(m["kernels"]) - 1
-		m["held"] = _auto_lot(m)
+		m["held"] = _rotary_lot(m) if String(m["type"]) == "M16" else _auto_lot(m)
 		m["done"] = int(m.get("done", 0)) + 1
 
 
@@ -1024,13 +1087,10 @@ func _auto_lot(m: Dictionary = {}) -> Dictionary:
 	if not m.is_empty() and _covered(m, "M04"):
 		portions += int(_tier_value("M04", "bonus", 1))
 	var quality := int(GRADE_QUALITY[grade])
-	# M02 the oil doser: a measured drop of oil (paid for) makes the lot taste better.
-	var oil := int(_auto().get("oil_price", 1))
-	if _device_on("M02") and money >= oil:
-		money -= oil
-		stats["oil_paid"] = int(stats.get("oil_paid", 0)) + oil
-		quality = mini(100, quality + 10)
+	quality = _oil(quality)
 	var lot := {"id": _new_id(), "recipe": "plain", "quality": quality, "portions": portions}
+	_sort_and_grade(lot, grade)
+	portions = int(lot["portions"])
 	stats["made_portions"] = int(stats["made_portions"]) + portions
 	stats["auto_lots"] = int(stats["auto_lots"]) + 1
 	stats["auto_" + grade] = int(stats.get("auto_" + grade, 0)) + 1   # Step 28: the grades the devices change
@@ -1038,6 +1098,115 @@ func _auto_lot(m: Dictionary = {}) -> Dictionary:
 	_note("lots")
 	_emit("auto_lot", {"lot": lot["id"], "grade": grade, "portions": portions, "machine": m.get("id", -1)})
 	return lot
+
+
+## M02 the oil doser: a measured drop of oil (paid for) makes the lot taste better.
+func _oil(quality: int) -> int:
+	var oil := int(_auto().get("oil_price", 1))
+	if _device_on("M02") and money >= oil:
+		money -= oil
+		stats["oil_paid"] = int(stats.get("oil_paid", 0)) + oil
+		return mini(100, quality + 10)
+	return quality
+
+
+# -- Step 29: the advanced kitchen (M09-M16), the kitchen's heat, premium ------------
+
+## M09 the kernel sorter re-pops an early or late lot's unpopped kernels: near quality,
+## one portion fewer (never none). M11 the quality sensor sends a lot of quality >=
+## threshold to the premium SKU -- its own packs, never mixed with plain.
+func _sort_and_grade(lot: Dictionary, grade: String) -> void:
+	if grade in [EARLY, LATE] and _device_on("M09"):
+		lot["quality"] = maxi(int(lot["quality"]), int(GRADE_QUALITY[NEAR]))
+		if int(lot["portions"]) > 1:
+			lot["portions"] = int(lot["portions"]) - 1   # the kernels it lost were never popcorn (callers count what is left)
+		stats["sorted_lots"] = int(stats.get("sorted_lots", 0)) + 1
+	var pr: Dictionary = _t().get("premium", {})
+	# The sensor's premium bin holds `bin` portions; full, it lets lots through as plain
+	# (premium never clogs the plain line).
+	if _device_on("M11") and int(lot["quality"]) >= int(pr.get("threshold", 90)) and premium_waiting() < int(pr.get("bin", 12)):
+		lot["recipe"] = "premium"
+		stats["premium_lots"] = int(stats.get("premium_lots", 0)) + 1
+
+
+## Premium portions made but not yet packed (the bin, the lift, the glass).
+func premium_waiting() -> int:
+	var n := bin_portions_of("premium")
+	for l: Dictionary in lift:
+		if String((l["lot"] as Dictionary).get("recipe", "")) == "premium":
+			n += int(l["lot"]["portions"])
+	if String(glass.get("recipe", "")) == "premium":
+		n += int(glass.get("portions", 0))
+	return n
+
+
+## M16 the rotary popper: a small lot (its contract's portions) every cycle, near grade
+## (a drum never hits perfect -- or burns), oiled if the doser runs.
+func _rotary_lot(m: Dictionary) -> Dictionary:
+	var portions := int((catalog("M16").get("contract", {}) as Dictionary).get("portions", 2))
+	var lot := {"id": _new_id(), "recipe": "plain", "quality": _oil(int(GRADE_QUALITY[NEAR])), "portions": portions}
+	_sort_and_grade(lot, NEAR)
+	stats["made_portions"] = int(stats["made_portions"]) + portions
+	stats["rotary_lots"] = int(stats.get("rotary_lots", 0)) + 1
+	stats["auto_portions"] = int(stats["auto_portions"]) + portions
+	_note("lots")
+	_emit("auto_lot", {"lot": lot["id"], "grade": NEAR, "portions": portions, "machine": m["id"]})
+	return lot
+
+
+## The kitchen's heat: cooking kettles warm the room, the room (and the fan) cool it.
+## Too hot with three or more kettles cooking and no vent stabilizer (M13): every kettle
+## stops to cool for a few seconds (the lots in them wait; nothing is lost or made).
+func _heat_step(dt: int) -> void:
+	var h: Dictionary = _t().get("heat", {})
+	if h.is_empty():
+		return
+	if overheat_left > 0:
+		overheat_left = maxi(0, overheat_left - dt)
+		kitchen_heat = maxf(0.0, kitchen_heat - float(h["dissipate"]) * dt / 1000.0)
+		return
+	var cooking := machines.filter(func(x: Dictionary) -> bool: return _is_kettle(x) and String(x["state"]) == "run").size()
+	var cool := float(h["dissipate"]) + (float(h["fan"]) if _device_on("M08") else 0.0)
+	kitchen_heat = clampf(kitchen_heat + (cooking * float(h["per_kettle"]) - cool) * dt / 1000.0, 0.0, float(h["limit"]))
+	if kitchen_heat >= float(h["limit"]) and cooking >= int(h["min_kettles"]):
+		if _device_on("M13"):
+			kitchen_heat = float(h["limit"]) * 0.9   # the vents carry the excess away
+			stats["vent_saves"] = int(stats.get("vent_saves", 0)) + 1
+		else:
+			overheat_left = int(h["stop_ms"])
+			kitchen_heat = float(h["limit"]) * 0.5
+			stats["overheat_stops"] = int(stats.get("overheat_stops", 0)) + 1
+			_emit("overheat", {"ms": overheat_left, "kettles": cooking})
+
+
+## M15's question: do the shelf and the orders need another lot? The popcorn they
+## want (orders not covered by packs, the shelf's stock targets) against the popcorn
+## already made and on its way (bin, lift, glass, lots held in kettles).
+func demand_wants_lot() -> bool:
+	var want := 0
+	var covered := {}
+	for c: Dictionary in queue:
+		var o: Dictionary = c["order"]
+		var key := "%s|%d" % [o["recipe"], o["size"]]
+		var have := int(covered.get(key, on_hand(String(o["recipe"]), int(o["size"]))))
+		if have > 0:
+			covered[key] = have - 1
+		else:
+			want += int(o["size"])
+	var cap := int(_t()["shelf_packs"])
+	var reserved := 0
+	var open := sizes_open()
+	for z: Dictionary in open:
+		reserved += int(z.get("stock", 0))
+	for z: Dictionary in open:
+		var size := int(z["size"])
+		var target := int(z.get("stock", 0)) if z.has("stock") else cap - reserved
+		var on := on_hand("plain", size) + on_hand("premium", size)
+		want += maxi(0, target - on) * size
+	var supply := bin_portions() + lift_portions() + int(glass.get("portions", 0))
+	for m: Dictionary in machines:
+		supply += int((m["held"] as Dictionary).get("portions", 0)) if _is_kettle(m) else 0
+	return want > supply
 
 
 # -- Step 28: the kitchen's devices (M01-M06, M08) ---------------------------------
@@ -1084,6 +1253,8 @@ func lift_ms() -> int:
 
 ## A kettle's cycle: its tier, then M05 (covered: 15% shorter) and M08 (0.3 s shorter).
 func _cooker_cycle(m: Dictionary) -> int:
+	if String(m["type"]) == "M16":   # the rotary popper: its own steady cycle (M08 does not cool a drum)
+		return int(_machine_tier(m).get("cycle_ms", 2500))
 	var ms := int(_machine_tier(m).get("cycle_ms", _auto()["cycle_ms"]))
 	if _covered(m, "M05"):
 		ms = int(ms * 0.85)
@@ -1095,7 +1266,7 @@ func _cooker_cycle(m: Dictionary) -> int:
 func _kitchen_busy() -> bool:
 	if heating or not lift.is_empty() or cooldown_left > 0:
 		return true
-	return machines.any(func(x: Dictionary) -> bool: return String(x["type"]) == "cooker" and String(x["state"]) == "run")
+	return machines.any(func(x: Dictionary) -> bool: return _is_kettle(x) and String(x["state"]) == "run")
 
 
 ## M01 the kernel hopper: buys kernels from the wallet (kernel_price a lot) and tops
@@ -1116,7 +1287,7 @@ func _hopper_step(m: Dictionary, dt: int) -> void:
 	var k := 0
 	var hungry: Dictionary = {}
 	for c: Dictionary in machines:
-		if String(c["type"]) != "cooker":
+		if not _is_kettle(c):
 			continue
 		if k >= mine * 4 and k < mine * 4 + 4 and int(c.get("kernels", 0)) < buffer:
 			if hungry.is_empty() or int(c.get("kernels", 0)) < int(hungry.get("kernels", 0)):
@@ -1144,8 +1315,8 @@ func _hopper_step(m: Dictionary, dt: int) -> void:
 ## The other kitchen devices work (and pay) while the kitchen works; their effects
 ## are applied where the goods are made (_auto_lot, _cooker_cycle, lift_ms, _cooldown_ms).
 func _device_step(m: Dictionary, dt: int) -> void:
-	var needs_kettle := String(m["type"]) in ["M02", "M03", "M04", "M05"]
-	var busy := machines.any(func(x: Dictionary) -> bool: return String(x["type"]) == "cooker" and String(x["state"]) == "run") if needs_kettle else _kitchen_busy()
+	var needs_kettle := String(m["type"]) in ["M02", "M03", "M04", "M05", "M09", "M11", "M13", "M14", "M15"]
+	var busy := machines.any(func(x: Dictionary) -> bool: return _is_kettle(x) and String(x["state"]) in ["run", "waiting", "overheat"]) if needs_kettle else _kitchen_busy()
 	if not busy:
 		m["state"] = "idle"
 		return
@@ -1157,7 +1328,7 @@ func _device_step(m: Dictionary, dt: int) -> void:
 ## Refill a kettle's kernels by hand (the card, when it has no hopper): price a lot.
 func _refill(id: int) -> Dictionary:
 	var m := machine(id)
-	if m.is_empty() or String(m["type"]) != "cooker":
+	if m.is_empty() or not _is_kettle(m):
 		return {"ok": false, "reason": "err.unknown"}
 	var a := _auto()
 	var need := int(a.get("kernel_buffer", 5)) - int(m.get("kernels", 0))
@@ -1220,7 +1391,12 @@ func _sell(sv: Dictionary) -> void:
 	var coins := pack_price(String(p["recipe"]), int(p["size"]), int(p["quality"]))
 	if first_sale_ms < 0:
 		first_sale_ms = flow_ms
-	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "ordered": c["order"]["size"], "quality": p["quality"], "coins": coins})
+	if String(p["recipe"]) == "premium":
+		stats["premium_sold"] = int(stats.get("premium_sold", 0)) + 1
+		stats["premium_revenue"] = int(stats.get("premium_revenue", 0)) + coins
+	if String(p["recipe"]) != String(c["order"]["recipe"]):
+		stats["wrong_sku"] = int(stats.get("wrong_sku", 0)) + 1   # must stay 0 (tests)
+	ledger.append({"t": flow_ms, "customer": c["id"], "pack": p["id"], "recipe": p["recipe"], "size": p["size"], "ordered": c["order"]["size"], "ordered_recipe": c["order"]["recipe"], "quality": p["quality"], "coins": coins})
 	if ledger.size() > 500:
 		ledger.pop_front()
 	stats["sold"] = int(stats["sold"]) + 1
@@ -1282,7 +1458,7 @@ const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines"
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
-		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate()}
+		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -1356,6 +1532,9 @@ func _apply_save(d: Dictionary) -> void:
 			machines.append({"id": machines.size() + 1, "type": "cooker", "floor": "kitchen", "slot": k, "tier": 0, "state": String(c.get("state", "idle")),
 				"left_ms": int(c.get("left_ms", 6000)), "held": c.get("held", {}), "upkeep_ms": int(c.get("upkeep_ms", 0)), "paid": 300, "assist": 0})
 			k += 1
+	# Step 29: the kitchen's heat (optional: a 0.28 save has none -- a cool kitchen).
+	kitchen_heat = clampf(float(d.get("kitchen_heat", 0.0)), 0.0, 1000.0) if typeof(d.get("kitchen_heat", 0.0)) in [TYPE_INT, TYPE_FLOAT] else 0.0
+	overheat_left = maxi(0, int(d.get("overheat_left", 0))) if typeof(d.get("overheat_left", 0)) in [TYPE_INT, TYPE_FLOAT] else 0
 	# Step 28: a kettle saved before kernels existed (0.25-0.27) comes back with a full
 	# buffer -- the save keeps cooking; it is not starved by an update.
 	for m: Dictionary in machines:
@@ -1393,7 +1572,7 @@ func state() -> Dictionary:
 	s["sign_tier"] = sign_tier
 	s["cookers"] = cookers.map(func(c: Dictionary) -> String: return String(c["state"]))
 	s["machines"] = machines.map(func(m: Dictionary) -> Dictionary: return {"id": m["id"], "type": m["type"], "floor": m["floor"], "slot": m["slot"],
-		"tier": m["tier"], "state": m["state"], "assist": m["assist"], "done": int(m.get("done", 0)), "held": int((m["held"] as Dictionary).get("portions", (m["held"] as Dictionary).get("size", 0)))})
+		"tier": m["tier"], "state": m["state"], "assist": m["assist"], "done": int(m.get("done", 0)), "held": int((m["held"] as Dictionary).get("portions", (m["held"] as Dictionary).get("size", 0))), "kernels": int(m.get("kernels", 0))})
 	s["build_cost"] = {"cooker": build_cost("cooker"), "bagger": build_cost("bagger"), "kiosk": build_cost("kiosk")}
 	s["auto_cost"] = auto_cost()
 	s["open"] = {"packer": station_open("packer"), "sign": station_open("sign"), "cooker": station_open("cooker"),
@@ -1416,6 +1595,13 @@ func state() -> Dictionary:
 	s["sizes_open"] = sizes_open().map(func(z: Dictionary) -> int: return int(z["size"]))
 	s["orders"] = queue.map(func(c: Dictionary) -> int: return int(c["order"]["size"]))
 	s["portions_everywhere"] = portions_everywhere()
+	# Step 29: the kitchen's heat, its places, premium stock.
+	s["kitchen_heat"] = kitchen_heat
+	s["heat_limit"] = float((_t().get("heat", {}) as Dictionary).get("limit", 100))
+	s["overheat_left"] = overheat_left
+	s["kitchen_slots"] = slots("kitchen")
+	s["premium_on_shelf"] = shelf.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "premium").size()
+	s["premium_in_bin"] = bin_portions_of("premium")
 	return s
 
 

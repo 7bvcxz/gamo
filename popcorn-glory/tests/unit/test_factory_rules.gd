@@ -1141,6 +1141,10 @@ const RUNTIME_TESTS := {"cooker": "test_upkeep_is_paid_a_coin_at_a_time_and_neve
 	"M03": "test_m03_the_heat_controller_stops_burnt_lots", "M04": "test_m04_the_motor_adds_a_portion_to_its_kettle_only",
 	"M05": "test_m05_the_detector_stops_late_lots_and_shortens_its_kettle", "M06": "test_m06_the_ejector_shortens_the_lift_for_every_lot",
 	"M08": "test_m08_the_fan_shortens_the_hand_cooldown_and_the_kettles_cycle",
+	"M09": "test_m09_the_sorter_repops_early_and_late_lots_for_a_portion", "M10": "test_m10_the_distributor_adds_kitchen_places_and_keeps_them_honest",
+	"M11": "test_m11_premium_lots_get_their_own_packs_and_customers", "M13": "test_m13_many_kettles_overheat_unless_the_vents_run",
+	"M14": "test_m14_the_recycler_lowers_cooking_kettles_upkeep_but_never_to_zero", "M15": "test_m15_the_dispatcher_cooks_only_what_is_wanted",
+	"M16": "test_m16_the_rotary_popper_is_a_steady_kettle_worth_its_place",
 	"bagger": "test_the_bagger_packs_real_portions_and_waits_or_holds_honestly",
 	"kiosk": "test_the_kiosk_serves_real_customers_and_pays_while_it_serves"}
 
@@ -1200,7 +1204,7 @@ func test_no_machine_is_sold_that_would_do_nothing() -> void:
 			assert_true(bool(r["ok"]) or String(r["reason"]) in ["err.no_slot", "err.slot_taken"], "%s: a running machine is built (%s)" % [id, r.get("reason", "")])
 			assert_true(RUNTIME_TESTS.has(String(e["runtime"])), "%s: its behaviour has a test" % id)
 			assert_true(has_method(RUNTIME_TESTS[String(e["runtime"])]), "%s: that test exists (%s)" % [id, RUNTIME_TESTS[String(e["runtime"])]])
-	assert_eq(runs, 10, "today: M01-M08, P03 and S07 run")
+	assert_eq(runs, 17, "today: M01-M11, M13-M16, P03 and S07 run (M12 sleeps until flavors)")
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing invented")
 
 
@@ -1437,3 +1441,300 @@ func test_eight_devices_at_once_any_cut_of_time_and_a_saved_layout() -> void:
 	_auto_lots(e, 90000)
 	assert_true(int(e.money) >= 0, "never a debt")
 	assert_true(String(e.machines[0]["state"]) in ["starved", "unpaid"], "the kettle waits for kernels it cannot buy")
+
+
+# -- Step 29: M09-M16, the advanced kitchen, heat, premium ---------------------------
+
+func _kettles(f: PopRules, n: int, kernels: int = 1000) -> void:
+	for i in n:
+		assert_true(bool(f.execute({"type": "build", "machine": "M07"})["ok"]), "kettle %d built" % i)
+	for m: Dictionary in f.machines:
+		if String(m["type"]) == "cooker":
+			m["kernels"] = kernels
+
+
+func _adv(f: PopRules) -> PopRules:
+	var x := _kitchen(41)
+	x.sign_tier = 6
+	x.packer_tier = 3
+	return x
+
+
+func test_m09_the_sorter_repops_early_and_late_lots_for_a_portion() -> void:
+	var a := _adv(null)
+	var r := _pop(a, -400)   # early
+	assert_eq(String(r["outcome"]), "early", "an early pop")
+	var plain: Dictionary = a.glass.duplicate()
+	var b := _adv(null)
+	b.execute({"type": "build", "machine": "M07"})
+	assert_true(bool(b.execute({"type": "build", "machine": "M09"})["ok"]), "the sorter is built")
+	b.money = 100000
+	_pop(b, -400)
+	assert_eq(int(b.glass["quality"]), 80, "the sorted early lot is near quality (was %d)" % int(plain["quality"]))
+	assert_eq(int(b.glass["portions"]), int(plain["portions"]) - 1, "one portion fewer")
+	_check_conservation(b, "sorted hand lot")
+	var p := _adv(null)
+	p.execute({"type": "build", "machine": "M07"})
+	p.machines[0]["kernels"] = 1000
+	p.execute({"type": "build", "machine": "M09"})
+	var lots := _auto_lots(p, 120000)
+	assert_true(lots.size() > 10, "lots were made (%d)" % lots.size())
+	assert_true(int(p.stats.get("sorted_lots", 0)) > 0, "the late auto lots were sorted (%d)" % int(p.stats.get("sorted_lots", 0)))
+	var q := _adv(null)
+	q.execute({"type": "build", "machine": "M07"})
+	q.machines[0]["kernels"] = 1000
+	q.execute({"type": "build", "machine": "M09"})
+	q.advance(120000)
+	_check_conservation(q, "sorted auto lots (no sink)")
+
+
+func test_m10_the_distributor_adds_kitchen_places_and_keeps_them_honest() -> void:
+	var f := _adv(null)
+	var base := int(f.slots("kitchen"))
+	f.execute({"type": "build", "machine": "M07"})
+	var r := f.execute({"type": "build", "machine": "M10"})
+	assert_true(bool(r["ok"]), "the distributor is built")
+	assert_eq(int(f.slots("kitchen")), base + 2, "two more kitchen places")
+	assert_true(bool(f.execute({"type": "build", "machine": "M07", "slot": base + 1})["ok"]), "a kettle in a new place")
+	var d: int = r["machine"]
+	assert_eq(String(f.execute({"type": "sell_machine", "id": d})["reason"]), "err.slot_taken", "not sold while its places hold a kettle")
+	f.execute({"type": "upgrade_machine", "id": d})
+	assert_eq(int(f.slots("kitchen")), base + 3, "its next tier: three")
+	var k: Dictionary = f.machine_at("kitchen", base + 1)
+	f.execute({"type": "sell_machine", "id": k["id"]})
+	assert_true(bool(f.execute({"type": "sell_machine", "id": d})["ok"]), "with its places empty it sells")
+	assert_eq(int(f.slots("kitchen")), base, "and the places go with it")
+	var g: PopRules = Factory.new()
+	assert_true(bool(g.from_save(JSON.parse_string(JSON.stringify(f.to_save())))), "saves")
+
+
+func test_m11_premium_lots_get_their_own_packs_and_customers() -> void:
+	var f := _adv(null)
+	f.execute({"type": "build", "machine": "M07"})
+	f.execute({"type": "build", "machine": "M11"})
+	f.money = 100000
+	_pop(f)   # perfect: quality 100
+	assert_eq(String(f.glass["recipe"]), "premium", "a perfect hand lot is premium")
+	f.advance(3000)
+	_pop(f, 600)   # late: quality 60
+	f.advance(3000)
+	var plain_lot: Array = f.bin.filter(func(l: Dictionary) -> bool: return String(l["recipe"]) == "plain")
+	assert_true(not plain_lot.is_empty(), "a late lot stays plain")
+	# Packs never mix: premium portions only in premium packs.
+	f.advance(30000)
+	for p: Dictionary in f.shelf + f.packing:
+		assert_true(String(p["recipe"]) in ["plain", "premium"], "a known SKU")
+	assert_true(f.shelf.any(func(p: Dictionary) -> bool: return String(p["recipe"]) == "premium"), "a premium pack on the shelf")
+	# A plain customer is never handed a premium pack; a premium one never a plain pack.
+	var before: int = f.ledger.size()
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "premium", "size": 2}, "patience_ms": 60000})
+	f.advance(20000)
+	for e: Dictionary in f.ledger.slice(before):
+		assert_eq(String(e["recipe"]), String(e["ordered_recipe"]), "the SKU they asked for")
+	var sold: Array = f.ledger.slice(before).filter(func(e: Dictionary) -> bool: return String(e["recipe"]) == "premium")
+	assert_true(not sold.is_empty(), "the premium customer bought a premium pack")
+	assert_true(int(sold[0]["coins"]) > int(f.pack_price("plain", 2, int(sold[0]["quality"]))), "for more than plain")
+	_check_conservation(f, "premium")
+	# The premium bin is bounded: a full one lets lots through as plain.
+	var g := _adv(null)
+	g.execute({"type": "build", "machine": "M07"})
+	g.execute({"type": "build", "machine": "M11"})
+	g.bin.append({"id": g._new_id(), "recipe": "premium", "quality": 100, "portions": 12})
+	var top := {"id": 0, "recipe": "plain", "quality": 100, "portions": 4}
+	g._sort_and_grade(top, "perfect")
+	assert_eq(String(top["recipe"]), "plain", "premium bin full: a perfect lot goes through as plain")
+	g.bin.clear()
+	g._sort_and_grade(top, "perfect")
+	assert_eq(String(top["recipe"]), "premium", "with room, premium")
+
+
+func test_m11_orders_for_premium_only_while_it_is_on_hand_and_plain_streams_unchanged() -> void:
+	var a: PopRules = Factory.new(null, 9)
+	var b: PopRules = Factory.new(null, 9)
+	for i in 50:
+		assert_eq(a._draw_order(), b._draw_order(), "without the sensor the order stream is the same")
+	var c := _adv(null)
+	c.execute({"type": "build", "machine": "M07"})
+	c.execute({"type": "build", "machine": "M11"})
+	var none := 0
+	for i in 40:
+		if String(c._draw_order()["recipe"]) == "premium":
+			none += 1
+	assert_eq(none, 0, "no premium orders while there is no premium popcorn")
+	c.bin.append({"id": c._new_id(), "recipe": "premium", "quality": 100, "portions": 8})
+	var some := 0
+	for i in 200:
+		if String(c._draw_order()["recipe"]) == "premium":
+			some += 1
+	assert_true(some > 30 and some < 100, "about 30%% ask for premium while it is on hand (%d of 200)" % some)
+
+
+func test_m12_the_flavor_mixer_sleeps_until_flavors() -> void:
+	var f := _adv(null)
+	f.execute({"type": "build", "machine": "M07"})
+	var r := f.execute({"type": "build", "machine": "M12"})
+	assert_false(bool(r["ok"]), "not built: no flavors yet")
+	assert_eq(String(r["reason"]), "err.not_yet", "the honest reason")
+	assert_false(f.catalog_buildable("M12"), "the catalog agrees")
+
+
+func test_m13_many_kettles_overheat_unless_the_vents_run() -> void:
+	var a := _adv(null)
+	_kettles(a, 5)
+	var lots_a := _auto_lots(a, 240000).size()
+	assert_true(int(a.stats.get("overheat_stops", 0)) > 0, "five kettles overheat the kitchen (%d stops)" % int(a.stats.get("overheat_stops", 0)))
+	var e := _adv(null)
+	e.next_arrival_ms = 0
+	_kettles(e, 5)
+	e.advance(240000)
+	assert_true(int(e.stats.get("overheat_stops", 0)) > 0, "overheating in a full run too")
+	_check_conservation(e, "overheat (no lot lost or doubled while kettles stop)")
+	var b := _adv(null)
+	_kettles(b, 5)
+	b.execute({"type": "build", "machine": "M13"})
+	var lots_b := _auto_lots(b, 240000).size()
+	assert_eq(int(b.stats.get("overheat_stops", 0)), 0, "with the vents, none")
+	assert_true(lots_b > lots_a, "and more lots (%d vs %d)" % [lots_b, lots_a])
+	var c := _adv(null)
+	_kettles(c, 2)
+	_auto_lots(c, 240000)
+	assert_eq(int(c.stats.get("overheat_stops", 0)), 0, "two kettles never overheat")
+	var d := _adv(null)
+	_kettles(d, 3)
+	d.execute({"type": "build", "machine": "M08"})
+	_auto_lots(d, 240000)
+	assert_eq(int(d.stats.get("overheat_stops", 0)), 0, "three with the fan stay cool")
+
+
+func test_m14_the_recycler_lowers_cooking_kettles_upkeep_but_never_to_zero() -> void:
+	var a := _adv(null)
+	_kettles(a, 2)
+	var la := _auto_lots(a, 180000).size()
+	var b := _adv(null)
+	_kettles(b, 2)
+	b.execute({"type": "build", "machine": "M14"})
+	var lb := _auto_lots(b, 180000).size()
+	assert_eq(lb, la, "the same lots")
+	assert_true(int(b.stats["upkeep_paid"]) < int(a.stats["upkeep_paid"]), "less upkeep (%d vs %d)" % [b.stats["upkeep_paid"], a.stats["upkeep_paid"]])
+	assert_true(int(b.stats["upkeep_paid"]) > 0, "but never free")
+	var c := _adv(null)
+	_kettles(c, 1)
+	var rid: int = c.execute({"type": "build", "machine": "M14"})["machine"]
+	c.execute({"type": "upgrade_machine", "id": rid})
+	c.execute({"type": "upgrade_machine", "id": rid})
+	_auto_lots(c, 120000)
+	assert_true(int(c.stats["upkeep_paid"]) >= 1, "at its best tier a kettle still pays (%d)" % int(c.stats["upkeep_paid"]))
+
+
+func test_m15_the_dispatcher_cooks_only_what_is_wanted() -> void:
+	# No customers: the shelf fills, then a kettle without the dispatcher keeps cooking into a
+	# full bin (blocked), one with it stops starting lots -- kernels and upkeep saved.
+	var a := _adv(null)
+	_kettles(a, 2, 1000)
+	a.advance(240000)
+	var b := _adv(null)
+	_kettles(b, 2, 1000)
+	b.execute({"type": "build", "machine": "M15"})
+	b.advance(240000)
+	assert_true(int(b.stats.get("dispatch_held_ms", 0)) > 0, "the dispatcher held kettles back")
+	assert_true(int(b.stats["made_portions"]) <= int(a.stats["made_portions"]), "no more popcorn than without it")
+	var used_a: int = 2000 - a.machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "cooker").reduce(func(n: int, m: Dictionary) -> int: return n + int(m["kernels"]), 0)
+	var used_b: int = 2000 - b.machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "cooker").reduce(func(n: int, m: Dictionary) -> int: return n + int(m["kernels"]), 0)
+	assert_true(used_b < used_a, "fewer kernels used (%d vs %d)" % [used_b, used_a])
+	_check_conservation(b, "dispatch")
+	# With orders waiting, it cooks.
+	var c := _adv(null)
+	_kettles(c, 1, 1000)
+	c.execute({"type": "build", "machine": "M15"})
+	assert_true(c.demand_wants_lot(), "an empty shelf wants popcorn")
+	c.advance(20000)
+	assert_true(int(c.stats["auto_lots"]) > 0, "so the kettle cooks")
+
+
+func test_m16_the_rotary_popper_is_a_steady_kettle_worth_its_place() -> void:
+	var f := _adv(null)
+	f.execute({"type": "build", "machine": "M07"})
+	var r := f.execute({"type": "build", "machine": "M16"})
+	assert_true(bool(r["ok"]), "the rotary popper is built")
+	var rot: Dictionary = f.machine(int(r["machine"]))
+	rot["kernels"] = 1000
+	f.machines[0]["kernels"] = 1000
+	var lots := _auto_lots(f, 60000)
+	var from_rot := lots.filter(func(l: Dictionary) -> bool: return int(l["machine"]) == int(rot["id"]))
+	var from_k := lots.filter(func(l: Dictionary) -> bool: return int(l["machine"]) != int(rot["id"]))
+	assert_true(from_rot.size() >= 22, "a lot about every 2.5 s (%d in a minute)" % from_rot.size())
+	assert_true(from_rot.all(func(l: Dictionary) -> bool: return int(l["portions"]) == 2 and String(l["grade"]) == "near"), "small near lots")
+	var pr: int = from_rot.reduce(func(n: int, l: Dictionary) -> int: return n + int(l["portions"]), 0)
+	var pk: int = from_k.reduce(func(n: int, l: Dictionary) -> int: return n + int(l["portions"]), 0)
+	assert_true(pr > pk * 2, "more popcorn per place than a basic kettle (%d vs %d)" % [pr, pk])
+	assert_true(int(rot["kernels"]) < 1000, "it uses kernels")
+	# A hopper feeds it like any kettle.
+	var g := _adv(null)
+	var gr: int = g.execute({"type": "build", "machine": "M07"})["machine"]
+	g.machine(gr)["kernels"] = 1000
+	var gid: int = g.execute({"type": "build", "machine": "M16"})["machine"]
+	g.machine(gid)["kernels"] = 0
+	g.execute({"type": "build", "machine": "M01"})
+	_auto_lots(g, 30000)
+	assert_true(int(g.machine(gid).get("done", 0)) > 0, "the hopper keeps the drum turning")
+	var h := _adv(null)
+	h.next_arrival_ms = 0
+	h.execute({"type": "build", "machine": "M07"})
+	var hid: int = h.execute({"type": "build", "machine": "M16"})["machine"]
+	h.execute({"type": "build", "machine": "M01"})
+	h.advance(180000)
+	assert_true(int(h.machine(hid).get("done", 0)) > 30, "a full run: the drum turned")
+	_check_conservation(h, "rotary (no sink)")
+
+
+func test_parallel_kettle_lines_and_the_hand_together_any_cut_of_time() -> void:
+	var a := _adv(null)
+	var b := _adv(null)
+	for f: PopRules in [a, b]:
+		f.next_arrival_ms = 0   # customers come
+		f.execute({"type": "build", "machine": "M07"})
+		var dr: Dictionary = f.execute({"type": "build", "machine": "M10"})
+		assert_true(bool(dr["ok"]), "the distributor built (%s)" % dr.get("reason", ""))
+		f.execute({"type": "upgrade_machine", "id": int(dr.get("machine", -1))})
+		for i in 2:
+			f.execute({"type": "build", "machine": "M07"})
+		for id in ["M01", "M16", "M11", "M13", "M14", "M15", "M09"]:
+			assert_true(bool(f.execute({"type": "build", "machine": id})["ok"]), "%s built" % id)
+		f.money = 20000
+	var pops := 0
+	var t := 0
+	while t < 300000:
+		for f: PopRules in [a, b]:
+			if f.glass.is_empty() and int(f.cooldown_left) <= 0 and not f.heating:
+				f.execute({"type": "press"})
+		a.advance(1600)
+		for i in 16:
+			b.advance(100)
+		for f: PopRules in [a, b]:
+			if f.heating:
+				f.execute({"type": "release"})
+		pops += 1
+		t += 1600
+	assert_eq(a.stats, b.stats, "the same factory, whatever the cut of time")
+	_check_conservation(a, "parallel lines with the hand")
+	assert_true(int(a.stats["lots"]) > 50, "the hand kept popping while machines worked (%d)" % int(a.stats["lots"]))
+	assert_true(int(a.stats["auto_lots"]) + int(a.stats.get("rotary_lots", 0)) > 50, "and the kettles cooked")
+	assert_true(int(a.stats.get("premium_lots", 0)) > 0, "the hand's perfect lots became premium")
+	for e: Dictionary in a.ledger:
+		assert_eq(String(e["recipe"]), String(e["ordered_recipe"]), "every sale the SKU that was ordered")
+	var c: PopRules = Factory.new()
+	assert_true(bool(c.from_save(JSON.parse_string(JSON.stringify(a.to_save())))), "the factory saves")
+	c.advance(30000)
+	a.advance(30000)
+	assert_eq(c.stats, a.stats, "and goes on the same")
+
+
+func test_a_paused_advanced_device_does_nothing_and_costs_nothing() -> void:
+	var a := _adv(null)
+	_kettles(a, 5)
+	var v: int = a.execute({"type": "build", "machine": "M13"})["machine"]
+	a.execute({"type": "pause_machine", "id": v, "paused": true})
+	var paid_before := int(a.stats["upkeep_paid"])
+	_auto_lots(a, 240000)
+	assert_true(int(a.stats.get("overheat_stops", 0)) > 0, "a paused vent does not stop overheating")
+	assert_eq(int(a.machine(v)["upkeep_ms"]), 0, "and owes nothing")

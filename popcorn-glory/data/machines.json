@@ -9,7 +9,9 @@
   "upkeep",
   "kernels",
   "oil",
-  "heat_model"
+  "heat_model",
+  "premium_sku",
+  "dispatch"
  ],
  "machines": [
   {
@@ -283,7 +285,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "chute",
+    "tipper",
     "arm"
    ],
    "motion": "an arm tips the kettle into the tube",
@@ -429,11 +431,10 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
-    "sieve"
+    "sorter"
    ],
    "motion": "a sieve shakes out unpopped kernels",
-   "operation": "re-pops the unpopped kernels of early or late lots",
+   "operation": "re-pops the unpopped kernels of early or late lots (the hand's and the kettles')",
    "contract": {
     "kind": "sort",
     "regrade": {
@@ -471,7 +472,7 @@
     }
    ],
    "marginal": "quality 50/60 -> 80 for a portion each",
-   "runtime": null,
+   "runtime": "M09",
    "step": 29
   },
   {
@@ -479,12 +480,10 @@
    "name": "Multi-Pot Distributor",
    "group": "advanced",
    "floor": "kitchen",
-   "slots": 2,
+   "slots": 1,
    "parts": [
-    "box",
-    "pipes",
-    "kettle_small",
-    "kettle_small"
+    "manifold",
+    "pipes"
    ],
    "motion": "pipes branch to several pots",
    "operation": "lets more kettles share the floor's places",
@@ -494,9 +493,9 @@
    },
    "inputs": [],
    "outputs": [
-    "two more kettle places"
+    "two more kitchen places (three, four at its tiers)"
    ],
-   "queue": "two places wide",
+   "queue": "one place; its extra places must be empty to sell it",
    "prereq": {
     "sign": 5,
     "machines": [
@@ -521,8 +520,8 @@
      "plus": 4
     }
    ],
-   "marginal": "more kettles where 4 places were the limit",
-   "runtime": null,
+   "marginal": "more kettles where the kitchen's places were the limit",
+   "runtime": "M10",
    "step": 29
   },
   {
@@ -532,12 +531,12 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "scanner",
     "eye",
     "split"
    ],
    "motion": "a light sorts lots left and right",
-   "operation": "sends top-quality lots to a premium bin",
+   "operation": "sends top-quality lots to a premium SKU",
    "contract": {
     "kind": "grade_split",
     "threshold": 90,
@@ -547,16 +546,14 @@
     "lots of quality >= 90"
    ],
    "outputs": [
-    "premium packs (price x1.2)"
+    "premium packs (price x1.2), sold only to customers who ask for premium"
    ],
-   "queue": "a second bin of 12",
+   "queue": "premium and plain never share a pack",
    "prereq": {
     "sign": 5,
     "packer": 2
    },
-   "requires": [
-    "premium_sku"
-   ],
+   "requires": [],
    "cost": 900,
    "growth": 1.25,
    "upkeep_per_min": 2,
@@ -571,8 +568,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "perfect hand lots sell for 20% more once a premium shelf exists",
-   "runtime": null,
+   "marginal": "perfect hand lots and tuned kettle lots sell for 20% more",
+   "runtime": "M11",
    "step": 29
   },
   {
@@ -582,7 +579,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "mixer",
     "whisk",
     "bowl"
    ],
@@ -621,7 +618,7 @@
     }
    ],
    "marginal": "none until flavors (Step 34)",
-   "runtime": null,
+   "runtime": "M12",
    "step": 29
   },
   {
@@ -631,7 +628,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "tower",
     "vent"
    ],
    "motion": "vents breathe in turn",
@@ -671,8 +668,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "none until kettles can overheat (Step 32)",
-   "runtime": null,
+   "marginal": "three or more kettles keep cooking instead of stopping to cool",
+   "runtime": "M13",
    "step": 29
   },
   {
@@ -682,7 +679,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "exchanger",
     "coil"
    ],
    "motion": "a coil glows while kettles run",
@@ -696,7 +693,7 @@
     "the kettles' waste heat"
    ],
    "outputs": [
-    "1 coin a minute less upkeep per cooking kettle"
+    "1 coin a minute less upkeep per cooking kettle (never below 1)"
    ],
    "queue": "covers the floor",
    "prereq": {
@@ -724,7 +721,7 @@
     }
    ],
    "marginal": "-25% kettle upkeep at tier 0",
-   "runtime": null,
+   "runtime": "M14",
    "step": 29
   },
   {
@@ -734,29 +731,30 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "console",
     "screen",
     "arrows"
    ],
    "motion": "a screen points kettles at jobs",
-   "operation": "chooses each kettle's next job from the shelf's shortages",
+   "operation": "starts a kettle's next lot only when the shelf and the orders need it (later also which flavor)",
    "contract": {
     "kind": "dispatch",
-    "chooses": "flavor per lot"
+    "chooses": "when each kettle cooks"
    },
    "inputs": [
-    "the shelf's counts"
+    "the shelf's counts, the orders waiting"
    ],
    "outputs": [
-    "kettles make what is missing"
+    "no lots nobody needs: kernels, oil and upkeep saved"
    ],
-   "queue": "needs two flavors to choose between",
+   "queue": "covers the floor",
    "prereq": {
-    "sign": 5
+    "sign": 5,
+    "machines": [
+     "M07"
+    ]
    },
-   "requires": [
-    "flavors"
-   ],
+   "requires": [],
    "cost": 1000,
    "growth": 1.25,
    "upkeep_per_min": 2,
@@ -771,8 +769,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "none until flavors (Step 34)",
-   "runtime": null,
+   "marginal": "pays for itself when the kettles out-cook the shop",
+   "runtime": "M15",
    "step": 29
   },
   {
@@ -780,8 +778,9 @@
    "name": "Rotary Popper",
    "group": "advanced",
    "floor": "kitchen",
-   "slots": 2,
+   "slots": 1,
    "parts": [
+    "rotary",
     "drum",
     "chute"
    ],
@@ -793,11 +792,13 @@
     "portions": 2,
     "cycle_ms": 2500
    },
-   "inputs": [],
+   "inputs": [
+    "kernels (one lot's worth a lot)"
+   ],
    "outputs": [
     "a small lot every 2.5 s"
    ],
-   "queue": "two places wide; holds when the bin is full",
+   "queue": "holds when the bin is full",
    "prereq": {
     "sign": 6,
     "machines": [
@@ -823,7 +824,7 @@
     }
    ],
    "marginal": "~48 portions a minute",
-   "runtime": null,
+   "runtime": "M16",
    "step": 29
   },
   {

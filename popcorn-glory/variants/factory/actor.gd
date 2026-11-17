@@ -23,6 +23,7 @@ var of := 2                    ## portions it will hold
 var scoop := false             ## a nozzle that is the tier-0 scoop
 var mood := "wait"             ## a customer's face (Step 21)
 var order_size := 0            ## Step 23: the bag they want, shown in a bubble while they wait (0: none)
+var order_premium := false     ## Step 29: they ask for the premium SKU (a gold bag in the bubble)
 ## The journey: waypoints and the seconds for the whole of it. `steps` (reduced
 ## motion) holds at each waypoint instead of gliding between them.
 var path: PackedVector2Array = PackedVector2Array()
@@ -99,6 +100,6 @@ func _draw() -> void:
 		CUSTOMER:
 			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood)
 			if order_size > 0 and not carrying:
-				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * 3.75), size_px, order_size)
+				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * 3.75), size_px, order_size, order_premium)
 			if carrying:
 				PopFactoryArt.bag(self, Vector2(size_px * 1.2, -size_px * 0.4), size_px * 0.9)

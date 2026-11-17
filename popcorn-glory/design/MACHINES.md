@@ -2,7 +2,7 @@
 
 `data/machines.json`이 단일 원본이다(생성: `tools/catalog/build_catalog.py`, 이 문서: `tools/catalog/catalog_doc.py`). 그림은 게임 안 `#machines`(실제 자리 크기, 다섯 묶음 × 8, 그 아래 40대가 층에 접힌 배치). 수치는 [proposal].
 
-**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model.
+**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch.
 
 ## 해금 지도 (간판 단계 → 열리는 기계)
 
@@ -11,9 +11,9 @@
 | 0 | P01, P02, P03 ●, P04, P05, P06, P07, P08 |
 | 2 | M06 ●, M08 ● |
 | 3 | M01 ●, M02 ●, M04 ●, M07 ●, S01, S07 ●, U04 |
-| 4 | M03 ●, M05 ●, M09, M12, S02, S03, S06, U01, U02, U03 |
-| 5 | M10, M11, M13, M14, M15, S05, U05, U06 |
-| 6 | M16, S04, S08, U07, U08 |
+| 4 | M03 ●, M05 ●, M09 ●, M12 ●, S02, S03, S06, U01, U02, U03 |
+| 5 | M10 ●, M11 ●, M13 ●, M14 ●, M15 ●, S05, U05, U06 |
+| 6 | M16 ●, S04, S08, U07, U08 |
 
 ● = 지금 돈다(Step 26: M07 자동 냄비, P03 부피 충전기, S07 셀프 키오스크).
 
@@ -34,14 +34,14 @@
 
 | ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| M09 | Kernel Sorter | kitchen · 1 | a sieve shakes out unpopped kernels | sort (regrade={'early': 'near', 'late': 'near'}, portion_loss=1) | early/late lots → the same lot at near grade, one portion fewer | between the kettles and the lift | 간판 4 · +M07 | — | 600 / 3분 | — / — / — | quality 50/60 -> 80 for a portion each | Step 29 |
-| M10 | Multi-Pot Distributor | kitchen · 2 | pipes branch to several pots | capacity (kitchen_slots_plus=2) | — → two more kettle places | two places wide | 간판 5 · +M07 | — | 1200 / 2분 | plus 2 / plus 3 / plus 4 | more kettles where 4 places were the limit | Step 29 |
-| M11 | Quality Sensor | kitchen · 1 | a light sorts lots left and right | grade_split (threshold=90, premium_price=1.2) | lots of quality >= 90 → premium packs (price x1.2) | a second bin of 12 | 간판 5 · 포장대 2 | premium_sku | 900 / 2분 | — / — / — | perfect hand lots sell for 20% more once a premium shelf exists | 체계 대기: premium_sku |
+| M09 | Kernel Sorter | kitchen · 1 | a sieve shakes out unpopped kernels | sort (regrade={'early': 'near', 'late': 'near'}, portion_loss=1) | early/late lots → the same lot at near grade, one portion fewer | between the kettles and the lift | 간판 4 · +M07 | — | 600 / 3분 | — / — / — | quality 50/60 -> 80 for a portion each | 돈다 |
+| M10 | Multi-Pot Distributor | kitchen · 1 | pipes branch to several pots | capacity (kitchen_slots_plus=2) | — → two more kitchen places (three, four at its tiers) | one place; its extra places must be empty to sell it | 간판 5 · +M07 | — | 1200 / 2분 | plus 2 / plus 3 / plus 4 | more kettles where the kitchen's places were the limit | 돈다 |
+| M11 | Quality Sensor | kitchen · 1 | a light sorts lots left and right | grade_split (threshold=90, premium_price=1.2) | lots of quality >= 90 → premium packs (price x1.2), sold only to customers who ask for premium | premium and plain never share a pack | 간판 5 · 포장대 2 | — | 900 / 2분 | — / — / — | perfect hand lots and tuned kettle lots sell for 20% more | 돈다 |
 | M12 | Flavor Base Mixer | kitchen · 1 | a whisk turns in a bowl | premix (for=flavored lots, time_saved_ms=1000) | flavor base → flavored lots without the coating wait | asleep until flavors open | 간판 4 | flavors | 700 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
-| M13 | Vent Stabilizer | kitchen · 1 | vents breathe in turn | stabilize (prevents=overheat stops, when_kettles_at_least=3) | the kitchen's heat → no overheat stops | covers the floor | 간판 5 · +M07 | heat_model | 800 / 2분 | — / — / — | none until kettles can overheat (Step 32) | Step 29 |
-| M14 | Heat Recycler | kitchen · 1 | a coil glows while kettles run | recycle (kettle_upkeep_minus=1, only_while=a kettle is cooking) | the kettles' waste heat → 1 coin a minute less upkeep per cooking kettle | covers the floor | 간판 5 · +M07 | — | 900 / 0분 | minus 1 / minus 2 / minus 3 | -25% kettle upkeep at tier 0 | Step 29 |
-| M15 | Smart Job Dispatcher | kitchen · 1 | a screen points kettles at jobs | dispatch (chooses=flavor per lot) | the shelf's counts → kettles make what is missing | needs two flavors to choose between | 간판 5 | flavors | 1000 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
-| M16 | Rotary Popper | kitchen · 2 | a drum turns and pours a steady stream | produce (makes=lots, portions=2, cycle_ms=2500) | — → a small lot every 2.5 s | two places wide; holds when the bin is full | 간판 6 · +M07 | — | 2500 / 6분 | cycle_ms 2500 / cycle_ms 2000 / cycle_ms 1600 | ~48 portions a minute | Step 29 |
+| M13 | Vent Stabilizer | kitchen · 1 | vents breathe in turn | stabilize (prevents=overheat stops, when_kettles_at_least=3) | the kitchen's heat → no overheat stops | covers the floor | 간판 5 · +M07 | heat_model | 800 / 2분 | — / — / — | three or more kettles keep cooking instead of stopping to cool | 돈다 |
+| M14 | Heat Recycler | kitchen · 1 | a coil glows while kettles run | recycle (kettle_upkeep_minus=1, only_while=a kettle is cooking) | the kettles' waste heat → 1 coin a minute less upkeep per cooking kettle (never below 1) | covers the floor | 간판 5 · +M07 | — | 900 / 0분 | minus 1 / minus 2 / minus 3 | -25% kettle upkeep at tier 0 | 돈다 |
+| M15 | Smart Job Dispatcher | kitchen · 1 | a screen points kettles at jobs | dispatch (chooses=when each kettle cooks) | the shelf's counts, the orders waiting → no lots nobody needs: kernels, oil and upkeep saved | covers the floor | 간판 5 · +M07 | — | 1000 / 2분 | — / — / — | pays for itself when the kettles out-cook the shop | 돈다 |
+| M16 | Rotary Popper | kitchen · 1 | a drum turns and pours a steady stream | produce (makes=lots, portions=2, cycle_ms=2500) | kernels (one lot's worth a lot) → a small lot every 2.5 s | holds when the bin is full | 간판 6 · +M07 | — | 2500 / 6분 | cycle_ms 2500 / cycle_ms 2000 / cycle_ms 1600 | ~48 portions a minute | 돈다 |
 
 ## 포장 (P01–P08, Step 30)
 
@@ -90,13 +90,12 @@
 | cup_sku | P01 | 30 |
 | customer_preferences | U05 | 36 |
 | faults | U01 | 32 |
-| flavors | M12, M15, P05, P06, P08, S06, U07 | 34 |
+| flavors | M12, P05, P06, P08, S06, U07 | 34 |
 | four_lanes | S08 | 31 |
 | multi_queue | S04 | 31 |
 | news | U07 | 37 |
 | parallel_lines | U08 | 33 |
 | portion_variance | P04 | 30 |
-| premium_sku | M11 | 29 |
 
 ## 40대가 함께 (Step 33)
 

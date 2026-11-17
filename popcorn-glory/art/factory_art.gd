@@ -59,7 +59,7 @@ static func popcorn(ci: CanvasItem, c: Vector2, s: float) -> void:
 ## A striped paper bag, bottom-centre anchored at `foot`, `w` wide. Sealed by
 ## default (a folded top and a gold label: Step 20); `open` while it is being
 ## filled, with `fill` puffs of popcorn showing at the mouth.
-static func bag(ci: CanvasItem, foot: Vector2, w: float, col: Color = PopTokens.MACHINE, open: bool = false, fill: int = 0, of: int = 2) -> void:
+static func bag(ci: CanvasItem, foot: Vector2, w: float, col: Color = PopTokens.MACHINE, open: bool = false, fill: int = 0, of: int = 2, premium: bool = false) -> void:
 	var h := w * 1.5
 	var p := foot - Vector2(w * 0.5, h)
 	var pts := PackedVector2Array([p, p + Vector2(w, 0), p + Vector2(w * 0.88, h), p + Vector2(w * 0.12, h)])
@@ -74,10 +74,26 @@ static func bag(ci: CanvasItem, foot: Vector2, w: float, col: Color = PopTokens.
 		for k in mini(fill, maxi(1, of)):
 			var fx := (float(k) + 0.5) / float(maxi(1, of))
 			popcorn(ci, p + Vector2(w * (0.2 + 0.6 * fx), w * 0.02 - w * 0.08 * float(k % 2)), w * 0.2)
+	elif premium:
+		# Step 29: the premium SKU -- a gold top band and a gold star (never mistaken for plain).
+		ci.draw_rect(Rect2(p, Vector2(w, w * 0.26)), PopPalette.GOLD)
+		ci.draw_line(p + Vector2(0, w * 0.26), p + Vector2(w, w * 0.26), PopTokens.BRASS, 2.0)
+		star(ci, p + Vector2(w * 0.5, h * 0.56), w * 0.24, PopPalette.GOLD, PopTokens.BRASS)
 	else:
 		ci.draw_rect(Rect2(p, Vector2(w, w * 0.22)), col)
 		ci.draw_circle(p + Vector2(w * 0.5, h * 0.55), w * 0.17, PopPalette.GOLD)
 		ci.draw_arc(p + Vector2(w * 0.5, h * 0.55), w * 0.17, 0, TAU, 16, PopTokens.BRASS, 2.0)
+
+
+## A five-pointed star (Step 29: premium).
+static func star(ci: CanvasItem, c: Vector2, r: float, fill: Color, edge: Color) -> void:
+	var pts := PackedVector2Array()
+	for i in 10:
+		var a := -PI / 2.0 + TAU * i / 10.0
+		pts.append(c + Vector2(cos(a), sin(a)) * (r if i % 2 == 0 else r * 0.45))
+	ci.draw_colored_polygon(pts, fill)
+	pts.append(pts[0])
+	ci.draw_polyline(pts, edge, maxf(1.0, r * 0.12))
 
 
 ## Step 20: the packing station at a tier's look, in `r` (its body and belt;
@@ -234,7 +250,7 @@ static func shop_sign(ci: CanvasItem, r: Rect2, look: int, mono: Color = Color(0
 
 ## Step 23: what a customer wants, in a bubble over their head -- a small bag,
 ## or a bigger bag with a fuller top for the large one (no words, no numbers).
-static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int) -> void:
+static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int, premium: bool = false) -> void:
 	var w := head * 1.5
 	var h := head * 1.35
 	var r := Rect2(tail - Vector2(w * 0.5, h + head * 0.25), Vector2(w, h))
@@ -242,7 +258,7 @@ static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int) 
 	ci.draw_colored_polygon(PackedVector2Array([tail, tail + Vector2(-head * 0.2, -head * 0.3), tail + Vector2(head * 0.2, -head * 0.3)]), Color(1, 1, 1, 0.95))
 	var big := size > 2
 	var bw := head * (0.62 if big else 0.42)
-	bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw)
+	bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw, PopTokens.MACHINE, false, 0, 2, premium)
 	if big:
 		popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28)
 
@@ -300,6 +316,15 @@ static func state_badge(ci: CanvasItem, at: Vector2, s: float, state: String) ->
 				ci.draw_arc(at, s, a0, a0 + TAU / 16.0, 4, PopTokens.SKY, 2.5)
 		"run":
 			ci.draw_circle(at, s * 0.6, PopTokens.OK)
+		"overheat":   # Step 29: too hot -- red with three heat waves
+			ci.draw_circle(at, s, PopTokens.WARN)
+			for q in 3:
+				var x := at.x + (q - 1) * s * 0.45
+				ci.draw_polyline(PackedVector2Array([Vector2(x, at.y + s * 0.5), Vector2(x - s * 0.15, at.y + s * 0.15), Vector2(x + s * 0.15, at.y - s * 0.15), Vector2(x, at.y - s * 0.5)]), Color.WHITE, maxf(1.5, s * 0.16))
+		"waiting":   # Step 29: the dispatcher holds it -- white with an hourglass
+			ci.draw_circle(at, s, Color(1, 1, 1, 0.92))
+			ci.draw_colored_polygon(PackedVector2Array([at + Vector2(-s * 0.4, -s * 0.5), at + Vector2(s * 0.4, -s * 0.5), at, ]), PopTokens.SKY)
+			ci.draw_colored_polygon(PackedVector2Array([at, at + Vector2(s * 0.4, s * 0.5), at + Vector2(-s * 0.4, s * 0.5)]), PopTokens.SKY)
 
 
 # -- Step 27: the forty machines' icons, composed from parts -----------------------
@@ -371,7 +396,7 @@ static func catalog_icon(ci: CanvasItem, r: Rect2, parts: Array, group: String, 
 				ci.draw_circle(o + Vector2(w * 0.5, h * 0.6), w * 0.26, c.call(body))
 				ci.draw_arc(o + Vector2(w * 0.5, h * 0.6), w * 0.26, 0, TAU, 24, c.call(body.darkened(0.3)), 2.0)
 				ci.draw_arc(o + Vector2(w * 0.5, h * 0.6), w * 0.19, 0, TAU, 24, c.call(PopTokens.STEEL), 3.0)
-			"chute":   # M06: a tipping chute on a stand (the arm tips it into the tube)
+			"tipper":   # M06: a tipping chute on a stand (the arm tips it into the tube)
 				ci.draw_rect(Rect2(o + Vector2(w * 0.28, h * 0.62), Vector2(w * 0.08, h * 0.28)), c.call(PopTokens.STEEL_DEEP))
 				ci.draw_rect(Rect2(o + Vector2(w * 0.18, h * 0.88), Vector2(w * 0.3, h * 0.05)), c.call(PopTokens.STEEL_DEEP))
 				var ch := PackedVector2Array([o + Vector2(w * 0.12, h * 0.5), o + Vector2(w * 0.9, h * 0.68), o + Vector2(w * 0.86, h * 0.8), o + Vector2(w * 0.12, h * 0.66)])
@@ -386,6 +411,50 @@ static func catalog_icon(ci: CanvasItem, r: Rect2, parts: Array, group: String, 
 				for q in 4:
 					var a := TAU * q / 4.0 + 0.4
 					ci.draw_line(o + Vector2(w * 0.5, h * 0.6) + Vector2(cos(a), sin(a)) * w * 0.1, o + Vector2(w * 0.5, h * 0.6) + Vector2(cos(a), sin(a)) * w * 0.29, c.call(Color(1, 1, 1, 0.35)), 1.5)
+			# Step 29: the advanced kitchen's silhouettes (deep red: the advanced group).
+			"sorter":   # M09: a shaker tray on legs over a drawer of re-popped kernels
+				for q in 2:
+					ci.draw_line(o + Vector2(w * (0.24 + 0.52 * q), h * 0.6), o + Vector2(w * (0.2 + 0.6 * q), h * 0.92), c.call(PopTokens.STEEL_DEEP), 3.0)
+				var tray := PackedVector2Array([o + Vector2(w * 0.1, h * 0.36), o + Vector2(w * 0.9, h * 0.46), o + Vector2(w * 0.86, h * 0.62), o + Vector2(w * 0.14, h * 0.54)])
+				ci.draw_colored_polygon(tray, c.call(body))
+				ci.draw_polyline(tray + PackedVector2Array([tray[0]]), c.call(body.darkened(0.3)), 2.0)
+				for q in 5:
+					ci.draw_line(o + Vector2(w * (0.2 + 0.13 * q), h * (0.42 + 0.012 * q)), o + Vector2(w * (0.22 + 0.13 * q), h * (0.55 + 0.012 * q)), c.call(Color(1, 1, 1, 0.45)), 1.5)
+				vgrad(ci, Rect2(o + Vector2(w * 0.32, h * 0.7), Vector2(w * 0.36, h * 0.14)), c.call(PopTokens.STEEL), c.call(PopTokens.STEEL_DEEP), 3)
+			"manifold":   # M10: an upright tank whose pipes branch to two small pots
+				vgrad(ci, Rect2(o + Vector2(w * 0.38, h * 0.28), Vector2(w * 0.24, h * 0.5)), c.call(body.lightened(0.15)), c.call(body), 8, c.call(body.darkened(0.3)), 2.0)
+				for q in 2:
+					var px := w * (0.1 + 0.62 * q)
+					PopMachineArt._round_rect(ci, Rect2(o + Vector2(px, h * 0.62), Vector2(w * 0.18, h * 0.22)), 3, c.call(PopTokens.MACHINE))
+					ci.draw_rect(Rect2(o + Vector2(px + w * 0.02, h * 0.64), Vector2(w * 0.14, h * 0.06)), c.call(Color(0.9, 0.96, 1.0)))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.3, h * 0.86), Vector2(w * 0.4, h * 0.05)), c.call(PopTokens.STEEL_DEEP))
+			"scanner":   # M11: a gate over a belt, lots pass under its eye
+				ci.draw_rect(Rect2(o + Vector2(w * 0.06, h * 0.82), Vector2(w * 0.88, h * 0.07)), c.call(PopTokens.STEEL))
+				for q in 2:
+					ci.draw_rect(Rect2(o + Vector2(w * (0.16 + 0.58 * q), h * 0.38), Vector2(w * 0.1, h * 0.46)), c.call(body))
+				vgrad(ci, Rect2(o + Vector2(w * 0.14, h * 0.34), Vector2(w * 0.72, h * 0.14)), c.call(body.lightened(0.15)), c.call(body), 4, c.call(body.darkened(0.3)), 2.0)
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.44, h * 0.48), o + Vector2(w * 0.56, h * 0.48), o + Vector2(w * 0.66, h * 0.82), o + Vector2(w * 0.34, h * 0.82)]), c.call(Color(1.0, 0.93, 0.6, 0.45)))
+			"mixer":   # M12: a stand mixer: base, column, head over the bowl
+				ci.draw_rect(Rect2(o + Vector2(w * 0.14, h * 0.84), Vector2(w * 0.72, h * 0.08)), c.call(body.darkened(0.15)))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.7, h * 0.3), Vector2(w * 0.12, h * 0.56)), c.call(body))
+				PopMachineArt._round_rect(ci, Rect2(o + Vector2(w * 0.36, h * 0.22), Vector2(w * 0.48, h * 0.16)), 6, c.call(body.lightened(0.1)))
+			"tower":   # M13: a tall vent tower with louvres and a cap
+				vgrad(ci, Rect2(o + Vector2(w * 0.28, h * 0.2), Vector2(w * 0.44, h * 0.72)), c.call(body.lightened(0.15)), c.call(body), 5, c.call(body.darkened(0.3)), 2.0)
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.22, h * 0.2), o + Vector2(w * 0.5, h * 0.06), o + Vector2(w * 0.78, h * 0.2)]), c.call(PopTokens.STEEL_DEEP))
+			"exchanger":   # M14: a squat tank with two pipes to the kettles
+				for q in 2:
+					ci.draw_rect(Rect2(o + Vector2(w * (0.26 + 0.4 * q), h * 0.2), Vector2(w * 0.08, h * 0.24)), c.call(PopTokens.STEEL_DEEP))
+				vgrad(ci, Rect2(o + Vector2(w * 0.12, h * 0.4), Vector2(w * 0.76, h * 0.48)), c.call(body.lightened(0.15)), c.call(body), 12, c.call(body.darkened(0.3)), 2.0)
+			"console":   # M15: a sloped control desk with a screen
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.1, h * 0.9), o + Vector2(w * 0.9, h * 0.9), o + Vector2(w * 0.86, h * 0.4), o + Vector2(w * 0.14, h * 0.36)]), c.call(body))
+				ci.draw_polyline(PackedVector2Array([o + Vector2(w * 0.1, h * 0.9), o + Vector2(w * 0.14, h * 0.36), o + Vector2(w * 0.86, h * 0.4), o + Vector2(w * 0.9, h * 0.9)]), c.call(body.darkened(0.3)), 2.0)
+				for q in 3:
+					ci.draw_circle(o + Vector2(w * (0.3 + 0.2 * q), h * 0.8), w * 0.035, c.call([PopTokens.OK, PopPalette.GOLD, PopTokens.WARN][q]))
+			"rotary":   # M16: a frame holding the drum, a hopper on top
+				for q in 2:
+					ci.draw_line(o + Vector2(w * (0.16 + 0.68 * q), h * 0.3), o + Vector2(w * (0.12 + 0.76 * q), h * 0.94), c.call(PopTokens.STEEL_DEEP), 4.0)
+				ci.draw_line(o + Vector2(w * 0.16, h * 0.3), o + Vector2(w * 0.84, h * 0.3), c.call(PopTokens.STEEL_DEEP), 4.0)
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.36, h * 0.04), o + Vector2(w * 0.64, h * 0.04), o + Vector2(w * 0.56, h * 0.24), o + Vector2(w * 0.44, h * 0.24)]), c.call(PopTokens.STEEL))
 			"drum":
 				ci.draw_circle(o + Vector2(w * 0.5, h * 0.55), w * 0.32, c.call(body))
 				ci.draw_arc(o + Vector2(w * 0.5, h * 0.55), w * 0.22, 0, TAU, 20, c.call(Color.WHITE), 3.0)
