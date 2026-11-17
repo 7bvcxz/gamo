@@ -1,0 +1,1008 @@
+{
+ "effects": {
+  "3701": {
+   "big_bag_day": {
+    "asked": 166,
+    "n": 3,
+    "saved": 0,
+    "sold": 159
+   },
+   "caramel_craze": {
+    "asked": 56,
+    "n": 3,
+    "saved": 0,
+    "sold": 51
+   },
+   "cheese_sale": {
+    "asked": 45,
+    "n": 2,
+    "saved": 28,
+    "sold": 47
+   },
+   "cocoa_week": {
+    "asked": 4,
+    "n": 1,
+    "saved": 0,
+    "sold": 5
+   }
+  },
+  "3702": {
+   "big_bag_day": {
+    "asked": 88,
+    "n": 2,
+    "saved": 0,
+    "sold": 92
+   },
+   "caramel_craze": {
+    "asked": 42,
+    "n": 2,
+    "saved": 0,
+    "sold": 37
+   },
+   "film_festival": {
+    "asked": 171,
+    "n": 2,
+    "saved": 0,
+    "sold": 166
+   },
+   "spicy_dare": {
+    "asked": 11,
+    "n": 1,
+    "saved": 0,
+    "sold": 12
+   },
+   "sugar_sale": {
+    "asked": 15,
+    "n": 1,
+    "saved": 26,
+    "sold": 19
+   }
+  },
+  "3703": {
+   "big_bag_day": {
+    "asked": 108,
+    "n": 3,
+    "saved": 0,
+    "sold": 103
+   },
+   "caramel_craze": {
+    "asked": 17,
+    "n": 1,
+    "saved": 0,
+    "sold": 17
+   },
+   "cheese_fans": {
+    "asked": 112,
+    "n": 3,
+    "saved": 0,
+    "sold": 106
+   },
+   "spicy_dare": {
+    "asked": 0,
+    "n": 1,
+    "saved": 0,
+    "sold": 0
+   },
+   "sugar_sale": {
+    "asked": 20,
+    "n": 1,
+    "saved": 32,
+    "sold": 22
+   }
+  }
+ },
+ "hours": {
+  "3701_focus": {
+   "abandoned": 0,
+   "asked_recipe": {
+    "caramel": 301,
+    "cheese": 381,
+    "cocoa": 198,
+    "duo": 115,
+    "plain": 1572,
+    "spicy": 85
+   },
+   "events": [
+    {
+     "asked": 21,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 20,
+     "start_min": 30.39
+    },
+    {
+     "asked": 47,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 46,
+     "start_min": 33.84
+    },
+    {
+     "asked": 17,
+     "id": "cheese_sale",
+     "saved": 10,
+     "sold": 17,
+     "start_min": 37.72
+    },
+    {
+     "asked": 15,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 15,
+     "start_min": 40.12
+    },
+    {
+     "asked": 60,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 56,
+     "start_min": 44.49
+    },
+    {
+     "asked": 21,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 18,
+     "start_min": 49.07
+    },
+    {
+     "asked": 50,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 46,
+     "start_min": 53.47
+    },
+    {
+     "asked": 16,
+     "id": "cheese_sale",
+     "saved": 12,
+     "sold": 16,
+     "start_min": 55.36
+    },
+    {
+     "asked": 3,
+     "id": "cocoa_week",
+     "saved": 0,
+     "sold": 2,
+     "start_min": 59.31
+    }
+   ],
+   "events_logged": 9,
+   "flavor_sold": {
+    "caramel": 299,
+    "cheese": 381,
+    "cocoa": 197,
+    "spicy": 85
+   },
+   "net_per_min": 547.0,
+   "news_saved_coins": 68,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 16,
+   "passed_by": 151,
+   "popularity_end": 100.0,
+   "sold": 2648,
+   "steady_violations": 0
+  },
+  "3701_off": {
+   "abandoned": 0,
+   "asked_recipe": {
+    "caramel": 303,
+    "cheese": 344,
+    "cocoa": 187,
+    "duo": 111,
+    "plain": 1651,
+    "spicy": 83
+   },
+   "events": [],
+   "events_logged": 0,
+   "flavor_sold": {
+    "caramel": 302,
+    "cheese": 344,
+    "cocoa": 187,
+    "spicy": 83
+   },
+   "net_per_min": 539.3,
+   "news_saved_coins": 0,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 0,
+   "passed_by": 105,
+   "popularity_end": 100.0,
+   "sold": 2675,
+   "steady_violations": 0
+  },
+  "3701_on": {
+   "abandoned": 7,
+   "asked_recipe": {
+    "caramel": 297,
+    "cheese": 382,
+    "cocoa": 148,
+    "duo": 133,
+    "plain": 1517,
+    "spicy": 103
+   },
+   "events": [
+    {
+     "asked": 21,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 18,
+     "start_min": 30.39
+    },
+    {
+     "asked": 49,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 48,
+     "start_min": 33.84
+    },
+    {
+     "asked": 18,
+     "id": "cheese_sale",
+     "saved": 11,
+     "sold": 20,
+     "start_min": 37.72
+    },
+    {
+     "asked": 23,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 20,
+     "start_min": 40.12
+    },
+    {
+     "asked": 55,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 54,
+     "start_min": 44.49
+    },
+    {
+     "asked": 12,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 13,
+     "start_min": 49.07
+    },
+    {
+     "asked": 62,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 57,
+     "start_min": 53.47
+    },
+    {
+     "asked": 27,
+     "id": "cheese_sale",
+     "saved": 17,
+     "sold": 27,
+     "start_min": 55.36
+    },
+    {
+     "asked": 4,
+     "id": "cocoa_week",
+     "saved": 0,
+     "sold": 5,
+     "start_min": 59.31
+    }
+   ],
+   "events_logged": 9,
+   "flavor_sold": {
+    "caramel": 293,
+    "cheese": 382,
+    "cocoa": 148,
+    "spicy": 101
+   },
+   "net_per_min": 531.5,
+   "news_saved_coins": 69,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 16,
+   "passed_by": 222,
+   "popularity_end": 100.0,
+   "sold": 2570,
+   "steady_violations": 0
+  },
+  "3701_u07": {
+   "abandoned": 0,
+   "asked_recipe": {
+    "caramel": 301,
+    "cheese": 374,
+    "cocoa": 202,
+    "duo": 111,
+    "plain": 1569,
+    "spicy": 86
+   },
+   "events": [
+    {
+     "asked": 21,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 20,
+     "start_min": 30.39
+    },
+    {
+     "asked": 47,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 46,
+     "start_min": 33.84
+    },
+    {
+     "asked": 17,
+     "id": "cheese_sale",
+     "saved": 11,
+     "sold": 17,
+     "start_min": 37.72
+    },
+    {
+     "asked": 18,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 18,
+     "start_min": 40.12
+    },
+    {
+     "asked": 59,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 60,
+     "start_min": 44.49
+    },
+    {
+     "asked": 22,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 17,
+     "start_min": 49.07
+    },
+    {
+     "asked": 51,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 45,
+     "start_min": 53.47
+    },
+    {
+     "asked": 14,
+     "id": "cheese_sale",
+     "saved": 9,
+     "sold": 16,
+     "start_min": 55.36
+    },
+    {
+     "asked": 4,
+     "id": "cocoa_week",
+     "saved": 0,
+     "sold": 5,
+     "start_min": 59.31
+    }
+   ],
+   "events_logged": 9,
+   "flavor_sold": {
+    "caramel": 299,
+    "cheese": 374,
+    "cocoa": 202,
+    "spicy": 86
+   },
+   "net_per_min": 544.5,
+   "news_saved_coins": 66,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 16,
+   "passed_by": 160,
+   "popularity_end": 100.0,
+   "sold": 2640,
+   "steady_violations": 0
+  },
+  "3702_focus": {
+   "abandoned": 17,
+   "asked_recipe": {
+    "caramel": 292,
+    "cheese": 318,
+    "cocoa": 181,
+    "duo": 105,
+    "plain": 1435,
+    "spicy": 90
+   },
+   "events": [
+    {
+     "asked": 9,
+     "id": "sugar_sale",
+     "saved": 16,
+     "sold": 11,
+     "start_min": 31.64
+    },
+    {
+     "asked": 16,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 13,
+     "start_min": 35.07
+    },
+    {
+     "asked": 87,
+     "id": "film_festival",
+     "saved": 0,
+     "sold": 88,
+     "start_min": 38.06
+    },
+    {
+     "asked": 18,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 18,
+     "start_min": 42.78
+    },
+    {
+     "asked": 22,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 16,
+     "start_min": 46.64
+    },
+    {
+     "asked": 67,
+     "id": "film_festival",
+     "saved": 0,
+     "sold": 64,
+     "start_min": 50.17
+    },
+    {
+     "asked": 11,
+     "id": "spicy_dare",
+     "saved": 0,
+     "sold": 11,
+     "start_min": 54.49
+    },
+    {
+     "asked": 43,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 38,
+     "start_min": 57.5
+    }
+   ],
+   "events_logged": 8,
+   "flavor_sold": {
+    "caramel": 288,
+    "cheese": 313,
+    "cocoa": 181,
+    "spicy": 85
+   },
+   "net_per_min": 489.9,
+   "news_saved_coins": 30,
+   "news_skipped": 0,
+   "news_spared": 1,
+   "news_started": 17,
+   "passed_by": 411,
+   "popularity_end": 100.0,
+   "sold": 2403,
+   "steady_violations": 0
+  },
+  "3702_off": {
+   "abandoned": 3,
+   "asked_recipe": {
+    "caramel": 268,
+    "cheese": 371,
+    "cocoa": 192,
+    "duo": 129,
+    "plain": 1614,
+    "spicy": 106
+   },
+   "events": [],
+   "events_logged": 0,
+   "flavor_sold": {
+    "caramel": 267,
+    "cheese": 370,
+    "cocoa": 190,
+    "spicy": 104
+   },
+   "net_per_min": 539.7,
+   "news_saved_coins": 0,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 0,
+   "passed_by": 98,
+   "popularity_end": 100.0,
+   "sold": 2673,
+   "steady_violations": 0
+  },
+  "3702_on": {
+   "abandoned": 0,
+   "asked_recipe": {
+    "caramel": 300,
+    "cheese": 346,
+    "cocoa": 217,
+    "duo": 113,
+    "plain": 1504,
+    "spicy": 113
+   },
+   "events": [
+    {
+     "asked": 15,
+     "id": "sugar_sale",
+     "saved": 26,
+     "sold": 19,
+     "start_min": 31.64
+    },
+    {
+     "asked": 22,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 19,
+     "start_min": 35.07
+    },
+    {
+     "asked": 89,
+     "id": "film_festival",
+     "saved": 0,
+     "sold": 88,
+     "start_min": 38.06
+    },
+    {
+     "asked": 20,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 18,
+     "start_min": 42.78
+    },
+    {
+     "asked": 42,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 48,
+     "start_min": 46.64
+    },
+    {
+     "asked": 82,
+     "id": "film_festival",
+     "saved": 0,
+     "sold": 78,
+     "start_min": 50.17
+    },
+    {
+     "asked": 11,
+     "id": "spicy_dare",
+     "saved": 0,
+     "sold": 12,
+     "start_min": 54.49
+    },
+    {
+     "asked": 46,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 44,
+     "start_min": 57.5
+    }
+   ],
+   "events_logged": 8,
+   "flavor_sold": {
+    "caramel": 300,
+    "cheese": 346,
+    "cocoa": 217,
+    "spicy": 113
+   },
+   "net_per_min": 534.2,
+   "news_saved_coins": 41,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 17,
+   "passed_by": 240,
+   "popularity_end": 100.0,
+   "sold": 2591,
+   "steady_violations": 0
+  },
+  "3702_u07": {
+   "abandoned": 15,
+   "asked_recipe": {
+    "caramel": 295,
+    "cheese": 328,
+    "cocoa": 186,
+    "duo": 100,
+    "plain": 1401,
+    "spicy": 70
+   },
+   "events": [
+    {
+     "asked": 17,
+     "id": "sugar_sale",
+     "saved": 28,
+     "sold": 18,
+     "start_min": 31.64
+    },
+    {
+     "asked": 21,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 18,
+     "start_min": 35.07
+    },
+    {
+     "asked": 77,
+     "id": "film_festival",
+     "saved": 0,
+     "sold": 78,
+     "start_min": 38.06
+    },
+    {
+     "asked": 17,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 14,
+     "start_min": 42.78
+    },
+    {
+     "asked": 46,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 41,
+     "start_min": 46.64
+    },
+    {
+     "asked": 88,
+     "id": "film_festival",
+     "saved": 0,
+     "sold": 86,
+     "start_min": 50.17
+    },
+    {
+     "asked": 5,
+     "id": "spicy_dare",
+     "saved": 0,
+     "sold": 5,
+     "start_min": 54.49
+    },
+    {
+     "asked": 42,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 43,
+     "start_min": 57.5
+    }
+   ],
+   "events_logged": 8,
+   "flavor_sold": {
+    "caramel": 294,
+    "cheese": 325,
+    "cocoa": 182,
+    "spicy": 67
+   },
+   "net_per_min": 484.6,
+   "news_saved_coins": 35,
+   "news_skipped": 0,
+   "news_spared": 1,
+   "news_started": 17,
+   "passed_by": 451,
+   "popularity_end": 100.0,
+   "sold": 2361,
+   "steady_violations": 0
+  },
+  "3703_focus": {
+   "abandoned": 13,
+   "asked_recipe": {
+    "caramel": 312,
+    "cheese": 375,
+    "cocoa": 173,
+    "duo": 109,
+    "plain": 1354,
+    "spicy": 82
+   },
+   "events": [
+    {
+     "asked": 50,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 52,
+     "start_min": 34.65
+    },
+    {
+     "asked": 18,
+     "id": "sugar_sale",
+     "saved": 28,
+     "sold": 20,
+     "start_min": 37.26
+    },
+    {
+     "asked": 30,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 30,
+     "start_min": 42.05
+    },
+    {
+     "asked": 20,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 16,
+     "start_min": 45.85
+    },
+    {
+     "asked": 49,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 45,
+     "start_min": 48.36
+    },
+    {
+     "asked": 13,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 12,
+     "start_min": 51.84
+    },
+    {
+     "asked": 38,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 37,
+     "start_min": 54.93
+    },
+    {
+     "asked": 18,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 16,
+     "start_min": 56.99
+    },
+    {
+     "asked": 1,
+     "id": "spicy_dare",
+     "saved": 0,
+     "sold": 1,
+     "start_min": 59.54
+    }
+   ],
+   "events_logged": 9,
+   "flavor_sold": {
+    "caramel": 306,
+    "cheese": 372,
+    "cocoa": 173,
+    "spicy": 80
+   },
+   "net_per_min": 489.6,
+   "news_saved_coins": 60,
+   "news_skipped": 0,
+   "news_spared": 2,
+   "news_started": 19,
+   "passed_by": 410,
+   "popularity_end": 100.0,
+   "sold": 2387,
+   "steady_violations": 0
+  },
+  "3703_off": {
+   "abandoned": 19,
+   "asked_recipe": {
+    "caramel": 287,
+    "cheese": 335,
+    "cocoa": 166,
+    "duo": 107,
+    "plain": 1507,
+    "spicy": 77
+   },
+   "events": [],
+   "events_logged": 0,
+   "flavor_sold": {
+    "caramel": 285,
+    "cheese": 334,
+    "cocoa": 164,
+    "spicy": 74
+   },
+   "net_per_min": 494.8,
+   "news_saved_coins": 0,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 0,
+   "passed_by": 311,
+   "popularity_end": 100.0,
+   "sold": 2458,
+   "steady_violations": 0
+  },
+  "3703_on": {
+   "abandoned": 4,
+   "asked_recipe": {
+    "caramel": 289,
+    "cheese": 420,
+    "cocoa": 202,
+    "duo": 105,
+    "plain": 1377,
+    "spicy": 85
+   },
+   "events": [
+    {
+     "asked": 25,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 21,
+     "start_min": 34.65
+    },
+    {
+     "asked": 20,
+     "id": "sugar_sale",
+     "saved": 32,
+     "sold": 22,
+     "start_min": 37.26
+    },
+    {
+     "asked": 45,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 42,
+     "start_min": 42.05
+    },
+    {
+     "asked": 17,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 17,
+     "start_min": 45.85
+    },
+    {
+     "asked": 42,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 39,
+     "start_min": 48.36
+    },
+    {
+     "asked": 34,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 32,
+     "start_min": 51.84
+    },
+    {
+     "asked": 41,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 43,
+     "start_min": 54.93
+    },
+    {
+     "asked": 33,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 32,
+     "start_min": 56.99
+    },
+    {
+     "asked": 0,
+     "id": "spicy_dare",
+     "saved": 0,
+     "sold": 0,
+     "start_min": 59.54
+    }
+   ],
+   "events_logged": 9,
+   "flavor_sold": {
+    "caramel": 287,
+    "cheese": 420,
+    "cocoa": 201,
+    "spicy": 84
+   },
+   "net_per_min": 513.9,
+   "news_saved_coins": 58,
+   "news_skipped": 0,
+   "news_spared": 0,
+   "news_started": 19,
+   "passed_by": 337,
+   "popularity_end": 100.0,
+   "sold": 2473,
+   "steady_violations": 0
+  },
+  "3703_u07": {
+   "abandoned": 13,
+   "asked_recipe": {
+    "caramel": 312,
+    "cheese": 375,
+    "cocoa": 173,
+    "duo": 109,
+    "plain": 1354,
+    "spicy": 82
+   },
+   "events": [
+    {
+     "asked": 50,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 52,
+     "start_min": 34.65
+    },
+    {
+     "asked": 18,
+     "id": "sugar_sale",
+     "saved": 28,
+     "sold": 20,
+     "start_min": 37.26
+    },
+    {
+     "asked": 30,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 30,
+     "start_min": 42.05
+    },
+    {
+     "asked": 20,
+     "id": "caramel_craze",
+     "saved": 0,
+     "sold": 16,
+     "start_min": 45.85
+    },
+    {
+     "asked": 49,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 45,
+     "start_min": 48.36
+    },
+    {
+     "asked": 13,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 12,
+     "start_min": 51.84
+    },
+    {
+     "asked": 38,
+     "id": "big_bag_day",
+     "saved": 0,
+     "sold": 37,
+     "start_min": 54.93
+    },
+    {
+     "asked": 18,
+     "id": "cheese_fans",
+     "saved": 0,
+     "sold": 16,
+     "start_min": 56.99
+    },
+    {
+     "asked": 1,
+     "id": "spicy_dare",
+     "saved": 0,
+     "sold": 1,
+     "start_min": 59.54
+    }
+   ],
+   "events_logged": 9,
+   "flavor_sold": {
+    "caramel": 306,
+    "cheese": 372,
+    "cocoa": 173,
+    "spicy": 80
+   },
+   "net_per_min": 488.4,
+   "news_saved_coins": 60,
+   "news_skipped": 0,
+   "news_spared": 2,
+   "news_started": 19,
+   "passed_by": 410,
+   "popularity_end": 100.0,
+   "sold": 2387,
+   "steady_violations": 0
+  }
+ },
+ "minutes": 60,
+ "plain": {
+  "3711": {
+   "events": {
+    "film_festival": 8
+   },
+   "sizes_open": [
+    2
+   ],
+   "sold": 875
+  },
+  "3712": {
+   "events": {
+    "film_festival": 8
+   },
+   "sizes_open": [
+    2
+   ],
+   "sold": 880
+  }
+ }
+}

@@ -1,0 +1,16 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+3701_off: net 539.3/min, sold 2675, events 0 (skipped 0), spared 0, saved 0 coins, steady bad 0  [34963 ms]
+3701_on: net 531.5/min, sold 2570, events 16 (skipped 0), spared 0, saved 69 coins, steady bad 0  [37050 ms]
+3701_focus: net 547.0/min, sold 2648, events 16 (skipped 0), spared 0, saved 68 coins, steady bad 0  [35803 ms]
+3701_u07: net 544.5/min, sold 2640, events 16 (skipped 0), spared 0, saved 66 coins, steady bad 0  [36118 ms]
+3702_off: net 539.7/min, sold 2673, events 0 (skipped 0), spared 0, saved 0 coins, steady bad 0  [35498 ms]
+3702_on: net 534.2/min, sold 2591, events 17 (skipped 0), spared 0, saved 41 coins, steady bad 0  [35709 ms]
+3702_focus: net 489.9/min, sold 2403, events 17 (skipped 0), spared 1, saved 30 coins, steady bad 0  [42723 ms]
+3702_u07: net 484.6/min, sold 2361, events 17 (skipped 0), spared 1, saved 35 coins, steady bad 0  [48345 ms]
+3703_off: net 494.8/min, sold 2458, events 0 (skipped 0), spared 0, saved 0 coins, steady bad 0  [48693 ms]
+3703_on: net 513.9/min, sold 2473, events 19 (skipped 0), spared 0, saved 58 coins, steady bad 0  [48545 ms]
+3703_focus: net 489.6/min, sold 2387, events 19 (skipped 0), spared 2, saved 60 coins, steady bad 0  [51248 ms]
+3703_u07: net 488.4/min, sold 2387, events 19 (skipped 0), spared 2, saved 60 coins, steady bad 0  [50167 ms]
+plain 3711: { "sizes_open": [2], "events": { "film_festival": 8 }, "sold": 875 }
+plain 3712: { "sizes_open": [2], "events": { "film_festival": 8 }, "sold": 880 }

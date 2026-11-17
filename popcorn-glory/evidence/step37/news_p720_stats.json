@@ -1,0 +1,64 @@
+{
+ "video_start_wall": 1794955918810,
+ "audio_start_wall": 1794955943522,
+ "run_start_wall": 1794955943523,
+ "craze_wall": 1794955970058,
+ "end_wall": 1794956091569,
+ "craze": {
+  "id": "caramel_craze",
+  "n": 1,
+  "ok": true
+ },
+ "before": {
+  "seconds": 26.535,
+  "caramel_asked": 1,
+  "sold": 13
+ },
+ "during": {
+  "seconds": 121.511,
+  "caramel_asked": 14,
+  "sold": 69,
+  "row": {
+   "asked": 16,
+   "channel": "flavor",
+   "flavor": "caramel",
+   "id": "caramel_craze",
+   "left_ms": 0,
+   "ms": 120000,
+   "mult": 2,
+   "n": 1,
+   "name": "Caramel craze!",
+   "saved": 0,
+   "sold": 15
+  }
+ },
+ "after": {
+  "seconds": 16,
+  "caramel_asked": 1,
+  "sold": 13,
+  "news": {
+   "active": [],
+   "focus": "",
+   "log": [
+    {
+     "asked": 16,
+     "channel": "flavor",
+     "flavor": "caramel",
+     "id": "caramel_craze",
+     "left_ms": 0,
+     "ms": 120000,
+     "mult": 2,
+     "n": 1,
+     "name": "Caramel craze!",
+     "saved": 0,
+     "sold": 15
+    }
+   ],
+   "next_in_ms": 51040,
+   "scheduler": false,
+   "unread": 0
+  }
+ },
+ "conserved": true,
+ "wrong_sku": 0
+}

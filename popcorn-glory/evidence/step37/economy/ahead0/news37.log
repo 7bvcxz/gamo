@@ -1,0 +1,9 @@
+
+3701_focus: net 531.5/min, sold 2570, events 16 (skipped 0), spared 0, saved 69 coins, steady bad 0  [49450 ms]
+3701_u07: net 530.5/min, sold 2570, events 16 (skipped 0), spared 0, saved 69 coins, steady bad 0  [51083 ms]
+3702_focus: net 534.2/min, sold 2591, events 17 (skipped 0), spared 0, saved 41 coins, steady bad 0  [46798 ms]
+3702_u07: net 533.1/min, sold 2591, events 17 (skipped 0), spared 0, saved 41 coins, steady bad 0  [49334 ms]
+3703_focus: net 513.9/min, sold 2473, events 19 (skipped 0), spared 0, saved 58 coins, steady bad 0  [51127 ms]
+3703_u07: net 512.7/min, sold 2473, events 19 (skipped 0), spared 0, saved 58 coins, steady bad 0  [50463 ms]
+plain 3711: { "sizes_open": [2], "events": { "film_festival": 8 }, "sold": 875 }
+plain 3712: { "sizes_open": [2], "events": { "film_festival": 8 }, "sold": 880 }
