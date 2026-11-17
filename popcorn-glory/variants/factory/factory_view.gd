@@ -131,6 +131,7 @@ func setup(p_rules: PopRules) -> void:
 		add_child(bell_node)
 		bell_node.draw.connect(func() -> void: PopFactoryArt.bell(bell_node, _head_px() * 0.9))
 		detail_layer.name = "Detail"
+		detail_layer.z_index = 10   # above everything, also the front row of the queue (z 1, Step 31)
 		add_child(detail_layer)
 		detail_layer.draw.connect(func() -> void:
 			if overview:
