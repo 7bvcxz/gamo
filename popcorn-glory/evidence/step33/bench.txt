@@ -1,0 +1,19 @@
+# tools/bench/forty.gd on 20972d1b (load average: 13.34, 10.06, 9.54)
+# before the Step 33 hotspot fixes (same tool, same session, earlier source): machines 44, a model minute in 2328.5 ms (1.940 ms a 50 ms step); machines 1.679 ms, lines 0.191, _device_on 0.006, on_hand 0.007, _next_pack 0.075 ms a call
+per type, all of its machines (us a step):
+  bagger 198.9
+  cooker 188.5
+  U08 89.7
+  M01 78.7
+  P01 48.9
+  U02 29.7
+  M05 12.7
+  M13 12.5
+  M08 12.3
+  U04 11.1
+machines 44, a model minute in 1089.8 ms (0.908 ms a 50 ms step)
+  machines: 0.838 ms a call
+  lines: 0.056 ms a call
+  devices: 0.001 ms a call
+  on_hand: 0.008 ms a call
+  next_pack: 0.036 ms a call

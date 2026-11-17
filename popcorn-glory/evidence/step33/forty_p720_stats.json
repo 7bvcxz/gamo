@@ -1,0 +1,23 @@
+{
+ "video_start_wall": 1794912843366,
+ "audio_start_wall": 1794912945373,
+ "run_start_wall": 1794912945375,
+ "machines": 44,
+ "lines": {
+  "kitchen": 3,
+  "packing": 3,
+  "shop": 2
+ },
+ "made": 148,
+ "packed": 61,
+ "sold": 61,
+ "revenue": 660,
+ "upkeep": 59,
+ "per_min_at_end": {
+  "lots": 41,
+  "packs": 39,
+  "sales": 40
+ },
+ "conserved": true,
+ "build": null
+}

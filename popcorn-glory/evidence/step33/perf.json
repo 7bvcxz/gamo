@@ -1,0 +1,190 @@
+{
+ "p720": {
+  "layout": {
+   "smallest_place_px": 30,
+   "window": [
+    720,
+    1280
+   ]
+  },
+  "ran": {
+   "ran": 39,
+   "never": [
+    "kiosk",
+    "U08",
+    "kiosk",
+    "bagger",
+    "bagger"
+   ]
+  },
+  "lines": {
+   "at_pause": 10,
+   "before_kitchen_pause": 7,
+   "moved": 2,
+   "line_portions": [
+    3,
+    0,
+    6
+   ]
+  },
+  "hidden": {
+   "before": 246715,
+   "hidden": 246783,
+   "after": 249377
+  }
+ },
+ "phone": {
+  "layout": {
+   "smallest_place_px": 45,
+   "window": [
+    780,
+    1688
+   ]
+  },
+  "ran": {
+   "ran": 39,
+   "never": [
+    "kiosk",
+    "U08",
+    "kiosk",
+    "bagger",
+    "bagger"
+   ]
+  },
+  "lines": {
+   "at_pause": 10,
+   "before_kitchen_pause": 10,
+   "moved": 3,
+   "line_portions": [
+    1,
+    0,
+    4
+   ]
+  },
+  "hidden": {
+   "before": 263457,
+   "hidden": 263528,
+   "after": 266165
+  }
+ },
+ "desktop": {
+  "layout": {
+   "smallest_place_px": 21,
+   "window": [
+    1280,
+    800
+   ]
+  },
+  "ran": {
+   "ran": 38,
+   "never": [
+    "kiosk",
+    "U08",
+    "bagger",
+    "kiosk",
+    "bagger",
+    "bagger"
+   ]
+  },
+  "lines": {
+   "at_pause": 11,
+   "before_kitchen_pause": 9,
+   "moved": 1,
+   "line_portions": [
+    1,
+    0,
+    0
+   ]
+  },
+  "hidden": {
+   "before": 241335,
+   "hidden": 241395,
+   "after": 244020
+  },
+  "perf": {
+   "machines": 44,
+   "fps": [
+    19.217834136002647,
+    19.39299912372838,
+    19.50458358439673,
+    18.971542685971045,
+    18.67138365829781,
+    19.17729407328283
+   ],
+   "median": 19.217834136002647,
+   "heap0": 29013859,
+   "heap1": 34671571,
+   "kept_mb": 5.657712,
+   "draw_calls": [
+    896,
+    908,
+    914,
+    902,
+    918,
+    888
+   ],
+   "objects": [
+    1045,
+    1036,
+    1053,
+    1050,
+    1059,
+    1034
+   ],
+   "nodes": [
+    283,
+    284,
+    284,
+    284,
+    285,
+    283
+   ],
+   "static_mem": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "redraws_per_min": {
+    "detail": 178,
+    "floors": 0,
+    "goods": 210,
+    "machines": 660
+   },
+   "cargo": {
+    "made": 313,
+    "peak": 10,
+    "reused": 560,
+    "skipped": 0
+   },
+   "pool": {
+    "bag": 7,
+    "lot": 1
+   },
+   "actor_nodes": 59,
+   "load": [
+    10.08,
+    10.94
+   ]
+  }
+ },
+ "_baseline_step32_factory29_10_machines": {
+  "fps_median": 22.24,
+  "draw_calls": [
+   846,
+   958,
+   965,
+   982,
+   962,
+   992
+  ],
+  "kept_mb": 5.44,
+  "load": [
+   8.37,
+   11.06
+  ]
+ },
+ "_baseline_0_12_2_stand": "R-01 (design/QUALITY_GATES.md): engine-side JS heap grew 1.5-5.5 MB a minute while the stand redrew every frame"
+}
