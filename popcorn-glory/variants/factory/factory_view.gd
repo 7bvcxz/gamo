@@ -981,7 +981,8 @@ func _new_actor(kind: String, id: int) -> Node2D:
 		a = Actor.new()
 		a.kind = kind
 		actor_layer.add_child(a)
-		cargo_stats["made"] = int(cargo_stats["made"]) + 1
+		if _pool.has(kind):   # lots and bags (customers are not pooled)
+			cargo_stats["made"] = int(cargo_stats["made"]) + 1
 	a.model_id = id
 	return a
 
