@@ -15,7 +15,8 @@
   "cup_sku",
   "portion_variance",
   "multi_queue",
-  "four_lanes"
+  "four_lanes",
+  "parallel_lines"
  ],
  "machines": [
   {
@@ -1940,15 +1941,16 @@
    "operation": "moves goods from a blocked line to an idle one",
    "contract": {
     "kind": "balance",
-    "needs_lines": 2
+    "needs_lines": 2,
+    "move": "a lot at a time per line, the oldest first"
    },
    "inputs": [
-    "goods in a blocked line"
+    "goods in a stopped or crowded line"
    ],
    "outputs": [
     "the same goods in an idle line"
    ],
-   "queue": "needs two parallel lines",
+   "queue": "needs two parallel packing lines; moves 1/2/3 lots at once",
    "prereq": {
     "sign": 6
    },
@@ -1960,18 +1962,24 @@
    "upkeep_per_min": 2,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "parallel": 1,
+     "move_ms": 1500
     },
     {
-     "cost": 400
+     "cost": 400,
+     "parallel": 2,
+     "move_ms": 1100
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "parallel": 3,
+     "move_ms": 800
     }
    ],
-   "marginal": "none until parallel lines (Step 33)",
-   "runtime": null,
-   "step": 32
+   "marginal": "a paused or crowded packing line's popcorn reaches an idle filler instead of waiting",
+   "runtime": "U08",
+   "step": 33
   }
  ]
 }

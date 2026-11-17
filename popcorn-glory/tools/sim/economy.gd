@@ -5,6 +5,7 @@ extends SceneTree
 ## Writes <out>/runs.csv (per minute, every run), <out>/purchases.csv (each purchase with its
 ## measured payback) and <out>/summary.json; asserts conservation at every minute.
 const Factory := preload("res://variants/factory/factory_rules.gd")
+const FORTY_PLAN: Array = preload("res://tests/unit/test_factory_rules.gd").FORTY_PLAN   ## Step 33: the unit test's 44-machine build order
 
 ## Hands: how soon they press after the kettle frees (ms) and their grade odds.
 const HANDS := {
@@ -242,6 +243,38 @@ func _scenario(name: String, out: Dictionary) -> void:
 				f.advance(1500)
 				if f.heating:
 					f.execute({"type": "release"})
+		"forty_hour", "forty_hour_no_u08":
+			# Step 33: an hour of the 44-machine factory (three kitchen lines, three packing lines,
+			# two shop lines) with a hand popping now and then; the second packing line's fillers
+			# stop from minute 20 to 30 -- with the route balancer (U08) its popcorn reaches the
+			# other lines, without it (a filler in its place) it waits.
+			f.sign_tier = 6
+			f.packer_tier = 3
+			f.level = 6
+			f.stats["sold"] = 1
+			f.stats["packed"] = 1
+			f.money = 1 << 30
+			for row: Array in FORTY_PLAN:
+				var floor := String(row[1])
+				if f.floor_full(floor) and int(f.line_cost(floor)) >= 0:
+					f.execute({"type": "buy_line", "floor": floor})
+				var id := String(row[0])
+				if id == "U08" and name == "forty_hour_no_u08":
+					id = "P04"
+				f.execute({"type": "build", "machine": id, "floor": floor})
+			assert(f.machines.size() >= 40, "forty machines built (%d)" % f.machines.size())
+			f.money = 2000
+			f.stats["sold"] = 0
+			var stopped: Array = f.of_type("bagger").filter(func(m: Dictionary) -> bool: return int(f.line_of("packing", int(m["slot"]))) == 1)
+			for i in 2400:
+				if i == 800 or i == 1200:
+					for m: Dictionary in stopped:
+						f.execute({"type": "pause_machine", "id": m["id"], "paused": i == 800})
+				if i % 3 == 0 and f.glass.is_empty() and int(f.cooldown_left) <= 0 and not f.heating:
+					f.execute({"type": "press"})
+				f.advance(1500)
+				if f.heating:
+					f.execute({"type": "release"})
 		"advanced_kitchen":   # Step 29: the same room with the advanced kitchen, no hand, 30 minutes
 			f.sign_tier = 6
 			f.packer_tier = 3
@@ -289,7 +322,8 @@ func _scenario(name: String, out: Dictionary) -> void:
 		"blocked_ms": f.stats["auto_blocked_ms"], "bin": f.bin_portions(), "shelf": f.shelf.size(), "glass": int(f.glass.get("portions", 0)),
 		"inputs": int(f.stats.get("kernels_paid", 0)) + int(f.stats.get("oil_paid", 0)),
 		"overheat_stops": int(f.stats.get("overheat_stops", 0)), "rotary_lots": int(f.stats.get("rotary_lots", 0)),
-		"per_machine": f.upkeep_overview()["machines"] if name == "hour_utility" else [],
+		"per_machine": f.upkeep_overview()["machines"] if name in ["hour_utility", "forty_hour"] else [],
+		"machines": f.machines.size(), "lines": f.floor_lines.duplicate(), "moved_lots": int(f.stats.get("moved_lots", 0)), "line_blocked_ms": int(f.stats.get("line_blocked_ms", 0)),
 		"net_per_min": (float(f.stats["revenue"]) - float(f.stats["upkeep_paid"]) - float(f.stats.get("kernels_paid", 0)) - float(f.stats.get("oil_paid", 0))) / maxf(1.0, minutes), "presses_refused": f.stats["glass_wait_ms"]}
 
 
@@ -322,7 +356,7 @@ func _init() -> void:
 	g.close()
 	var scen := {}
 	if only == "":
-		for name in ["zero_customers", "overproduction", "max_customers", "sales_burst", "cookers_10", "cookers_20", "cookers_40", "advanced_kitchen", "hour_utility"]:
+		for name in ["zero_customers", "overproduction", "max_customers", "sales_burst", "cookers_10", "cookers_20", "cookers_40", "advanced_kitchen", "hour_utility", "forty_hour", "forty_hour_no_u08"]:
 			_scenario(name, scen)
 	summary["_scenarios"] = scen
 	var s := FileAccess.open(out + "/summary.json", FileAccess.WRITE)

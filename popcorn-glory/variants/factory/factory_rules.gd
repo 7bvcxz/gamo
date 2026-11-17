@@ -47,6 +47,10 @@ var kitchen_heat := 0.0    ## Step 29: the kitchen's heat (0 .. heat.limit)
 var pack_rng_state := 0    ## Step 30: the packing floor's own generator (a filler's overfill)
 var _prng := RandomNumberGenerator.new()
 var overheat_left := 0     ## Step 29: ms the kettles still stop to cool
+## Step 33: each floor's lines (1 = the first; data: factory.lines adds places per line).
+## Two or more packing lines make the raw bin parallel lines: every lot that lands is
+## routed to one line, and a line's fillers pack only its own goods (the station is line 1).
+var floor_lines := {"kitchen": 1, "packing": 1, "shop": 1}
 ## The cookers among them (Step 25's name; the same dictionaries).
 var cookers: Array:
 	get:
@@ -296,6 +300,8 @@ func _act(kind: String, cmd: Dictionary) -> Dictionary:
 	match kind:   # Step 26: the machines' lifecycle
 		"build":
 			return _build(String(cmd.get("machine", "")), int(cmd.get("slot", -1)), String(cmd.get("floor", "")))
+		"buy_line":   # Step 33: a floor's next line of places
+			return _buy_line(String(cmd.get("floor", "")))
 		"pause_all":   # Step 32: every machine at once (the upkeep overview)
 			return _pause_all(bool(cmd.get("paused", true)))
 		"sell_machine":
@@ -392,15 +398,17 @@ func _flow_step(dt: int) -> void:
 		bn_ring.append(instant_bottleneck())
 		if bn_ring.size() > BN_SAMPLES:
 			bn_ring.pop_front()
-	# 1b. The machines (Steps 25-26).
+	# 1b. The machines (Steps 25-26), then the lines (Step 33).
 	_machines_step(dt)
+	_lines_step(dt)
 	# 2. The lift lands lots in the bin.
 	var still: Array = []
 	for x: Dictionary in lift:
 		x["left_ms"] = int(x["left_ms"]) - dt
 		if int(x["left_ms"]) <= 0:
+			_route(x["lot"])   # Step 33: to a packing line (with two or more)
 			bin.append(x["lot"])
-			_emit("lot_binned", {"lot": x["lot"]["id"]})
+			_emit("lot_binned", {"lot": x["lot"]["id"], "line": lot_line(x["lot"])})
 		else:
 			still.append(x)
 	lift = still
@@ -413,7 +421,7 @@ func _flow_step(dt: int) -> void:
 		# stock (a small buffer of large bags, small bags for the rest of the shelf).
 		var started := 0
 		for k in int(packer()["per_cycle"]):
-			var want := _next_pack(station_sizes())
+			var want := _next_pack(station_sizes(), 0)
 			if want.is_empty():
 				break
 			# shelf_room counts the packs being sealed, so each started pack takes its place.
@@ -787,6 +795,21 @@ func shelf_room(sku: String) -> int:
 	return shelf_base() - plain_on
 
 
+## Packs on the shelf or being filled, by "sku|size" (what on_hand answers, all at once).
+func _on_hand_counts() -> Dictionary:
+	var out := {}
+	for m: Dictionary in of_type("bagger"):
+		var h: Dictionary = m["held"]
+		if not h.is_empty():
+			var k := "%s|%d" % [h["recipe"], h["size"]]
+			out[k] = int(out.get(k, 0)) + 1
+	for arr: Array in [shelf, packing]:
+		for p: Dictionary in arr:
+			var k := "%s|%d" % [p["recipe"], p["size"]]
+			out[k] = int(out.get(k, 0)) + 1
+	return out
+
+
 ## Packs of an SKU and size on the shelf or being filled.
 func on_hand(sku: String, size: int) -> int:
 	var n := 0
@@ -800,10 +823,12 @@ func on_hand(sku: String, size: int) -> int:
 	return n
 
 
-func _recipe_for(sku: String, size: int) -> String:
+func _recipe_for(sku: String, size: int, line: int = -1) -> String:
 	for lot: Dictionary in bin:
+		if not _on_line(lot, line):
+			continue
 		var r := String(lot["recipe"])
-		if pack_sku(r) == sku and bin_portions_of(r) >= size:
+		if pack_sku(r) == sku and bin_portions_of(r, line) >= size:
 			return r
 	return ""
 
@@ -811,18 +836,34 @@ func _recipe_for(sku: String, size: int) -> String:
 ## The next pack to fill ({recipe, size, for}) or {} -- nothing wanted, or not
 ## enough popcorn of the wanted kind (then the station waits: it never packs the
 ## popcorn an order needs into another bag).
-func _next_pack(allowed: Array = []) -> Dictionary:
+func _next_pack(allowed: Array = [], line: int = -1) -> Dictionary:
 	var covered := {}
+	var counts := _on_hand_counts()   # Step 33: counted once (forty machines asked per order)
+	# The line's recipes in the bin, oldest first, and their portions (one pass, not one a lot).
+	var order: Array = []
+	var portions := {}
+	for lot: Dictionary in bin:
+		if not _on_line(lot, line):
+			continue
+		var rr := String(lot["recipe"])
+		if not portions.has(rr):
+			order.append(rr)
+			portions[rr] = 0
+		portions[rr] = int(portions[rr]) + int(lot["portions"])
 	for c: Dictionary in queue:
 		var o: Dictionary = c["order"]
 		if not allowed.is_empty() and not allowed.has(int(o["size"])):
 			continue   # Step 30: cups are the cup feeder's; the station and the fillers pack bags
 		var key := "%s|%d" % [o["recipe"], o["size"]]
-		var have := int(covered.get(key, on_hand(String(o["recipe"]), int(o["size"]))))
+		var have := int(covered.get(key, int(counts.get(key, 0))))
 		if have > 0:
 			covered[key] = have - 1
 			continue
-		var r := _recipe_for(String(o["recipe"]), int(o["size"]))
+		var r := ""
+		for rr: String in order:
+			if pack_sku(rr) == String(o["recipe"]) and int(portions[rr]) >= int(o["size"]):
+				r = rr
+				break
 		return {} if r == "" else {"recipe": r, "size": int(o["size"]), "for": "order"}
 	var cap := shelf_base()
 	var reserved := 0
@@ -836,17 +877,12 @@ func _next_pack(allowed: Array = []) -> Dictionary:
 		var target := int(z.get("stock", 0)) if z.has("stock") else cap - reserved
 		# Each SKU in the bin (oldest first) against its own target; premium keeps one
 		# pack of a size in stock (only premium customers buy it: Step 29).
-		var seen := {}
-		for lot: Dictionary in bin:
-			var r := String(lot["recipe"])
-			if seen.has(r):
-				continue
-			seen[r] = true
-			if bin_portions_of(r) < size:
+		for r: String in order:
+			if int(portions[r]) < size:
 				continue
 			var sku := pack_sku(r)
 			var t := mini(target, 1) if sku in ["premium", "bargain"] else target
-			if on_hand(sku, size) < t:
+			if int(counts.get("%s|%d" % [sku, size], 0)) < t:
 				return {"recipe": r, "size": size, "for": "stock"}
 	return {}
 
@@ -901,10 +937,10 @@ func per_min(stage: String) -> int:
 	return n
 
 
-func bin_portions_of(recipe: String) -> int:
+func bin_portions_of(recipe: String, line: int = -1) -> int:
 	var n := 0
 	for lot: Dictionary in bin:
-		if String(lot["recipe"]) == recipe:
+		if String(lot["recipe"]) == recipe and _on_line(lot, line):
 			n += int(lot["portions"])
 	return n
 
@@ -918,7 +954,7 @@ func pack_sku(recipe: String) -> String:
 ## Takes `size` portions of `recipe` from the bin's oldest lots of it (FIFO)
 ## into a new pack; its quality is the portions' average (nothing lost).
 func _start_pack(size: int, recipe: String) -> void:
-	var pack := _take_pack(size, recipe)
+	var pack := _take_pack(size, recipe, 0)   # Step 33: the station is the first line's
 	var ms := int(round(float(packer()["ms"]) * seal_factor()))
 	pack["left_ms"] = ms
 	pack["ms"] = ms
@@ -928,14 +964,14 @@ func _start_pack(size: int, recipe: String) -> void:
 
 ## Takes `size` portions of `recipe` from the bin's oldest lots of it into a new
 ## pack (shared by the station and the baggers, Step 26).
-func _take_pack(size: int, recipe: String) -> Dictionary:
+func _take_pack(size: int, recipe: String, line: int = -1) -> Dictionary:
 	var need := size
 	var q_sum := 0
 	var used: Array = []
 	var i := 0
 	while need > 0:
 		var lot: Dictionary = bin[i]
-		if String(lot["recipe"]) != recipe:
+		if String(lot["recipe"]) != recipe or not _on_line(lot, line):
 			i += 1
 			continue
 		var take := mini(need, int(lot["portions"]))
@@ -1011,7 +1047,7 @@ const FLOOR_OF := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop",
 	"M09": "kitchen", "M10": "kitchen", "M11": "kitchen", "M12": "kitchen", "M13": "kitchen", "M14": "kitchen", "M15": "kitchen", "M16": "kitchen",
 	"P01": "packing", "P02": "packing", "P04": "packing", "P05": "packing", "P06": "packing", "P07": "packing", "P08": "packing",
 	"S01": "shop", "S02": "shop", "S03": "shop", "S04": "shop", "S05": "shop", "S06": "shop", "S08": "shop",
-	"U01": "any", "U02": "any", "U03": "any", "U04": "packing", "U05": "packing", "U06": "any", "U07": "any", "U08": "any"}
+	"U01": "any", "U02": "any", "U03": "any", "U04": "packing", "U05": "packing", "U06": "any", "U07": "any", "U08": "packing"}
 ## Step 28: the kitchen's devices that serve the kettles (each a catalog id and its own runtime).
 const KITCHEN_DEVICES := ["M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16"]
 ## Step 29: what cooks lots on its own (the auto kettle and the rotary popper): kernels,
@@ -1070,10 +1106,226 @@ func _auto() -> Dictionary:
 
 
 func slots(floor: String) -> int:
-	var n := int((_t().get("slots", {}) as Dictionary).get(floor, 0))
+	var n := int((_t().get("slots", {}) as Dictionary).get(floor, 0)) + line_places(floor)
 	if floor == "kitchen":
 		n += _kitchen_plus()
 	return n
+
+
+# -- Step 33: lines, routing between parallel packing lines ----------------------
+
+## The places a floor's bought lines add (the first line's places are `slots`).
+func line_places(floor: String, lines_n: int = -1) -> int:
+	var table: Array = (_t().get("lines", {}) as Dictionary).get(floor, [])
+	var n := 0
+	var bought := (int(floor_lines.get(floor, 1)) if lines_n < 0 else lines_n) - 1
+	for i in mini(bought, table.size()):
+		n += int((table[i] as Dictionary)["places"])
+	return n
+
+
+## The line a place belongs to (0 = the first). The kitchen's extra places from the
+## multi-pot distributor (M10) come after its lines and stand on the first line.
+func line_of(floor: String, slot: int) -> int:
+	var k := int((_t().get("slots", {}) as Dictionary).get(floor, 0))
+	if slot < k:
+		return 0
+	var table: Array = (_t().get("lines", {}) as Dictionary).get(floor, [])
+	for i in mini(int(floor_lines.get(floor, 1)) - 1, table.size()):
+		k += int((table[i] as Dictionary)["places"])
+		if slot < k:
+			return i + 1
+	return 0
+
+
+## What the floor's next line costs (-1: every line is built).
+func line_cost(floor: String) -> int:
+	var table: Array = (_t().get("lines", {}) as Dictionary).get(floor, [])
+	var i := int(floor_lines.get(floor, 1)) - 1
+	return int((table[i] as Dictionary)["cost"]) if i >= 0 and i < table.size() else -1
+
+
+## Whether every place on the floor holds a machine (a floor grows when it is full).
+func floor_full(floor: String) -> bool:
+	for k in slots(floor):
+		if machine_at(floor, k).is_empty():
+			return false
+	return true
+
+
+func _buy_line(floor: String) -> Dictionary:
+	if not floor_lines.has(floor):
+		return {"ok": false, "reason": "err.unknown"}
+	var cost := line_cost(floor)
+	if cost < 0:
+		return {"ok": false, "reason": "err.max_level"}
+	if not floor_full(floor):
+		return {"ok": false, "reason": "err.floor_not_full"}
+	if money < cost:
+		return {"ok": false, "reason": "err.not_enough_money"}
+	# The kitchen's distributor places move behind the new line: machines keep their place
+	# numbers, so a machine on a distributor place now stands on the new line's place.
+	money -= cost
+	floor_lines[floor] = int(floor_lines[floor]) + 1
+	_emit("line_built", {"floor": floor, "lines": floor_lines[floor], "cost": cost, "money": money, "slots": slots(floor)})
+	return {"ok": true, "lines": floor_lines[floor], "cost": cost}
+
+
+## Two or more packing lines: the bin's lots belong to lines.
+func parallel_lines() -> bool:
+	return int(floor_lines.get("packing", 1)) >= 2
+
+
+func packing_lines() -> int:
+	return int(floor_lines.get("packing", 1))
+
+
+func lot_line(lot: Dictionary) -> int:
+	return int(lot.get("line", 0))
+
+
+## A lot on its way between two lines (the route balancer, U08): no line packs it.
+func _moving(lot: Dictionary) -> bool:
+	return int(lot.get("moving_ms", 0)) > 0
+
+
+## Whether a lot is packable by a packer of line `line` (-1: any line; with one
+## packing line every lot is every packer's).
+func _on_line(lot: Dictionary, line: int) -> bool:
+	if line < 0 or not parallel_lines():
+		return not _moving(lot)
+	return lot_line(lot) == line and not _moving(lot)
+
+
+## The fillers (P03 baggers) on a packing line; the station packs for line 0.
+func line_fillers(line: int) -> Array:
+	return of_type("bagger").filter(func(x: Dictionary) -> bool: return line_of("packing", int(x["slot"])) == line)
+
+
+## A line that can pack now: line 0 has the station; another line needs a filler
+## that is not paused, unpaid or saving.
+func line_working(line: int) -> bool:
+	if line == 0:
+		return true
+	return line_fillers(line).any(func(x: Dictionary) -> bool: return String(x["state"]) not in ["paused", "unpaid", "saving"])
+
+
+func line_portions(line: int) -> int:
+	var n := 0
+	for lot: Dictionary in bin:
+		if lot_line(lot) == line and not _moving(lot):
+			n += int(lot["portions"])
+	return n
+
+
+## Dispatch: a landing lot goes to the working line with the least popcorn per
+## packer (ties: the first line) -- deterministic, and a line that cannot pack gets nothing.
+func _route(lot: Dictionary) -> void:
+	if not parallel_lines():
+		return
+	var best := 0
+	var best_load := INF
+	for line in packing_lines():
+		if not line_working(line):
+			continue
+		var heads := line_fillers(line).filter(func(x: Dictionary) -> bool: return String(x["state"]) not in ["paused", "unpaid", "saving"]).size() + (1 if line == 0 else 0)
+		var load := float(line_portions(line)) / float(maxi(1, heads))
+		if load < best_load:
+			best_load = load
+			best = line
+	lot["line"] = best
+
+
+func _moving_to(line: int) -> int:
+	var n := 0
+	for lot: Dictionary in bin:
+		if _moving(lot) and int(lot["to"]) == line:
+			n += int(lot["portions"])
+	return n
+
+
+## Each step with parallel lines: a lot on a line that has no filler at all (it was
+## sold) goes back to the first line; then the route balancer (U08) moves goods.
+func _lines_step(dt: int) -> void:
+	if not parallel_lines():
+		return
+	var filled := {}
+	var working := {}
+	for line in packing_lines():
+		var fl := line_fillers(line)
+		filled[line] = not fl.is_empty()
+		working[line] = line == 0 or fl.any(func(x: Dictionary) -> bool: return String(x["state"]) not in ["paused", "unpaid", "saving"])
+	var stuck := false
+	for lot: Dictionary in bin:
+		var line := lot_line(lot)
+		if line > 0 and not _moving(lot) and not bool(filled.get(line, false)):
+			lot["line"] = 0
+			stats["line_orphans"] = int(stats.get("line_orphans", 0)) + 1
+		elif line > 0 and not _moving(lot) and not bool(working.get(line, true)):
+			stuck = true
+	if stuck:
+		stats["line_blocked_ms"] = int(stats.get("line_blocked_ms", 0)) + dt
+
+
+## U08 the route balancer: moves the oldest lots of a stopped line (its fillers all
+## paused, unpaid or saving) -- or of a line holding two packs' worth more than an idle
+## one -- to a line with nothing to pack; `parallel` lots at a time, each `move_ms`.
+## It works (and pays) only while it moves something.
+func _balancer_step(m: Dictionary, dt: int) -> void:
+	if not parallel_lines():
+		m["state"] = "idle"
+		return
+	var tier := _machine_tier(m)
+	var parallel := int(tier.get("parallel", 1))
+	var move_ms := int(tier.get("move_ms", 1500))
+	var mine: Array = bin.filter(func(l: Dictionary) -> bool: return _moving(l) and int(l.get("mover", -1)) == int(m["id"]))
+	if mine.size() < parallel:
+		# An idle line: it can pack and holds (with what is on its way to it) less than
+		# two packs' worth -- so a lone leftover portion never makes a line look busy.
+		var idle := -1
+		var enough := 2 * pack_size()
+		for line in packing_lines():
+			if line_working(line) and line_portions(line) + _moving_to(line) < enough:
+				idle = line
+				break
+		if idle >= 0:
+			var from := -1
+			for line in packing_lines():
+				if line != idle and not line_working(line) and line_portions(line) > 0:
+					from = line
+					break
+			if from < 0:
+				for line in packing_lines():
+					if line != idle and line_portions(line) >= enough * 2:
+						from = line
+						break
+			if from >= 0:
+				for lot: Dictionary in bin:
+					if mine.size() >= parallel:
+						break
+					if lot_line(lot) == from and not _moving(lot):
+						lot["moving_ms"] = move_ms
+						lot["to"] = idle
+						lot["mover"] = m["id"]
+						mine.append(lot)
+						_emit("lot_moving", {"lot": lot["id"], "from": from, "to": idle, "machine": m["id"], "ms": move_ms})
+						break   # one lot a step: the next step asks again (the idle line may be full by then)
+	if mine.is_empty():
+		m["state"] = "idle"
+		return
+	if not _pay(m, dt):
+		return
+	m["state"] = "run"
+	for lot: Dictionary in mine:
+		lot["moving_ms"] = int(lot["moving_ms"]) - dt
+		if int(lot["moving_ms"]) <= 0:
+			lot["line"] = int(lot["to"])
+			lot.erase("moving_ms")
+			lot.erase("to")
+			lot.erase("mover")
+			stats["moved_lots"] = int(stats.get("moved_lots", 0)) + 1
+			m["done"] = int(m.get("done", 0)) + 1
+			_emit("lot_moved", {"lot": lot["id"], "line": lot["line"], "machine": m["id"]})
 
 
 ## Step 29, M10 the multi-pot distributor: more kitchen places (each distributor its tier's).
@@ -1147,6 +1399,8 @@ func _build(type: String, slot: int, on_floor: String = "") -> Dictionary:
 		return {"ok": false, "reason": "err.unknown"}
 	if not station_open(type):
 		return {"ok": false, "reason": "err.locked"}
+	if type == "U08" and not parallel_lines():
+		return {"ok": false, "reason": "err.needs_lines"}   # Step 33: it balances two lines or does nothing
 	var floor := String(FLOOR_OF[type])
 	if floor == "any":   # Step 32: a support machine stands where it is put
 		floor = on_floor if on_floor in ["kitchen", "packing", "shop"] else "kitchen"
@@ -1166,6 +1420,7 @@ func _build(type: String, slot: int, on_floor: String = "") -> Dictionary:
 		"left_ms": int(_machine_tier_of(type, 0).get("cycle_ms", c.get("cycle_ms", 6000))), "held": {}, "upkeep_ms": 0, "paid": cost, "assist": 0}
 	next_machine_id += 1
 	machines.append(m)
+	_type_index_key = -1
 	_emit("station_upgrade", {"station": type, "tier": _count(type), "cost": cost, "money": money, "machine": m["id"], "slot": slot})
 	_emit("machine_built", {"machine": m["id"], "type": type, "slot": slot})
 	return {"ok": true, "machine": m["id"], "cost": cost}
@@ -1188,14 +1443,17 @@ func _sell_machine(id: int) -> Dictionary:
 		return {"ok": false, "reason": "err.unknown"}
 	if not (m["held"] as Dictionary).is_empty() or _kiosk_busy(id) or paying.any(func(pv: Dictionary) -> bool: return int(pv["cashier"]) == id):
 		return {"ok": false, "reason": "err.busy"}
+	if bin.any(func(l: Dictionary) -> bool: return _moving(l) and int(l.get("mover", -1)) == id):
+		return {"ok": false, "reason": "err.busy"}   # Step 33: a balancer finishes moving its lots first
 	if String(m["type"]) == "M10":
-		var left := int((_t().get("slots", {}) as Dictionary).get("kitchen", 0)) + _kitchen_plus(id)
+		var left := int((_t().get("slots", {}) as Dictionary).get("kitchen", 0)) + line_places("kitchen") + _kitchen_plus(id)
 		for x: Dictionary in machines:
 			if String(x["floor"]) == "kitchen" and int(x["slot"]) >= left and int(x["id"]) != id:
 				return {"ok": false, "reason": "err.slot_taken"}   # its places hold machines
 	var refund := int(m["paid"]) / 2
 	money += refund
 	machines.erase(m)
+	_type_index_key = -1
 	if assist_target == id:
 		assist_target = -1
 	_emit("machine_sold", {"machine": id, "refund": refund, "money": money})
@@ -1302,6 +1560,8 @@ func _machines_step(dt: int) -> void:
 				_shop_device_step(m, dt)
 			"U01", "U02", "U03", "U04", "U05":
 				_utility_step(m, dt)
+			"U08":
+				_balancer_step(m, dt)
 			"M01":
 				_hopper_step(m, dt)
 			"M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M13", "M14", "M15":
@@ -1355,20 +1615,22 @@ func _bagger_step(m: Dictionary, dt: int) -> void:
 	var h: Dictionary = m["held"]
 	if h.is_empty():
 		var allowed: Array = [1] if cups else station_sizes()
-		var want := _next_pack(allowed)
+		# Step 33: a filler packs its own line's goods; the cup feeder takes a portion from any line.
+		var line := -1 if cups else line_of("packing", int(m["slot"]))
+		var want := _next_pack(allowed, line)
 		if want.is_empty():
 			m["state"] = "starved" if shelf_room("plain") > 0 else "blocked"
 			return
 		if shelf_room(pack_sku(String(want["recipe"]))) <= 0:
 			m["state"] = "blocked"
 			return
-		var pack := _take_pack(int(want["size"]), String(want["recipe"]))
+		var pack := _take_pack(int(want["size"]), String(want["recipe"]), line)
 		var ms := float(_machine_tier(m).get("cycle_ms", 5000 if not cups else 2000))
 		if not cups:
 			if _device_on("P04"):
 				ms += float(_tier_value("P04", "slower_ms", 500))
-			elif _overfills() and bin_portions_of(String(want["recipe"])) > 0:
-				_take_extra(pack, String(want["recipe"]))
+			elif _overfills() and bin_portions_of(String(want["recipe"]), line) > 0:
+				_take_extra(pack, String(want["recipe"]), line)
 		pack["left_ms"] = int(round(ms * seal_factor() * lube_factor(m)))
 		m["held"] = pack
 		_emit("bagger_started", {"machine": m["id"], "pack": pack["id"], "size": pack["size"], "ms": pack["left_ms"]})
@@ -1399,10 +1661,10 @@ func _overfills() -> bool:
 
 
 ## One more portion of `recipe` from the bin's oldest lot into `pack` (an overfill).
-func _take_extra(pack: Dictionary, recipe: String) -> void:
+func _take_extra(pack: Dictionary, recipe: String, line: int = -1) -> void:
 	for i in bin.size():
 		var lot: Dictionary = bin[i]
-		if String(lot["recipe"]) == recipe and int(lot["portions"]) > 0:
+		if String(lot["recipe"]) == recipe and int(lot["portions"]) > 0 and _on_line(lot, line):
 			lot["portions"] = int(lot["portions"]) - 1
 			if int(lot["portions"]) <= 0:
 				bin.remove_at(i)
@@ -1585,23 +1847,59 @@ func demand_wants_lot() -> bool:
 # -- Step 28: the kitchen's devices (M01-M06, M08) ---------------------------------
 
 func _devices(type: String) -> Array:
-	return machines.filter(func(x: Dictionary) -> bool: return String(x["type"]) == type and String(x["state"]) not in ["paused", "unpaid", "saving"])
+	var out: Array = []
+	for x: Dictionary in of_type(type):
+		var st := String(x["state"])
+		if st != "paused" and st != "unpaid" and st != "saving":
+			out.append(x)
+	return out
 
 
 ## Whether a working device of that type is on the floor (paused or unpaid ones do nothing).
 func _device_on(type: String) -> bool:
-	return not _devices(type).is_empty()
+	for x: Dictionary in of_type(type):
+		var st := String(x["state"])
+		if st != "paused" and st != "unpaid" and st != "saving":
+			return true
+	return false
+
+
+## Step 33: the machines of a type, in build order -- an index kept with the machine list
+## (forty machines asked a dozen questions each, every 50 ms, made filtering the whole
+## list the factory's hotspot). Rebuilt when machines are built, sold or loaded.
+var _type_index := {}
+var _type_index_key := -1
+
+
+func of_type(type: String) -> Array:
+	var key := machines.size() * 100003 + (int(machines[machines.size() - 1]["id"]) if not machines.is_empty() else 0) * 7 + (int(machines[0]["id"]) if not machines.is_empty() else 0)
+	if key != _type_index_key:
+		_type_index = {}
+		for x: Dictionary in machines:
+			var t := String(x["type"])
+			if not _type_index.has(t):
+				_type_index[t] = []
+			(_type_index[t] as Array).append(x)
+		_type_index_key = key
+	return _type_index.get(type, [])
+
+
+func _any_kettle_in(states: Array) -> bool:
+	for t: String in KETTLES:
+		for x: Dictionary in of_type(t):
+			if states.has(String(x["state"])):
+				return true
+	return false
 
 
 ## A device that serves one kettle each (M04, M05): kettles in id order, one per device.
 func _covered(kettle: Dictionary, type: String) -> bool:
 	var n := _devices(type).size()
 	var k := 0
-	for c: Dictionary in machines:
-		if String(c["type"]) == "cooker":
-			if int(c["id"]) == int(kettle["id"]):
-				return k < n
-			k += 1
+	for c: Dictionary in of_type("cooker"):
+		if int(c["id"]) == int(kettle["id"]):
+			return k < n
+		k += 1
 	return false
 
 
@@ -1640,7 +1938,7 @@ func _cooker_cycle(m: Dictionary) -> int:
 func _kitchen_busy() -> bool:
 	if heating or not lift.is_empty() or cooldown_left > 0:
 		return true
-	return machines.any(func(x: Dictionary) -> bool: return _is_kettle(x) and String(x["state"]) == "run")
+	return _any_kettle_in(["run"])
 
 
 ## M01 the kernel hopper: buys kernels from the wallet (kernel_price a lot) and tops
@@ -1690,7 +1988,7 @@ func _hopper_step(m: Dictionary, dt: int) -> void:
 ## are applied where the goods are made (_auto_lot, _cooker_cycle, lift_ms, _cooldown_ms).
 func _device_step(m: Dictionary, dt: int) -> void:
 	var needs_kettle := String(m["type"]) in ["M02", "M03", "M04", "M05", "M09", "M11", "M13", "M14", "M15"]
-	var busy := machines.any(func(x: Dictionary) -> bool: return _is_kettle(x) and String(x["state"]) in ["run", "waiting", "overheat"]) if needs_kettle else _kitchen_busy()
+	var busy := _any_kettle_in(["run", "waiting", "overheat"]) if needs_kettle else _kitchen_busy()
 	if not busy:
 		m["state"] = "idle"
 		return
@@ -1701,7 +1999,7 @@ func _device_step(m: Dictionary, dt: int) -> void:
 
 ## Step 30: the packing floor's devices work (and pay) while the floor packs.
 func _packing_device_step(m: Dictionary, dt: int) -> void:
-	var busy := not packing.is_empty() or machines.any(func(x: Dictionary) -> bool: return String(x["type"]) in ["bagger", "P01"] and String(x["state"]) == "run")
+	var busy := not packing.is_empty() or of_type("bagger").any(func(x: Dictionary) -> bool: return String(x["state"]) == "run") or of_type("P01").any(func(x: Dictionary) -> bool: return String(x["state"]) == "run")
 	if not busy:
 		m["state"] = "idle"
 		return
@@ -1846,7 +2144,7 @@ const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines"
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
-		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state), "paying": paying.duplicate(true)}
+		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state), "paying": paying.duplicate(true), "floor_lines": floor_lines.duplicate()}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -1913,6 +2211,7 @@ func _apply_save(d: Dictionary) -> void:
 		_orng.state = order_rng_state
 	glass_held_ms = maxi(0, int(d.get("glass_held_ms", 0))) if typeof(d.get("glass_held_ms", 0)) == TYPE_INT else 0
 	machines = (d.get("machines", []) as Array).duplicate(true) if typeof(d.get("machines", [])) == TYPE_ARRAY else []
+	_type_index_key = -1
 	# A 0.25 save kept its cookers apart: they become cooker machines in the kitchen's slots.
 	if typeof(d.get("cookers")) == TYPE_ARRAY:
 		var k := 0
@@ -1926,6 +2225,13 @@ func _apply_save(d: Dictionary) -> void:
 	paying = (d.get("paying", []) as Array).duplicate(true) if typeof(d.get("paying", [])) == TYPE_ARRAY else []
 	if String(d.get("pack_rng_state", "")).is_valid_int():
 		pack_rng_state = String(d["pack_rng_state"]).to_int()
+	# Step 33: the floors' lines (optional: a 0.32 save has one line a floor).
+	floor_lines = {"kitchen": 1, "packing": 1, "shop": 1}
+	if typeof(d.get("floor_lines")) == TYPE_DICTIONARY:
+		for f: String in floor_lines.keys():
+			var max_n := ((_t().get("lines", {}) as Dictionary).get(f, []) as Array).size() + 1
+			if typeof((d["floor_lines"] as Dictionary).get(f)) == TYPE_INT:
+				floor_lines[f] = clampi(int(d["floor_lines"][f]), 1, max_n)
 	# Step 28: a kettle saved before kernels existed (0.25-0.27) comes back with a full
 	# buffer -- the save keeps cooking; it is not starved by an update.
 	for m: Dictionary in machines:
@@ -1963,7 +2269,7 @@ func state() -> Dictionary:
 	s["sign_tier"] = sign_tier
 	s["cookers"] = cookers.map(func(c: Dictionary) -> String: return String(c["state"]))
 	s["machines"] = machines.map(func(m: Dictionary) -> Dictionary: return {"id": m["id"], "type": m["type"], "floor": m["floor"], "slot": m["slot"],
-		"tier": m["tier"], "state": m["state"], "assist": m["assist"], "done": int(m.get("done", 0)), "held": int((m["held"] as Dictionary).get("portions", (m["held"] as Dictionary).get("size", 0))), "kernels": int(m.get("kernels", 0))})
+		"tier": m["tier"], "state": m["state"], "assist": m["assist"], "done": int(m.get("done", 0)), "held": int((m["held"] as Dictionary).get("portions", (m["held"] as Dictionary).get("size", 0))), "kernels": int(m.get("kernels", 0)), "line": line_of(String(m["floor"]), int(m["slot"]))})
 	s["build_cost"] = {"cooker": build_cost("cooker"), "bagger": build_cost("bagger"), "kiosk": build_cost("kiosk")}
 	s["auto_cost"] = auto_cost()
 	s["open"] = {"packer": station_open("packer"), "sign": station_open("sign"), "cooker": station_open("cooker"),
@@ -1997,6 +2303,16 @@ func state() -> Dictionary:
 	s["overview"] = upkeep_overview()   # Step 32
 	s["paying_ids"] = paying.map(func(pv: Dictionary) -> int: return int(pv["customer"]["id"]))
 	s["counter_lanes"] = lanes()
+	# Step 33: the lines, their places and costs, the parallel packing lines' goods.
+	s["lines"] = floor_lines.duplicate()
+	s["line_cost"] = {"kitchen": line_cost("kitchen"), "packing": line_cost("packing"), "shop": line_cost("shop")}
+	s["slots"] = {"kitchen": slots("kitchen"), "packing": slots("packing"), "shop": slots("shop")}
+	s["parallel"] = parallel_lines()
+	var lp: Array = []
+	for line in packing_lines():
+		lp.append(line_portions(line))
+	s["line_portions"] = lp
+	s["moving_lots"] = bin.filter(func(l: Dictionary) -> bool: return _moving(l)).size()
 	return s
 
 

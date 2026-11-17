@@ -99,6 +99,31 @@ func _tick() -> void:
 						if "queue" in _app.rules:
 							_app.rules.queue.clear()
 							_app.rules.next_arrival_ms = 1 << 40
+					"F":
+						# Step 33 (picture setup): the 44-machine plan of the unit test, `F<n>` its
+						# first n, the lines bought as each floor fills -- through the app's commands.
+						var rr = _app.rules
+						rr.sign_tier = 6
+						rr.packer_tier = 3
+						rr.level = maxi(int(rr.level), 6)
+						rr.stats["packed"] = maxi(1, int(rr.stats["packed"]))
+						rr.stats["sold"] = maxi(1, int(rr.stats["sold"]))
+						rr.money += 1 << 24
+						var n := int(step.substr(1)) if step.length() > 1 else 44
+						for row: Array in preload("res://tests/unit/test_factory_rules.gd").FORTY_PLAN:
+							if (rr.machines as Array).size() >= n:
+								break
+							var fl := String(row[1])
+							if rr.floor_full(fl) and int(rr.line_cost(fl)) >= 0:
+								_app.on_command("buy_line", {"type": "buy_line", "floor": fl})
+							_app.on_command("build", {"type": "build", "machine": row[0], "floor": fl})
+						rr.money = 3000
+					"O":
+						# Step 33: the overview card (`O<id>` with that machine's diagnostics).
+						var vo = _app.frame.play
+						vo.overview = true
+						if step.length() > 1:
+							vo.ov_machine = int(step.substr(1))
 					"w":
 						_app.dev_advance(int(step.substr(1)))
 					"f":
@@ -119,6 +144,24 @@ func _tick() -> void:
 		return
 	process_frame.disconnect(_tick)
 	await RenderingServer.frame_post_draw
+	if _args.has("draws"):
+		# Step 33: draw calls with each of the play view's layers hidden in turn -- what each costs.
+		var v: Node = _app.frame.play
+		var info := func() -> int: return RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
+		for q in 3:
+			await RenderingServer.frame_post_draw
+		var all := int(info.call())
+		print("draws: all %d (objects %d)" % [all, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME)])
+		for c: Node in v.get_children():
+			if not c is CanvasItem or not (c as CanvasItem).visible:
+				continue
+			(c as CanvasItem).visible = false
+			for q in 3:
+				await RenderingServer.frame_post_draw
+			print("draws: without %s (%d children): %d (-%d)" % [c.name, c.get_child_count(), int(info.call()), all - int(info.call())])
+			(c as CanvasItem).visible = true
+			for q in 2:
+				await RenderingServer.frame_post_draw
 	var image: Image = root.get_texture().get_image()
 	var err := image.save_png(_args["out"])
 	print("capture: %s %dx%d err=%d" % [_args["out"], image.get_width(), image.get_height(), err])

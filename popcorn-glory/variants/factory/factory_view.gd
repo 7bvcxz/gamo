@@ -32,6 +32,19 @@ const MACHINE_OF := {"kitchen": "cooker", "packing": "bagger", "shop": "kiosk"}
 const FLOOR_INDEX := {"shop": 0, "packing": 1, "kitchen": 2}
 const FLOOR_OF_TYPE := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop"}
 var floor_layer := Node2D.new()
+## Step 33: what changes with the goods (the shop's sign and counter, the bin, the
+## station, the shelf) and each machine are their own nodes -- forty machines that
+## change state every step no longer redraw the whole factory.
+var goods_layer := Node2D.new()
+var machine_layer := Node2D.new()
+var _mnodes := {}            ## machine id -> its node
+## Step 33: each machine's picture (type, tier, size) drawn once into a small texture: a
+## machine is then one textured quad (its icon was a dozen draw calls -- forty-four of
+## them were 40% of a frame's draw calls). The state badge and gauges stay vector.
+var _icon_root := Node.new()
+var _icon_cache := {}
+var _goods_key := ""
+var redraws := {"floors": 0, "goods": 0, "machines": 0, "detail": 0}   ## for the perf tests
 var customer_node := Node2D.new()
 var detail_layer := Node2D.new()   ## above everything: the open floor's detail
 ## Step 18: the moving goods and people, keyed by the model's ids.
@@ -61,6 +74,9 @@ var _hint_key := ""
 ## and the kernels in flight from a hopper to a kettle.
 var _motion := {}
 var overview := false          ## Step 32: the upkeep overview is open
+var _overview_t := 0.0
+var _low_wallet := false
+var ov_machine := -1           ## Step 33: the machine picked in the overview (its diagnostics)
 var _heat_node: Node2D = null   ## Step 29: the kitchen's thermometer beside its places
 var _heat_shown := -1.0
 var _kernel_flights: Array = []
@@ -87,11 +103,19 @@ func setup(p_rules: PopRules) -> void:
 		a.queue_free()
 	customers.clear()
 	cargo.clear()
+	_pool = {"lot": [], "bag": []}
 	leaving.clear()
 	cargo_log.clear()
 	filling.clear()
 	nozzles.clear()
 	_motion.clear()
+	for n: Node in machine_layer.get_children():
+		n.queue_free()
+	_mnodes.clear()
+	for n: Node in _icon_root.get_children():
+		n.queue_free()
+	_icon_cache.clear()
+	_goods_key = ""
 	_kernel_flights.clear()
 	_nozzle_key = ""
 	_status = ""
@@ -101,17 +125,31 @@ func setup(p_rules: PopRules) -> void:
 		floor_layer.name = "Floors"
 		add_child(floor_layer)
 		move_child(floor_layer, 0)
-		floor_layer.draw.connect(func() -> void: _draw_floors(floor_layer))
+		floor_layer.draw.connect(func() -> void:
+			redraws["floors"] = int(redraws["floors"]) + 1
+			_draw_floors(floor_layer))
+		goods_layer.name = "Goods"
+		add_child(goods_layer)
+		move_child(goods_layer, 1)
+		goods_layer.draw.connect(func() -> void:
+			redraws["goods"] = int(redraws["goods"]) + 1
+			_draw_shop(goods_layer, floor_rect(TOP))
+			_draw_packing(goods_layer, packing_rect()))
+		machine_layer.name = "Machines"
+		add_child(machine_layer)
+		move_child(machine_layer, 2)
+		_icon_root.name = "IconCache"
+		add_child(_icon_root)
 		customer_node.name = "Customer"
 		add_child(customer_node)
-		move_child(customer_node, 1)
+		move_child(customer_node, 3)
 		customer_node.draw.connect(func() -> void: _draw_customer(customer_node))
 		actor_layer.name = "Actors"
 		add_child(actor_layer)
-		move_child(actor_layer, 2)
+		move_child(actor_layer, 4)
 		status_node.name = "PackerStatus"
 		add_child(status_node)
-		move_child(status_node, 3)
+		move_child(status_node, 5)
 		status_node.draw.connect(func() -> void: _draw_status(status_node))
 		hint_node.name = "Hint"
 		add_child(hint_node)
@@ -134,6 +172,7 @@ func setup(p_rules: PopRules) -> void:
 		detail_layer.z_index = 10   # above everything, also the front row of the queue (z 1, Step 31)
 		add_child(detail_layer)
 		detail_layer.draw.connect(func() -> void:
+			redraws["detail"] = int(redraws["detail"]) + 1
 			if overview:
 				_draw_overview(detail_layer, detail_rect())
 			elif selected >= 0:
@@ -180,8 +219,10 @@ func detail_rect() -> Rect2:
 		if is_wide():
 			var xo := size.x * 0.62 + 16
 			return Rect2(Vector2(xo, 210), Vector2(size.x - xo - 16, size.y - 230))
+		# Step 33: over the shop and the packing floor (the kitchen and its lines stay in view).
 		var tt := floor_rect(TOP)
-		return Rect2(tt.position + Vector2(12, 8), Vector2(tt.size.x - 24, tt.size.y - 16))
+		var mid := floor_rect(MID)
+		return Rect2(tt.position + Vector2(8, 6), Vector2(tt.size.x - 16, mid.end.y - tt.position.y - 12))
 	if selected < 0:
 		return Rect2()
 	if is_wide():
@@ -194,9 +235,18 @@ func detail_rect() -> Rect2:
 	if sel_machine >= 0 or not sel_slot.is_empty():
 		# Step 28: the kitchen's eight places fill its column, so a machine's detail sits
 		# over the shop floor (the machines and the ring stay in view).
-		var t := floor_rect(TOP)
+		# Step 33: a shop place's card over the packing floor -- never over the place chosen.
+		var t := floor_rect(MID) if _sel_floor() == "shop" else floor_rect(TOP)
 		return Rect2(t.position + Vector2(12, 8), Vector2(t.size.x - 24, t.size.y - 16))
 	return Rect2(Vector2(x, r.position.y + 12), Vector2(r.end.x - 12 - x, r.size.y - 24))
+
+
+func _sel_floor() -> String:
+	if not sel_slot.is_empty():
+		return String(sel_slot.get("floor", ""))
+	if sel_machine >= 0 and rules:
+		return String((rules.machine(sel_machine) as Dictionary).get("floor", ""))
+	return ""
 
 
 func tube_rect() -> Rect2:
@@ -208,7 +258,79 @@ func tube_rect() -> Rect2:
 
 func machine_size() -> float:
 	var low := floor_rect(LOW)
-	return minf(low.size.y * 0.64, low.size.x * 0.52)
+	var s := minf(low.size.y * 0.64, low.size.x * 0.52)
+	# Step 33: a kitchen of several lines gives the hand's kettle a little less room.
+	return s * 0.8 if dense("kitchen") else s
+
+
+## Step 33: a floor that has bought a second line draws its places compactly, a group per line.
+func dense(floor: String) -> bool:
+	return rules != null and int((rules.get("floor_lines") as Dictionary).get(floor, 1)) >= 2
+
+
+## The packing floor's own picture (bin, station, shelf): the whole floor, or above the
+## strip of places once it has several lines.
+func packing_rect() -> Rect2:
+	var r := floor_rect(MID)
+	if not dense("packing"):
+		return r
+	return Rect2(r.position, Vector2(r.size.x, r.size.y - _pack_strip().size.y - 6))
+
+
+## Step 33: the packing lines' places, one row along the bottom of the floor.
+func _pack_strip() -> Rect2:
+	var r := floor_rect(MID)
+	var h := clampf(r.size.y * 0.27, 34.0, 64.0)
+	return Rect2(Vector2(r.position.x + 10, r.end.y - h - 4), Vector2(tube_rect().position.x - 10 - r.position.x - 10, h))
+
+
+## The kitchen's places as groups, one per line (then the distributors' places).
+func _line_groups(floor: String) -> Array:
+	var base := int((rules.economy.table("factory")["slots"] as Dictionary)[floor])
+	var out: Array = [base]
+	var table: Array = (rules.economy.table("factory").get("lines", {}) as Dictionary).get(floor, [])
+	for i in mini(int((rules.get("floor_lines") as Dictionary).get(floor, 1)) - 1, table.size()):
+		out.append(int((table[i] as Dictionary)["places"]))
+	var sum := 0
+	for g: int in out:
+		sum += g
+	if int(rules.slots(floor)) > sum:
+		out.append(int(rules.slots(floor)) - sum)
+	return out
+
+
+const LINE_GAP := 12.0
+
+
+## The dense kitchen: right of the ring, a grid whose rows never mix two lines
+## (columns that divide a line's eight places), as large as fits.
+func _kitchen_cell(k: int) -> Rect2:
+	var r := floor_rect(LOW)
+	var left := machine_centre().x + ring_radius() + machine_size() * 0.06
+	var right := tube_rect().position.x - 6
+	var area := Rect2(Vector2(left, r.position.y + 10), Vector2(right - left, r.size.y - 20))
+	var groups := _line_groups("kitchen")
+	var gap := 6.0
+	var best := 0.0
+	var cols := 4
+	for c in [2, 4, 8]:
+		var rows := 0
+		for g: int in groups:
+			rows += ceili(float(g) / c)
+		var w := minf((area.size.x - gap * (c - 1)) / c, (area.size.y - LINE_GAP * (groups.size() - 1) - gap * (rows - 1)) / rows * 0.82)
+		if w > best:
+			best = w
+			cols = c
+	var h := best / 0.82
+	var row := 0
+	var gi := 0
+	var j := k
+	while gi < groups.size() and j >= int(groups[gi]):
+		row += ceili(float(groups[gi]) / cols)
+		j -= int(groups[gi])
+		gi += 1
+	row += j / cols
+	return Rect2(Vector2(area.position.x + (j % cols) * (best + gap), area.position.y + row * (h + gap) + gi * LINE_GAP), Vector2(best, h))
 
 
 ## The ring is centred in the kitchen (a little below the middle, room above
@@ -216,7 +338,8 @@ func machine_size() -> float:
 func machine_base() -> Vector2:
 	var low := floor_rect(LOW)
 	var centre_y := low.position.y + low.size.y * 0.53
-	return Vector2(low.position.x + low.size.x * 0.43, centre_y + PopMachineArt.height_at(rules.level if rules else 0, machine_size()) * 0.5)
+	var fx_ := 0.31 if dense("kitchen") else 0.43   # Step 33: room for three lines of places
+	return Vector2(low.position.x + low.size.x * fx_, centre_y + PopMachineArt.height_at(rules.level if rules else 0, machine_size()) * 0.5)
 
 
 func extra_rects() -> Dictionary:
@@ -232,6 +355,12 @@ func extra_rects() -> Dictionary:
 		out["overview"] = overview_button_rect()   # Step 32
 	if overview:
 		out["pause_all"] = _pause_all_rect()
+		var L := _ov_layout(detail_rect())
+		for f: String in OV_FLOORS:
+			if int(rules.line_cost(f)) >= 0:
+				out["ov_line_%s" % f] = L["lines"][f]
+		for id: int in L["machines"]:
+			out["ovm_%d" % id] = L["machines"][id]
 	# Step 26: every machine place, and the chosen machine's two buttons.
 	for f: String in FLOOR_NAME:
 		for k in (int(rules.slots(f)) if rules else 0):
@@ -240,6 +369,7 @@ func extra_rects() -> Dictionary:
 		var b := _machine_buttons()
 		out["m_pause"] = b["pause"]
 		out["m_sell"] = b["sell"]
+		out["m_group"] = _group_rect(detail_rect())   # Step 33: the floor's pause (for the tests)
 	if not sel_slot.is_empty():
 		var rs := _picker_rects(detail_rect())
 		var choices := _floor_choices(String(sel_slot["floor"]))
@@ -345,6 +475,7 @@ var _redraw_once := true
 
 
 func _process(delta: float) -> void:
+	_slot_cache.clear()
 	super(delta)
 	_redraw_once = false
 	# On a landscape screen the right column shows the kitchen's detail until a floor is chosen.
@@ -352,13 +483,30 @@ func _process(delta: float) -> void:
 		_wide_default = false
 		if selected < 0:
 			selected = LOW
-	var key := "%s|%d|%d|%s" % [size, selected, rules.level if rules else 0, _inventory_key()]
+	# Step 33: three keys -- the floors' structure, the goods, the open panel -- and each
+	# machine its own (_step_machine_nodes).
+	var key := "%s|%d|%d|%s" % [size, selected, rules.level if rules else 0, _structure_key()]
 	if key != _floors_key:
 		_floors_key = key
 		floor_layer.queue_redraw()
+		goods_layer.queue_redraw()
 		customer_node.queue_redraw()
 		detail_layer.queue_redraw()
 		_redraw_once = true
+	var gkey := _inventory_key()
+	if gkey != _goods_key:
+		_goods_key = gkey
+		goods_layer.queue_redraw()
+		if selected >= 0 and not overview:
+			detail_layer.queue_redraw()
+		_redraw_once = true
+	_overview_t += delta
+	if _overview_t >= 0.5:   # the overview's numbers (and the wallet's warning) twice a second
+		_overview_t = 0.0
+		_low_wallet = bool(rules.upkeep_overview()["low_wallet"]) if rules else false
+		if overview:
+			detail_layer.queue_redraw()
+	_step_machine_nodes()
 	_process_glass()
 	_step_actors(delta)
 	_clock += delta
@@ -438,6 +586,7 @@ func _draw_hint_finger(ci: CanvasItem) -> void:
 func on_events(events: Array[Dictionary]) -> void:
 	if not events.is_empty():   # (called every frame, mostly with nothing)
 		_redraw_once = true
+		_slot_cache.clear()   # Step 33: a line bought or a machine built moves the places
 	var rest: Array[Dictionary] = []
 	for e: Dictionary in events:
 		if String(e["type"]) == "earn":
@@ -483,9 +632,7 @@ func _draw_floors(ci: CanvasItem) -> void:
 	var cols := [PopTokens.FLOOR_TOP, PopTokens.FLOOR_MID, PopTokens.FLOOR_LOW]
 	for i in 3:
 		PopFactoryArt.floor_panel(ci, floor_rect(i), cols[i], i == selected)
-	_draw_shop(ci, floor_rect(TOP))
-	_draw_packing(ci, floor_rect(MID))
-	_draw_kitchen(ci, floor_rect(LOW))
+	_draw_kitchen(ci, floor_rect(LOW))   # (the shop and the packing floor: goods_layer, Step 33)
 	_draw_machines(ci)
 	var tube := tube_rect()
 	PopFactoryArt.glass(ci, tube, tube.size.x * 0.5)
@@ -736,9 +883,26 @@ func _form(ci: CanvasItem, floor_i: int, k: int, foot: Vector2, h: float, dim: b
 func _inventory_key() -> String:
 	if rules == null:
 		return ""
+	var sel := ""
+	if sel_machine >= 0:   # the open machine's own numbers
+		var m: Dictionary = rules.machine(sel_machine)
+		sel = "%s:%d:%d" % [m.get("state", ""), int(m.get("tier", 0)), int(m.get("done", 0))]
+	var lp := ""
+	if rules.parallel_lines():
+		for line in rules.packing_lines():
+			lp += "%d," % rules.line_portions(line)
 	return "%d|%d|%d|%d|%s|%s" % [rules.bin_portions(), (rules.get("shelf") as Array).size(), (rules.get("queue") as Array).size(),
 		(rules.get("lift") as Array).size(), (rules.get("packing") as Array).size(), not (rules.get("serving") as Dictionary).is_empty()] + "|%d|%s" % [rules.get("packer_tier"), rules.packer_state()] \
-		+ "|%d|%s|%s" % [sel_machine, sel_slot, ",".join((rules.get("machines") as Array).map(func(m: Dictionary) -> String: return "%d:%s:%d" % [m["id"], m["state"], m["tier"]]))]
+		+ "|%d|%s|%s|%s|%d" % [sel_machine, sel_slot, sel, lp, rules.get("sign_tier")]
+
+
+## Step 33: what the floor layer draws -- the places (which hold what), the lines, the
+## stations that are open, the wallet's warning on the overview button.
+func _structure_key() -> String:
+	if rules == null:
+		return ""
+	return "%s|%s|%s|%s|%s|%s" % [",".join((rules.get("machines") as Array).map(func(m: Dictionary) -> String: return "%d:%s:%d" % [m["id"], m["floor"], m["slot"]])),
+		rules.get("floor_lines"), sel_slot, rules.station_open("bagger"), rules.station_open("kiosk"), _low_wallet] + "|%d|%d" % [rules.get("packer_tier"), rules.get("sign_tier")]
 
 
 ## The kettle's glass shows its waiting lot (the backpressure is visible).
@@ -779,11 +943,45 @@ func _bags_flying_to_shelf() -> int:
 	return n
 
 
+## Step 33: lots and bags are pooled -- a busy factory reuses the same few nodes
+## instead of making and freeing one per lot (no churn for the garbage collector);
+## at most CARGO_MAX journeys are drawn at once (the model moves every good either way;
+## the bin, the shelf and the counters show the real amounts).
+const CARGO_MAX := 40
+var _pool := {"lot": [], "bag": []}
+var cargo_stats := {"peak": 0, "skipped": 0, "made": 0, "reused": 0}
+
+
+func _cargo_full() -> bool:
+	if cargo.size() >= CARGO_MAX:
+		cargo_stats["skipped"] = int(cargo_stats["skipped"]) + 1
+		return true
+	return false
+
+
 func _new_actor(kind: String, id: int) -> Node2D:
-	var a: Node2D = Actor.new()
-	a.kind = kind
+	var a: Node2D = null
+	if _pool.has(kind) and not (_pool[kind] as Array).is_empty():
+		a = (_pool[kind] as Array).pop_back()
+		a.open = false
+		a.fill = 0
+		a.of = 2
+		a.done = false
+		a.steps = false
+		a.easing_to = false
+		a.carrying = false
+		a.visible = true
+		for meta in ["to", "end_on_arrival"]:
+			if a.has_meta(meta):
+				a.remove_meta(meta)
+		a.queue_redraw()
+		cargo_stats["reused"] = int(cargo_stats["reused"]) + 1
+	else:
+		a = Actor.new()
+		a.kind = kind
+		actor_layer.add_child(a)
+		cargo_stats["made"] = int(cargo_stats["made"]) + 1
 	a.model_id = id
-	actor_layer.add_child(a)
 	return a
 
 
@@ -846,7 +1044,7 @@ func _door() -> Vector2:
 
 
 func _shelf_spot(k: int) -> Vector2:
-	var r := floor_rect(MID)
+	var r := packing_rect()
 	var shelf_cap := int(rules.state()["shelf_cap"])
 	var per := maxi(1, (shelf_cap + 1) / 2)
 	var span := tube_rect().position.x - 16 - (r.position.x + r.size.x * 0.62)
@@ -856,17 +1054,17 @@ func _shelf_spot(k: int) -> Vector2:
 
 
 func _bag_px() -> float:
-	return floor_rect(MID).size.y * 0.16
+	return packing_rect().size.y * 0.16
 
 
 func _bin_top() -> Vector2:
-	var r := floor_rect(MID)
+	var r := packing_rect()
 	var hs := r.size.y * 0.46
 	return Vector2(r.position.x + r.size.x * 0.14 + hs * 0.45, r.position.y + r.size.y * 0.16 + hs * 0.3)
 
 
 func _packer_out() -> Vector2:
-	var r := floor_rect(MID)
+	var r := packing_rect()
 	return Vector2(r.position.x + r.size.x * 0.38 + r.size.y * 0.4, r.position.y + r.size.y * 0.14 + r.size.y * 0.58 + 4)
 
 
@@ -887,6 +1085,8 @@ func _flow_events(events: Array[Dictionary]) -> void:
 		match String(e["type"]):
 			"lot_lifted":
 				# Up the glass tube from the kettle to the raw bin, in the lift's time.
+				if _cargo_full():
+					continue
 				var a := _new_actor(Actor.LOT, int(d["lot"]))
 				a.size_px = _bag_px() * 0.85
 				var top := machine_top()
@@ -894,7 +1094,12 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					var mm: Dictionary = rules.machine(int(d["machine"]))
 					top = slot_rect(String(mm["floor"]), int(mm["slot"])).get_center()
 				var bin := _bin_top()
-				a.start(PackedVector2Array([top, Vector2(tube_x, top.y), Vector2(tube_x, bin.y - 40), bin]), _seconds("lift"), reduced_motion)
+				var path := PackedVector2Array([top, Vector2(tube_x, top.y), Vector2(tube_x, bin.y - 40), bin])
+				if d.has("machine") and rules and not (rules.machine(int(d["machine"])) as Dictionary).is_empty():
+					var by := _kitchen_belt_y(int(rules.machine(int(d["machine"]))["slot"]))
+					if by > 0.0:   # Step 33: down to its line's belt, along it to the tube
+						path = PackedVector2Array([top, Vector2(top.x, by), Vector2(tube_x, by), Vector2(tube_x, bin.y - 40), bin])
+				a.start(path, _seconds("lift"), reduced_motion)
 				cargo[int(d["lot"])] = a
 				_log(int(d["lot"]), "lot", "start")
 			"lot_binned":
@@ -931,6 +1136,8 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					filling.erase(pid)
 					_log(pid, "fill", "end")
 				else:
+					if _cargo_full():
+						continue
 					b = _new_actor(Actor.BAG, pid)
 					b.size_px = _bag_px()
 				b.set_meta("to", "shelf")
@@ -957,6 +1164,11 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					from = bag.position
 					bag.remove_meta("end_on_arrival")
 				else:
+					if _cargo_full():
+						var cid0 := int(d["customer"])
+						if customers.has(cid0):
+							customers[cid0].walk_to(_handoff_spot(int(d.get("lane", 0))))
+						continue
 					bag = _new_actor(Actor.BAG, pid)
 					bag.size_px = _bag_px()
 				bag.set_meta("to", "counter")
@@ -1015,7 +1227,11 @@ func _end_cargo(id: int, kind: String) -> void:
 	if cargo.has(id):
 		var a: Node2D = cargo[id]
 		cargo.erase(id)
-		a.queue_free()
+		if _pool.has(a.kind) and (_pool[a.kind] as Array).size() < CARGO_MAX:
+			a.visible = false
+			(_pool[a.kind] as Array).append(a)
+		else:
+			a.queue_free()
 		_log(id, kind, "end")
 
 
@@ -1055,6 +1271,7 @@ func _reconcile_customers() -> void:
 
 func _step_actors(delta: float) -> void:
 	_reconcile_customers()
+	cargo_stats["peak"] = maxi(int(cargo_stats["peak"]), cargo.size())
 	for a in cargo.values():
 		a.step(delta)
 	for id in cargo.keys():
@@ -1062,7 +1279,7 @@ func _step_actors(delta: float) -> void:
 		if a.done and a.has_meta("end_on_arrival"):
 			_end_cargo(int(id), "bag")
 			_redraw_once = true
-			floor_layer.queue_redraw()   # the bag lands on the static shelf
+			goods_layer.queue_redraw()   # the bag lands on the shelf (the goods layer, Step 33)
 	for a in customers.values():
 		a.step(delta)
 	var still: Array = []
@@ -1089,14 +1306,17 @@ func debug_state() -> Dictionary:
 	return {"flying": flying, "customers": customers.size(), "leaving": leaving.size(), "log": cargo_log.duplicate(),
 		"filling": fill, "nozzles": nozzles.size(), "packer_status": _status,
 		"moods": customers.values().map(func(a: Node2D) -> String: return a.mood), "bell": bell_swinging(),
-		"cue": _cue if cue_node.visible else "", "bubbles": customers.values().map(func(a: Node2D) -> int: return a.order_size)}
+		"cue": _cue if cue_node.visible else "", "bubbles": customers.values().map(func(a: Node2D) -> int: return a.order_size),
+		"cargo_stats": cargo_stats.duplicate(), "cargo_now": cargo.size(), "pool": {"lot": (_pool["lot"] as Array).size(), "bag": (_pool["bag"] as Array).size()},
+		"redraws": redraws.duplicate(), "machine_nodes": _mnodes.size(), "actor_nodes": actor_layer.get_child_count(), "dense": {"kitchen": dense("kitchen"), "packing": dense("packing"), "shop": dense("shop")},
+		"ov_machine": ov_machine, "selected": selected, "sel_machine": sel_machine, "sel_slot": sel_slot}
 
 
 # -- Step 20: the packing station ---------------------------------------------
 
 ## The station's body and belt on the middle floor (between the raw bin and the shelf).
 func _station_rect() -> Rect2:
-	var r := floor_rect(MID)
+	var r := packing_rect()
 	return Rect2(Vector2(r.position.x + r.size.x * 0.34, r.position.y + r.size.y * 0.12), Vector2(r.size.x * 0.25, r.size.y * 0.76))
 
 
@@ -1499,8 +1719,23 @@ func _sign_rect() -> Rect2:
 ## A floor's k-th machine place: the kitchen's beside the ring (two columns), the
 ## packing floor's above the shelf, the shop's by the door.
 func slot_rect(floor: String, k: int) -> Rect2:
+	# Step 33: asked for every machine every frame (nodes, motion, input): kept for the frame.
+	var ck := "%s%d" % [floor, k]
+	if _slot_cache.has(ck):
+		return _slot_cache[ck]
+	var out := _slot_rect(floor, k)
+	_slot_cache[ck] = out
+	return out
+
+
+var _slot_cache := {}
+
+
+func _slot_rect(floor: String, k: int) -> Rect2:
 	match floor:
 		"kitchen":
+			if dense("kitchen"):
+				return _kitchen_cell(k)
 			var r := floor_rect(LOW)
 			var left := machine_centre().x + ring_radius() + machine_size() * 0.09
 			var right := r.end.x - 12
@@ -1509,6 +1744,19 @@ func slot_rect(floor: String, k: int) -> Rect2:
 			var h := w / 0.82
 			return Rect2(Vector2(left + (k % 2) * (w + 10), r.position.y + 12 + (k / 2) * (h + 8)), Vector2(w, h))
 		"packing":
+			if dense("packing"):
+				# Step 33: one row along the floor's bottom, a gap between lines.
+				var st := _pack_strip()
+				var groups := _line_groups("packing")
+				var n := int(rules.slots("packing"))
+				var gap := 4.0
+				var w := minf((st.size.x - gap * (n - 1) - LINE_GAP * (groups.size() - 1)) / n, st.size.y * 0.82)
+				var gi := 0
+				var acc := 0
+				while gi < groups.size() - 1 and k >= acc + int(groups[gi]):
+					acc += int(groups[gi])
+					gi += 1
+				return Rect2(Vector2(st.position.x + k * (w + gap) + gi * LINE_GAP, st.end.y - w / 0.82), Vector2(w, w / 0.82))
 			var r := floor_rect(MID)
 			var x0 := r.position.x + r.size.x * 0.62
 			var x1 := tube_rect().position.x - 16
@@ -1520,9 +1768,18 @@ func slot_rect(floor: String, k: int) -> Rect2:
 			var r := floor_rect(TOP)
 			var hp := _head_px()
 			var w := hp * 1.6
-			var x := r.end.x - hp * 1.2 - (k + 1) * w * 1.08
 			var bottom := counter_rect().position.y
 			var h := w * 1.2
+			if dense("shop"):
+				# Step 33: a line a row -- the second above the first, under the news button.
+				var per := int((rules.economy.table("factory")["slots"] as Dictionary)["shop"])
+				var top := news_rect().end.y + 4.0
+				h = minf(h, (bottom - top - 4.0) / 2.0)
+				w = h / 1.2
+				var row := k / per
+				var col := k % per
+				return Rect2(Vector2(r.end.x - hp * 1.2 - (col + 1) * w * 1.08, bottom - h - row * (h + 4.0)), Vector2(w, h))
+			var x := r.end.x - hp * 1.2 - (k + 1) * w * 1.08
 			return Rect2(Vector2(x, bottom - h), Vector2(w, h))
 	return Rect2()
 
@@ -1558,6 +1815,19 @@ func _machine_press(p: Vector2) -> bool:
 		detail_layer.queue_redraw()
 		return true
 	if overview:
+		# Step 33: a floor's next line, a machine's diagnostics -- the card stays open.
+		var L := _ov_layout(detail_rect())
+		for f: String in OV_FLOORS:
+			if (L["lines"][f] as Rect2).has_point(p) and int(rules.line_cost(f)) >= 0:
+				command.emit("buy_line", {"type": "buy_line", "floor": f})
+				_slot_cache.clear()
+				detail_layer.queue_redraw()
+				return true
+		for id: int in L["machines"]:
+			if (L["machines"][id] as Rect2).has_point(p):
+				ov_machine = -1 if ov_machine == id else id
+				detail_layer.queue_redraw()
+				return true
 		if _pause_all_rect().has_point(p):
 			var any_on := (rules.get("machines") as Array).any(func(x: Dictionary) -> bool: return String(x["state"]) != "paused")
 			command.emit("pause_all", {"type": "pause_all", "paused": any_on})
@@ -1633,6 +1903,7 @@ func _draw_machines(ci: CanvasItem) -> void:
 	if rules == null:
 		return
 	_draw_overview_button(ci)
+	_draw_line_paths(ci)
 	for f: String in FLOOR_NAME:
 		var type := String(MACHINE_OF[f])
 		var open: bool = rules.station_open(type)
@@ -1659,42 +1930,185 @@ func _draw_machines(ci: CanvasItem) -> void:
 					pts.append(pts[0])
 					ci.draw_polyline(pts, PopPalette.GOLD, 4.0, true)
 				continue
-			PopMachineArt._round_rect(ci, r, PopTokens.R_MACHINE, Color(1, 1, 1, 0.45))
-			var mtype := String(m["type"])
-			if mtype.begins_with("M") or mtype.begins_with("P") or mtype.begins_with("S") or mtype.begins_with("U"):
-				var e: Dictionary = rules.forty().get(mtype, {})
-				PopFactoryArt.catalog_icon(ci, r.grow(-4), e.get("parts", ["box"]), String(e.get("group", "manufacturing")))
-				for q in int(m["tier"]):
-					ci.draw_circle(Vector2(r.position.x + 8 + q * 11, r.position.y + 8), 4.0, PopPalette.GOLD)
-			else:
-				PopFactoryArt.machine_icon(ci, r.grow(-4), type, int(m["tier"]))
-			if mtype in ["cooker", "M16"]:
-				# Step 28: its kernels, a gauge along the bottom (empty = it starves).
-				var buf := float(rules.catalog("cooker").get("kernel_buffer", 5))
-				var g := Rect2(Vector2(r.position.x + 6, r.end.y - 9), Vector2(r.size.x - 12, 5))
-				ci.draw_rect(g, Color(PopPalette.INK, 0.15))
-				ci.draw_rect(Rect2(g.position, Vector2(g.size.x * clampf(float(m.get("kernels", 0)) / buf, 0.0, 1.0), g.size.y)), Color(0.85, 0.62, 0.25))
-			PopFactoryArt.state_badge(ci, Vector2(r.end.x - 9, r.position.y + 9), 8.0, String(m["state"]))
-			if int(m["id"]) == sel_machine:
-				var pts := PopMachineArt.round_rect_points(r.grow(3), PopTokens.R_MACHINE)
-				pts.append(pts[0])
-				ci.draw_polyline(pts, PopPalette.GOLD, 4.0, true)
-				var b := _machine_buttons()
-				var pr: Rect2 = b["pause"]
-				ci.draw_circle(pr.get_center(), pr.size.x * 0.5, Color.WHITE)
-				ci.draw_arc(pr.get_center(), pr.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
-				if String(m["state"]) == "paused":   # a play triangle resumes
-					var c := pr.get_center()
-					var q := pr.size.x * 0.22
-					ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-q * 0.7, -q), c + Vector2(q, 0), c + Vector2(-q * 0.7, q)]), PopTokens.OK)
-				else:
-					PopFactoryArt.state_badge(ci, pr.get_center(), pr.size.x * 0.32, "paused")
-				var sr: Rect2 = b["sell"]
-				ci.draw_circle(sr.get_center(), sr.size.x * 0.5, Color.WHITE)
-				ci.draw_arc(sr.get_center(), sr.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
-				PopMachineArt.draw_coin(ci, sr.get_center() + Vector2(0, 2), sr.size.x * 0.22)
-				ci.draw_line(sr.get_center() + Vector2(-sr.size.x * 0.22, -sr.size.x * 0.24), sr.get_center() + Vector2(0, -sr.size.x * 0.36), PopPalette.INK, 2.5)
-				ci.draw_line(sr.get_center() + Vector2(sr.size.x * 0.22, -sr.size.x * 0.24), sr.get_center() + Vector2(0, -sr.size.x * 0.36), PopPalette.INK, 2.5)
+
+
+## Step 33: each machine's node -- made when it is built, freed when it is sold,
+## redrawn only when what it shows changes.
+func _step_machine_nodes() -> void:
+	if rules == null:
+		return
+	var alive := {}
+	for m: Dictionary in rules.get("machines"):
+		var id := int(m["id"])
+		alive[id] = true
+		if not _mnodes.has(id):
+			# Its picture (a viewport texture: premultiplied alpha) and, above it, what
+			# changes -- the state badge, the kernels, the selection -- drawn as vectors.
+			var n := Node2D.new()
+			var mat := CanvasItemMaterial.new()
+			mat.blend_mode = CanvasItemMaterial.BLEND_MODE_PREMULT_ALPHA
+			n.material = mat
+			n.draw.connect(func() -> void: _draw_machine_pic(n, id))
+			var over := Node2D.new()
+			over.name = "Over"
+			over.draw.connect(func() -> void:
+				redraws["machines"] = int(redraws["machines"]) + 1
+				_draw_machine_node(over, id))
+			n.add_child(over)
+			machine_layer.add_child(n)
+			_mnodes[id] = n
+		var node: Node2D = _mnodes[id]
+		var r := slot_rect(String(m["floor"]), int(m["slot"]))
+		var key := "%s|%d|%d|%s|%s|%s" % [m["state"], int(m["tier"]), int(m.get("kernels", 0)), id == sel_machine or id == ov_machine, r, _icon_texture(String(m["type"]), int(m["tier"]), r.grow(-4).size, String(m["floor"])) != null]
+		if String(node.get_meta("key", "")) != key:
+			node.set_meta("key", key)
+			node.queue_redraw()
+			(node.get_node("Over") as Node2D).queue_redraw()
+	for id: int in _mnodes.keys():
+		if not alive.has(id):
+			(_mnodes[id] as Node2D).queue_free()
+			_mnodes.erase(id)
+
+
+## Step 33: the lines' paths -- a belt under each kitchen line to the lift's tube (its
+## lots ride it), a belt under each packing line's places.
+func _draw_line_paths(ci: CanvasItem) -> void:
+	if rules == null:
+		return
+	if dense("kitchen"):
+		var groups := _line_groups("kitchen")
+		var k := 0
+		var tube_x := tube_rect().get_center().x
+		for g: int in groups:
+			var last := slot_rect("kitchen", k + g - 1)
+			var first := slot_rect("kitchen", k)
+			var y := last.end.y + 3.0
+			var belt := Rect2(Vector2(first.position.x - 4, y), Vector2(tube_x - first.position.x + 4, 5))
+			PopFactoryArt.steel(ci, belt, 2.5)
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(tube_x - 10, y - 4), Vector2(tube_x - 2, y + 2.5), Vector2(tube_x - 10, y + 9)]), PopTokens.STEEL_DEEP)
+			k += g
+	if dense("packing"):
+		var groups := _line_groups("packing")
+		var k := 0
+		for g: int in groups:
+			var a := slot_rect("packing", k)
+			var b := slot_rect("packing", k + g - 1)
+			PopFactoryArt.steel(ci, Rect2(Vector2(a.position.x - 3, a.end.y - 2), Vector2(b.end.x - a.position.x + 6, 5)), 2.5)
+			k += g
+
+
+## The y of the belt under a kitchen place's line (dense kitchen), or -1.
+func _kitchen_belt_y(slot: int) -> float:
+	if not dense("kitchen"):
+		return -1.0
+	var k := 0
+	for g: int in _line_groups("kitchen"):
+		if slot < k + g:
+			return slot_rect("kitchen", k + g - 1).end.y + 5.5
+		k += g
+	return -1.0
+
+
+func _draw_machine_pic(ci: CanvasItem, id: int) -> void:
+	var m: Dictionary = rules.machine(id) if rules else {}
+	if m.is_empty():
+		return
+	var r := slot_rect(String(m["floor"]), int(m["slot"]))
+	var tex := _icon_texture(String(m["type"]), int(m["tier"]), r.grow(-4).size, String(m["floor"]))
+	if tex != null:
+		ci.draw_texture_rect(tex, r, false)
+
+
+## The cached picture of a machine (its plate, its icon, its tier dots) at this size, or
+## null while it is being drawn (the first frames: the node draws it as vectors).
+func _icon_texture(type: String, tier: int, inner: Vector2, floor: String) -> Texture2D:
+	var k := clampf(snappedf(get_global_transform_with_canvas().get_scale().x * 1.5, 0.25), 1.0, 3.0)
+	var size := inner + Vector2(8, 8)
+	var px := Vector2i(ceili(size.x * k), ceili(size.y * k))
+	if px.x <= 0 or px.y <= 0:
+		return null
+	var key := "%s|%d|%d|%d|%s" % [type, tier, px.x, px.y, floor]
+	if not _icon_cache.has(key):
+		var vp := SubViewport.new()
+		vp.size = px
+		vp.transparent_bg = true
+		vp.disable_3d = true
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		var n := Node2D.new()
+		n.scale = Vector2(k, k)
+		n.draw.connect(func() -> void: _draw_icon_plate(n, type, tier, Rect2(Vector2.ZERO, size), floor))
+		vp.add_child(n)
+		_icon_root.add_child(vp)
+		_icon_cache[key] = {"vp": vp, "frame": Engine.get_frames_drawn()}
+		if _icon_cache.size() > 160:   # a resized window leaves old sizes behind
+			var old: String = _icon_cache.keys()[0]
+			(_icon_cache[old]["vp"] as Node).queue_free()
+			_icon_cache.erase(old)
+	var e: Dictionary = _icon_cache[key]
+	if Engine.get_frames_drawn() - int(e["frame"]) < 3:
+		return null
+	return (e["vp"] as SubViewport).get_texture()
+
+
+func _draw_icon_plate(ci: CanvasItem, mtype: String, tier: int, r: Rect2, floor: String) -> void:
+	PopMachineArt._round_rect(ci, r, PopTokens.R_MACHINE, Color(1, 1, 1, 0.45))
+	if mtype.begins_with("M") or mtype.begins_with("P") or mtype.begins_with("S") or mtype.begins_with("U"):
+		var e: Dictionary = rules.forty().get(mtype, {})
+		PopFactoryArt.catalog_icon(ci, r.grow(-4), e.get("parts", ["box"]), String(e.get("group", "manufacturing")))
+		for q in tier:
+			ci.draw_circle(Vector2(r.position.x + 8 + q * 11, r.position.y + 8), 4.0, PopPalette.GOLD)
+	else:
+		PopFactoryArt.machine_icon(ci, r.grow(-4), String(MACHINE_OF[floor]), tier)
+
+
+## Step 33: one machine, on its own node (redrawn when its state, tier, kernels or
+## selection change -- not when another machine's do).
+func _draw_machine_node(ci: CanvasItem, id: int) -> void:
+	var m: Dictionary = rules.machine(id)
+	if m.is_empty():
+		return
+	var r := slot_rect(String(m["floor"]), int(m["slot"]))
+	var type := String(MACHINE_OF[String(m["floor"])])
+	var mtype := String(m["type"])
+	var tex := _icon_texture(mtype, int(m["tier"]), r.grow(-4).size, String(m["floor"]))
+	if tex != null:
+		pass   # its plate and picture: the parent node's texture (_draw_machine_pic)
+	elif mtype.begins_with("M") or mtype.begins_with("P") or mtype.begins_with("S") or mtype.begins_with("U"):
+		PopMachineArt._round_rect(ci, r, PopTokens.R_MACHINE, Color(1, 1, 1, 0.45))
+		var e: Dictionary = rules.forty().get(mtype, {})
+		PopFactoryArt.catalog_icon(ci, r.grow(-4), e.get("parts", ["box"]), String(e.get("group", "manufacturing")))
+		for q in int(m["tier"]):
+			ci.draw_circle(Vector2(r.position.x + 8 + q * 11, r.position.y + 8), 4.0, PopPalette.GOLD)
+	else:
+		PopMachineArt._round_rect(ci, r, PopTokens.R_MACHINE, Color(1, 1, 1, 0.45))
+		PopFactoryArt.machine_icon(ci, r.grow(-4), type, int(m["tier"]))
+	if mtype in ["cooker", "M16"]:
+		# Step 28: its kernels, a gauge along the bottom (empty = it starves).
+		var buf := float(rules.catalog("cooker").get("kernel_buffer", 5))
+		var g := Rect2(Vector2(r.position.x + 6, r.end.y - 9), Vector2(r.size.x - 12, 5))
+		ci.draw_rect(g, Color(PopPalette.INK, 0.15))
+		ci.draw_rect(Rect2(g.position, Vector2(g.size.x * clampf(float(m.get("kernels", 0)) / buf, 0.0, 1.0), g.size.y)), Color(0.85, 0.62, 0.25))
+	PopFactoryArt.state_badge(ci, Vector2(r.end.x - 9, r.position.y + 9), 8.0, String(m["state"]))
+	if int(m["id"]) == sel_machine:
+		var pts := PopMachineArt.round_rect_points(r.grow(3), PopTokens.R_MACHINE)
+		pts.append(pts[0])
+		ci.draw_polyline(pts, PopPalette.GOLD, 4.0, true)
+		var b := _machine_buttons()
+		var pr: Rect2 = b["pause"]
+		ci.draw_circle(pr.get_center(), pr.size.x * 0.5, Color.WHITE)
+		ci.draw_arc(pr.get_center(), pr.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
+		if String(m["state"]) == "paused":   # a play triangle resumes
+			var c := pr.get_center()
+			var q := pr.size.x * 0.22
+			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-q * 0.7, -q), c + Vector2(q, 0), c + Vector2(-q * 0.7, q)]), PopTokens.OK)
+		else:
+			PopFactoryArt.state_badge(ci, pr.get_center(), pr.size.x * 0.32, "paused")
+		var sr: Rect2 = b["sell"]
+		ci.draw_circle(sr.get_center(), sr.size.x * 0.5, Color.WHITE)
+		ci.draw_arc(sr.get_center(), sr.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
+		PopMachineArt.draw_coin(ci, sr.get_center() + Vector2(0, 2), sr.size.x * 0.22)
+		ci.draw_line(sr.get_center() + Vector2(-sr.size.x * 0.22, -sr.size.x * 0.24), sr.get_center() + Vector2(0, -sr.size.x * 0.36), PopPalette.INK, 2.5)
+		ci.draw_line(sr.get_center() + Vector2(sr.size.x * 0.22, -sr.size.x * 0.24), sr.get_center() + Vector2(0, -sr.size.x * 0.36), PopPalette.INK, 2.5)
 
 
 ## The machine's detail: what it makes a minute (now > next tier), what it costs
@@ -1851,6 +2265,8 @@ func _floor_choices(floor: String) -> Array:
 		if String(rules.FLOOR_OF[u]) in ["any", floor]:
 			devices.append(u)
 	for id: String in devices:
+		if id == "U08" and not rules.parallel_lines():
+			continue   # Step 33: the route balancer needs two packing lines
 		if rules.station_open(id) and rules.catalog_buildable(id):
 			out.append(id)
 	return out
@@ -1997,6 +2413,9 @@ func _step_machine_motion(delta: float) -> void:
 				node.position = Vector2(r.position.x + r.size.x * 0.3, r.position.y + r.size.y * (0.75 - 0.5 * absf(sin(t * 0.9)) if run else 0.75))
 			"U05":   # the lamp sweeps the desk
 				node.position = Vector2(r.position.x + r.size.x * (0.4 + 0.3 * absf(sin(t * 1.6)) if run else 0.5), r.position.y + r.size.y * 0.6)
+			"U08":   # Step 33: a lot slides across from one line's arrow to the other's
+				node.position = Vector2(r.position.x + r.size.x * (0.25 + 0.5 * fmod(t * 0.9, 1.0)), r.position.y + r.size.y * 0.55)
+				node.visible = run
 			"P08":   # the gate swings each pack to its lane
 				node.position = Vector2(c.x, r.position.y + r.size.y * 0.5)
 				node.rotation = (0.45 if fmod(floor(t * 0.8), 2.0) < 1.0 else -0.45) if run else 0.0
@@ -2067,9 +2486,79 @@ func _pause_all_rect() -> Rect2:
 	return Rect2(Vector2(d.end.x - s - 12, d.end.y - s - 12), Vector2(s, s))
 
 
-## The upkeep overview: coins a minute burned by running machines (and held back by
-## paused ones), coins the shop took in the last minute, the net -- red when the wallet
-## covers less than two minutes of the burn -- and one button to pause or resume all.
+## The overview (Step 32's upkeep, Step 33's whole factory on one card, no words):
+##   the three rates -- lots, packs and sales a minute -- the bottleneck's ringed in red;
+##   coins burned, taken and the net a minute;
+##   each floor, a group of small machines per line (coloured by what they are doing,
+##   an empty place dashed) and its next line's button with the price (dim until the
+##   floor is full and the coins are there); a machine picked here shows its
+##   diagnostics in a strip below (and is ringed on its floor), without leaving the card;
+##   one button pauses or resumes everything.
+const OV_FLOORS := ["shop", "packing", "kitchen"]
+const STATE_COLOUR := {"run": Color(0.36, 0.72, 0.42), "idle": Color(0.72, 0.72, 0.7), "blocked": Color(0.93, 0.62, 0.25),
+	"starved": Color(0.55, 0.75, 0.92), "paused": Color(0.3, 0.27, 0.25), "unpaid": Color(0.88, 0.3, 0.25),
+	"saving": Color(0.95, 0.78, 0.3), "waiting": Color(0.55, 0.75, 0.92), "overheat": Color(0.88, 0.3, 0.25)}
+
+
+func _ov_fs(d: Rect2) -> float:
+	return clampf(minf(d.size.x * 0.05, d.size.y * 0.055), 13.0, 24.0)
+
+
+## Where everything on the card is (drawing and pressing ask the same layout).
+func _ov_layout(d: Rect2) -> Dictionary:
+	var fs := _ov_fs(d)
+	var pad := fs * 0.6
+	var out := {"fs": fs, "rates": [], "money": [], "floors": {}, "lines": {}, "machines": {}, "empty": []}
+	var cw := (d.size.x - pad * 2.0) / 3.0
+	for i in 3:
+		out["rates"].append(Rect2(Vector2(d.position.x + pad + cw * i, d.position.y + pad), Vector2(cw - 4, fs * 1.6)))
+		out["money"].append(Rect2(Vector2(d.position.x + pad + cw * i, d.position.y + pad + fs * 1.9), Vector2(cw - 4, fs * 1.4)))
+	var y := d.position.y + pad + fs * 3.6
+	var diag_h := fs * 2.4
+	var pause := _pause_all_rect()
+	var bottom := minf(d.end.y - pad - diag_h, pause.position.y - 4)
+	var row_h := minf(fs * 3.4, (bottom - y) / 3.0)
+	var btn_w := fs * 4.6
+	for f: String in OV_FLOORS:
+		var row := Rect2(Vector2(d.position.x + pad, y), Vector2(d.size.x - pad * 2.0, row_h - 4))
+		out["floors"][f] = row
+		out["lines"][f] = Rect2(Vector2(row.end.x - btn_w, row.position.y + 2), Vector2(btn_w, row.size.y - 4))
+		# the places, a group per line, between the floor's chip and its button
+		var groups := _line_groups(f) if rules else [1]
+		var n := int(rules.slots(f)) if rules else 1
+		var x0 := row.position.x + row.size.y * 1.1
+		var room := row.size.x - row.size.y * 1.1 - btn_w - 8
+		# one or two rows of small machines a line, whichever draws them larger
+		var sub := 1
+		var sq := 0.0
+		for rows_n in [1, 2]:
+			var colsn := 0
+			for g: int in groups:
+				colsn += ceili(float(g) / rows_n)
+			var q := minf((row.size.y - 4) / rows_n - 2, (room - LINE_GAP * 0.6 * (groups.size() - 1)) / maxf(1.0, colsn) - 2)
+			if q > sq:
+				sq = q
+				sub = rows_n
+		sq = maxf(6.0, sq)
+		var k := 0
+		var x := x0
+		var y0 := row.get_center().y - (sq * sub + 2 * (sub - 1)) * 0.5
+		for gi in groups.size():
+			var gcols := ceili(float(groups[gi]) / sub)
+			for j in int(groups[gi]):
+				var r := Rect2(Vector2(x + (j % gcols) * (sq + 2), y0 + (j / gcols) * (sq + 2)), Vector2(sq, sq))
+				var m: Dictionary = rules.machine_at(f, k) if rules else {}
+				if m.is_empty():
+					out["empty"].append(r)
+				else:
+					out["machines"][int(m["id"])] = r
+				k += 1
+			x += gcols * (sq + 2) + LINE_GAP * 0.6
+		y += row_h
+	out["diag"] = Rect2(Vector2(d.position.x + pad, y + 2), Vector2(pause.position.x - d.position.x - pad * 2.0, diag_h))
+	return out
+
+
 func _draw_overview(ci: CanvasItem, d: Rect2) -> void:
 	PopFactoryArt.shadow(ci, d, PopTokens.R_BUTTON)
 	PopMachineArt._round_rect(ci, d, PopTokens.R_BUTTON, Color(1, 1, 1, 0.97))
@@ -2077,15 +2566,46 @@ func _draw_overview(ci: CanvasItem, d: Rect2) -> void:
 	pts.append(pts[0])
 	var o: Dictionary = rules.upkeep_overview()
 	ci.draw_polyline(pts, PopTokens.WARN if bool(o["low_wallet"]) else PopPalette.GOLD, 5.0, true)
+	var L := _ov_layout(d)
+	var fs := float(L["fs"])
 	var font := ThemeDB.fallback_font
-	var fs := int(clampf(minf(d.size.x * 0.08, d.size.y * 0.16), 16.0, 30.0))
-	var x := d.position.x + fs * 2.2
-	var y := d.position.y + fs * 1.4
+	var st: Dictionary = rules.state()
+	var pm: Dictionary = st["per_min"]
+	# 1. the three rates; the stage holding the factory back is ringed in red.
+	var bn := String(st["bottleneck"])
+	var stage_of := {"production": 0, "packaging": 1, "service": 2, "demand": 2}
+	var vals := [int(pm["lots"]), int(pm["packs"]), int(pm["sales"])]
+	for i in 3:
+		var r: Rect2 = L["rates"][i]
+		var ic := Vector2(r.position.x + fs * 0.8, r.get_center().y)
+		match i:
+			0:   # a lot of popcorn
+				for q in 3:
+					PopFactoryArt.popcorn(ci, ic + Vector2((q - 1) * fs * 0.32, -absf(q - 1) * fs * -0.1), fs * 0.28)
+			1:   # a sealed bag
+				PopFactoryArt.bag(ci, ic + Vector2(0, fs * 0.45), fs * 0.5)
+			2:   # a coin in a hand-over (a sale)
+				PopMachineArt.draw_coin(ci, ic, fs * 0.4)
+		var txt := "%d" % vals[i]
+		ci.draw_string(font, Vector2(r.position.x + fs * 1.6, r.get_center().y + fs * 0.35), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs), PopPalette.INK)
+		# a little clock right after the number: a minute
+		var cc := Vector2(r.position.x + fs * 1.6 + font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs)).x + fs * 0.45, r.get_center().y)
+		ci.draw_arc(cc, fs * 0.28, 0, TAU, 12, Color(PopPalette.INK, 0.5), 1.5)
+		ci.draw_line(cc, cc + Vector2(0, -fs * 0.2), Color(PopPalette.INK, 0.5), 1.5)
+		if stage_of.has(bn) and int(stage_of[bn]) == i:
+			var rp := PopMachineArt.round_rect_points(r.grow(2), 8)
+			rp.append(rp[0])
+			ci.draw_polyline(rp, PopTokens.WARN, 3.0, true)
+		if i < 2:   # the flow goes up: lots -> packs -> sales
+			var ax := r.end.x + 2
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(ax - 4, r.get_center().y - 5), Vector2(ax + 2, r.get_center().y), Vector2(ax - 4, r.get_center().y + 5)]), Color(PopPalette.INK, 0.45))
+	# 2. burn, take, net.
 	var rows := [["burn", "-%s" % str(o["burn_per_min"]), PopTokens.WARN], ["take", "+%d" % int(o["revenue_last_min"]), PopTokens.OK],
 		["net", ("%+.0f" % float(o["net_per_min"])), PopTokens.OK if float(o["net_per_min"]) >= 0.0 else PopTokens.WARN]]
-	for r: Array in rows:
-		var ic := Vector2(d.position.x + fs * 1.0, y - fs * 0.35)
-		match String(r[0]):
+	for i in 3:
+		var r: Rect2 = L["money"][i]
+		var ic := Vector2(r.position.x + fs * 0.8, r.get_center().y)
+		match String(rows[i][0]):
 			"burn":   # a coin with a flame
 				PopMachineArt.draw_coin(ci, ic, fs * 0.38)
 				ci.draw_colored_polygon(PackedVector2Array([ic + Vector2(fs * 0.3, -fs * 0.1), ic + Vector2(fs * 0.5, -fs * 0.55), ic + Vector2(fs * 0.62, -fs * 0.05)]), PopTokens.WARN)
@@ -2096,23 +2616,96 @@ func _draw_overview(ci: CanvasItem, d: Rect2) -> void:
 				ci.draw_arc(ic, fs * 0.38, 0, TAU, 16, PopPalette.INK, 2.5)
 				ci.draw_line(ic, ic + Vector2(0, -fs * 0.3), PopPalette.INK, 2.5)
 				ci.draw_line(ic, ic + Vector2(fs * 0.22, 0), PopPalette.INK, 2.5)
-		ci.draw_string(font, Vector2(x, y), String(r[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, r[2])
-		y += fs * 1.35
-	# Paused machines: the pause badge and how many.
-	if int(o["paused"]) > 0:
-		PopFactoryArt.state_badge(ci, Vector2(d.position.x + fs, y - fs * 0.35), fs * 0.38, "paused")
-		ci.draw_string(font, Vector2(x, y), "%d" % int(o["paused"]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopPalette.INK)
+		ci.draw_string(font, Vector2(r.position.x + fs * 1.6, r.get_center().y + fs * 0.35), String(rows[i][1]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs), rows[i][2])
+	# 3. the floors: a chip in the floor's colour, the machines by line, the next line.
+	var cols := {"shop": PopTokens.FLOOR_TOP, "packing": PopTokens.FLOOR_MID, "kitchen": PopTokens.FLOOR_LOW}
+	for f: String in OV_FLOORS:
+		var row: Rect2 = L["floors"][f]
+		var chip := Rect2(row.position, Vector2(row.size.y, row.size.y))
+		PopMachineArt._round_rect(ci, chip.grow(-2), 6, (cols[f] as Array)[1])
+		PopFactoryArt.machine_icon(ci, chip.grow(-6), String(MACHINE_OF[f]), 0)
+		var lc := int(rules.line_cost(f))
+		var b: Rect2 = L["lines"][f]
+		if lc >= 0:
+			var ready: bool = rules.floor_full(f) and rules.money >= lc
+			PopMachineArt._round_rect(ci, b, 8, PopPalette.GOLD if ready else Color(PopPalette.INK, 0.12))
+			# a plus over a small row of places: one more line
+			var pc := Vector2(b.position.x + b.size.y * 0.5, b.get_center().y)
+			ci.draw_rect(Rect2(pc - Vector2(b.size.y * 0.28, 2), Vector2(b.size.y * 0.56, 4)), PopPalette.INK if ready else Color(PopPalette.INK, 0.4))
+			ci.draw_rect(Rect2(pc - Vector2(2, b.size.y * 0.28), Vector2(4, b.size.y * 0.56)), PopPalette.INK if ready else Color(PopPalette.INK, 0.4))
+			var cx := b.position.x + b.size.y * 0.95
+			PopMachineArt.draw_coin(ci, Vector2(cx + fs * 0.3, b.get_center().y), fs * 0.3)
+			ci.draw_string(font, Vector2(cx + fs * 0.7, b.get_center().y + fs * 0.3), _short(lc), HORIZONTAL_ALIGNMENT_LEFT, b.end.x - cx - fs * 0.75, int(fs * 0.8), PopPalette.INK if ready else Color(PopPalette.INK, 0.45))
+		for r: Rect2 in L["empty"]:
+			if row.has_point(r.get_center()):
+				PopMachineArt._round_rect(ci, r, 3, Color(PopPalette.INK, 0.06))
+	for id: int in L["machines"]:
+		var r: Rect2 = L["machines"][id]
+		var m: Dictionary = rules.machine(id)
+		var col: Color = STATE_COLOUR.get(String(m["state"]), Color(0.7, 0.7, 0.7))
+		PopMachineArt._round_rect(ci, r, 3, col)
+		if r.size.x >= 20.0:
+			var e: Dictionary = rules.forty().get(String(m["type"]), {})
+			if e.is_empty():
+				PopFactoryArt.machine_icon(ci, r.grow(-2), String(m["type"]), int(m["tier"]))
+			else:
+				PopFactoryArt.catalog_icon(ci, r.grow(-2), e.get("parts", ["box"]), String(e.get("group", "manufacturing")))
+		if id == ov_machine:
+			var rp := PopMachineArt.round_rect_points(r.grow(2), 4)
+			rp.append(rp[0])
+			ci.draw_polyline(rp, PopPalette.GOLD, 3.0, true)
+	# 4. the picked machine's diagnostics.
+	if ov_machine >= 0 and not rules.machine(ov_machine).is_empty():
+		var m: Dictionary = rules.machine(ov_machine)
+		var dr: Rect2 = L["diag"]
+		PopMachineArt._round_rect(ci, dr, 8, Color(PopPalette.GOLD, 0.18))
+		var ir := Rect2(dr.position + Vector2(4, 2), Vector2(dr.size.y - 4, dr.size.y - 4))
+		var e: Dictionary = rules.forty().get(String(m["type"]), {})
+		if e.is_empty():
+			PopFactoryArt.machine_icon(ci, ir, String(m["type"]), int(m["tier"]))
+		else:
+			PopFactoryArt.catalog_icon(ci, ir, e.get("parts", ["box"]), String(e.get("group", "manufacturing")))
+		PopFactoryArt.state_badge(ci, Vector2(ir.end.x + fs * 0.6, dr.get_center().y), fs * 0.4, String(m["state"]))
+		var row_o: Dictionary = {}
+		for x: Dictionary in o["machines"]:
+			if int(x["id"]) == ov_machine:
+				row_o = x
+		var x0 := ir.end.x + fs * 1.4
+		# its line: one dot per line, its own filled
+		var lines_n := int((rules.get("floor_lines") as Dictionary).get(String(m["floor"]), 1))
+		var my := int(rules.line_of(String(m["floor"]), int(m["slot"])))
+		for q in lines_n:
+			var dc := Vector2(x0 + q * fs * 0.55, dr.get_center().y)
+			if q == my:
+				ci.draw_circle(dc, fs * 0.2, PopPalette.INK)
+			else:
+				ci.draw_arc(dc, fs * 0.2, 0, TAU, 10, PopPalette.INK, 1.5)
+		x0 += lines_n * fs * 0.55 + fs * 0.4
+		# what it has done (lots, packs, customers, moves), and what it costs: a minute and all told
+		ci.draw_string(font, Vector2(x0, dr.get_center().y + fs * 0.35), "x%d" % int(m.get("done", 0)), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.9), PopPalette.INK)
+		x0 += fs * 3.4
+		PopMachineArt.draw_coin(ci, Vector2(x0, dr.get_center().y), fs * 0.32)
+		ci.draw_colored_polygon(PackedVector2Array([Vector2(x0 + fs * 0.25, dr.get_center().y - fs * 0.1), Vector2(x0 + fs * 0.42, dr.get_center().y - fs * 0.5), Vector2(x0 + fs * 0.55, dr.get_center().y - fs * 0.05)]), PopTokens.WARN)
+		ci.draw_string(font, Vector2(x0 + fs * 0.75, dr.get_center().y + fs * 0.35), "-%s  (%d)" % [str(row_o.get("per_min", 0)), int(row_o.get("paid", 0))], HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.9), PopTokens.WARN)
 	# Pause / resume everything.
-	var b := _pause_all_rect()
-	ci.draw_circle(b.get_center(), b.size.x * 0.5, Color.WHITE)
-	ci.draw_arc(b.get_center(), b.size.x * 0.5, 0, TAU, 24, PopPalette.INK, 2.5)
+	var pb := _pause_all_rect()
+	ci.draw_circle(pb.get_center(), pb.size.x * 0.5, Color.WHITE)
+	ci.draw_arc(pb.get_center(), pb.size.x * 0.5, 0, TAU, 24, PopPalette.INK, 2.5)
 	var any_on := (rules.get("machines") as Array).any(func(m: Dictionary) -> bool: return String(m["state"]) != "paused")
 	if any_on:
-		PopFactoryArt.state_badge(ci, b.get_center(), b.size.x * 0.3, "paused")
+		PopFactoryArt.state_badge(ci, pb.get_center(), pb.size.x * 0.3, "paused")
 	else:
-		var c := b.get_center()
-		var q := b.size.x * 0.22
+		var c := pb.get_center()
+		var q := pb.size.x * 0.22
 		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-q * 0.7, -q), c + Vector2(q, 0), c + Vector2(-q * 0.7, q)]), PopTokens.OK)
+	if int(o["paused"]) > 0:
+		ci.draw_string(font, Vector2(pb.position.x - fs * 1.6, pb.get_center().y + fs * 0.35), "%d" % int(o["paused"]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs), PopPalette.INK)
+
+
+static func _short(n: int) -> String:
+	if n >= 1000:
+		return ("%dk" % (n / 1000)) if n % 1000 == 0 else ("%.1fk" % (n / 1000.0))
+	return str(n)
 
 
 func _draw_overview_button(ci: CanvasItem) -> void:
@@ -2207,6 +2800,8 @@ func _draw_motion_part(n: Node2D) -> void:
 			n.draw_rect(Rect2(Vector2(-w * 0.1, -w * 0.08), Vector2(w * 0.2, w * 0.16)), Color(0.75, 0.55, 0.3))
 		"U05":
 			n.draw_circle(Vector2.ZERO, w * 0.08, Color(1.0, 0.9, 0.4, 0.45))
+		"U08":
+			PopFactoryArt.popcorn(n, Vector2.ZERO, w * 0.09)
 		"P08":
 			n.draw_line(Vector2.ZERO, Vector2(0, w * 0.3), PopTokens.STEEL_DEEP, 4.0)
 			n.draw_circle(Vector2.ZERO, w * 0.05, PopPalette.GOLD)
