@@ -44,6 +44,8 @@ var machines: Array = []
 var next_machine_id := 1
 var assist_target := -1    ## the machine the player has selected (a perfect pop tunes it)
 var kitchen_heat := 0.0    ## Step 29: the kitchen's heat (0 .. heat.limit)
+var pack_rng_state := 0    ## Step 30: the packing floor's own generator (a filler's overfill)
+var _prng := RandomNumberGenerator.new()
 var overheat_left := 0     ## Step 29: ms the kettles still stop to cool
 ## The cookers among them (Step 25's name; the same dictionaries).
 var cookers: Array:
@@ -86,6 +88,8 @@ func _init(p_economy: PopEconomy = null, seed_value: int = 20261116) -> void:
 	order_rng_state = int(_orng.state)
 	_arng.seed = seed_value + 104729
 	auto_rng_state = int(_arng.state)
+	_prng.seed = seed_value + 15485863
+	pack_rng_state = int(_prng.state)
 	# The first customer is already waiting when the shop opens (design/FACTORY_FLOW.md 5).
 	_arrive()
 	var f := _t()["customers"] as Dictionary
@@ -165,7 +169,7 @@ func station_open(station: String) -> bool:
 			return int(stats["sold"]) >= 1 or sign_tier > 0
 		"auto", "cooker":
 			return sign_tier >= int(_auto().get("unlock_sign", 2)) or _count("cooker") > 0
-		"M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16":
+		"M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "P01", "P02", "P04", "P05", "P06", "P07", "P08":
 			var p: Dictionary = catalog(station).get("prereq", {})
 			var needs_kettle := (p.get("machines", []) as Array).has("M07")
 			return sign_tier >= int(p.get("sign", 0)) and packer_tier >= int(p.get("packer", 0)) and (not needs_kettle or _count("cooker") > 0) or _count(station) > 0
@@ -259,16 +263,22 @@ func portions_everywhere() -> int:
 	if not glass.is_empty():
 		n += int(glass["portions"])
 	for p: Dictionary in packing:
-		n += int(p["size"])
+		n += pack_portions(p)
 	for p: Dictionary in shelf:
-		n += int(p["size"])
+		n += pack_portions(p)
 	for sv: Dictionary in serves:
-		n += int(sv["pack"]["size"])
+		n += pack_portions(sv["pack"])
 	for m: Dictionary in machines:
 		var h: Dictionary = m["held"]
 		if not h.is_empty():
 			n += int(h.get("portions", h.get("size", 0)))
 	return n + int(stats["sold_portions"])
+
+
+## Step 30: the portions really in a pack -- its size, or one more when a volumetric
+## filler overfilled it (the extra is in the bag, not paid for).
+func pack_portions(p: Dictionary) -> int:
+	return int(p.get("portions", p.get("size", 0)))
 
 
 # -- the hand -----------------------------------------------------------------
@@ -396,19 +406,18 @@ func _flow_step(dt: int) -> void:
 		# Step 23: what to pack is what is wanted -- first the orders waiting (in
 		# queue order) that the shelf and the heads do not already cover, then the
 		# stock (a small buffer of large bags, small bags for the rest of the shelf).
-		var room := int(t["shelf_packs"]) - shelf.size()
 		var started := 0
 		for k in int(packer()["per_cycle"]):
-			if room <= 0:
-				break
-			var want := _next_pack()
+			var want := _next_pack(station_sizes())
 			if want.is_empty():
 				break
+			# shelf_room counts the packs being sealed, so each started pack takes its place.
+			if shelf_room(pack_sku(String(want["recipe"]))) <= 0:
+				break
 			_start_pack(int(want["size"]), String(want["recipe"]))
-			room -= 1
 			started += 1
 		if started == 0:
-			if room <= 0:
+			if shelf_room("plain") <= 0:
 				stats["packer_blocked_ms"] = int(stats["packer_blocked_ms"]) + dt
 			else:
 				stats["packer_starved_ms"] = int(stats["packer_starved_ms"]) + dt
@@ -417,7 +426,7 @@ func _flow_step(dt: int) -> void:
 		for p: Dictionary in packing:
 			p["left_ms"] = int(p["left_ms"]) - dt
 			if int(p["left_ms"]) <= 0:
-				var pack := {"id": p["id"], "recipe": p["recipe"], "size": p["size"], "quality": p["quality"]}
+				var pack := {"id": p["id"], "recipe": p["recipe"], "size": p["size"], "quality": p["quality"], "portions": pack_portions(p)}
 				shelf.append(pack)
 				stats["packed"] = int(stats["packed"]) + 1
 				_note("packs")
@@ -502,9 +511,50 @@ func packable_recipe(size: int = -1) -> String:
 func sizes_open() -> Array:
 	var out: Array = []
 	for z: Dictionary in _t().get("sizes", [{"size": pack_size(), "price": 10, "unlock_packer": 0}]):
-		if packer_tier >= int(z.get("unlock_packer", 0)):
+		if z.has("unlock_machine") and not _device_on(String(z["unlock_machine"])):
+			continue   # Step 30: cups exist while a cup feeder runs
+		if packer_tier >= int(z.get("unlock_packer", 0)) or (z.has("unlock_machine_early") and _device_on(String(z["unlock_machine_early"]))):
 			out.append(z)
 	return out
+
+
+## Step 30: the sizes the station and the fillers pack (bags; cups are P01's).
+func station_sizes() -> Array:
+	return sizes_open().filter(func(z: Dictionary) -> bool: return not z.has("unlock_machine")).map(func(z: Dictionary) -> int: return int(z["size"]))
+
+
+## Step 30, P07 the auto sealer: sealing apart from filling -- every packing cycle shorter.
+func seal_factor() -> float:
+	if not _device_on("P07"):
+		return 1.0
+	var best := 0.0
+	for d: Dictionary in _devices("P07"):
+		best = maxf(best, float(_machine_tier(d).get("minus", 0.25)))
+	return 1.0 - best
+
+
+## Step 30, P08 the diverter: premium on its own lane (its tier's places), so it never
+## takes plain places; without it every SKU shares the shelf.
+func premium_lane() -> int:
+	var best := 0
+	for d: Dictionary in _devices("P08"):
+		best = maxi(best, int(_machine_tier(d).get("lane", 2)))
+	return best
+
+
+func shelf_cap() -> int:
+	return int(_t()["shelf_packs"]) + premium_lane()
+
+
+## Places left on the shelf for a pack of this SKU (sealed packs and packs being
+## sealed by the station count; a filler's own pack is checked again when it is sealed).
+func shelf_room(sku: String) -> int:
+	var lane := premium_lane()
+	var on: Array = shelf + packing
+	if lane > 0 and sku == "premium":
+		return lane - on.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "premium").size()
+	var plain_on := on.size() if lane == 0 else on.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) != "premium").size()
+	return int(_t()["shelf_packs"]) - plain_on
 
 
 ## Packs of an SKU and size on the shelf or being filled.
@@ -531,10 +581,12 @@ func _recipe_for(sku: String, size: int) -> String:
 ## The next pack to fill ({recipe, size, for}) or {} -- nothing wanted, or not
 ## enough popcorn of the wanted kind (then the station waits: it never packs the
 ## popcorn an order needs into another bag).
-func _next_pack() -> Dictionary:
+func _next_pack(allowed: Array = []) -> Dictionary:
 	var covered := {}
 	for c: Dictionary in queue:
 		var o: Dictionary = c["order"]
+		if not allowed.is_empty() and not allowed.has(int(o["size"])):
+			continue   # Step 30: cups are the cup feeder's; the station and the fillers pack bags
 		var key := "%s|%d" % [o["recipe"], o["size"]]
 		var have := int(covered.get(key, on_hand(String(o["recipe"]), int(o["size"]))))
 		if have > 0:
@@ -549,6 +601,8 @@ func _next_pack() -> Dictionary:
 		reserved += int(z.get("stock", 0))
 	for z: Dictionary in open:
 		var size := int(z["size"])
+		if not allowed.is_empty() and not allowed.has(size):
+			continue
 		var target := int(z.get("stock", 0)) if z.has("stock") else cap - reserved
 		# Each SKU in the bin (oldest first) against its own target; premium keeps one
 		# pack of a size in stock (only premium customers buy it: Step 29).
@@ -620,7 +674,7 @@ func pack_sku(recipe: String) -> String:
 ## into a new pack; its quality is the portions' average (nothing lost).
 func _start_pack(size: int, recipe: String) -> void:
 	var pack := _take_pack(size, recipe)
-	var ms := int(packer()["ms"])
+	var ms := int(round(float(packer()["ms"]) * seal_factor()))
 	pack["left_ms"] = ms
 	pack["ms"] = ms
 	packing.append(pack)
@@ -704,12 +758,15 @@ func _buy_sign() -> Dictionary:
 
 const FLOOR_OF := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop",
 	"M01": "kitchen", "M02": "kitchen", "M03": "kitchen", "M04": "kitchen", "M05": "kitchen", "M06": "kitchen", "M08": "kitchen",
-	"M09": "kitchen", "M10": "kitchen", "M11": "kitchen", "M12": "kitchen", "M13": "kitchen", "M14": "kitchen", "M15": "kitchen", "M16": "kitchen"}
+	"M09": "kitchen", "M10": "kitchen", "M11": "kitchen", "M12": "kitchen", "M13": "kitchen", "M14": "kitchen", "M15": "kitchen", "M16": "kitchen",
+	"P01": "packing", "P02": "packing", "P04": "packing", "P05": "packing", "P06": "packing", "P07": "packing", "P08": "packing"}
 ## Step 28: the kitchen's devices that serve the kettles (each a catalog id and its own runtime).
 const KITCHEN_DEVICES := ["M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16"]
 ## Step 29: what cooks lots on its own (the auto kettle and the rotary popper): kernels,
 ## hoppers, the heat and the dispatcher treat them alike.
 const KETTLES := ["cooker", "M16"]
+## Step 30: the packing floor's machines besides the bagger (P03).
+const PACKING_DEVICES := ["P01", "P02", "P04", "P05", "P06", "P07", "P08"]
 const CATALOG_PATH := "res://data/machines.json"
 var _forty: Dictionary = {}
 
@@ -965,8 +1022,10 @@ func _machines_step(dt: int) -> void:
 		match String(m["type"]):
 			"cooker", "M16":
 				_cooker_step(m, dt)
-			"bagger":
+			"bagger", "P01":
 				_bagger_step(m, dt)
+			"P02", "P04", "P07", "P08":
+				_packing_device_step(m, dt)
 			"kiosk":
 				_kiosk_step(m, dt)
 			"M01":
@@ -1014,17 +1073,29 @@ func _cooker_step(m: Dictionary, dt: int) -> void:
 
 ## A bagger fills one pack at a time with what is wanted (the same rule as the
 ## station), from real portions in the bin; it waits (starved) with nothing to
-## pack and holds a sealed pack (blocked) while the shelf is full.
+## pack and holds a sealed pack (blocked) while the shelf is full. Step 30: the cup
+## feeder (P01) is the same machine for cups; a bagger is volumetric -- it overfills
+## a pack by a portion now and then unless a portion weigher (P04) runs.
 func _bagger_step(m: Dictionary, dt: int) -> void:
+	var cups := String(m["type"]) == "P01"
 	var h: Dictionary = m["held"]
 	if h.is_empty():
-		var room := int(_t()["shelf_packs"]) - shelf.size() - packing.size()
-		var want := _next_pack() if room > 0 else {}
+		var allowed: Array = [1] if cups else station_sizes()
+		var want := _next_pack(allowed)
 		if want.is_empty():
-			m["state"] = "starved" if room > 0 else "blocked"
+			m["state"] = "starved" if shelf_room("plain") > 0 else "blocked"
+			return
+		if shelf_room(pack_sku(String(want["recipe"]))) <= 0:
+			m["state"] = "blocked"
 			return
 		var pack := _take_pack(int(want["size"]), String(want["recipe"]))
-		pack["left_ms"] = int(_machine_tier(m).get("cycle_ms", 5000))
+		var ms := float(_machine_tier(m).get("cycle_ms", 5000 if not cups else 2000))
+		if not cups:
+			if _device_on("P04"):
+				ms += float(_tier_value("P04", "slower_ms", 500))
+			elif _overfills() and bin_portions_of(String(want["recipe"])) > 0:
+				_take_extra(pack, String(want["recipe"]))
+		pack["left_ms"] = int(round(ms * seal_factor()))
 		m["held"] = pack
 		_emit("bagger_started", {"machine": m["id"], "pack": pack["id"], "size": pack["size"], "ms": pack["left_ms"]})
 		return
@@ -1034,15 +1105,36 @@ func _bagger_step(m: Dictionary, dt: int) -> void:
 		m["state"] = "run"
 		h["left_ms"] = int(h["left_ms"]) - dt
 		return
-	if shelf.size() >= int(_t()["shelf_packs"]):
+	if shelf_room(String(h["recipe"])) <= 0:
 		m["state"] = "blocked"
 		return
-	shelf.append({"id": h["id"], "recipe": h["recipe"], "size": h["size"], "quality": h["quality"]})
+	shelf.append({"id": h["id"], "recipe": h["recipe"], "size": h["size"], "quality": h["quality"], "portions": pack_portions(h)})
 	stats["packed"] = int(stats["packed"]) + 1
 	_note("packs")
 	m["held"] = {}
 	m["done"] = int(m.get("done", 0)) + 1
 	_emit("pack_shelved", {"pack": h["id"], "machine": m["id"]})
+
+
+## Step 30: does this volumetric fill overshoot? (the packing floor's own generator)
+func _overfills() -> bool:
+	_prng.state = pack_rng_state
+	var hit := _prng.randf() < float((_t().get("fill", {}) as Dictionary).get("overfill_chance", 0.0))
+	pack_rng_state = int(_prng.state)
+	return hit
+
+
+## One more portion of `recipe` from the bin's oldest lot into `pack` (an overfill).
+func _take_extra(pack: Dictionary, recipe: String) -> void:
+	for i in bin.size():
+		var lot: Dictionary = bin[i]
+		if String(lot["recipe"]) == recipe and int(lot["portions"]) > 0:
+			lot["portions"] = int(lot["portions"]) - 1
+			if int(lot["portions"]) <= 0:
+				bin.remove_at(i)
+			pack["portions"] = int(pack["size"]) + 1
+			stats["overfill_portions"] = int(stats.get("overfill_portions", 0)) + 1
+			return
 
 
 ## A kiosk pays only while it hands a pack over (the counter loop gives it customers).
@@ -1325,6 +1417,17 @@ func _device_step(m: Dictionary, dt: int) -> void:
 	m["state"] = "run"
 
 
+## Step 30: the packing floor's devices work (and pay) while the floor packs.
+func _packing_device_step(m: Dictionary, dt: int) -> void:
+	var busy := not packing.is_empty() or machines.any(func(x: Dictionary) -> bool: return String(x["type"]) in ["bagger", "P01"] and String(x["state"]) == "run")
+	if not busy:
+		m["state"] = "idle"
+		return
+	if not _pay(m, dt):
+		return
+	m["state"] = "run"
+
+
 ## Refill a kettle's kernels by hand (the card, when it has no hopper): price a lot.
 func _refill(id: int) -> Dictionary:
 	var m := machine(id)
@@ -1357,6 +1460,8 @@ func reseed(seed_value: int) -> void:
 	order_rng_state = int(_orng.state)
 	_arng.seed = seed_value + 104729
 	auto_rng_state = int(_arng.state)
+	_prng.seed = seed_value + 15485863
+	pack_rng_state = int(_prng.state)
 	queue.clear()
 	arrival_log.clear()
 	stats["arrived"] = 0
@@ -1391,6 +1496,7 @@ func _sell(sv: Dictionary) -> void:
 	var coins := pack_price(String(p["recipe"]), int(p["size"]), int(p["quality"]))
 	if first_sale_ms < 0:
 		first_sale_ms = flow_ms
+	stats["sold_size_%d" % int(p["size"])] = int(stats.get("sold_size_%d" % int(p["size"]), 0)) + 1   # Step 30: cups, bags
 	if String(p["recipe"]) == "premium":
 		stats["premium_sold"] = int(stats.get("premium_sold", 0)) + 1
 		stats["premium_revenue"] = int(stats.get("premium_revenue", 0)) + coins
@@ -1401,7 +1507,7 @@ func _sell(sv: Dictionary) -> void:
 		ledger.pop_front()
 	stats["sold"] = int(stats["sold"]) + 1
 	_note("sales")
-	stats["sold_portions"] = int(stats["sold_portions"]) + int(p["size"])
+	stats["sold_portions"] = int(stats["sold_portions"]) + pack_portions(p)
 	stats["revenue"] = int(stats["revenue"]) + coins
 	_emit("sale", {"customer": c["id"], "pack": p["id"], "coins": coins, "quality": p["quality"]})
 	_earn(coins, {"from": "sale", "customer": c["id"], "pack": p["id"]})
@@ -1458,7 +1564,7 @@ const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines"
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
-		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left}
+		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state)}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -1535,6 +1641,8 @@ func _apply_save(d: Dictionary) -> void:
 	# Step 29: the kitchen's heat (optional: a 0.28 save has none -- a cool kitchen).
 	kitchen_heat = clampf(float(d.get("kitchen_heat", 0.0)), 0.0, 1000.0) if typeof(d.get("kitchen_heat", 0.0)) in [TYPE_INT, TYPE_FLOAT] else 0.0
 	overheat_left = maxi(0, int(d.get("overheat_left", 0))) if typeof(d.get("overheat_left", 0)) in [TYPE_INT, TYPE_FLOAT] else 0
+	if String(d.get("pack_rng_state", "")).is_valid_int():
+		pack_rng_state = String(d["pack_rng_state"]).to_int()
 	# Step 28: a kettle saved before kernels existed (0.25-0.27) comes back with a full
 	# buffer -- the save keeps cooking; it is not starved by an update.
 	for m: Dictionary in machines:
@@ -1566,7 +1674,7 @@ func state() -> Dictionary:
 	s["packer_state"] = packer_state()
 	s["packs_per_min"] = packs_per_min(packer_tier)
 	s["shelf"] = shelf.size()
-	s["shelf_cap"] = int(_t()["shelf_packs"])
+	s["shelf_cap"] = shelf_cap()   # Step 30: plus the premium lane while a diverter runs
 	s["queue"] = queue.size()
 	s["queue_cap"] = queue_cap()
 	s["sign_tier"] = sign_tier

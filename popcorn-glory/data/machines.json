@@ -11,7 +11,9 @@
   "oil",
   "heat_model",
   "premium_sku",
-  "dispatch"
+  "dispatch",
+  "cup_sku",
+  "portion_variance"
  ],
  "machines": [
   {
@@ -834,44 +836,46 @@
    "floor": "packing",
    "slots": 1,
    "parts": [
-    "box",
+    "cupstack",
     "cups"
    ],
    "motion": "a stack of cups lowers one at a time",
-   "operation": "feeds cups for a cup product",
+   "operation": "fills one-portion cups, a product of its own (and the lone portion a bag would leave)",
    "contract": {
     "kind": "container",
-    "container": "cup"
+    "container": "cup",
+    "size": 1
    },
    "inputs": [
-    "cups"
+    "single portions"
    ],
    "outputs": [
-    "cup packs (a new SKU)"
+    "cup packs (a new SKU, price 6)"
    ],
-   "queue": "one per station",
+   "queue": "cups only it can fill",
    "prereq": {
     "packer": 1
    },
-   "requires": [
-    "cup_sku"
-   ],
+   "requires": [],
    "cost": 300,
    "growth": 1.25,
    "upkeep_per_min": 1,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "cycle_ms": 2000
     },
     {
-     "cost": 400
+     "cost": 400,
+     "cycle_ms": 1600
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "cycle_ms": 1200
     }
    ],
-   "marginal": "none until cups are a product",
-   "runtime": null,
+   "marginal": "a quarter of customers want a cup once cups exist",
+   "runtime": "P01",
    "step": 30
   },
   {
@@ -881,7 +885,7 @@
    "floor": "packing",
    "slots": 1,
    "parts": [
-    "box",
+    "dispenser",
     "bags_flat"
    ],
    "motion": "a flat bag opens and drops",
@@ -892,12 +896,12 @@
     "opens_size": 4
    },
    "inputs": [
-    "flat bags"
+    "flat large bags"
    ],
    "outputs": [
-    "large bags can be packed at station tier 1"
+    "the large bag on sale before the station's tier 2"
    ],
-   "queue": "one per station",
+   "queue": "one per floor",
    "prereq": {
     "packer": 1
    },
@@ -916,8 +920,8 @@
      "cost": 1000
     }
    ],
-   "marginal": "the large bag (+80% per customer who wants it) one tier earlier",
-   "runtime": null,
+   "marginal": "large-bag orders (35%) served from tier 1",
+   "runtime": "P02",
    "step": 30
   },
   {
@@ -977,45 +981,46 @@
    "floor": "packing",
    "slots": 1,
    "parts": [
-    "box",
+    "weigher",
     "scale"
    ],
-   "motion": "a scale pan dips and settles",
-   "operation": "weighs each pack so no portion is overfilled",
+   "motion": "a pan dips and settles under each pack",
+   "operation": "weighs each filler's pack so no portion is given away",
    "contract": {
     "kind": "weigh",
     "returns_overfill": true,
     "slower_ms": 500
    },
    "inputs": [
-    "the station's packs"
+    "the fillers' packs"
    ],
    "outputs": [
-    "exact packs; overfill back to the bin"
+    "exact packs: the overfilled portion back in the bin, 0.5 s slower"
    ],
-   "queue": "on the station",
+   "queue": "covers the floor's fillers",
    "prereq": {
     "packer": 2
    },
-   "requires": [
-    "portion_variance"
-   ],
+   "requires": [],
    "cost": 500,
    "growth": 1.25,
    "upkeep_per_min": 2,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "slower_ms": 500
     },
     {
-     "cost": 400
+     "cost": 400,
+     "slower_ms": 400
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "slower_ms": 300
     }
    ],
-   "marginal": "none until packs can be overfilled (P03 volume variance, Step 30)",
-   "runtime": null,
+   "marginal": "about one pack in seven keeps its extra portion",
+   "runtime": "P04",
    "step": 30
   },
   {
@@ -1025,23 +1030,21 @@
    "floor": "packing",
    "slots": 1,
    "parts": [
-    "box",
-    "spray"
+    "sprayer"
    ],
-   "motion": "a fine mist puffs over the popcorn",
+   "motion": "a mist of seasoning falls on the portions",
    "operation": "seasons plain portions into a flavor",
    "contract": {
     "kind": "season",
     "makes": "flavored portions"
    },
    "inputs": [
-    "plain portions",
-    "seasoning"
+    "flavors"
    ],
    "outputs": [
-    "cheese/spicy portions"
+    "flavored portions"
    ],
-   "queue": "one flavor at a time",
+   "queue": "asleep until flavors open",
    "prereq": {
     "packer": 2
    },
@@ -1063,7 +1066,7 @@
     }
    ],
    "marginal": "none until flavors (Step 34)",
-   "runtime": null,
+   "runtime": "P05",
    "step": 30
   },
   {
@@ -1073,10 +1076,9 @@
    "floor": "packing",
    "slots": 1,
    "parts": [
-    "drum",
-    "drip"
+    "coater"
    ],
-   "motion": "caramel drips into a tumbling drum",
+   "motion": "caramel cascades over a turning drum",
    "operation": "coats portions with caramel",
    "contract": {
     "kind": "coat",
@@ -1084,13 +1086,12 @@
     "slow": true
    },
    "inputs": [
-    "plain portions",
-    "caramel"
+    "flavors"
    ],
    "outputs": [
     "caramel portions"
    ],
-   "queue": "slow; one batch at a time",
+   "queue": "asleep until flavors open",
    "prereq": {
     "packer": 2
    },
@@ -1112,7 +1113,7 @@
     }
    ],
    "marginal": "none until flavors (Step 34)",
-   "runtime": null,
+   "runtime": "P06",
    "step": 30
   },
   {
@@ -1122,10 +1123,9 @@
    "floor": "packing",
    "slots": 1,
    "parts": [
-    "box",
-    "jaws"
+    "sealer"
    ],
-   "motion": "two hot jaws press a bag shut",
+   "motion": "jaws press and crimp each bag",
    "operation": "seals packs apart from filling",
    "contract": {
     "kind": "seal",
@@ -1135,9 +1135,9 @@
     "filled packs"
    ],
    "outputs": [
-    "sealed packs, the heads free sooner"
+    "the station's, the fillers' and the cup feeder's cycles 25/30/35% shorter"
    ],
-   "queue": "on the station",
+   "queue": "covers the floor",
    "prereq": {
     "packer": 2
    },
@@ -1159,8 +1159,8 @@
      "minus": 0.35
     }
    ],
-   "marginal": "the station packs ~33% more",
-   "runtime": null,
+   "marginal": "a quarter more packs from the same heads",
+   "runtime": "P07",
    "step": 30
   },
   {
@@ -1168,13 +1168,13 @@
    "name": "Package Conveyor Diverter",
    "group": "packaging",
    "floor": "packing",
-   "slots": 2,
+   "slots": 1,
    "parts": [
-    "belt",
-    "gate"
+    "diverter",
+    "arrows"
    ],
-   "motion": "a gate swings packs onto lanes",
-   "operation": "sorts packs onto per-flavor shelf lanes",
+   "motion": "an arm swings each pack to its lane",
+   "operation": "sends each SKU to its own shelf lane",
    "contract": {
     "kind": "divert",
     "shelf_lanes": "per SKU"
@@ -1183,31 +1183,32 @@
     "sealed packs"
    ],
    "outputs": [
-    "packs on their own lanes"
+    "premium packs on their own lane (2/3/4 places) -- they never take plain places (flavors' lanes later)"
    ],
-   "queue": "two places wide",
+   "queue": "covers the shelf",
    "prereq": {
     "packer": 3
    },
-   "requires": [
-    "flavors"
-   ],
+   "requires": [],
    "cost": 1200,
    "growth": 1.25,
    "upkeep_per_min": 2,
    "tiers": [
     {
-     "cost": 0
+     "cost": 0,
+     "lane": 2
     },
     {
-     "cost": 400
+     "cost": 400,
+     "lane": 3
     },
     {
-     "cost": 1000
+     "cost": 1000,
+     "lane": 4
     }
    ],
-   "marginal": "none until two flavors share the shelf",
-   "runtime": null,
+   "marginal": "plain keeps its whole shelf while premium waits",
+   "runtime": "P08",
    "step": 30
   },
   {

@@ -226,9 +226,9 @@ func extra_rects() -> Dictionary:
 		var b := _machine_buttons()
 		out["m_pause"] = b["pause"]
 		out["m_sell"] = b["sell"]
-	if not sel_slot.is_empty() and String(sel_slot["floor"]) == "kitchen":
+	if not sel_slot.is_empty() and String(sel_slot["floor"]) in ["kitchen", "packing"]:
 		var rs := _picker_rects(detail_rect())
-		var choices := _kitchen_choices()
+		var choices := _floor_choices(String(sel_slot["floor"]))
 		for i in rs.size():
 			out["pick_%s" % choices[i]] = rs[i]   # Step 28: the kitchen picker
 	return out
@@ -567,7 +567,10 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 		if k < shelf_n:
 			var shelved: Array = rules.get("shelf") if rules else []
 			var prem := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "premium"
-			PopFactoryArt.bag(ci, foot, w, PopTokens.MACHINE, false, 0, 2, prem)
+			if k < shelved.size() and int((shelved[k] as Dictionary).get("size", 2)) == 1:
+				PopFactoryArt.cup(ci, foot, w * 0.9)   # Step 30: a cup
+			else:
+				PopFactoryArt.bag(ci, foot, w, PopTokens.MACHINE, false, 0, 2, prem)
 		else:
 			PopMachineArt._round_rect(ci, Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35))
 
@@ -1462,7 +1465,7 @@ func slot_rect(floor: String, k: int) -> Rect2:
 			var r := floor_rect(MID)
 			var x0 := r.position.x + r.size.x * 0.62
 			var x1 := tube_rect().position.x - 16
-			var w := (x1 - x0) / 3.0 - 6.0
+			var w := (x1 - x0) / float(maxi(1, int(rules.slots("packing")) if rules else 3)) - 6.0
 			return Rect2(Vector2(x0 + k * (w + 6.0), r.position.y + r.size.y * 0.06), Vector2(w, r.size.y * 0.28))
 		"shop":
 			var r := floor_rect(TOP)
@@ -1496,7 +1499,7 @@ func _clear_machine_selection() -> void:
 func _machine_press(p: Vector2) -> bool:
 	if rules == null:
 		return false
-	if not sel_slot.is_empty() and String(sel_slot["floor"]) == "kitchen":
+	if not sel_slot.is_empty() and String(sel_slot["floor"]) in ["kitchen", "packing"]:
 		var rs := _picker_rects(detail_rect())
 		for i in rs.size():
 			if (rs[i] as Rect2).has_point(p):
@@ -1642,9 +1645,9 @@ func _draw_machine_detail(ci: CanvasItem, d: Rect2) -> void:
 		tier = int(m["tier"])
 	else:
 		type = _slot_type(String(sel_slot["floor"]))
-		if String(sel_slot["floor"]) == "kitchen":
-			# The picker: every kitchen machine that can be built now, the chosen one ringed.
-			var choices := _kitchen_choices()
+		if String(sel_slot["floor"]) in ["kitchen", "packing"]:
+			# The picker: every machine of this floor that can be built now, the chosen one ringed.
+			var choices := _floor_choices(String(sel_slot["floor"]))
 			var rs := _picker_rects(d)
 			for i in rs.size():
 				var pr: Rect2 = rs[i]
@@ -1754,21 +1757,29 @@ func _machine_event(e: Dictionary) -> void:
 ## Which machine an empty place would get: the shop and packing floors have one
 ## kind; the kitchen's picker (in the detail) chooses among the open ones.
 func _slot_type(floor: String) -> String:
-	if floor != "kitchen":
+	if not floor in ["kitchen", "packing"]:
 		return String(MACHINE_OF[floor])
-	var choices := _kitchen_choices()
+	var choices := _floor_choices(floor)
 	if choices.is_empty():
-		return "cooker"
+		return String(MACHINE_OF[floor])
 	return String(choices[clampi(int(sel_slot.get("pick", 0)), 0, choices.size() - 1)])
 
 
 func _kitchen_choices() -> Array:
+	return _floor_choices("kitchen")
+
+
+## The machines a floor's empty place can take now (Step 28: the kitchen; Step 30: the
+## packing floor) -- its own machine first, then the open catalog devices that run.
+func _floor_choices(floor: String) -> Array:
 	var out: Array = []
 	if rules == null:
 		return out
-	if rules.station_open("cooker"):
-		out.append("cooker")
-	for id: String in rules.KITCHEN_DEVICES:
+	var own := String(MACHINE_OF[floor])
+	if rules.station_open(own):
+		out.append(own)
+	var devices: Array = rules.KITCHEN_DEVICES if floor == "kitchen" else (rules.PACKING_DEVICES if floor == "packing" else [])
+	for id: String in devices:
 		if rules.station_open(id) and rules.catalog_buildable(id):
 			out.append(id)
 	return out
@@ -1778,7 +1789,7 @@ func _picker_rects(d: Rect2) -> Array:
 	# Step 29: up to fifteen kitchen machines -- a grid in the panel's free part (right of
 	# the numbers on a wide panel, below them on a tall one), as big as fits (<= 52 px).
 	var out: Array = []
-	var choices := _kitchen_choices()
+	var choices := _floor_choices(String(sel_slot.get("floor", "kitchen")))
 	var n := choices.size()
 	if n == 0:
 		return out
@@ -1871,6 +1882,22 @@ func _step_machine_motion(delta: float) -> void:
 				node.position = Vector2(c.x, r.position.y + r.size.y * 0.55)
 				if run:
 					node.rotation += delta * 4.0
+			# Step 30: the packing floor, moving only while it packs.
+			"bagger":   # the nozzle presses into the bag
+				node.position = Vector2(c.x, r.position.y + r.size.y * (0.3 + (0.08 * absf(sin(t * 2.4)) if run else 0.0)))
+			"P01":   # a cup slides under the tube and on
+				node.position = Vector2(r.position.x + r.size.x * (0.3 + 0.4 * fmod(t * 0.7, 1.0) if run else 0.5), r.position.y + r.size.y * 0.62)
+				node.visible = run
+			"P02":   # an open bag drops onto the chute
+				node.position = Vector2(c.x, r.position.y + r.size.y * (0.62 + 0.22 * fmod(t * 0.9, 1.0) if run else 0.66))
+				node.visible = run
+			"P04":   # the pan dips and settles
+				node.position = Vector2(c.x, r.position.y + r.size.y * (0.36 + (0.04 * absf(sin(t * 5.0)) if run else 0.0)))
+			"P07":   # the jaws crimp
+				node.position = Vector2(c.x, r.position.y + r.size.y * (0.4 + (0.24 * maxf(0.0, sin(t * 3.0)) if run else 0.0)))
+			"P08":   # the gate swings each pack to its lane
+				node.position = Vector2(c.x, r.position.y + r.size.y * 0.5)
+				node.rotation = (0.45 if fmod(floor(t * 0.8), 2.0) < 1.0 else -0.45) if run else 0.0
 			_:
 				node.position = c
 	_step_heat_gauge()
@@ -1966,6 +1993,21 @@ func _draw_motion_part(n: Node2D) -> void:
 				n.draw_arc(Vector2((q - 1.5) * w * 0.13, 0), w * 0.07, PI, TAU, 8, Color(1.0, 0.55, 0.2), 3.0)
 		"M15":
 			n.draw_colored_polygon(PackedVector2Array([Vector2(-w * 0.05, -w * 0.05), Vector2(w * 0.06, 0), Vector2(-w * 0.05, w * 0.05)]), PopTokens.OK)
+		"bagger":
+			n.draw_colored_polygon(PackedVector2Array([Vector2(-w * 0.08, -w * 0.1), Vector2(w * 0.08, -w * 0.1), Vector2(w * 0.03, w * 0.06), Vector2(-w * 0.03, w * 0.06)]), PopTokens.STEEL_DEEP)
+		"P01":
+			PopFactoryArt.cup(n, Vector2.ZERO, w * 0.18)
+		"P02":
+			PopFactoryArt.bag(n, Vector2.ZERO, w * 0.16, PopTokens.MACHINE, true)
+		"P04":
+			n.draw_line(Vector2(-w * 0.2, 0), Vector2(w * 0.2, 0), PopTokens.STEEL_DEEP, 4.0)
+			n.draw_arc(Vector2(0, -w * 0.02), w * 0.18, 0.15, PI - 0.15, 10, PopTokens.STEEL_DEEP, 2.0)
+		"P07":
+			n.draw_rect(Rect2(Vector2(-w * 0.28, -w * 0.05), Vector2(w * 0.56, w * 0.06)), PopTokens.WARN)
+			n.draw_rect(Rect2(Vector2(-w * 0.28, w * 0.01), Vector2(w * 0.56, w * 0.03)), Color(1, 1, 1, 0.8))
+		"P08":
+			n.draw_line(Vector2.ZERO, Vector2(0, w * 0.3), PopTokens.STEEL_DEEP, 4.0)
+			n.draw_circle(Vector2.ZERO, w * 0.05, PopPalette.GOLD)
 		"M16":
 			for q in 4:
 				var a := TAU * q / 4.0

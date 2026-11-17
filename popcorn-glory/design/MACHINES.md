@@ -2,13 +2,13 @@
 
 `data/machines.json`이 단일 원본이다(생성: `tools/catalog/build_catalog.py`, 이 문서: `tools/catalog/catalog_doc.py`). 그림은 게임 안 `#machines`(실제 자리 크기, 다섯 묶음 × 8, 그 아래 40대가 층에 접힌 배치). 수치는 [proposal].
 
-**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch.
+**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep, kernels, oil, heat_model, premium_sku, dispatch, cup_sku, portion_variance.
 
 ## 해금 지도 (간판 단계 → 열리는 기계)
 
 | 간판 | 열리는 기계 |
 |---|---|
-| 0 | P01, P02, P03 ●, P04, P05, P06, P07, P08 |
+| 0 | P01 ●, P02 ●, P03 ●, P04 ●, P05 ●, P06 ●, P07 ●, P08 ● |
 | 2 | M06 ●, M08 ● |
 | 3 | M01 ●, M02 ●, M04 ●, M07 ●, S01, S07 ●, U04 |
 | 4 | M03 ●, M05 ●, M09 ●, M12 ●, S02, S03, S06, U01, U02, U03 |
@@ -47,14 +47,14 @@
 
 | ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| P01 | Cup Feeder | packing · 1 | a stack of cups lowers one at a time | container (container=cup) | cups → cup packs (a new SKU) | one per station | 포장대 1 | cup_sku | 300 / 1분 | — / — / — | none until cups are a product | 체계 대기: cup_sku |
-| P02 | Bag Dispenser | packing · 1 | a flat bag opens and drops | container (container=large bag, opens_size=4) | flat bags → large bags can be packed at station tier 1 | one per station | 포장대 1 | — | 400 / 1분 | — / — / — | the large bag (+80% per customer who wants it) one tier earlier | Step 30 |
+| P01 | Cup Feeder | packing · 1 | a stack of cups lowers one at a time | container (container=cup, size=1) | single portions → cup packs (a new SKU, price 6) | cups only it can fill | 포장대 1 | — | 300 / 1분 | cycle_ms 2000 / cycle_ms 1600 / cycle_ms 1200 | a quarter of customers want a cup once cups exist | 돈다 |
+| P02 | Bag Dispenser | packing · 1 | a flat bag opens and drops | container (container=large bag, opens_size=4) | flat large bags → the large bag on sale before the station's tier 2 | one per floor | 포장대 1 | — | 400 / 1분 | — / — / — | large-bag orders (35%) served from tier 1 | 돈다 |
 | P03 | Volumetric Filler | packing · 1 | a nozzle fills a bag by volume | pack (makes=packs, cycle_ms=5000) | portions in the bin → a sealed pack on the shelf | holds a sealed pack while the shelf is full | 포장대 1 | — | 350 / 3분 | cycle_ms 5000 / cycle_ms 4000 / cycle_ms 3200 | +12 packs a minute (tier 0) | 돈다 |
-| P04 | Portion Weigher | packing · 1 | a scale pan dips and settles | weigh (returns_overfill=True, slower_ms=500) | the station's packs → exact packs; overfill back to the bin | on the station | 포장대 2 | portion_variance | 500 / 2분 | — / — / — | none until packs can be overfilled (P03 volume variance, Step 30) | 체계 대기: portion_variance |
-| P05 | Seasoning Sprayer | packing · 1 | a fine mist puffs over the popcorn | season (makes=flavored portions) | plain portions, seasoning → cheese/spicy portions | one flavor at a time | 포장대 2 | flavors | 700 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
-| P06 | Caramel Coater | packing · 1 | caramel drips into a tumbling drum | coat (makes=caramel portions, slow=True) | plain portions, caramel → caramel portions | slow; one batch at a time | 포장대 2 | flavors | 900 / 3분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
-| P07 | Auto Sealer | packing · 1 | two hot jaws press a bag shut | seal (station_cycle_minus=0.25) | filled packs → sealed packs, the heads free sooner | on the station | 포장대 2 | — | 600 / 2분 | minus 0.25 / minus 0.3 / minus 0.35 | the station packs ~33% more | Step 30 |
-| P08 | Package Conveyor Diverter | packing · 2 | a gate swings packs onto lanes | divert (shelf_lanes=per SKU) | sealed packs → packs on their own lanes | two places wide | 포장대 3 | flavors | 1200 / 2분 | — / — / — | none until two flavors share the shelf | 체계 대기: flavors |
+| P04 | Portion Weigher | packing · 1 | a pan dips and settles under each pack | weigh (returns_overfill=True, slower_ms=500) | the fillers' packs → exact packs: the overfilled portion back in the bin, 0.5 s slower | covers the floor's fillers | 포장대 2 | — | 500 / 2분 | slower_ms 500 / slower_ms 400 / slower_ms 300 | about one pack in seven keeps its extra portion | 돈다 |
+| P05 | Seasoning Sprayer | packing · 1 | a mist of seasoning falls on the portions | season (makes=flavored portions) | flavors → flavored portions | asleep until flavors open | 포장대 2 | flavors | 700 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| P06 | Caramel Coater | packing · 1 | caramel cascades over a turning drum | coat (makes=caramel portions, slow=True) | flavors → caramel portions | asleep until flavors open | 포장대 2 | flavors | 900 / 3분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| P07 | Auto Sealer | packing · 1 | jaws press and crimp each bag | seal (station_cycle_minus=0.25) | filled packs → the station's, the fillers' and the cup feeder's cycles 25/30/35% shorter | covers the floor | 포장대 2 | — | 600 / 2분 | minus 0.25 / minus 0.3 / minus 0.35 | a quarter more packs from the same heads | 돈다 |
+| P08 | Package Conveyor Diverter | packing · 1 | an arm swings each pack to its lane | divert (shelf_lanes=per SKU) | sealed packs → premium packs on their own lane (2/3/4 places) -- they never take plain places (flavors' lanes later) | covers the shelf | 포장대 3 | — | 1200 / 2분 | lane 2 / lane 3 / lane 4 | plain keeps its whole shelf while premium waits | 돈다 |
 
 ## 가게 (S01–S08, Step 31)
 
@@ -87,15 +87,13 @@
 | 체계 | 기다리는 기계 | 생기는 Step |
 |---|---|---|
 | aging | U06 | 32 |
-| cup_sku | P01 | 30 |
 | customer_preferences | U05 | 36 |
 | faults | U01 | 32 |
-| flavors | M12, P05, P06, P08, S06, U07 | 34 |
+| flavors | M12, P05, P06, S06, U07 | 34 |
 | four_lanes | S08 | 31 |
 | multi_queue | S04 | 31 |
 | news | U07 | 37 |
 | parallel_lines | U08 | 33 |
-| portion_variance | P04 | 30 |
 
 ## 40대가 함께 (Step 33)
 

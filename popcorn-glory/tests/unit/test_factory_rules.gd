@@ -1145,6 +1145,9 @@ const RUNTIME_TESTS := {"cooker": "test_upkeep_is_paid_a_coin_at_a_time_and_neve
 	"M11": "test_m11_premium_lots_get_their_own_packs_and_customers", "M13": "test_m13_many_kettles_overheat_unless_the_vents_run",
 	"M14": "test_m14_the_recycler_lowers_cooking_kettles_upkeep_but_never_to_zero", "M15": "test_m15_the_dispatcher_cooks_only_what_is_wanted",
 	"M16": "test_m16_the_rotary_popper_is_a_steady_kettle_worth_its_place",
+	"P01": "test_p01_the_cup_feeder_makes_cups_a_product_of_their_own", "P02": "test_p02_the_dispenser_opens_large_bags_before_tier_two",
+	"P04": "test_p04_fillers_overfill_and_the_weigher_keeps_the_portion", "P07": "test_p07_the_sealer_shortens_every_packing_cycle",
+	"P08": "test_p08_the_diverter_gives_premium_its_own_lane",
 	"bagger": "test_the_bagger_packs_real_portions_and_waits_or_holds_honestly",
 	"kiosk": "test_the_kiosk_serves_real_customers_and_pays_while_it_serves"}
 
@@ -1204,7 +1207,7 @@ func test_no_machine_is_sold_that_would_do_nothing() -> void:
 			assert_true(bool(r["ok"]) or String(r["reason"]) in ["err.no_slot", "err.slot_taken"], "%s: a running machine is built (%s)" % [id, r.get("reason", "")])
 			assert_true(RUNTIME_TESTS.has(String(e["runtime"])), "%s: its behaviour has a test" % id)
 			assert_true(has_method(RUNTIME_TESTS[String(e["runtime"])]), "%s: that test exists (%s)" % [id, RUNTIME_TESTS[String(e["runtime"])]])
-	assert_eq(runs, 17, "today: M01-M11, M13-M16, P03 and S07 run (M12 sleeps until flavors)")
+	assert_eq(runs, 22, "today: M01-M11, M13-M16, P01-P04, P07, P08 and S07 run (M12, P05, P06 sleep until flavors)")
 	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing invented")
 
 
@@ -1738,3 +1741,200 @@ func test_a_paused_advanced_device_does_nothing_and_costs_nothing() -> void:
 	_auto_lots(a, 240000)
 	assert_true(int(a.stats.get("overheat_stops", 0)) > 0, "a paused vent does not stop overheating")
 	assert_eq(int(a.machine(v)["upkeep_ms"]), 0, "and owes nothing")
+
+
+# -- Step 30: P01-P08, the packing floor -----------------------------------------------
+
+func _packfloor(seed_value: int = 51) -> PopRules:
+	var f: PopRules = Factory.new(null, seed_value)
+	_quiet_shop(f)
+	f.sign_tier = 4
+	f.packer_tier = 3
+	f.money = 100000
+	_open(f)
+	_open_sign(f)
+	return f
+
+
+func _fill_bin(f: PopRules, portions: int, recipe: String = "plain") -> void:
+	f.bin.append({"id": f._new_id(), "recipe": recipe, "quality": 80, "portions": portions})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + portions
+
+
+func test_p01_the_cup_feeder_makes_cups_a_product_of_their_own() -> void:
+	var f := _packfloor()
+	assert_false(f.sizes_open().any(func(z: Dictionary) -> bool: return int(z["size"]) == 1), "no cups without a cup feeder")
+	assert_true(bool(f.execute({"type": "build", "machine": "P01"})["ok"]), "the cup feeder is built")
+	assert_true(f.sizes_open().any(func(z: Dictionary) -> bool: return int(z["size"]) == 1), "cups are on sale")
+	assert_false(f.station_sizes().has(1), "the station does not fill cups")
+	_fill_bin(f, 1)
+	f.advance(4000)
+	assert_true(f.shelf.any(func(p: Dictionary) -> bool: return int(p["size"]) == 1), "the lone portion became a cup")
+	var id: int = f._new_id()
+	f.queue.append({"id": id, "order": {"recipe": "plain", "size": 1}, "patience_ms": 60000})
+	f.advance(10000)
+	var sale: Array = f.ledger.filter(func(e: Dictionary) -> bool: return int(e["customer"]) == id)
+	assert_eq(sale.size(), 1, "a cup customer bought a cup")
+	assert_eq(int(sale[0]["size"]), 1, "a cup, not a bag")
+	assert_true(int(sale[0]["coins"]) < int(f.pack_price("plain", 2, int(sale[0]["quality"]))), "cheaper than a bag")
+	_check_conservation(f, "cups")
+	var g := _packfloor()
+	g.execute({"type": "build", "machine": "P01"})
+	var cups := 0
+	for i in 400:
+		if int(g._draw_order()["size"]) == 1:
+			cups += 1
+	assert_true(cups > 60 and cups < 140, "about a quarter of orders are cups (%d of 400)" % cups)
+
+
+func test_p02_the_dispenser_opens_large_bags_before_tier_two() -> void:
+	var f := _packfloor()
+	f.packer_tier = 1
+	assert_false(f.station_sizes().has(4), "tier 1: no large bag")
+	assert_true(bool(f.execute({"type": "build", "machine": "P02"})["ok"]), "the dispenser is built")
+	assert_true(f.station_sizes().has(4), "with the dispenser, the large bag")
+	var id: int = f._new_id()
+	f.queue.append({"id": id, "order": {"recipe": "plain", "size": 4}, "patience_ms": 60000})
+	_fill_bin(f, 4)
+	f.advance(20000)
+	assert_eq(f.ledger.filter(func(e: Dictionary) -> bool: return int(e["customer"]) == id and int(e["size"]) == 4).size(), 1, "a large bag sold at tier 1")
+	var d: int = f.machines[0]["id"]
+	f.execute({"type": "pause_machine", "id": d, "paused": true})
+	assert_false(f.station_sizes().has(4), "paused, the large bag waits")
+	_check_conservation(f, "dispenser")
+
+
+func test_p04_fillers_overfill_and_the_weigher_keeps_the_portion() -> void:
+	# The bagger works before the station in a flow step; a bin with more than a pack in it
+	# lets a volumetric fill overshoot by a portion.
+	var a := _packfloor(53)
+	a.execute({"type": "build", "machine": "bagger"})
+	for i in 40:
+		_fill_bin(a, 6)
+		a.advance(6000)
+		a.shelf.clear()   # a sink: the shelf never blocks
+		a.stats["made_portions"] = a.portions_everywhere()   # what the sink took is not counted
+	var over := int(a.stats.get("overfill_portions", 0))
+	assert_true(over > 0, "a volumetric filler overfills now and then (%d portions given away)" % over)
+	var b := _packfloor(53)
+	b.execute({"type": "build", "machine": "bagger"})
+	b.execute({"type": "build", "machine": "P04"})
+	for i in 40:
+		_fill_bin(b, 6)
+		b.advance(6000)
+		b.shelf.clear()
+	assert_eq(int(b.stats.get("overfill_portions", 0)), 0, "with the weigher, never")
+	var c := _packfloor(53)
+	var bg: int = c.execute({"type": "build", "machine": "bagger"})["machine"]
+	_fill_bin(c, 2)
+	c.advance(100)
+	var plain_ms := int(c.machine(bg)["held"].get("left_ms", 0))
+	var e := _packfloor(53)
+	var bg2: int = e.execute({"type": "build", "machine": "bagger"})["machine"]
+	e.execute({"type": "build", "machine": "P04"})
+	_fill_bin(e, 2)
+	e.advance(100)
+	assert_true(plain_ms > 0, "the bagger took the pack")
+	assert_true(int(e.machine(bg2)["held"].get("left_ms", 0)) > plain_ms, "and the weighing costs time")
+	var g := _packfloor(55)
+	g.execute({"type": "build", "machine": "bagger"})
+	g.next_arrival_ms = 0
+	for i in 30:
+		_fill_bin(g, 5)
+		g.advance(6000)
+	assert_true(int(g.stats.get("overfill_portions", 0)) > 0, "overfills in a full run")
+	_check_conservation(g, "overfilled packs: every portion still counted")
+
+
+func test_p07_the_sealer_shortens_every_packing_cycle() -> void:
+	var a := _packfloor()
+	a.packer_tier = 0
+	_fill_bin(a, 2)
+	a.advance(100)
+	var plain := int(a.packing[0]["ms"])
+	var b := _packfloor()
+	b.execute({"type": "build", "machine": "P07"})
+	b.packer_tier = 0
+	_fill_bin(b, 2)
+	b.advance(100)
+	assert_eq(int(b.packing[0]["ms"]), int(round(plain * 0.75)), "the station's cycle a quarter shorter")
+	var c := _packfloor()
+	var bg: int = c.execute({"type": "build", "machine": "bagger"})["machine"]
+	c.execute({"type": "build", "machine": "P07"})
+	_fill_bin(c, 2)
+	c.advance(100)
+	var held: Dictionary = c.machine(bg)["held"]
+	assert_true(not held.is_empty(), "the bagger took the pack")
+	assert_true(int(held["left_ms"]) <= int(round(5000 * 0.75)), "a filler's cycle too (%d)" % int(held["left_ms"]))
+	var d := _packfloor()
+	var sid: int = d.execute({"type": "build", "machine": "P07"})["machine"]
+	d.execute({"type": "upgrade_machine", "id": sid})
+	assert_true(absf(float(d.seal_factor()) - 0.7) < 0.001, "its next tier: 30%% shorter (%.3f)" % d.seal_factor())
+
+
+func test_p08_the_diverter_gives_premium_its_own_lane() -> void:
+	var f := _packfloor()
+	var cap := int(f.economy.table("factory")["shelf_packs"])
+	for i in cap:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 80})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + cap * 2
+	assert_eq(f.shelf_room("premium"), 0, "without a diverter a full shelf has no room for premium")
+	assert_true(bool(f.execute({"type": "build", "machine": "P08"})["ok"]), "the diverter is built")
+	assert_eq(f.shelf_room("premium"), 2, "with it, premium has its own two places")
+	assert_eq(f.shelf_room("plain"), 0, "plain is still full")
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "premium", "size": 2}, "patience_ms": 60000})
+	_fill_bin(f, 2, "premium")
+	f.advance(15000)
+	assert_true(int(f.stats.get("premium_sold", 0)) >= 1, "a premium pack made and sold past a full plain shelf")
+	assert_true(f.shelf.size() <= int(f.state()["shelf_cap"]), "within shelf and lane")
+	_check_conservation(f, "diverter")
+
+
+func test_packing_halts_full_and_idles_empty_and_saves_mid_cycle() -> void:
+	var f := _packfloor(57)
+	f.execute({"type": "build", "machine": "bagger"})
+	f.execute({"type": "build", "machine": "P01"})
+	f.execute({"type": "build", "machine": "P07"})
+	f.packer_tier = 0
+	var packed0 := int(f.stats["packed"])
+	f.advance(20000)
+	assert_eq(int(f.stats["packed"]), packed0, "no raw stock: nothing packed")
+	for m: Dictionary in f.machines:
+		assert_true(String(m["state"]) in ["starved", "idle"], "%s waits (%s)" % [m["type"], m["state"]])
+	_fill_bin(f, 23)
+	f.advance(1500)
+	var g: PopRules = Factory.new()
+	assert_true(bool(g.from_save(JSON.parse_string(JSON.stringify(f.to_save())))), "saves mid-cycle")
+	f.advance(60000)
+	g.advance(60000)
+	assert_eq(g.stats, f.stats, "and goes on the same")
+	assert_true(f.shelf.size() <= int(f.state()["shelf_cap"]), "the shelf never overfills")
+	assert_true(f.machines.any(func(m: Dictionary) -> bool: return String(m["state"]) == "blocked") or String(f.packer_state()) == "blocked", "a full shelf stops the floor")
+	_check_conservation(f, "full floor")
+	var paid := int(f.stats["upkeep_paid"])
+	f.advance(60000)
+	assert_eq(int(f.stats["upkeep_paid"]), paid, "a stopped floor pays no upkeep")
+
+
+func test_p05_p06_sleep_until_flavors() -> void:
+	var f := _packfloor()
+	for id in ["P05", "P06"]:
+		var r := f.execute({"type": "build", "machine": id})
+		assert_false(bool(r["ok"]), "%s not sold before flavors" % id)
+		assert_eq(String(r["reason"]), "err.not_yet", "the honest reason")
+
+
+func test_the_station_fills_every_head_up_to_the_shelf_room() -> void:
+	# Found by the economy simulation (Step 30): the per-SKU shelf check once counted a started
+	# pack twice, so a three-head station filled fewer heads than the shelf had room for.
+	var f := _packfloor(59)
+	f.packer_tier = 3
+	var heads := int(f.packer()["per_cycle"])
+	var cap := int(f.economy.table("factory")["shelf_packs"])
+	for i in cap - heads:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 80})
+	f.stats["made_portions"] = int(f.stats["made_portions"]) + (cap - heads) * 2
+	_fill_bin(f, heads * 2 + 6)
+	f.advance(50)
+	assert_eq(f.packing.size(), heads, "every head starts a pack while the shelf has room for it (%d heads)" % heads)
+	_check_conservation(f, "full heads")
