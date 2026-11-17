@@ -2075,6 +2075,16 @@ func test_s05_the_express_window_serves_small_orders_apart() -> void:
 	var e: Dictionary = f.ledger.filter(func(l: Dictionary) -> bool: return int(l["customer"]) == s2)[0]
 	assert_true(int(e["size"]) <= 2, "never a large bag at the express window")
 	_check_conservation(f, "express")
+	# With many free counter lanes the express window still takes the small orders first
+	# (its lane is the faster one) -- found in the browser, where the robot's lanes took all.
+	var g := _shop(67)
+	var gx: int = g.execute({"type": "build", "machine": "S05"})["machine"]
+	g.execute({"type": "build", "machine": "S08"})
+	_stock(g, 4, 2)
+	for i in 3:
+		_want(g, 2)
+	g.advance(100)
+	assert_true(g.serves.any(func(sv: Dictionary) -> bool: return int(sv.get("kiosk", -1)) == gx), "the express window took a small order although counter lanes were free")
 
 
 func test_s06_the_menu_board_lets_customers_order_what_is_there() -> void:

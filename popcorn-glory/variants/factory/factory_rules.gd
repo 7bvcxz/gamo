@@ -479,6 +479,8 @@ func _flow_step(dt: int) -> void:
 	_cashiers_step(dt)
 	if serves.is_empty() and queue.is_empty():
 		stats["counter_empty_ms"] = int(stats["counter_empty_ms"]) + dt
+	# The express window first: a small order goes to its faster lane when it is free.
+	_self_serve(["S05"])
 	while _counter_serving() < lanes() and not queue.is_empty():
 		var qi := _next_customer(0)
 		if qi < 0:
@@ -495,13 +497,18 @@ func _flow_step(dt: int) -> void:
 		var ms := counter_service_ms(cashier)
 		serves.append({"customer": head, "pack": pack, "left_ms": ms, "lane": lane, "pay_at_cashier": cashier})
 		_emit("serve_started", {"customer": head["id"], "pack": pack["id"], "lane": lane})
-	# Step 26: self-serve kiosks take the next customer when the counter's lanes are busy;
-	# Step 31: the express window takes the next small order.
+	# Step 26: self-serve kiosks take the next customer when the counter's lanes are busy.
+	_self_serve(["kiosk"])
+
+
+## Machines with their own lane take customers from the queue: kiosks (anyone, when
+## the counter is full) and the express window (Step 31: small orders, first).
+func _self_serve(kinds: Array) -> void:
 	for m: Dictionary in machines:
 		if queue.is_empty():
 			break
 		var kind := String(m["type"])
-		if not kind in ["kiosk", "S05"] or String(m["state"]) in ["paused", "unpaid"] or _kiosk_busy(int(m["id"])):
+		if not kind in kinds or String(m["state"]) in ["paused", "unpaid"] or _kiosk_busy(int(m["id"])):
 			continue
 		var cap_size := int((_t().get("counter_machines", {}) as Dictionary).get("express_max_size", 2)) if kind == "S05" else 0
 		var qi := _next_customer(cap_size)
