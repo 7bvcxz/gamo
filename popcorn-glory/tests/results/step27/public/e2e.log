@@ -1,0 +1,468 @@
+
+Running 198 tests using 1 worker
+
+  ✘    1 [p720] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (1.5m)
+  ✓    2 [p720] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (retry #1) (4.4s)
+  ✓    3 [p720] › specs/art15.spec.mjs:14:1 › the chooser does not list the artboard (3.5s)
+  ✓    4 [p720] › specs/burst14.spec.mjs:11:1 › burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst (15.1s)
+  ✓    5 [p720] › specs/burst14.spec.mjs:41:1 › without ?burst=1 the stand has no crescendo (15.4s)
+  -    6 [p720] › specs/burst14.spec.mjs:51:1 › the fountain is heard and does not clip
+  ✓    7 [p720] › specs/catalog27.spec.mjs:4:1 › the machine catalog sheet draws on this screen (4.0s)
+  ✓    8 [p720] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (6.0s)
+  ✓    9 [p720] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (3.1s)
+  ✓   10 [p720] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (7.1s)
+  ✓   11 [p720] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (6.5s)
+  ✓   12 [p720] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (8.7s)
+  ✓   13 [p720] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (5.8s)
+  ✓   14 [p720] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (5.7s)
+  ✓   15 [p720] › specs/factory16.spec.mjs:12:1 › the factory: three floors fit, the ring is in the kitchen, nothing covers them (3.1s)
+  ✓   16 [p720] › specs/factory16.spec.mjs:30:1 › the factory: the kettle cooks, a floor opens its detail without cooking (7.1s)
+  -   17 [p720] › specs/factory16.spec.mjs:74:1 › idle memory: the factory keeps far less than the stand
+  ✓   18 [p720] › specs/factory17.spec.mjs:7:1 › the factory: no money at the pop, the first sale pays the pack price, goods are conserved (12.8s)
+  ✓   19 [p720] › specs/factory18.spec.mjs:8:1 › one batch from the kettle to a satisfied customer (13.5s)
+  ✓   20 [p720] › specs/factory19.spec.mjs:7:1 › the factory kettle: a real lot, the crescendo fills, an unaffordable card answers (6.1s)
+  ✓   21 [p720] › specs/factory20.spec.mjs:7:1 › the packing station: fill, seal, shelf; the middle floor card sells the station (11.8s)
+  ✓   22 [p720] › specs/factory21.spec.mjs:7:1 › first pop -> first pack -> one paid hand-over; a calm empty shop between customers (25.8s)
+  ✓   23 [p720] › specs/factory21.spec.mjs:39:1 › no stock, no sale: the queue fills, faces change, people leave, money stays 0 (4.2s)
+  ✓   24 [p720] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (23.4s)
+  ✓   25 [p720] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (3.4s)
+  ✘   26 [p720] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck (1.5m)
+  ✓   27 [p720] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck (retry #1) (1.1m)
+  ✓   28 [p720] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.4m)
+  -   29 [p720] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase
+  -   30 [p720] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once
+  -   31 [p720] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back
+  ✓   32 [p720] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B (6.4s)
+  ✓   33 [p720] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page (4.4s)
+  -   34 [p720] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake
+  -   35 [p720] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart
+  ✓   36 [p720] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (16.9s)
+  ✓   37 [p720] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (37.7s)
+  ✓   38 [p720] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (5.9s)
+  ✓   39 [p720] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (8.1s)
+  ✓   40 [p720] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion (7.9s)
+  -   41 [p720] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  ✓   42 [p720] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins) (388ms)
+  ✓   43 [p720] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere (517ms)
+  ✓   44 [p720] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (729ms)
+  ✓   45 [p720] › specs/sound05.spec.mjs:22:1 › A: a press is heard (4.3s)
+  ✓   46 [p720] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (6.4s)
+  ✓   47 [p720] › specs/sound05.spec.mjs:53:1 › stand: a perfect pop, and the busy top stand, do not clip (35.7s)
+  ✓   48 [p720] › specs/sound05.spec.mjs:87:1 › stand: the shake clinks and the helper pops on its own (11.2s)
+  ✓   49 [p720] › specs/sound05.spec.mjs:125:1 › C: kernels clink and the eruption booms (6.5s)
+  ✓   50 [p720] › specs/sound05.spec.mjs:137:1 › the speaker button steps loud -> soft -> off, and back on (8.9s)
+  ✓   51 [p720] › specs/sound05.spec.mjs:162:1 › ?sound=off starts muted (5.3s)
+  ✓   52 [p720] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (4.7s)
+  ✓   53 [p720] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (12.3s)
+  ✓   54 [p720] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (3.9s)
+  ✓   55 [p720] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (6.9s)
+  ✓   56 [p720] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (3.5s)
+  ✓   57 [p720] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (7.1s)
+  ✓   58 [p720] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.9s)
+  ✘   59 [phone] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (1.5m)
+  ✓   60 [phone] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (retry #1) (4.5s)
+  ✓   61 [phone] › specs/art15.spec.mjs:14:1 › the chooser does not list the artboard (3.3s)
+  ✓   62 [phone] › specs/burst14.spec.mjs:11:1 › burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst (14.0s)
+  ✓   63 [phone] › specs/burst14.spec.mjs:41:1 › without ?burst=1 the stand has no crescendo (12.4s)
+  -   64 [phone] › specs/burst14.spec.mjs:51:1 › the fountain is heard and does not clip
+  ✓   65 [phone] › specs/catalog27.spec.mjs:4:1 › the machine catalog sheet draws on this screen (3.7s)
+  ✓   66 [phone] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (5.0s)
+  ✓   67 [phone] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (2.7s)
+  ✓   68 [phone] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (7.3s)
+  ✓   69 [phone] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (5.6s)
+  ✓   70 [phone] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (8.7s)
+  ✓   71 [phone] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (4.9s)
+  ✓   72 [phone] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (5.3s)
+  ✓   73 [phone] › specs/factory16.spec.mjs:12:1 › the factory: three floors fit, the ring is in the kitchen, nothing covers them (2.7s)
+  ✓   74 [phone] › specs/factory16.spec.mjs:30:1 › the factory: the kettle cooks, a floor opens its detail without cooking (8.3s)
+  -   75 [phone] › specs/factory16.spec.mjs:74:1 › idle memory: the factory keeps far less than the stand
+  ✓   76 [phone] › specs/factory17.spec.mjs:7:1 › the factory: no money at the pop, the first sale pays the pack price, goods are conserved (13.3s)
+  ✓   77 [phone] › specs/factory18.spec.mjs:8:1 › one batch from the kettle to a satisfied customer (13.9s)
+  ✓   78 [phone] › specs/factory19.spec.mjs:7:1 › the factory kettle: a real lot, the crescendo fills, an unaffordable card answers (8.1s)
+  ✓   79 [phone] › specs/factory20.spec.mjs:7:1 › the packing station: fill, seal, shelf; the middle floor card sells the station (15.0s)
+  ✓   80 [phone] › specs/factory21.spec.mjs:7:1 › first pop -> first pack -> one paid hand-over; a calm empty shop between customers (25.8s)
+  ✓   81 [phone] › specs/factory21.spec.mjs:39:1 › no stock, no sale: the queue fills, faces change, people leave, money stays 0 (4.6s)
+  ✓   82 [phone] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (25.2s)
+  ✓   83 [phone] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (4.2s)
+  ✓   84 [phone] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck (1.1m)
+  ✓   85 [phone] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.6m)
+  -   86 [phone] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase
+  -   87 [phone] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once
+  -   88 [phone] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back
+  ✓   89 [phone] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B (7.5s)
+  ✓   90 [phone] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page (4.6s)
+  -   91 [phone] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake
+  -   92 [phone] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart
+  ✓   93 [phone] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (21.7s)
+  ✓   94 [phone] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (46.6s)
+  ✓   95 [phone] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (7.0s)
+  ✓   96 [phone] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (9.4s)
+  -   97 [phone] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -   98 [phone] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -   99 [phone] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  100 [phone] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  101 [phone] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (725ms)
+  ✓  102 [phone] › specs/sound05.spec.mjs:22:1 › A: a press is heard (4.9s)
+  ✓  103 [phone] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (7.1s)
+  ✓  104 [phone] › specs/sound05.spec.mjs:53:1 › stand: a perfect pop, and the busy top stand, do not clip (40.8s)
+  ✓  105 [phone] › specs/sound05.spec.mjs:87:1 › stand: the shake clinks and the helper pops on its own (12.3s)
+  ✓  106 [phone] › specs/sound05.spec.mjs:125:1 › C: kernels clink and the eruption booms (7.9s)
+  ✓  107 [phone] › specs/sound05.spec.mjs:137:1 › the speaker button steps loud -> soft -> off, and back on (11.0s)
+  ✓  108 [phone] › specs/sound05.spec.mjs:162:1 › ?sound=off starts muted (6.5s)
+  ✓  109 [phone] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (5.2s)
+  ✓  110 [phone] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (14.3s)
+  ✓  111 [phone] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (5.0s)
+  ✘  112 [phone] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (1.5m)
+  ✓  113 [phone] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (retry #1) (11.0s)
+  ✓  114 [phone] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (4.4s)
+  ✓  115 [phone] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (7.9s)
+  ✓  116 [phone] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (3.7s)
+  ✓  117 [desktop] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (3.6s)
+  ✓  118 [desktop] › specs/art15.spec.mjs:14:1 › the chooser does not list the artboard (3.2s)
+  ✓  119 [desktop] › specs/burst14.spec.mjs:11:1 › burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst (13.4s)
+  ✓  120 [desktop] › specs/burst14.spec.mjs:41:1 › without ?burst=1 the stand has no crescendo (12.8s)
+  ✓  121 [desktop] › specs/burst14.spec.mjs:51:1 › the fountain is heard and does not clip (20.9s)
+  ✓  122 [desktop] › specs/catalog27.spec.mjs:4:1 › the machine catalog sheet draws on this screen (4.1s)
+  ✓  123 [desktop] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (5.9s)
+  ✓  124 [desktop] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (3.6s)
+  ✓  125 [desktop] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (7.3s)
+  ✓  126 [desktop] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (6.1s)
+  ✓  127 [desktop] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (9.0s)
+  ✓  128 [desktop] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (5.9s)
+  ✓  129 [desktop] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (5.8s)
+  ✓  130 [desktop] › specs/factory16.spec.mjs:12:1 › the factory: three floors fit, the ring is in the kitchen, nothing covers them (3.6s)
+  ✓  131 [desktop] › specs/factory16.spec.mjs:30:1 › the factory: the kettle cooks, a floor opens its detail without cooking (7.6s)
+IDLE factory 0.26 stand 0.65
+  ✓  132 [desktop] › specs/factory16.spec.mjs:74:1 › idle memory: the factory keeps far less than the stand (3.3m)
+  ✓  133 [desktop] › specs/factory17.spec.mjs:7:1 › the factory: no money at the pop, the first sale pays the pack price, goods are conserved (12.8s)
+  ✓  134 [desktop] › specs/factory18.spec.mjs:8:1 › one batch from the kettle to a satisfied customer (13.6s)
+  ✓  135 [desktop] › specs/factory19.spec.mjs:7:1 › the factory kettle: a real lot, the crescendo fills, an unaffordable card answers (7.8s)
+  ✓  136 [desktop] › specs/factory20.spec.mjs:7:1 › the packing station: fill, seal, shelf; the middle floor card sells the station (13.3s)
+  ✓  137 [desktop] › specs/factory21.spec.mjs:7:1 › first pop -> first pack -> one paid hand-over; a calm empty shop between customers (25.6s)
+  ✓  138 [desktop] › specs/factory21.spec.mjs:39:1 › no stock, no sale: the queue fills, faces change, people leave, money stays 0 (5.4s)
+  ✓  139 [desktop] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (23.8s)
+  ✓  140 [desktop] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (2.6s)
+  ✓  141 [desktop] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck (1.0m)
+  ✓  142 [desktop] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.1m)
+  ✓  143 [desktop] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase (11.3s)
+  ✓  144 [desktop] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once (9.7s)
+  ✓  145 [desktop] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back (5.2s)
+  -  146 [desktop] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B
+  -  147 [desktop] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page
+  ✓  148 [desktop] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake (1.2m)
+  ✓  149 [desktop] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart (1.3m)
+  ✓  150 [desktop] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (10.4s)
+  ✓  151 [desktop] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (19.8s)
+  ✓  152 [desktop] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (3.7s)
+  ✓  153 [desktop] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.3s)
+  -  154 [desktop] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  ✘  155 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (5.0m)
+  ✘  156 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (retry #1) (5.0m)
+  -  157 [desktop] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  158 [desktop] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  159 [desktop] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (781ms)
+  ✓  160 [desktop] › specs/sound05.spec.mjs:22:1 › A: a press is heard (4.0s)
+  ✓  161 [desktop] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (5.2s)
+  ✓  162 [desktop] › specs/sound05.spec.mjs:53:1 › stand: a perfect pop, and the busy top stand, do not clip (30.4s)
+  ✓  163 [desktop] › specs/sound05.spec.mjs:87:1 › stand: the shake clinks and the helper pops on its own (9.9s)
+  ✓  164 [desktop] › specs/sound05.spec.mjs:125:1 › C: kernels clink and the eruption booms (4.4s)
+  ✓  165 [desktop] › specs/sound05.spec.mjs:137:1 › the speaker button steps loud -> soft -> off, and back on (6.4s)
+  ✓  166 [desktop] › specs/sound05.spec.mjs:162:1 › ?sound=off starts muted (3.9s)
+  ✓  167 [desktop] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (3.9s)
+  ✓  168 [desktop] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (12.2s)
+  ✓  169 [desktop] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (2.8s)
+  ✓  170 [desktop] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (4.6s)
+  ✓  171 [desktop] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (2.6s)
+  ✓  172 [desktop] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (6.6s)
+  ✓  173 [desktop] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.4s)
+  ✓  174 [m-p720] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (2.9s)
+  ✓  175 [m-p720] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (2.8s)
+  ✓  176 [m-p720] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (2.8s)
+  ✓  177 [m-p720] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (2.5s)
+  ✓  178 [m-p720] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (3.9s)
+  ✓  179 [m-p720] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (3.0s)
+  ✓  180 [m-hd] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (3.4s)
+  ✓  181 [m-hd] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (3.3s)
+  ✓  182 [m-hd] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (3.3s)
+  ✓  183 [m-hd] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (3.2s)
+  ✓  184 [m-hd] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (5.2s)
+  ✓  185 [m-hd] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (3.6s)
+  ✓  186 [m-small] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (3.6s)
+  ✓  187 [m-small] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (3.6s)
+  ✓  188 [m-small] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (3.6s)
+  ✓  189 [m-small] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (3.2s)
+  ✓  190 [m-small] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (5.9s)
+  ✓  191 [m-small] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (4.0s)
+  ✓  192 [m-tablet] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (4.3s)
+  ✓  193 [m-tablet] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (4.3s)
+  ✓  194 [m-tablet] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (4.2s)
+  ✓  195 [m-tablet] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (3.7s)
+  ✓  196 [m-tablet] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (7.7s)
+  ✓  197 [m-tablet] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (4.8s)
+  ✓  198 [m-landscape] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (4.1s)
+  ✓  199 [m-landscape] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (4.1s)
+  ✓  200 [m-landscape] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (4.0s)
+  ✓  201 [m-landscape] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (3.9s)
+  ✓  202 [m-landscape] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (7.2s)
+  ✓  203 [m-landscape] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (4.5s)
+
+
+  1) [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) ────────
+
+    TimeoutError: page.waitForFunction: Timeout 300000ms exceeded.
+
+      84 |   const t0 = Date.now();
+      85 |   await pop.page.goto('./#stand');
+    > 86 |   await pop.page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 300_000 });
+         |                  ^
+      87 |   const ms = Date.now() - t0;
+      88 |   testInfo.annotations.push({ type: 'slow_load', description: `Fast 3G emulation: first drawn frame after ${ms} ms` });
+      89 |   expect(ms, 'opens on Fast 3G within 5 minutes').toBeLessThan(300_000);
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs:86:18
+
+    Error: no page errors during the test
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    +   "network error",
+    + ]
+
+       at ../lib/pop.mjs:122
+
+      120 |     const pop = wrap(page, testInfo);
+      121 |     await use(pop);
+    > 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);
+          |                                                          ^
+      123 |   },
+      124 | });
+      125 |
+        at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)
+
+    Error Context: test-results/release12-first-load-on-a-slow-connection-recorded--desktop/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    TimeoutError: page.waitForFunction: Timeout 300000ms exceeded.
+
+      84 |   const t0 = Date.now();
+      85 |   await pop.page.goto('./#stand');
+    > 86 |   await pop.page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 300_000 });
+         |                  ^
+      87 |   const ms = Date.now() - t0;
+      88 |   testInfo.annotations.push({ type: 'slow_load', description: `Fast 3G emulation: first drawn frame after ${ms} ms` });
+      89 |   expect(ms, 'opens on Fast 3G within 5 minutes').toBeLessThan(300_000);
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs:86:18
+
+    Error: no page errors during the test
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    +   "network error",
+    + ]
+
+       at ../lib/pop.mjs:122
+
+      120 |     const pop = wrap(page, testInfo);
+      121 |     await use(pop);
+    > 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);
+          |                                                          ^
+      123 |   },
+      124 | });
+      125 |
+        at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)
+
+    Error Context: test-results/release12-first-load-on-a-slow-connection-recorded--desktop-retry1/error-context.md
+
+  2) [p720] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen ─────────────────
+
+    TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.
+
+       at ../lib/pop.mjs:43
+
+      41 |     // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).
+      42 |     ready: async () => {
+    > 43 |       await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });
+         |                  ^
+      44 |       await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);
+      45 |     },
+      46 |     state: () => page.evaluate(() => window.popcorn.state()),
+        at Object.ready (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:43:18)
+        at Object.open (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:37:17)
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art15.spec.mjs:7:3
+
+    Error: no page errors during the test
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    +   "network error",
+    + ]
+
+       at ../lib/pop.mjs:122
+
+      120 |     const pop = wrap(page, testInfo);
+      121 |     await use(pop);
+    > 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);
+          |                                                          ^
+      123 |   },
+      124 | });
+      125 |
+        at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)
+
+    Error Context: test-results/art15-the-artboard-preview-draws-on-this-screen-p720/error-context.md
+
+  3) [p720] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck 
+
+    TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.
+
+       at ../lib/pop.mjs:43
+
+      41 |     // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).
+      42 |     ready: async () => {
+    > 43 |       await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });
+         |                  ^
+      44 |       await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);
+      45 |     },
+      46 |     state: () => page.evaluate(() => window.popcorn.state()),
+        at Object.ready (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:43:18)
+        at Object.open (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:37:17)
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory23.spec.mjs:9:3
+
+    Error: no page errors during the test
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    +   "network error",
+    + ]
+
+       at ../lib/pop.mjs:122
+
+      120 |     const pop = wrap(page, testInfo);
+      121 |     await use(pop);
+    > 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);
+          |                                                          ^
+      123 |   },
+      124 | });
+      125 |
+        at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)
+
+    Error Context: test-results/factory23-two-products-eac-220b9-he-cue-names-the-bottleneck-p720/error-context.md
+
+  4) [phone] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen ────────────────
+
+    TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.
+
+       at ../lib/pop.mjs:43
+
+      41 |     // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).
+      42 |     ready: async () => {
+    > 43 |       await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });
+         |                  ^
+      44 |       await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);
+      45 |     },
+      46 |     state: () => page.evaluate(() => window.popcorn.state()),
+        at Object.ready (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:43:18)
+        at Object.open (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:37:17)
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art15.spec.mjs:7:3
+
+    Error: no page errors during the test
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    +   "network error",
+    + ]
+
+       at ../lib/pop.mjs:122
+
+      120 |     const pop = wrap(page, testInfo);
+      121 |     await use(pop);
+    > 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);
+          |                                                          ^
+      123 |   },
+      124 | });
+      125 |
+        at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)
+
+    Error Context: test-results/art15-the-artboard-preview-draws-on-this-screen-phone/error-context.md
+
+  5) [phone] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back ─────────────────
+
+    TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.
+
+       at ../lib/pop.mjs:43
+
+      41 |     // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).
+      42 |     ready: async () => {
+    > 43 |       await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });
+         |                  ^
+      44 |       await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);
+      45 |     },
+      46 |     state: () => page.evaluate(() => window.popcorn.state()),
+        at Object.ready (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:43:18)
+        at Object.open (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:37:17)
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/stub03.spec.mjs:9:3
+
+    Error: no page errors during the test
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    +   "network error",
+    + ]
+
+       at ../lib/pop.mjs:122
+
+      120 |     const pop = wrap(page, testInfo);
+      121 |     await use(pop);
+    > 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);
+          |                                                          ^
+      123 |   },
+      124 | });
+      125 |
+        at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)
+
+    Error Context: test-results/stub03-the-stub-press-upgrade-restart-back-phone/error-context.md
+
+  1 failed
+    [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) ─────────
+  4 flaky
+    [p720] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen ──────────────────
+    [p720] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck 
+    [phone] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen ─────────────────
+    [phone] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back ──────────────────
+  24 skipped
+  169 passed (51.8m)

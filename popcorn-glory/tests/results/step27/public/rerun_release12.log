@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (1.0m)
+
+  1 passed (1.0m)

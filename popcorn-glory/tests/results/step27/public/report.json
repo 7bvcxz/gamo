@@ -1,0 +1,1724 @@
+{
+  "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
+  "sha": "504e53125fe0",
+  "dirty": true,
+  "build": {
+    "version": "0.27.0",
+    "pack": "game-f9d9d42c407a.pck",
+    "packSize": 440336,
+    "engine": "engine-7eda98958eb0",
+    "godot": "4.7.stable.official.5b4e0cb0f",
+    "source": "46ff781b84f1"
+  },
+  "target": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+  "when": "2026-11-16T14:34:26.686Z",
+  "stages": {
+    "headless": "PASSED",
+    "deploy": "SKIPPED (--public: testing the published build)",
+    "browser": "FAILED"
+  },
+  "headless_summary": "178 passed, 0 failed, 5037 checks, 18 files, 23.9s",
+  "browser_checks": [
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the artboard preview draws on this screen",
+      "project": "p720",
+      "status": "PASSED (on retry)",
+      "first_try_error": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.",
+      "error": "",
+      "notes": [],
+      "ms": 4447
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the chooser does not list the artboard",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3471
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the artboard preview draws on this screen",
+      "project": "phone",
+      "status": "PASSED (on retry)",
+      "first_try_error": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.",
+      "error": "",
+      "notes": [],
+      "ms": 4491
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the chooser does not list the artboard",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3334
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the artboard preview draws on this screen",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3584
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the chooser does not list the artboard",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3181
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 15102
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "without ?burst=1 the stand has no crescendo",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 15420
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "the fountain is heard and does not clip",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures the sound",
+      "notes": [],
+      "ms": 57
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 14007
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "without ?burst=1 the stand has no crescendo",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12445
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "the fountain is heard and does not clip",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures the sound",
+      "notes": [],
+      "ms": 60
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13361
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "without ?burst=1 the stand has no crescendo",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12771
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "the fountain is heard and does not clip",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mix: fountain rms 0.229 peak 0.759"
+      ],
+      "ms": 20929
+    },
+    {
+      "spec": "catalog27.spec.mjs",
+      "title": "the machine catalog sheet draws on this screen",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3991
+    },
+    {
+      "spec": "catalog27.spec.mjs",
+      "title": "the machine catalog sheet draws on this screen",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3715
+    },
+    {
+      "spec": "catalog27.spec.mjs",
+      "title": "the machine catalog sheet draws on this screen",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4141
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the chooser lists A, B, C and each tile opens its experiment",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5994
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the atlas draws: the money coin is gold, not a white square",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3075
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "A Click & Pop: every press pays at once",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7080
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6542
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding on burns by itself and never locks",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8732
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5833
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "runs never leak between experiments",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5749
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the chooser lists A, B, C and each tile opens its experiment",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4956
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the atlas draws: the money coin is gold, not a white square",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2682
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "A Click & Pop: every press pays at once",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7297
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5594
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding on burns by itself and never locks",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8729
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4880
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "runs never leak between experiments",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5312
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the chooser lists A, B, C and each tile opens its experiment",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5852
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the atlas draws: the money coin is gold, not a white square",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3582
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "A Click & Pop: every press pays at once",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7259
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6109
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding on burns by itself and never locks",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8996
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5873
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "runs never leak between experiments",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5811
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: three floors fit, the ring is in the kitchen, nothing covers them",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3141
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: the kettle cooks, a floor opens its detail without cooking",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7083
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "idle memory: the factory keeps far less than the stand",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 54
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: three floors fit, the ring is in the kitchen, nothing covers them",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2692
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: the kettle cooks, a floor opens its detail without cooking",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8252
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "idle memory: the factory keeps far less than the stand",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 73
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: three floors fit, the ring is in the kitchen, nothing covers them",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3603
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: the kettle cooks, a floor opens its detail without cooking",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7569
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "idle memory: the factory keeps far less than the stand",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "memory: idle, kept JS heap after GC: factory 0.26 MB/min, stand 0.65 MB/min"
+      ],
+      "ms": 197009
+    },
+    {
+      "spec": "factory17.spec.mjs",
+      "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12817
+    },
+    {
+      "spec": "factory17.spec.mjs",
+      "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13349
+    },
+    {
+      "spec": "factory17.spec.mjs",
+      "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12795
+    },
+    {
+      "spec": "factory18.spec.mjs",
+      "title": "one batch from the kettle to a satisfied customer",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13548
+    },
+    {
+      "spec": "factory18.spec.mjs",
+      "title": "one batch from the kettle to a satisfied customer",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13948
+    },
+    {
+      "spec": "factory18.spec.mjs",
+      "title": "one batch from the kettle to a satisfied customer",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13566
+    },
+    {
+      "spec": "factory19.spec.mjs",
+      "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6133
+    },
+    {
+      "spec": "factory19.spec.mjs",
+      "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8123
+    },
+    {
+      "spec": "factory19.spec.mjs",
+      "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7772
+    },
+    {
+      "spec": "factory20.spec.mjs",
+      "title": "the packing station: fill, seal, shelf; the middle floor card sells the station",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11818
+    },
+    {
+      "spec": "factory20.spec.mjs",
+      "title": "the packing station: fill, seal, shelf; the middle floor card sells the station",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 15002
+    },
+    {
+      "spec": "factory20.spec.mjs",
+      "title": "the packing station: fill, seal, shelf; the middle floor card sells the station",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13268
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "first pop -> first pack -> one paid hand-over; a calm empty shop between customers",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 25800
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "no stock, no sale: the queue fills, faces change, people leave, money stays 0",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4233
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "first pop -> first pack -> one paid hand-over; a calm empty shop between customers",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 25805
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "no stock, no sale: the queue fills, faces change, people leave, money stays 0",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4643
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "first pop -> first pack -> one paid hand-over; a calm empty shop between customers",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 25578
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "no stock, no sale: the queue fills, faces change, people leave, money stays 0",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5370
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 23399
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3416
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 25196
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4163
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 23756
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2648
+    },
+    {
+      "spec": "factory23.spec.mjs",
+      "title": "two products: each customer gets the bag they ordered, once; the cue names the bottleneck",
+      "project": "p720",
+      "status": "PASSED (on retry)",
+      "first_try_error": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.",
+      "error": "",
+      "notes": [],
+      "ms": 63389
+    },
+    {
+      "spec": "factory23.spec.mjs",
+      "title": "two products: each customer gets the bag they ordered, once; the cue names the bottleneck",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 65202
+    },
+    {
+      "spec": "factory23.spec.mjs",
+      "title": "two products: each customer gets the bag they ordered, once; the cue names the bottleneck",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 61412
+    },
+    {
+      "spec": "factory26.spec.mjs",
+      "title": "a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 81786
+    },
+    {
+      "spec": "factory26.spec.mjs",
+      "title": "a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 98706
+    },
+    {
+      "spec": "factory26.spec.mjs",
+      "title": "a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 68069
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 1
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 1
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11316
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9681
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5167
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6375
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4398
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7509
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4636
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "touch paths on touch projects",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "touch paths on touch projects",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 2
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 1
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf: {\"load_ms\":2070,\"heap_start\":10105245,\"heap_after_60s\":11838325,\"burst\":{\"fps\":47.9405146535875,\"draw_calls\":117,\"primitives\":4297,\"fx_peak\":155,\"fx_cap\":400},\"sleep\":{\"before\":3208,\"hidden_5s\":3232,\"after_wake\":4152},\"load_avg\":15.38}"
+      ],
+      "ms": 71509
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf: {\"worst\":{\"draw_calls\":179,\"primitives\":5341,\"fx\":43},\"fps\":[24.727992087042534,28.450897669551086,34.50315458710756,31.664357795290922,32.518722894952255,26.724735222114877],\"median_fps\":31.664357795290922,\"heap_start\":11576917,\"heap_after_60s\":17115013,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":22},\"helper_batches\":42,\"sound_played\":{\"clink\":1,\"coin\":62,\"ding\":22,\"fanfare\":1,\"pop_1\":42,\"pop_2\":22,\"sizzle\":22,\"upgrade\":7},\"load_avg\":16.24,\"hidden\":{\"helper_before\":42,\"helper_after_5s_hidden\":42},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+      ],
+      "ms": 76614
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 16863
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 37674
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5864
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 21749
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 46595
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7003
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 10443
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 19759
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3668
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "device: p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 8077
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7898
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 56
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 388
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 517
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "device: phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 9431
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 41
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 36
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 51
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 59
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "device: desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 5314
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "desktop",
+      "status": "FAILED",
+      "error": "TimeoutError: page.waitForFunction: Timeout 300000ms exceeded.",
+      "notes": [],
+      "ms": 301846
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 31
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "scorecard09.spec.mjs",
+      "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 729
+    },
+    {
+      "spec": "scorecard09.spec.mjs",
+      "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 725
+    },
+    {
+      "spec": "scorecard09.spec.mjs",
+      "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 781
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4314
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6414
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: a perfect pop, and the busy top stand, do not clip",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mix: fresh perfect rms 0.223 peak 0.759; top stand rms 0.223 peak 0.759"
+      ],
+      "ms": 35659
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: the shake clinks and the helper pops on its own",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11241
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6528
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> off, and back on",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8872
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5315
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4898
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7053
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: a perfect pop, and the busy top stand, do not clip",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mix: fresh perfect rms 0.223 peak 0.759; top stand rms 0.223 peak 0.759"
+      ],
+      "ms": 40846
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: the shake clinks and the helper pops on its own",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12331
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7900
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> off, and back on",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11031
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6472
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3993
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5236
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: a perfect pop, and the busy top stand, do not clip",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mix: fresh perfect rms 0.223 peak 0.759; top stand rms 0.224 peak 0.764"
+      ],
+      "ms": 30445
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: the shake clinks and the helper pops on its own",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9896
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4441
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> off, and back on",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6397
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3854
+    },
+    {
+      "spec": "stall09.spec.mjs",
+      "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "hold: finger 1552 ms, game judged 1616 ms (perfect)"
+      ],
+      "ms": 4718
+    },
+    {
+      "spec": "stall09.spec.mjs",
+      "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "hold: finger 1551 ms, game judged 1624 ms (perfect)"
+      ],
+      "ms": 5242
+    },
+    {
+      "spec": "stall09.spec.mjs",
+      "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "hold: finger 1551 ms, game judged 1562 ms (perfect)"
+      ],
+      "ms": 3905
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12316
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3949
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 14322
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5039
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12237
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2822
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "load: 2441 ms to the first drawn frame"
+      ],
+      "ms": 6934
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3523
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7084
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2902
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "phone",
+      "status": "PASSED (on retry)",
+      "first_try_error": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.",
+      "error": "",
+      "notes": [
+        "load: 3923 ms to the first drawn frame"
+      ],
+      "ms": 10959
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4389
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7891
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3669
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "load: 1975 ms to the first drawn frame"
+      ],
+      "ms": 4595
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2567
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6573
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2384
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+      ],
+      "ms": 2920
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+      ],
+      "ms": 2772
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+      ],
+      "ms": 2774
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 332 CSS px, floors 218/191/476 CSS px tall"
+      ],
+      "ms": 2511
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3871
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3025
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+      ],
+      "ms": 3446
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+      ],
+      "ms": 3305
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+      ],
+      "ms": 3324
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 342 CSS px, floors 224/195/489 CSS px tall"
+      ],
+      "ms": 3234
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5190
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3589
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+      ],
+      "ms": 3616
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+      ],
+      "ms": 3619
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+      ],
+      "ms": 3561
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 166 CSS px, floors 109/95/238 CSS px tall"
+      ],
+      "ms": 3224
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5852
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3962
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+      ],
+      "ms": 4302
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+      ],
+      "ms": 4272
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+      ],
+      "ms": 4230
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 266 CSS px, floors 175/153/381 CSS px tall"
+      ],
+      "ms": 3736
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7653
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4848
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+      ],
+      "ms": 4121
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+      ],
+      "ms": 4059
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+      ],
+      "ms": 4011
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 123 CSS px, floors 81/71/177 CSS px tall"
+      ],
+      "ms": 3881
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7210
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4455
+    }
+  ],
+  "browser_totals": {
+    "passed": 173,
+    "passed_on_retry": 4,
+    "failed": 1,
+    "skipped": 24
+  }
+}
