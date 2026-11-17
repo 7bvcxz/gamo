@@ -19,9 +19,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
-    "funnel",
-    "kernels"
+    "bin"
    ],
    "motion": "kernels trickle down a funnel into the kettles",
    "operation": "keeps every auto kettle on the floor supplied with kernels",
@@ -75,9 +73,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
-    "drop",
-    "dial"
+    "bottle"
    ],
    "motion": "a drop of oil falls with each cycle",
    "operation": "measures oil into each auto lot",
@@ -134,7 +130,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "cabinet",
     "thermometer"
    ],
    "motion": "a needle steadies on a gauge",
@@ -185,9 +181,9 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
-    "gear",
-    "shaft"
+    "motor",
+    "shaft",
+    "gear"
    ],
    "motion": "a shaft turns inside the kettle",
    "operation": "stirs each auto lot so it pops evenly",
@@ -238,7 +234,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "sensor",
     "eye"
    ],
    "motion": "an eye blinks when the popping slows",
@@ -287,7 +283,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "chute",
     "arm"
    ],
    "motion": "an arm tips the kettle into the tube",
@@ -384,7 +380,7 @@
    "floor": "kitchen",
    "slots": 1,
    "parts": [
-    "box",
+    "cage",
     "fan"
    ],
    "motion": "fan blades spin after each pop",

@@ -334,6 +334,58 @@ static func catalog_icon(ci: CanvasItem, r: Rect2, parts: Array, group: String, 
 		match part:
 			"box":
 				vgrad(ci, Rect2(o + Vector2(w * 0.15, h * 0.35), Vector2(w * 0.7, h * 0.55)), c.call(body.lightened(0.15)), c.call(body), 6, c.call(body.darkened(0.3)), 2.0)
+			# Step 28: the kitchen devices' own silhouettes (not a box each): one look per job.
+			"bin":   # M01: a steel-rimmed hopper bin, a window of kernels, a spout and two legs
+				ci.draw_line(o + Vector2(w * 0.3, h * 0.6), o + Vector2(w * 0.24, h * 0.92), c.call(PopTokens.STEEL_DEEP), 3.0)
+				ci.draw_line(o + Vector2(w * 0.7, h * 0.6), o + Vector2(w * 0.76, h * 0.92), c.call(PopTokens.STEEL_DEEP), 3.0)
+				var bin := PackedVector2Array([o + Vector2(w * 0.14, h * 0.1), o + Vector2(w * 0.86, h * 0.1), o + Vector2(w * 0.64, h * 0.62), o + Vector2(w * 0.36, h * 0.62)])
+				ci.draw_colored_polygon(bin, c.call(body))
+				ci.draw_polyline(bin + PackedVector2Array([bin[0]]), c.call(body.darkened(0.3)), 2.0)
+				ci.draw_rect(Rect2(o + Vector2(w * 0.1, h * 0.06), Vector2(w * 0.8, h * 0.07)), c.call(PopTokens.STEEL))
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.3, h * 0.2), o + Vector2(w * 0.7, h * 0.2), o + Vector2(w * 0.6, h * 0.46), o + Vector2(w * 0.4, h * 0.46)]), c.call(Color(1.0, 0.95, 0.85)))
+				for q in 6:
+					ci.draw_circle(o + Vector2(w * (0.4 + 0.04 * (q % 3) + (0.02 if q >= 3 else 0.0)), h * (0.38 - 0.06 * (q / 3))), w * 0.04, c.call(Color(0.85, 0.62, 0.25)))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.44, h * 0.62), Vector2(w * 0.12, h * 0.12)), c.call(PopTokens.STEEL_DEEP))
+			"bottle":   # M02: an upside-down oil bottle over a dosing head, a cup below it
+				PopMachineArt._round_rect(ci, Rect2(o + Vector2(w * 0.3, h * 0.04), Vector2(w * 0.4, h * 0.34)), 6, c.call(Color(0.93, 0.7, 0.2)))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.36, h * 0.1), Vector2(w * 0.08, h * 0.2)), c.call(Color(1, 1, 1, 0.45)))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.44, h * 0.38), Vector2(w * 0.12, h * 0.06)), c.call(PopTokens.STEEL_DEEP))
+				vgrad(ci, Rect2(o + Vector2(w * 0.24, h * 0.44), Vector2(w * 0.52, h * 0.16)), c.call(body.lightened(0.15)), c.call(body), 4, c.call(body.darkened(0.3)), 2.0)
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.46, h * 0.6), o + Vector2(w * 0.54, h * 0.6), o + Vector2(w * 0.5, h * 0.66)]), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.32, h * 0.78), o + Vector2(w * 0.68, h * 0.78), o + Vector2(w * 0.62, h * 0.92), o + Vector2(w * 0.38, h * 0.92)]), c.call(PopTokens.STEEL))
+			"cabinet":   # M03: a steel control cabinet with a red band
+				vgrad(ci, Rect2(o + Vector2(w * 0.2, h * 0.3), Vector2(w * 0.6, h * 0.62)), c.call(PopTokens.STEEL), c.call(PopTokens.STEEL_DEEP), 5, c.call(PopTokens.STEEL_DEEP.darkened(0.3)), 2.0)
+				ci.draw_rect(Rect2(o + Vector2(w * 0.2, h * 0.82), Vector2(w * 0.6, h * 0.06)), c.call(body))
+				for q in 2:
+					ci.draw_circle(o + Vector2(w * (0.34 + 0.32 * q), h * 0.36), w * 0.03, c.call(PopTokens.WARN if q == 0 else Color(0.4, 0.75, 0.45)))
+			"motor":   # M04: a finned motor drum lying on its side, a shaft rising into the kettle
+				vgrad(ci, Rect2(o + Vector2(w * 0.12, h * 0.42), Vector2(w * 0.76, h * 0.42)), c.call(body.lightened(0.15)), c.call(body.darkened(0.08)), 14, c.call(body.darkened(0.3)), 2.0)
+				for q in 5:
+					var fx := w * (0.24 + 0.13 * q)
+					ci.draw_line(o + Vector2(fx, h * 0.46), o + Vector2(fx, h * 0.8), c.call(body.darkened(0.25)), 2.0)
+				ci.draw_rect(Rect2(o + Vector2(w * 0.06, h * 0.52), Vector2(w * 0.08, h * 0.22)), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.86, h * 0.52), Vector2(w * 0.08, h * 0.22)), c.call(PopTokens.STEEL_DEEP))
+			"sensor":   # M05: a round lens housing on a post
+				ci.draw_rect(Rect2(o + Vector2(w * 0.46, h * 0.74), Vector2(w * 0.08, h * 0.14)), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.3, h * 0.88), Vector2(w * 0.4, h * 0.05)), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.6), w * 0.26, c.call(body))
+				ci.draw_arc(o + Vector2(w * 0.5, h * 0.6), w * 0.26, 0, TAU, 24, c.call(body.darkened(0.3)), 2.0)
+				ci.draw_arc(o + Vector2(w * 0.5, h * 0.6), w * 0.19, 0, TAU, 24, c.call(PopTokens.STEEL), 3.0)
+			"chute":   # M06: a tipping chute on a stand (the arm tips it into the tube)
+				ci.draw_rect(Rect2(o + Vector2(w * 0.28, h * 0.62), Vector2(w * 0.08, h * 0.28)), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.18, h * 0.88), Vector2(w * 0.3, h * 0.05)), c.call(PopTokens.STEEL_DEEP))
+				var ch := PackedVector2Array([o + Vector2(w * 0.12, h * 0.5), o + Vector2(w * 0.9, h * 0.68), o + Vector2(w * 0.86, h * 0.8), o + Vector2(w * 0.12, h * 0.66)])
+				ci.draw_colored_polygon(ch, c.call(body))
+				ci.draw_polyline(ch + PackedVector2Array([ch[0]]), c.call(body.darkened(0.3)), 2.0)
+				ci.draw_line(o + Vector2(w * 0.16, h * 0.56), o + Vector2(w * 0.84, h * 0.72), c.call(Color(1, 1, 1, 0.6)), 2.0)
+			"cage":   # M08: a round fan cage on a foot
+				ci.draw_rect(Rect2(o + Vector2(w * 0.44, h * 0.86), Vector2(w * 0.12, h * 0.06)), c.call(PopTokens.STEEL_DEEP))
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.6), w * 0.3, c.call(body))
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.6), w * 0.24, c.call(body.darkened(0.35)))
+				ci.draw_arc(o + Vector2(w * 0.5, h * 0.6), w * 0.3, 0, TAU, 28, c.call(PopTokens.STEEL), 3.0)
+				for q in 4:
+					var a := TAU * q / 4.0 + 0.4
+					ci.draw_line(o + Vector2(w * 0.5, h * 0.6) + Vector2(cos(a), sin(a)) * w * 0.1, o + Vector2(w * 0.5, h * 0.6) + Vector2(cos(a), sin(a)) * w * 0.29, c.call(Color(1, 1, 1, 0.35)), 1.5)
 			"drum":
 				ci.draw_circle(o + Vector2(w * 0.5, h * 0.55), w * 0.32, c.call(body))
 				ci.draw_arc(o + Vector2(w * 0.5, h * 0.55), w * 0.22, 0, TAU, 20, c.call(Color.WHITE), 3.0)

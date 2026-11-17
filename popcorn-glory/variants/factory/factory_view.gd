@@ -1796,7 +1796,10 @@ func _step_machine_motion(delta: float) -> void:
 				if run:
 					node.rotation += delta * (9.0 if String(m["type"]) == "M08" else 3.0)
 			"M01", "M02":
-				var fall := 0.12 + 0.22 * fmod(t * 1.6, 1.0) if run else 0.12
+				# Step 28: kernels trickle out of the hopper's spout; the oil drips from the
+				# doser's nozzle into its cup (the silhouettes in PopFactoryArt.catalog_icon).
+				var top := 0.76 if String(m["type"]) == "M01" else 0.66
+				var fall := top + 0.12 * fmod(t * 1.6, 1.0) if run else top
 				node.position = Vector2(c.x, r.position.y + r.size.y * fall)
 			"M03":
 				node.position = c + Vector2(0, r.size.y * 0.1)
