@@ -95,11 +95,12 @@ test('a paused cashier holds its customers sales until it is resumed', async ({ 
   await play(pop, 4);
   let s = await pop.state();
   expect(s.run.paying, 'customers wait at the paused drawer').toBeGreaterThan(0);
+  const held = s.run.paying_ids;
   const heldSales = s.run.stats.sold - sold0;
   await pop.tap('m_pause');
   await play(pop, 4);
   s = await pop.state();
-  expect(s.run.paying, 'resumed, they pay').toBe(0);
+  for (const id of held) expect(s.run.paying_ids, `resumed, customer ${id} paid and left the drawer`).not.toContain(id);
   expect(s.run.stats.sold - sold0, 'and the held sales happen').toBeGreaterThan(heldSales);
   expect(s.run.portions_everywhere).toBe(s.run.stats.made_portions);
   expect(pop.errors).toEqual([]);

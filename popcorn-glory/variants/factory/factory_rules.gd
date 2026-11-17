@@ -1864,6 +1864,7 @@ func state() -> Dictionary:
 	s["premium_on_shelf"] = shelf.filter(func(p: Dictionary) -> bool: return String(p["recipe"]) == "premium").size()
 	s["premium_in_bin"] = bin_portions_of("premium")
 	s["paying"] = paying.size()   # Step 31: customers at the auto cashier
+	s["paying_ids"] = paying.map(func(pv: Dictionary) -> int: return int(pv["customer"]["id"]))
 	s["counter_lanes"] = lanes()
 	return s
 
