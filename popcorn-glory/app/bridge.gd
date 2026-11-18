@@ -69,6 +69,9 @@ func query(name: String, arg: Variant) -> Variant:
 		"dev_news":
 			# Step 37: a named event now (the schedule's draw is tested headless).
 			return _app.call("dev_news", String(arg))
+		"dev_contest":
+			# Step 38: a named contest posted now (the board's rotation is tested headless).
+			return _app.call("dev_contest", String(arg))
 		"dev_level":
 			# A picture of a later machine for render checks -- not a play
 			# (the play tests never call it).

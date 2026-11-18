@@ -234,6 +234,15 @@ func dev_news(id: String) -> Dictionary:
 	return r
 
 
+## Step 38: post a contest now, for the tests (the shop must still meet its needs).
+func dev_contest(id: String) -> Dictionary:
+	if rules == null or not rules.has_method("contest_force_post"):
+		return {"ok": false}
+	var r: Dictionary = rules.contest_force_post(id)
+	_flush()
+	return r
+
+
 func dev_level(level: int) -> void:
 	if rules != null:
 		rules.level = clampi(level, 0, rules.max_level())

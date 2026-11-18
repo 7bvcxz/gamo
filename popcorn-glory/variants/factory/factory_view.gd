@@ -103,6 +103,10 @@ var news_node := Node2D.new()    ## Step 37: the live icon, the ticker, the mark
 var _news_key := ""
 var _ticker := {}                ## Step 37: {"n", "t" seconds, "end"} -- a start (or end) slides out of the icon
 const TICKER_S := 6.5
+var news_tab := "news"           ## Step 38: the paper's page -- "news" or "contests"
+var _contest_info := ""          ## Step 38: the contest whose one-line description is shown (asked for)
+var _cancel_armed := 0.0         ## Step 38: seconds the cancel waits for its second tap
+var _cticker := {}               ## Step 38: {"kind": "end", "t", "row"} -- a contest's end slides out of its chip
 
 
 func setup(p_rules: PopRules) -> void:
@@ -378,10 +382,27 @@ func extra_rects() -> Dictionary:
 	out["ring"] = Rect2(c - Vector2(r, r), Vector2(r * 2.0, r * 2.0))
 	if selected >= 0 or overview or news_open:
 		out["detail"] = detail_rect()
-	if news_open:   # Step 37: the card's focus buttons
+	if news_open and news_tab == "news":   # Step 37: the card's focus buttons
 		for fr: Dictionary in _news_layout(detail_rect())["rows"]:
 			if (fr["focus"] as Rect2).size.x > 0.0:
 				out["news_focus_%s" % fr["row"]["flavor"]] = fr["focus"]
+	if news_open:   # Step 38: the tabs, and the contests page's buttons
+		var tabs := _paper_tabs(detail_rect(), float(_news_layout(detail_rect())["fs"]))
+		for k: String in tabs.keys():
+			out["news_tab_%s" % k] = tabs[k]
+		if news_tab == "contests":
+			var L := _contest_layout(detail_rect())
+			if (L["top"] as Dictionary).has("cancel"):
+				out["contest_cancel"] = L["top"]["cancel"]
+			if not (L["top"] as Dictionary).is_empty():
+				out["contest_top"] = L["top"]["rect"]
+			for cc: Dictionary in L["cards"]:
+				out["contest_enter_%s" % cc["row"]["id"]] = cc["enter"]
+				out["contest_info_%s" % cc["row"]["id"]] = cc["info"]
+				out["contest_card_%s" % cc["row"]["id"]] = cc["rect"]
+			out["contest_shelf"] = L["shelf"]
+	if _chip_visible():
+		out["contest_chip"] = contest_chip_rect()
 	if rules and not (rules.get("machines") as Array).is_empty():
 		out["overview"] = overview_button_rect()   # Step 32
 	if overview:
@@ -638,15 +659,20 @@ func _draw_hint_finger(ci: CanvasItem) -> void:
 	ci.draw_arc(p + Vector2(0, -22), 30, 0, TAU, 24, Color(PopPalette.INK, 0.35), 3.0)
 
 
+var _events_seen := 0
+
+
 func on_events(events: Array[Dictionary]) -> void:
 	if not events.is_empty():   # (called every frame, mostly with nothing)
+		_events_seen += 1   # (Step 38: the contests' cached state is read again)
 		_redraw_once = true
 		_slot_cache.clear()   # Step 33: a line bought or a machine built moves the places
 	var rest: Array[Dictionary] = []
 	for e: Dictionary in events:
 		if String(e["type"]) == "earn":
 			# A sale: the coin and the +N at the counter, where the pack met the customer.
-			var at := _counter_point()
+			# (Step 38: a contest's prize at its chip.)
+			var at := contest_chip_rect().get_center() if String(e["data"].get("from", "")) == "contest" else _counter_point()
 			fx.coin(at, machine_size() / 900.0)
 			_gain(int(e["data"].get("amount", 0)))
 			_gains[-1]["at"] = at
@@ -658,6 +684,15 @@ func on_events(events: Array[Dictionary]) -> void:
 		elif String(e["type"]) in ["news_start", "news_end"]:   # Step 37: the ticker slides out of the icon
 			_ticker = {"n": int(e["data"].get("n", -1)), "t": 0.0, "end": String(e["type"]) == "news_end"}
 			_sound("ding", 1.5 if String(e["type"]) == "news_start" else 1.1, -14.0)
+		elif String(e["type"]) == "contest_end":   # Step 38: the end slides out of the chip
+			_cticker = {"kind": "end", "t": 0.0, "row": (e["data"] as Dictionary).duplicate()}
+			_cancel_armed = 0.0
+			if int(e["data"].get("tier", 0)) > 0:
+				_sound("fanfare", 1.0 + 0.1 * int(e["data"]["tier"]), -8.0)
+			else:
+				_sound("ding", 0.9, -14.0)
+		elif String(e["type"]) == "contest_start":
+			_sound("ding", 1.7, -12.0)
 		elif String(e["type"]) == "station_upgrade":
 			# Each floor's own flourish (Step 24): the station sparkles where it
 			# stands with a rising chime and a clink of its new heads; the sign
@@ -898,7 +933,15 @@ func toggle_news() -> void:
 		_clear_machine_selection()
 		selected = -1
 		overview = false
-		command.emit("news_read", {"type": "news_read"})
+		# Step 38: the page the paper opens on -- unread news first, then a contest's news
+		var cs := _contests()
+		if int(_news()["unread"]) > 0 or not bool(cs["open"]):
+			news_tab = "news"
+		elif bool(cs["fresh"]) or int(cs["unseen"]) > 0 or not (cs["entry"] as Dictionary).is_empty():
+			news_tab = "contests"
+		_contest_info = ""
+		_cancel_armed = 0.0
+		_paper_seen()
 	_floors_key = ""
 	detail_layer.queue_redraw()
 	news_node.queue_redraw()
@@ -908,13 +951,23 @@ func toggle_news() -> void:
 func _news_press(p: Vector2, f: int) -> bool:
 	if rules == null or not rules.has_method("news_state"):
 		return false
-	var covered := (selected >= 0 or overview) and detail_rect().has_point(p)   # an open card over the icon has the tap
+	var covered := (selected >= 0 or overview or news_open) and detail_rect().has_point(p)   # an open card over the icon has the tap (Step 38: the paper's own tabs sit over it)
 	if news_rect().grow(6).has_point(p) and not covered:
 		toggle_news()
 		return true
+	if _chip_visible() and contest_chip_rect().grow(4).has_point(p) and not covered and not (news_open and detail_rect().has_point(p)):
+		open_contests()   # Step 38: the chip opens its page
+		return true
 	if not news_open:
 		return false
-	for fr: Dictionary in _news_layout(detail_rect())["rows"]:
+	var tabs := _paper_tabs(detail_rect(), float(_news_layout(detail_rect())["fs"]))
+	for k: String in tabs.keys():
+		if (tabs[k] as Rect2).grow(4).has_point(p):
+			set_news_tab(k)
+			return true
+	if news_tab == "contests" and _contest_press(p):
+		return true
+	for fr: Dictionary in (_news_layout(detail_rect())["rows"] if news_tab == "news" else []):
 		if (fr["focus"] as Rect2).has_point(p):
 			command.emit("news_focus", {"type": "news_focus", "flavor": String(fr["row"]["flavor"])})
 			detail_layer.queue_redraw()
@@ -938,7 +991,21 @@ func _step_news(delta: float) -> void:
 		if float(_ticker["t"]) >= TICKER_S:
 			_ticker = {}
 	var ns := _news()
-	var parts: Array = [ns["unread"], ns["focus"], news_open, size]
+	if _cancel_armed > 0.0:   # Step 38
+		_cancel_armed = maxf(0.0, _cancel_armed - delta)
+	if not _cticker.is_empty() and _ticker.is_empty():   # (it waits for the news's strip: one strip at a time)
+		_cticker["t"] = float(_cticker["t"]) + delta
+		if float(_cticker["t"]) >= TICKER_S:
+			_cticker = {}
+	var cs := _contests()
+	var parts: Array = [ns["unread"], ns["focus"], news_open, size, news_tab, _contest_info, _cancel_armed > 0.0, cs["open"], cs["fresh"], cs["unseen"], (cs["results"] as Array).size()]
+	for p: Dictionary in cs["posted"]:
+		parts.append("%s:%d:%s" % [p["id"], int(p["until_left_ms"]) / 1000, p["problem"]])
+	if not (cs["entry"] as Dictionary).is_empty():
+		parts.append("e%d:%s:%d" % [int(cs["entry"]["left_ms"]) / 1000, cs["entry"]["score"], cs["entry"]["tier"]])
+	if not _cticker.is_empty():
+		var ct := float(_cticker["t"])
+		parts.append(int(ct * 30.0) if ct < 0.5 or ct > TICKER_S - 0.5 else -2)
 	for r: Dictionary in ns["active"]:
 		parts.append("%d:%d:%d" % [r["n"], int(r["left_ms"]) / 1000, r["sold"]])
 	if not _ticker.is_empty():
@@ -1000,8 +1067,15 @@ func _draw_news_live(ci: CanvasItem) -> void:
 		var fs := int(r * 0.48)
 		var t := str(unread)
 		ci.draw_string(font, Vector2(bc.x - font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x * 0.5, bc.y + fs * 0.36), t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)
+	var cs := _contests()
+	if bool(cs["fresh"]) or (int(cs["unseen"]) > 0 and not (news_open and news_tab == "contests")):   # Step 38: a contest's news -- a small gold trophy dot
+		var dc := c + Vector2(-r * 0.72, -r * 0.72)
+		ci.draw_circle(dc, r * 0.34, PopPalette.GOLD)
+		ci.draw_arc(dc, r * 0.34, 0, TAU, 16, Color.WHITE, 2.5)
+		PopContestArt.trophy(ci, dc + Vector2(0, 1), r * 0.42, 3)
 	for mk: Dictionary in _news_marks():
 		PopNewsArt.line_mark(ci, mk["at"], float(mk["s"]), mk["row"])
+	_draw_contest_chip(ci)
 	if not _ticker.is_empty():
 		_draw_ticker(ci)
 
@@ -1020,6 +1094,8 @@ func _draw_ticker(ci: CanvasItem) -> void:
 		return
 	var h := n.size.y * 0.86
 	var strip := Rect2(Vector2(n.position.x - 8.0 - w, n.get_center().y - h * 0.5), Vector2(w + n.size.x * 0.5, h))
+	if _chip_visible():   # Step 38: it slides out left of a contest's chip (the chip stays in view)
+		strip.position.x -= contest_chip_rect().size.x + 10.0
 	var end := bool(_ticker["end"])
 	PopFactoryArt.shadow(ci, strip, h * 0.5)
 	PopMachineArt._round_rect(ci, strip, h * 0.5, PopNewsArt.PAPER)
@@ -1099,13 +1175,29 @@ func _draw_news_card(ci: CanvasItem, d: Rect2) -> void:
 	PopNewsArt.paper(ci, mast.position + Vector2(fs * 1.0, mast.size.y * 0.5), fs * 1.5, true)
 	for i in 5:   # the masthead's lettering, drawn (a newspaper's name, not words to read)
 		var lx := mast.position.x + fs * 2.4 + i * fs * 1.25
-		if lx + fs > mast.end.x - fs * 2.4:
+		if lx + fs > mast.end.x - fs * (4.4 if bool(_contests()["open"]) else 2.4):
 			break
 		ci.draw_rect(Rect2(Vector2(lx, mast.position.y + mast.size.y * 0.3), Vector2(fs * 0.95, mast.size.y * 0.4)), Color(1, 1, 1, 0.9))
 	ci.draw_line(Vector2(mast.position.x, mast.end.y + fs * 0.25), Vector2(mast.end.x, mast.end.y + fs * 0.25), PopNewsArt.PAPER_EDGE, 2.0)
 	ci.draw_line(Vector2(mast.position.x, mast.end.y + fs * 0.42), Vector2(mast.end.x, mast.end.y + fs * 0.42), PopNewsArt.PAPER_EDGE, 1.0)
+	var tabs := _paper_tabs(d, fs)   # Step 38: the paper and the trophy, gold under the page shown
+	for k: String in tabs.keys():
+		var tb: Rect2 = tabs[k]
+		var on := news_tab == k
+		ci.draw_circle(tb.get_center(), tb.size.x * 0.5, PopPalette.GOLD if on else Color(1, 1, 1, 0.92))
+		ci.draw_arc(tb.get_center(), tb.size.x * 0.5, 0, TAU, 24, Color.WHITE if on else Color(PopNewsArt.PAPER_EDGE, 0.6), 3.0)
+		if k == "news":
+			PopNewsArt.paper(ci, tb.get_center() + Vector2(1, 1), tb.size.x * 0.62, true)
+		else:
+			PopContestArt.trophy(ci, tb.get_center() + Vector2(0, 1), tb.size.x * 0.7, 3)
+	var cs := _contests()
+	if tabs.has("contests") and news_tab != "contests" and (bool(cs["fresh"]) or int(cs["unseen"]) > 0):
+		ci.draw_circle((tabs["contests"] as Rect2).position + Vector2((tabs["contests"] as Rect2).size.x * 0.9, 2), fs * 0.24, PopNewsArt.MAST)
+	if news_tab == "contests" and not tabs.is_empty():
+		_draw_contests_page(ci, d, fs)
+		return
 	if bool(ns["scheduler"]):   # U07: a calendar in the masthead's corner (it focuses by itself)
-		var cal := Rect2(Vector2(mast.end.x - fs * 1.5, mast.position.y + fs * 0.2), Vector2(fs * 1.0, fs * 0.9))
+		var cal := Rect2(Vector2((tabs["news"] as Rect2).position.x - fs * 1.4 if tabs.has("news") else mast.end.x - fs * 1.5, mast.position.y + fs * 0.2), Vector2(fs * 1.0, fs * 0.9))
 		ci.draw_rect(cal, Color.WHITE)
 		ci.draw_rect(Rect2(cal.position, Vector2(cal.size.x, cal.size.y * 0.3)), PopPalette.GOLD)
 		ci.draw_rect(cal, PopNewsArt.PAPER_EDGE, false, 2.0)
@@ -1144,6 +1236,418 @@ func _draw_news_card(ci: CanvasItem, d: Rect2) -> void:
 		PopNewsArt.tick(ci, Vector2(rr.position.x + fs * 2.2, cy), fs * 0.6, Color(PopTokens.OK, 0.7))
 		_news_result(ci, font, Vector2(rr.position.x + fs * 2.9, cy), fs * 0.8, r, true)
 		ci.draw_line(Vector2(rr.position.x, rr.end.y + fs * 0.08), Vector2(rr.end.x, rr.end.y + fs * 0.08), Color(PopNewsArt.PAPER_EDGE, 0.15), 1.0)
+
+
+# -- Step 38: the contests (the paper's second page) ----------------------------------------
+## A trophy tab beside the paper's masthead once the shop works. Its page: the contest running
+## (its picture, the score, a bar with the bronze/silver/gold marks, the time left, a cancel
+## that wants a second tap), or the last result (the trophy won, the score against the marks,
+## the prize -- or how far it was); then the posted contests (what it measures, the recipes
+## that count, its length, the fee, the three marks and their prizes, an Enter button ringed
+## by the time left to enter, a "?" for the one-line description); the trophies on a shelf.
+## While a contest runs, a chip beside the paper on the shop shows its time and score; its end
+## slides out of the chip: the trophy and the prize.
+
+var _cs_cache := {}
+var _cs_frame := -1
+var _cs_events := -1
+
+
+## The contests' state, read once a frame (the icon, the chip, the page and the input all ask).
+func _contests() -> Dictionary:
+	if rules == null or not rules.has_method("contests_state"):
+		return {"open": false, "fresh": false, "unseen": 0, "posted": [], "entry": {}, "results": [], "trophies": {}}
+	var fr := Engine.get_process_frames()
+	if fr != _cs_frame or _cs_events != _events_seen:
+		_cs_cache = rules.contests_state()
+		_cs_frame = fr
+		_cs_events = _events_seen
+	return _cs_cache
+
+
+func contest_chip_rect() -> Rect2:
+	var n := news_rect()
+	return Rect2(n.position - Vector2(n.size.x + 10.0, 0), n.size)
+
+
+func _chip_visible() -> bool:
+	return not (_contests()["entry"] as Dictionary).is_empty() or (not _cticker.is_empty() and String(_cticker.get("kind", "")) == "end")
+
+
+## The masthead's tabs (once the contests are open): the paper, the trophy.
+func _paper_tabs(d: Rect2, fs: float) -> Dictionary:
+	if not bool(_contests()["open"]):
+		return {}
+	var mast := Rect2(d.position + Vector2(fs * 0.6, fs * 0.5), Vector2(d.size.x - fs * 1.2, fs * 1.3))
+	var s := fs * 1.5
+	var cy := mast.get_center().y
+	return {"contests": Rect2(Vector2(mast.end.x - s - fs * 0.1, cy - s * 0.5), Vector2(s, s)), "news": Rect2(Vector2(mast.end.x - s * 2.0 - fs * 0.35, cy - s * 0.5), Vector2(s, s))}
+
+
+func set_news_tab(tab: String) -> void:
+	if tab == news_tab:
+		return
+	news_tab = tab
+	_contest_info = ""
+	_cancel_armed = 0.0
+	_paper_seen()
+	detail_layer.queue_redraw()
+	news_node.queue_redraw()
+	_sound("clink", 1.4 if tab == "contests" else 1.2, -12.0)
+
+
+func _paper_seen() -> void:
+	if news_tab == "contests":
+		command.emit("contests_seen", {"type": "contests_seen"})
+	else:
+		command.emit("news_read", {"type": "news_read"})
+
+
+func open_contests() -> void:
+	if not news_open:
+		toggle_news()
+	set_news_tab("contests")
+
+
+## The recipes a format counts: the kettle's butter for the streak, its flavor for a batch,
+## every recipe the shop offers for the rest.
+func _contest_recipes(row: Dictionary) -> Array:
+	match String(row.get("kind", "")):
+		"streak":
+			return ["plain"]
+		"best_batch":
+			return [String(row.get("flavor", "caramel"))]
+	var out: Array = ["plain"]
+	if rules != null and rules.has_method("offered_flavors"):
+		for f: String in rules.offered_flavors():
+			if not out.has(f) and out.size() < 4:
+				out.append(f)
+	return out
+
+
+func _contest_layout(d: Rect2) -> Dictionary:
+	var cs := _contests()
+	var e: Dictionary = cs["entry"]
+	var res: Array = cs["results"]
+	# The page's size: the paper's, smaller (never below 22) so the posted contests fit with
+	# the running one (or the last result) above them; the shelf only where there is room.
+	var base := clampf(minf(d.size.y * 0.075, d.size.x * 0.05), 16.0, 30.0)   # the masthead's (the paper's)
+	var need := (4.2 if not e.is_empty() or not res.is_empty() else 0.0) + 3.8 * float(maxi(1, (cs["posted"] as Array).size())) + 2.2
+	var fs := clampf(minf(base, (d.size.y - base * 2.6) / need), minf(base, 26.0), 30.0)
+	var y := d.position.y + base * 2.6
+	var top := {}
+	if not e.is_empty() or not res.is_empty():
+		var rr := Rect2(Vector2(d.position.x + fs * 0.6, y), Vector2(d.size.x - fs * 1.2, fs * 3.9))
+		top = {"rect": rr, "row": e if not e.is_empty() else res.back(), "live": not e.is_empty()}
+		if not e.is_empty():
+			top["cancel"] = Rect2(Vector2(rr.end.x - fs * 1.55, rr.position.y + fs * 0.2), Vector2(fs * 1.3, fs * 1.3))
+		y += fs * 4.2
+	var cards: Array = []
+	for p: Dictionary in cs["posted"]:
+		if y + fs * 3.6 > d.end.y - fs * 0.3:
+			break
+		var rr := Rect2(Vector2(d.position.x + fs * 0.6, y), Vector2(d.size.x - fs * 1.2, fs * 3.6))
+		cards.append({"rect": rr, "row": p, "enter": Rect2(Vector2(rr.end.x - fs * 2.9, rr.position.y + fs * 0.5), Vector2(fs * 2.6, fs * 2.6)),
+			"info": Rect2(rr.position + Vector2(fs * 0.12, fs * 0.12), Vector2(fs * 1.05, fs * 1.05))})
+		y += fs * 3.8
+	var shelf := Rect2()
+	if y + fs * 2.0 <= d.end.y:
+		shelf = Rect2(Vector2(d.position.x + fs * 0.6, d.end.y - fs * 2.1), Vector2(d.size.x - fs * 1.2, fs * 1.8))
+	return {"fs": fs, "top": top, "cards": cards, "shelf": shelf, "cs": cs}
+
+
+func _contest_press(p: Vector2) -> bool:
+	var L := _contest_layout(detail_rect())
+	var top: Dictionary = L["top"]
+	if top.has("cancel") and (top["cancel"] as Rect2).grow(4).has_point(p):
+		if _cancel_armed > 0.0:   # the second tap: the contest ends, its fee spent
+			command.emit("contest_cancel", {"type": "contest_cancel"})
+			_cancel_armed = 0.0
+			_sound("thud", 0.9, -10.0)
+		else:
+			_cancel_armed = 3.0
+			_sound("clink", 0.8, -10.0)
+		detail_layer.queue_redraw()
+		return true
+	for c: Dictionary in L["cards"]:
+		var row: Dictionary = c["row"]
+		if (c["info"] as Rect2).grow(4).has_point(p):
+			_contest_info = "" if _contest_info == String(row["id"]) else String(row["id"])
+			detail_layer.queue_redraw()
+			_sound("clink", 1.5, -14.0)
+			return true
+		if (c["enter"] as Rect2).grow(4).has_point(p):
+			if String(row.get("problem", "")) == "" and (L["cs"]["entry"] as Dictionary).is_empty():
+				command.emit("contest_enter", {"type": "contest_enter", "id": String(row["id"])})
+				_contest_info = ""
+				_sound("upgrade", 1.3, -8.0)
+			else:
+				_sound("thud", 1.2, -12.0)   # locked: the card shows why
+			detail_layer.queue_redraw()
+			return true
+	return false
+
+
+func _draw_contests_page(ci: CanvasItem, d: Rect2, _mast_fs: float) -> void:
+	var L := _contest_layout(d)
+	var fs := float(L["fs"])
+	var font := ThemeDB.fallback_font
+	var cs: Dictionary = L["cs"]
+	var top: Dictionary = L["top"]
+	if not top.is_empty():
+		if bool(top["live"]):
+			_draw_contest_live(ci, font, top, fs)
+		else:
+			_draw_contest_result(ci, font, top, fs, int(cs["unseen"]) == int(top["row"].get("seq", -1)))
+	if (L["cards"] as Array).is_empty() and top.is_empty():   # nothing posted now: a resting trophy
+		var qc := Vector2(d.get_center().x, d.position.y + fs * 5.0)
+		PopContestArt.trophy(ci, qc, fs * 2.6, 0)
+		for i in 3:
+			ci.draw_circle(qc + Vector2(fs * (1.5 + i * 0.5), -fs * (0.9 + i * 0.45)), fs * (0.12 + i * 0.05), Color(PopPalette.INK, 0.3))
+	for c: Dictionary in L["cards"]:
+		_draw_contest_card(ci, font, c, fs, not (cs["entry"] as Dictionary).is_empty())
+	# the trophy shelf: each format's best
+	var sh: Rect2 = L["shelf"]
+	if sh.size.x <= 0.0:
+		return
+	ci.draw_line(Vector2(sh.position.x, sh.end.y - fs * 0.15), Vector2(sh.end.x, sh.end.y - fs * 0.15), Color(PopNewsArt.PAPER_EDGE, 0.5), 3.0)
+	var ids: Array = rules.contest_ids() if rules != null and rules.has_method("contest_ids") else []
+	for i in ids.size():
+		var x := sh.position.x + sh.size.x * (float(i) + 0.5) / float(ids.size())
+		PopContestArt.trophy(ci, Vector2(x, sh.position.y + fs * 0.85), fs * 1.35, int((cs["trophies"] as Dictionary).get(String(ids[i]), 0)))
+
+
+func _draw_contest_card(ci: CanvasItem, font: Font, c: Dictionary, fs: float, busy: bool) -> void:
+	var rr: Rect2 = c["rect"]
+	var r: Dictionary = c["row"]
+	var locked := String(r.get("problem", "")) != "" or busy
+	PopMachineArt._round_rect(ci, rr, fs * 0.6, Color(1, 1, 1, 0.92))
+	PopContestArt.subject(ci, Vector2(rr.position.x + fs * 1.55, rr.get_center().y + fs * 0.1), fs * 2.2, r, locked)
+	if int(r["trophy"]) > 0:   # the best tier won already, small, under the picture
+		PopContestArt.trophy(ci, Vector2(rr.position.x + fs * 2.45, rr.end.y - fs * 0.55), fs * 0.8, int(r["trophy"]))
+	# "?": the description, only when asked
+	var ib: Rect2 = c["info"]
+	var on := _contest_info == String(r["id"])
+	ci.draw_circle(ib.get_center(), ib.size.x * 0.5, PopPalette.GOLD if on else Color(1, 1, 1))
+	ci.draw_arc(ib.get_center(), ib.size.x * 0.5, 0, TAU, 16, Color(PopPalette.INK, 0.7), 2.0)
+	var qfs := int(ib.size.x * 0.75)
+	ci.draw_string(font, Vector2(ib.get_center().x - font.get_string_size("?", HORIZONTAL_ALIGNMENT_LEFT, -1, qfs).x * 0.5, ib.get_center().y + qfs * 0.36), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, qfs, PopPalette.INK)
+	var x0 := rr.position.x + fs * 3.0
+	var eb: Rect2 = c["enter"]
+	if on:   # the short description in place of the numbers
+		ci.draw_multiline_string(font, Vector2(x0, rr.position.y + fs * 1.2), String(r["about"]), HORIZONTAL_ALIGNMENT_LEFT, eb.position.x - x0 - fs * 0.3, int(fs * 0.72), 3, PopPalette.INK)
+	else:
+		var y1 := rr.position.y + fs * 1.0
+		var x := x0 + fs * 0.4
+		x += PopContestArt.stopwatch(ci, font, Vector2(x, y1), fs * 0.36, int(r["ms"]), fs * 0.72, locked) + fs * 0.5
+		x += PopContestArt.recipes(ci, Vector2(x, y1), fs * 0.95, _contest_recipes(r)) + fs * 0.3
+		if int(r["fee"]) > 0:   # the fee, paid at entry
+			PopMachineArt.draw_coin(ci, Vector2(x + fs * 0.3, y1), fs * 0.27)
+			ci.draw_string(font, Vector2(x + fs * 0.65, y1 + fs * 0.25), "-%d" % int(r["fee"]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.68), Color(PopPalette.INK, 0.65))
+		# the three marks and their prizes
+		var y2 := rr.position.y + fs * 2.55
+		var w := (eb.position.x - x0 - fs * 0.2) / 3.0
+		var tiers: Array = r.get("tiers", [])
+		for i in mini(3, tiers.size()):
+			var mx := x0 + w * i + fs * 0.55
+			PopContestArt.medal(ci, font, Vector2(mx, y2), fs * 0.5, i + 1, _mark_text(tiers[i], r), not locked)
+			PopMachineArt.draw_coin(ci, Vector2(mx + fs * 0.85, y2), fs * 0.22)
+			ci.draw_string(font, Vector2(mx + fs * 1.12, y2 + fs * 0.24), str(int(r["prizes"][i])), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.66), Color(PopPalette.INK, 0.5 if locked else 1.0))
+	# Enter: a gold button ringed by the time left to enter; locked, a lock (or the paper: news on it)
+	var ec := eb.get_center()
+	var er := eb.size.x * 0.5
+	var k := clampf(float(r.get("until_left_ms", 0)) / float(maxi(1, int(r["window_ms"]))), 0.0, 1.0)
+	ci.draw_arc(ec, er + fs * 0.12, 0, TAU, 32, Color(PopPalette.INK, 0.12), fs * 0.14)
+	ci.draw_arc(ec, er + fs * 0.12, -PI * 0.5, -PI * 0.5 + TAU * k, 32, PopContestArt.TIER_EDGE[3], fs * 0.14)
+	if locked:
+		ci.draw_circle(ec, er * 0.86, Color(0.88, 0.88, 0.88))
+		if String(r.get("problem", "")) == "err.contest_news":
+			PopNewsArt.paper(ci, ec, er * 1.1, true)
+		else:
+			PopContestArt.lock(ci, ec, er * 1.1)
+	else:
+		ci.draw_circle(ec, er * 0.86, PopPalette.GOLD)
+		ci.draw_arc(ec, er * 0.86, 0, TAU, 28, PopPalette.INK, 3.0)
+		ci.draw_colored_polygon(PackedVector2Array([ec + Vector2(-er * 0.25, -er * 0.38), ec + Vector2(er * 0.42, 0), ec + Vector2(-er * 0.25, er * 0.38)]), PopPalette.INK)
+
+
+## A mark as written on its medal: whole numbers; lean packing's per-100 with one decimal.
+func _mark_text(v: Variant, row: Dictionary) -> String:
+	var f := float(v)
+	if bool(row.get("lower", false)) and absf(f - roundf(f)) > 0.01:
+		return "%.1f" % f
+	return str(int(roundf(f)))
+
+
+func _score_text(row: Dictionary) -> String:
+	var s := float(row.get("score", 0.0))
+	return "%.1f" % s if bool(row.get("lower", false)) else str(int(s))
+
+
+func _draw_contest_live(ci: CanvasItem, font: Font, top: Dictionary, fs: float) -> void:
+	var rr: Rect2 = top["rect"]
+	var r: Dictionary = top["row"]
+	PopMachineArt._round_rect(ci, rr, fs * 0.6, Color(1.0, 0.97, 0.86))
+	var pts := PopMachineArt.round_rect_points(rr, fs * 0.6)
+	pts.append(pts[0])
+	ci.draw_polyline(pts, PopPalette.GOLD, 4.0, true)
+	PopContestArt.subject(ci, Vector2(rr.position.x + fs * 1.55, rr.get_center().y), fs * 2.2, r)
+	var x0 := rr.position.x + fs * 3.0
+	var tc := Vector2(rr.end.x - fs * 2.6, rr.position.y + fs * 1.6)
+	PopNewsArt.timer(ci, font, tc, fs * 0.8, int(r["left_ms"]), int(r["ms"]), fs * 0.72)
+	var big := int(fs * 1.45)
+	var st := _score_text(r)
+	ci.draw_string(font, Vector2(x0, rr.position.y + fs * 1.75), st, HORIZONTAL_ALIGNMENT_LEFT, -1, big, PopPalette.INK)
+	var sx := x0 + font.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, big).x + fs * 0.4
+	if int(r["tier"]) > 0:
+		PopContestArt.trophy(ci, Vector2(sx + fs * 0.55, rr.position.y + fs * 1.2), fs * 1.1, int(r["tier"]), true)
+		sx += fs * 1.3
+	if String(r["kind"]) == "waste":   # the bags it needs to count
+		PopFactoryArt.sku_bag(ci, Vector2(sx + fs * 0.35, rr.position.y + fs * 1.65), fs * 0.5, "plain")
+		ci.draw_string(font, Vector2(sx + fs * 0.75, rr.position.y + fs * 1.55), "%d/%d" % [int(r["packs"]), int(r["min_packs"])], HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.7), PopPalette.INK if int(r["packs"]) >= int(r["min_packs"]) else Color(PopPalette.INK, 0.55))
+	var bar := Rect2(Vector2(x0, rr.position.y + fs * 2.75), Vector2(tc.x - fs * 1.4 - x0, fs * 0.38))
+	PopContestArt.bar(ci, font, bar, r["tiers"], float(r["score"]), int(r["tier"]), bool(r["lower"]))
+	_draw_marks_under(ci, font, bar, r, fs)
+	# cancel: an X; armed (waiting for the second tap), red with the fee's coin
+	var cb: Rect2 = top["cancel"]
+	var cc := cb.get_center()
+	var armed := _cancel_armed > 0.0
+	ci.draw_circle(cc, cb.size.x * 0.5, PopTokens.WARN if armed else Color(1, 1, 1))
+	ci.draw_arc(cc, cb.size.x * 0.5, 0, TAU, 20, Color(PopPalette.INK, 0.7), 2.0)
+	var xs := cb.size.x * 0.2
+	var xc := Color.WHITE if armed else Color(PopPalette.INK, 0.8)
+	ci.draw_line(cc + Vector2(-xs, -xs), cc + Vector2(xs, xs), xc, 3.0)
+	ci.draw_line(cc + Vector2(-xs, xs), cc + Vector2(xs, -xs), xc, 3.0)
+	if armed:
+		PopMachineArt.draw_coin(ci, cc + Vector2(-cb.size.x * 0.95, 0), fs * 0.3)
+		ci.draw_line(cc + Vector2(-cb.size.x * 1.25, cb.size.x * 0.3), cc + Vector2(-cb.size.x * 0.65, -cb.size.x * 0.3), PopTokens.WARN, 3.0)
+
+
+func _draw_marks_under(ci: CanvasItem, font: Font, bar: Rect2, r: Dictionary, fs: float) -> void:
+	var tiers: Array = r["tiers"]
+	var lower := bool(r["lower"])
+	var top := float(tiers[2]) * (1.0 if lower else 1.15)
+	var lo := float(tiers[0]) * 1.5
+	for i in 3:
+		var v := float(tiers[i])
+		var k := clampf(v / maxf(0.001, top), 0.0, 1.0) if not lower else clampf((lo - v) / maxf(0.001, lo), 0.0, 1.0)
+		var t := _mark_text(tiers[i], r)
+		var mfs := int(fs * 0.55)
+		var w := font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, mfs).x
+		ci.draw_string(font, Vector2(bar.position.x + bar.size.x * k - w * 0.5, bar.end.y + fs * 0.75), t, HORIZONTAL_ALIGNMENT_LEFT, -1, mfs, Color(PopPalette.INK, 0.75))
+
+
+## The last result: the trophy won (or a grey one), the score on the bar of its marks, the
+## prize -- or, without a tier, how much more (or less, for waste) bronze wanted. No scolding.
+func _draw_contest_result(ci: CanvasItem, font: Font, top: Dictionary, fs: float, fresh: bool) -> void:
+	var rr: Rect2 = top["rect"]
+	var r: Dictionary = top["row"]
+	var tier := int(r["tier"])
+	PopMachineArt._round_rect(ci, rr, fs * 0.6, Color(1.0, 0.97, 0.86) if fresh else Color(1, 1, 1, 0.9))
+	if fresh:
+		var pts := PopMachineArt.round_rect_points(rr, fs * 0.6)
+		pts.append(pts[0])
+		ci.draw_polyline(pts, PopContestArt.TIER_COL[tier] if tier > 0 else Color(PopPalette.INK, 0.3), 4.0, true)
+	PopContestArt.trophy(ci, Vector2(rr.position.x + fs * 1.55, rr.get_center().y), fs * 2.4, tier, tier > 0)
+	var x0 := rr.position.x + fs * 3.0
+	var big := int(fs * 1.3)
+	var st := _score_text(r)
+	ci.draw_string(font, Vector2(x0, rr.position.y + fs * 1.6), st, HORIZONTAL_ALIGNMENT_LEFT, -1, big, PopPalette.INK)
+	var sx := x0 + font.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, big).x + fs * 0.5
+	PopContestArt.subject(ci, Vector2(sx + fs * 0.6, rr.position.y + fs * 1.15), fs * 1.1, r, true)
+	var px := rr.end.x - fs * 3.4
+	var py := rr.position.y + fs * 1.25
+	if String(r.get("how", "")) == "cancel":   # stopped: the stopwatch, crossed
+		PopContestArt.stopwatch(ci, font, Vector2(px + fs * 0.4, py), fs * 0.4, int(r["end"]) - int(r["start"]), fs * 0.7, true)
+		ci.draw_line(Vector2(px, py - fs * 0.5), Vector2(px + fs * 0.8, py + fs * 0.5), PopTokens.WARN, 3.0)
+	elif int(r["prize"]) > 0:
+		PopMachineArt.draw_coin(ci, Vector2(px + fs * 0.35, py), fs * 0.4)
+		ci.draw_string(font, Vector2(px + fs * 0.85, py + fs * 0.32), "+%d" % int(r["prize"]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.95), PopTokens.OK)
+	else:   # how far bronze was: an arrow and the gap, in plain ink
+		var t: Array = r["tiers"]
+		var gap := absf(float(t[0]) - float(r["score"]))
+		var lower := bool(r["lower"])
+		if lower and int(r["packs"]) < int(r["min_packs"]):   # too few bags: the bags it wanted
+			PopFactoryArt.sku_bag(ci, Vector2(px + fs * 0.35, py + fs * 0.45), fs * 0.55, "plain")
+			ci.draw_string(font, Vector2(px + fs * 0.8, py + fs * 0.32), "%d/%d" % [int(r["packs"]), int(r["min_packs"])], HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.8), PopPalette.INK)
+		else:
+			var ax := px + fs * 0.3
+			var dir := 1.0 if lower else -1.0   # up: more wanted; down: less
+			ci.draw_line(Vector2(ax, py + fs * 0.4 * -dir), Vector2(ax, py - fs * 0.35 * -dir), PopPalette.INK, 3.0)
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(ax - fs * 0.2, py - fs * 0.25 * -dir), Vector2(ax + fs * 0.2, py - fs * 0.25 * -dir), Vector2(ax, py - fs * 0.5 * -dir)]), PopPalette.INK)
+			var gt := ("%.1f" % gap) if lower else str(int(ceil(gap)))
+			ci.draw_string(font, Vector2(ax + fs * 0.45, py + fs * 0.32), gt, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.9), PopPalette.INK)
+	if int(r["fee"]) > 0:   # the fee it cost, small and grey, left of the prize
+		var ft := "-%d" % int(r["fee"])
+		var fw := font.get_string_size(ft, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.6)).x
+		PopMachineArt.draw_coin(ci, Vector2(px - fw - fs * 0.65, py), fs * 0.22)
+		ci.draw_string(font, Vector2(px - fw - fs * 0.35, py + fs * 0.22), ft, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs * 0.6), Color(PopPalette.INK, 0.55))
+	var bar := Rect2(Vector2(x0, rr.position.y + fs * 2.75), Vector2(rr.end.x - fs * 1.0 - x0, fs * 0.38))
+	PopContestArt.bar(ci, font, bar, r["tiers"], float(r["score"]), tier, bool(r["lower"]))
+	_draw_marks_under(ci, font, bar, r, fs)
+
+
+## On the shop while a contest runs: a trophy chip beside the paper -- the time left as a
+## gold ring, the score in a badge. Its end: the chip shows the tier, a strip the prize.
+func _draw_contest_chip(ci: CanvasItem) -> void:
+	if not _chip_visible():
+		return
+	var cs := _contests()
+	var e: Dictionary = cs["entry"]
+	var n := contest_chip_rect()
+	var c := n.get_center()
+	var r := n.size.x * 0.5
+	ci.draw_circle(c, r, Color(1, 1, 1, 0.97))
+	var tier := 0
+	if not e.is_empty():
+		var k := clampf(float(e["left_ms"]) / float(maxi(1, int(e["ms"]))), 0.0, 1.0)
+		ci.draw_arc(c, r - 3.0, -PI * 0.5, -PI * 0.5 + TAU * k, 32, PopPalette.GOLD, 6.0)
+		tier = int(e["tier"])
+	else:
+		tier = int((_cticker.get("row", {}) as Dictionary).get("tier", 0))
+	ci.draw_arc(c, r, 0, TAU, 32, PopPalette.INK, 3.0)
+	PopContestArt.trophy(ci, c + Vector2(0, 2), n.size.x * 0.66, tier if e.is_empty() else 3, e.is_empty() and tier > 0)
+	if not e.is_empty():   # the score so far
+		var font := ThemeDB.fallback_font
+		var t := _score_text(e)
+		var fs := int(r * 0.5)
+		var w := maxf(r * 0.8, font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x + r * 0.3)
+		var b := Rect2(Vector2(c.x - w * 0.5, c.y + r * 0.62), Vector2(w, r * 0.62))
+		PopMachineArt._round_rect(ci, b, b.size.y * 0.5, PopPalette.INK)
+		ci.draw_string(font, Vector2(c.x - font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x * 0.5, b.get_center().y + fs * 0.36), t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)
+	if not _cticker.is_empty() and String(_cticker["kind"]) == "end" and _ticker.is_empty():
+		_draw_contest_strip(ci)
+
+
+func _draw_contest_strip(ci: CanvasItem) -> void:
+	var row: Dictionary = _cticker["row"]
+	var t := float(_cticker["t"])
+	var k := clampf(minf(t / 0.35, (TICKER_S - t) / 0.35), 0.0, 1.0)
+	k = k * k * (3.0 - 2.0 * k)
+	var n := contest_chip_rect()
+	var h := n.size.y * 0.86
+	var w := n.size.y * 2.6 * k
+	if w < 8.0:
+		return
+	var strip := Rect2(Vector2(n.position.x - 8.0 - w, n.get_center().y - h * 0.5), Vector2(w + n.size.x * 0.5, h))
+	var tier := int(row.get("tier", 0))
+	PopFactoryArt.shadow(ci, strip, h * 0.5)
+	PopMachineArt._round_rect(ci, strip, h * 0.5, PopNewsArt.PAPER)
+	var pts := PopMachineArt.round_rect_points(strip, h * 0.5)
+	pts.append(pts[0])
+	ci.draw_polyline(pts, PopContestArt.TIER_EDGE[tier] if tier > 0 else Color(PopNewsArt.PAPER_EDGE, 0.5), 4.0, true)
+	if k < 0.98:
+		return
+	var font := ThemeDB.fallback_font
+	var fs := h * 0.42
+	var x := strip.position.x + h * 0.55
+	PopContestArt.trophy(ci, Vector2(x, strip.get_center().y), h * 0.7, tier, tier > 0)
+	x += h * 0.55
+	if int(row.get("prize", 0)) > 0:
+		PopMachineArt.draw_coin(ci, Vector2(x + fs * 0.35, strip.get_center().y), fs * 0.34)
+		ci.draw_string(font, Vector2(x + fs * 0.8, strip.get_center().y + fs * 0.36), "+%d" % int(row["prize"]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs), PopTokens.OK)
+	else:
+		ci.draw_string(font, Vector2(x + fs * 0.2, strip.get_center().y + fs * 0.36), _score_text(row), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs), PopPalette.INK)
 
 
 ## A floor's detail: its form now, an arrow, and its next form dimmed with a lock.
@@ -1794,7 +2298,8 @@ func debug_state() -> Dictionary:
 		"cargo_stats": cargo_stats.duplicate(), "cargo_now": cargo.size(), "pool": {"lot": (_pool["lot"] as Array).size(), "bag": (_pool["bag"] as Array).size()},
 		"redraws": redraws.duplicate(), "machine_nodes": _mnodes.size(), "actor_nodes": actor_layer.get_child_count(), "dense": {"kitchen": dense("kitchen"), "packing": dense("packing"), "shop": dense("shop")},
 		"ov_machine": ov_machine, "selected": selected, "sel_machine": sel_machine, "sel_slot": sel_slot,
-		"news_open": news_open, "ticker": int(_ticker.get("n", -1)), "ticker_end": bool(_ticker.get("end", false)), "news_marks": _news_marks().size()}
+		"news_open": news_open, "ticker": int(_ticker.get("n", -1)), "ticker_end": bool(_ticker.get("end", false)), "news_marks": _news_marks().size(),
+		"news_tab": news_tab, "contest_info": _contest_info, "cancel_armed": _cancel_armed > 0.0, "contest_chip": _chip_visible(), "cticker": int((_cticker.get("row", {}) as Dictionary).get("seq", -1))}
 
 
 # -- Step 20: the packing station ---------------------------------------------

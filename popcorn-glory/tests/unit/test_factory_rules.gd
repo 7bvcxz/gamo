@@ -4115,3 +4115,455 @@ func test_an_hour_of_news_saves_resumes_and_conserves() -> void:
 		assert_true(int(a["end"]) - int(a["start"]) <= int(f.news_event(String(a["id"]))["ms"]), "%s: never longer than its length" % a["id"])
 	_check_sales(f, "news hour")
 	_check_conservation(f, "news hour")
+
+
+# -- Step 38: contests ----------------------------------------------------------------
+const CONTEST_KINDS := ["streak", "best_batch", "served", "waste", "net"]
+
+
+## A shop the contests are open in (15 bags sold), with the board posted.
+func _contest_shop(seed_value: int = 601) -> PopRules:
+	var f := _shop(seed_value)
+	f.stats["sold"] = maxi(int(f.stats["sold"]), int(f.contest_rules()["open_after_sold"]))
+	f.next_arrival_ms = f.flow_ms + 100   # customers buy what is made (the kettle never waits on a full shelf)
+	f.advance(1000)
+	return f
+
+
+func _posted_ids(f: PopRules) -> Array:
+	return (f.contests["posted"] as Array).map(func(p: Dictionary) -> String: return String(p["id"]))
+
+
+## The next hand pop once the kettle can take it (the glass poured, the cooldown done).
+func _pop_ready(f: PopRules, offset: int = 10) -> Dictionary:
+	for i in 300:
+		if f.glass.is_empty() and int(f.cooldown_left) <= 0 and not f.heating:
+			break
+		f.advance(100)
+	return _pop(f, offset)
+
+
+func _late(f: PopRules) -> int:
+	return int(f.window_end()) - int(f.window_start()) + 150
+
+
+func _contest_ends(f: PopRules) -> Array:
+	return f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "contest_end")
+
+
+## The flavor factory of the sims (built by the player's commands): kettles, hopper, mixer,
+## sorter, lines, coaters on all four flavors, the shop's devices -- a real advanced shop.
+func _contest_factory(seed_value: int) -> PopRules:
+	var f: PopRules = Factory.new(null, seed_value)
+	f.sign_tier = 6
+	f.packer_tier = 3
+	f.level = 6
+	f.stats["sold"] = 1
+	f.stats["packed"] = 1
+	f.money = 1 << 30
+	for id: String in ["M07", "M10", "M07", "M01", "M16", "U02", "U03", "U01", "M13", "M12"]:
+		f.execute({"type": "build", "machine": id, "floor": "kitchen"})
+	for row: Array in [["bagger", ""], ["P07", ""], ["P05", "auto"], ["P06", "auto"], ["line", ""], ["bagger", ""], ["U04", ""], ["P05", "spicy"], ["P06", "cocoa"]]:
+		if String(row[0]) == "line":
+			f.execute({"type": "buy_line", "floor": "packing"})
+			continue
+		var r: Dictionary = f.execute({"type": "build", "machine": row[0], "floor": "packing"})
+		if String(row[1]) != "":
+			f.execute({"type": "set_flavor", "id": r["machine"], "flavor": row[1]})
+	for id in ["S03", "S05", "S08", "S01"]:
+		f.execute({"type": "build", "machine": id, "floor": "shop"})
+	f.money = 5000
+	return f
+
+
+func test_contests_are_local_clean_data_and_wait_for_a_working_shop() -> void:
+	var f: PopRules = Factory.new(null, 603)
+	var cr: Dictionary = f.contest_rules()
+	var ids: Array = f.contest_ids()
+	assert_true(ids.size() >= 3 and ids.size() <= 5, "three to five formats (%d)" % ids.size())
+	var kinds := {}
+	for id: String in ids:
+		var c: Dictionary = f.contest_format(id)
+		assert_false(c.is_empty(), "%s: in the table" % id)
+		assert_true(CONTEST_KINDS.has(String(c["kind"])), "%s: a known measure" % id)
+		kinds[c["kind"]] = true
+		assert_true(int(c["ms"]) >= 60000 and int(c["ms"]) <= 600000, "%s: a finite length in active minutes" % id)
+		assert_true(int(c["fee"]) >= 0 and int(c["fee"]) < int(c["prizes"][0]), "%s: a predictable fee below the first prize" % id)
+		assert_eq((c["prizes"] as Array).size(), 3, "%s: bronze, silver, gold" % id)
+		assert_true(int(c["prizes"][0]) < int(c["prizes"][1]) and int(c["prizes"][1]) < int(c["prizes"][2]), "%s: prizes rise with the tier" % id)
+		assert_true(String(c["about"]).length() > 0 and String(c["about"]).length() <= 80, "%s: a short description (on request)" % id)
+		for k: String in ["rivals", "players", "rank", "ranking", "currency", "tickets", "gems"]:
+			assert_false(c.has(k), "%s: no %s -- a local challenge in the one money" % [id, k])
+	assert_eq(kinds.size(), ids.size(), "every format measures something different")
+	# A newcomer: nothing before the shop works, however long the stand runs.
+	var g: PopRules = Factory.new(null, 605)
+	_quiet_shop(g)
+	g.advance(10 * 60000)
+	assert_false(bool(g.contests["open"]), "no contests before the sign opens")
+	_open_sign(g)
+	g.stats["sold"] = int(cr["open_after_sold"]) - 1
+	g.advance(2000)
+	assert_false(bool(g.contests["open"]), "nor before %d bags are sold" % int(cr["open_after_sold"]))
+	assert_true((g.contests["posted"] as Array).is_empty(), "nothing posted")
+	g.stats["sold"] = int(cr["open_after_sold"])
+	g.advance(2000)
+	assert_true(bool(g.contests["open"]), "then they open")
+	assert_true(bool(g.contests_state()["fresh"]), "a gold dot until the page is seen")
+	var posted := _posted_ids(g)
+	assert_true(posted.size() >= 1 and posted.size() <= int(cr["board"]), "a board of %d (%s)" % [posted.size(), posted])
+	assert_true(posted.has("perfect_streak"), "the approachable one is posted for a plain stand")
+	for id: String in posted:
+		assert_eq(g.contest_needs(id), "", "%s: only what the shop could take part in" % id)
+	assert_false(posted.has("caramel_batch") or posted.has("lean_packing") or posted.has("balanced_line"), "no caramel, bagger or factory contest for a stand without them")
+	assert_true(bool(g.execute({"type": "contests_seen"})["ok"]), "seen")
+	assert_false(bool(g.contests_state()["fresh"]), "the dot goes")
+
+
+func test_a_first_entry_pays_its_fee_once_and_one_contest_runs_at_a_time() -> void:
+	var f := _contest_shop(607)
+	var fee := int(f.contest_format("perfect_streak")["fee"])
+	assert_eq(String(f.execute({"type": "contest_enter", "id": "balanced_line"})["reason"]), "err.contest_closed", "not posted: refused")
+	var poor := _contest_shop(607)
+	poor.money = fee - 1
+	assert_eq(String(poor.execute({"type": "contest_enter", "id": "perfect_streak"})["reason"]), "err.not_enough_money", "the fee first")
+	assert_eq(int(poor.money), fee - 1, "nothing taken")
+	var m0 := int(f.money)
+	var r: Dictionary = f.execute({"type": "contest_enter", "id": "perfect_streak"})
+	assert_true(bool(r["ok"]), "entered")
+	assert_eq(int(f.money), m0 - fee, "the fee, once")
+	assert_eq(int(f.stats["contest_fees"]), fee, "counted")
+	assert_false(_posted_ids(f).has("perfect_streak"), "off the board while it runs")
+	for id: String in _posted_ids(f):
+		assert_eq(String(f.execute({"type": "contest_enter", "id": id})["reason"]), "err.contest_running", "one at a time (%s)" % id)
+	assert_eq(String(f.execute({"type": "contest_enter", "id": "perfect_streak"})["reason"]), "err.contest_running", "and not twice")
+	assert_eq(int(f.money), m0 - fee, "still one fee")
+	var e: Dictionary = f.contests_state()["entry"]
+	assert_eq(int(e["left_ms"]), int(f.contest_format("perfect_streak")["ms"]), "its whole length ahead")
+	assert_eq(float(e["score"]), 0.0, "nothing counted yet: no earlier pops")
+
+
+func test_the_streak_counts_real_perfect_pops_a_miss_resets_and_gold_pays_once() -> void:
+	var f := _contest_shop(609)
+	for i in 3:   # perfect pops before the entry count for nothing
+		assert_eq(String(_pop_ready(f)["outcome"]), "perfect", "a perfect pop before")
+	f.execute({"type": "contest_enter", "id": "perfect_streak"})
+	f.drain_events()
+	var tiers: Array = f.contest_format("perfect_streak")["tiers"]
+	for i in 2:
+		_pop_ready(f)
+	assert_eq(float(f.contests_state()["entry"]["score"]), 2.0, "two in a row (the three before do not count)")
+	assert_ne(String(_pop_ready(f, _late(f))["outcome"]), "perfect", "a miss")
+	assert_eq(int(f.contests["entry"]["cur"]), 0, "the run ends")
+	assert_eq(float(f.contests_state()["entry"]["score"]), 2.0, "the best stays")
+	var m0 := int(f.money)
+	for i in int(tiers[2]):
+		assert_eq(String(_pop_ready(f)["outcome"]), "perfect", "perfect %d" % (i + 1))
+	var ends := _contest_ends(f)
+	assert_eq(ends.size(), 1, "gold ends it at once (no need to wait)")
+	assert_eq(int(ends[0]["data"]["tier"]), 3, "gold")
+	var prize := int(f.contest_format("perfect_streak")["prizes"][2])
+	assert_eq(int(ends[0]["data"]["prize"]), prize, "the gold prize")
+	assert_true(int(f.money) - m0 >= prize, "paid")
+	var paid := int(f.stats["contest_prizes"])
+	assert_eq(paid, prize, "once")
+	assert_eq(int(f.contests["trophies"]["perfect_streak"]), 3, "a gold trophy")
+	assert_true((f.contests["entry"] as Dictionary).is_empty(), "over")
+	for i in 3:
+		_pop_ready(f)
+	f.advance(int(f.contest_format("perfect_streak")["ms"]) + 1000)
+	assert_eq(int(f.stats["contest_prizes"]), paid, "never paid again (no claim twice)")
+	assert_eq(_contest_ends(f).size(), 0, "no second end")
+	assert_eq(String(f.execute({"type": "contest_cancel"})["reason"]), "err.no_contest", "nothing to cancel")
+
+
+func test_time_runs_out_in_active_time_and_the_tier_reached_pays() -> void:
+	var f := _contest_shop(611)
+	var c: Dictionary = f.contest_format("perfect_streak")
+	f.execute({"type": "contest_enter", "id": "perfect_streak"})
+	var end := int(f.contests["entry"]["end"])
+	for i in int(c["tiers"][1]):
+		_pop_ready(f)
+	f.drain_events()
+	var m0 := int(f.money)
+	f.advance(end - int(f.flow_ms) - 100)
+	assert_false((f.contests["entry"] as Dictionary).is_empty(), "still on 0.1 s before the end")
+	f.advance(200)
+	var ends := _contest_ends(f)
+	assert_eq(ends.size(), 1, "it ends at its time")
+	assert_true(int(ends[0]["data"]["end"]) >= end and int(ends[0]["data"]["end"]) <= end + 100, "at the end time (%d / %d)" % [int(ends[0]["data"]["end"]), end])
+	assert_eq(int(ends[0]["data"]["tier"]), 2, "silver: %d in a row" % int(c["tiers"][1]))
+	assert_eq(int(f.stats["contest_prizes"]), int(c["prizes"][1]), "the silver prize")
+	assert_true(int(f.money) - m0 >= int(c["prizes"][1]), "paid")
+	# Short of bronze: no prize, a result that says how far (the score and the marks).
+	var g := _contest_shop(613)
+	g.execute({"type": "contest_enter", "id": "perfect_streak"})
+	_pop_ready(g)
+	g.advance(int(c["ms"]))
+	var r: Dictionary = (g.contests["results"] as Array).back()
+	assert_eq(int(r["tier"]), 0, "no tier")
+	assert_eq(int(r["prize"]), 0, "no prize")
+	assert_eq(float(r["score"]), 1.0, "its score")
+	assert_eq(r["tiers"], g.contest_tiers("perfect_streak"), "the marks it was measured against")
+	assert_eq(int(g.contests_state()["unseen"]), int(r["seq"]), "the result waits to be seen")
+	assert_false(g.contests["trophies"].has("perfect_streak"), "no trophy")
+
+
+func test_cancel_keeps_the_fee_the_format_rests_then_repeats_and_pays_again() -> void:
+	var f := _contest_shop(615)
+	var c: Dictionary = f.contest_format("perfect_streak")
+	f.execute({"type": "contest_enter", "id": "perfect_streak"})
+	for i in 4:
+		_pop_ready(f)
+	var m0 := int(f.money)
+	var r: Dictionary = f.execute({"type": "contest_cancel"})
+	assert_true(bool(r["ok"]) and int(r["prize"]) == 0, "cancelled: no prize")
+	assert_eq(int(f.money), m0, "no refund either")
+	assert_eq(String((f.contests["results"] as Array).back()["how"]), "cancel", "the result says cancelled")
+	assert_eq(String(f.execute({"type": "contest_enter", "id": "perfect_streak"})["reason"]), "err.contest_closed", "it cannot restart for free")
+	f.advance(int(f.contest_rules()["rest_ms"]) - 5000)
+	assert_false(_posted_ids(f).has("perfect_streak"), "it rests")
+	f.advance(10000)
+	assert_true(_posted_ids(f).has("perfect_streak"), "then it is posted again")
+	var m1 := int(f.money)
+	assert_true(bool(f.execute({"type": "contest_enter", "id": "perfect_streak"})["ok"]), "and can be entered again")
+	assert_eq(int(f.money), m1 - int(c["fee"]), "for its fee")
+	for i in int(c["tiers"][0]):
+		_pop_ready(f)
+	f.advance(int(c["ms"]))
+	assert_eq(int((f.contests["results"] as Array).back()["tier"]), 1, "bronze this time")
+	assert_eq(int(f.stats["contest_prizes"]), int(c["prizes"][0]), "its prize")
+	assert_eq(int(f.stats["contests_cancelled"]), 1, "one cancelled")
+	assert_eq(int(f.stats["contests_done"]), 1, "one done")
+	# A posted window that closes unentered: it rests half as long and comes back.
+	var g := _contest_shop(617)
+	var until := int((g.contests["posted"] as Array)[0]["until"])
+	var id0 := String((g.contests["posted"] as Array)[0]["id"])
+	g.advance(until - int(g.flow_ms) + 1000)
+	assert_false(_posted_ids(g).has(id0), "%s: its window closed" % id0)
+	g.advance(int(g.contest_rules()["rest_ms"]) / 2 + 1000)
+	assert_true(_posted_ids(g).has(id0), "%s: back after resting" % id0)
+
+
+func test_the_caramel_batch_counts_batches_done_after_entry_as_they_left_the_drum() -> void:
+	var s := _batch_on_drum(619, "caramel")
+	var f: PopRules = s["f"]
+	var id := int(s["m"]["id"])
+	f.flavor("caramel")["buffer"] = 40   # (a shop that keeps caramel coated ahead: batch after batch)
+	f.stats["sold"] = int(f.contest_rules()["open_after_sold"])
+	f.advance(1000)
+	assert_true(_posted_ids(f).has("caramel_batch"), "posted for a caramel shop")
+	var w: Array = f.finish_window("caramel")
+	# A batch finished before the entry counts for nothing.
+	assert_eq(String(_hold_spoon(f, id, (int(w[0]) + int(w[1])) / 2)["grade"]), "perfect", "a perfect finish before")
+	f.advance(200)
+	assert_true(bool(f.execute({"type": "contest_enter", "id": "caramel_batch"})["ok"]), "entered")
+	assert_eq(float(f.contests_state()["entry"]["score"]), 0.0, "nothing yet")
+	f.drain_events()
+	# The machine's own batch: its quality as it leaves (below the hand's).
+	var q := -1
+	for i in 600:
+		f.advance(100)
+		var lc := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "lot_coated")
+		if not lc.is_empty():
+			q = int(lc[0]["data"]["quality"])
+			break
+	assert_true(q > 0 and q < 100, "the machine's batch (%d)" % q)
+	assert_eq(float(f.contests_state()["entry"]["score"]), float(q), "counted as it left the drum")
+	# An upgrade now does not change a batch already done.
+	f.execute({"type": "upgrade_machine", "id": id})
+	assert_eq(float(f.contests_state()["entry"]["score"]), float(q), "no retroactive grade")
+	# The spoon's perfect finish: 100, gold, at once.
+	_fill_bin(f, 12)
+	for i in 100:
+		if not (f.machine(id)["held"] as Dictionary).is_empty():
+			break
+		f.advance(100)
+	f.drain_events()
+	assert_eq(String(_hold_spoon(f, id, (int(w[0]) + int(w[1])) / 2)["grade"]), "perfect", "a perfect finish")
+	f.advance(200)
+	var ends := _contest_ends(f)
+	assert_eq(ends.size(), 1, "gold ends it")
+	assert_eq(int(ends[0]["data"]["tier"]), 3, "gold")
+	assert_eq(float(ends[0]["data"]["score"]), 100.0, "the hand's 100")
+	_check_conservation(f, "caramel contest")
+
+
+func test_rush_hour_sets_its_marks_from_the_sign_and_the_news_keeps_off() -> void:
+	var f := _still_popularity(_contest_shop(621))
+	f.next_arrival_ms = f.flow_ms + 100
+	_stock(f, 40)
+	assert_true(_posted_ids(f).has("rush_hour"), "posted for a busy sign")
+	var c: Dictionary = f.contest_format("rush_hour")
+	var expect: float = 60000.0 / float(f.mean_wait_ms(f.sign_tier)) * f.arrival_factor() * float(c["ms"]) / 60000.0
+	var tiers: Array = f.contest_tiers("rush_hour")
+	assert_eq(int(tiers[2]), int(ceil(expect * float(c["tiers"][2]))), "gold: %.0f%% of the %.1f customers the sign brings" % [float(c["tiers"][2]) * 100.0, expect])
+	# Collision: no entry during a festival; none drawn during rush hour.
+	assert_true(bool(f.news_force("film_festival")["ok"]), "a festival")
+	assert_eq(String(f.execute({"type": "contest_enter", "id": "rush_hour"})["reason"]), "err.contest_news", "the crowd would not be the shop's: refused")
+	assert_eq(f.contests_state()["posted"].filter(func(p: Dictionary) -> bool: return String(p["id"]) == "rush_hour")[0]["problem"], "err.contest_news", "the card says why")
+	f.advance(int(f.news_event("film_festival")["ms"]) + 1000)
+	var sold0 := int(f.stats["sold"])
+	assert_true(bool(f.execute({"type": "contest_enter", "id": "rush_hour"})["ok"]), "after it: entered")
+	assert_false(bool(f.news_force("film_festival")["ok"]), "no festival during rush hour")
+	assert_true(bool(f.news_force("big_bag_day")["ok"]), "other news still comes")
+	f.advance(60000)
+	var e: Dictionary = f.contests_state()["entry"]
+	assert_eq(int(e["score"]), int(f.stats["sold"]) - sold0, "only sales after the entry")
+	f.advance(int(c["ms"]))
+	var r: Dictionary = (f.contests["results"] as Array).back()
+	assert_true(int(r["score"]) > 0, "it served (%d)" % int(r["score"]))
+	assert_eq(r["tiers"], tiers, "the marks set at entry")
+	assert_eq(int(f.stats.get("wrong_sku", 0)), 0, "rush hour: never the wrong bag")
+
+
+func test_lean_packing_counts_the_portions_given_away_and_needs_its_bags() -> void:
+	var runs := {}
+	for weigher: bool in [false, true]:
+		var f := _contest_shop(623)
+		f.money = 100000
+		f.execute({"type": "build", "machine": "bagger"})
+		if weigher:
+			assert_true(bool(f.execute({"type": "build", "machine": "P04"})["ok"]), "the portion weigher")
+		f.advance(2000)
+		assert_true(_posted_ids(f).has("lean_packing"), "posted once a bagger fills")
+		assert_true(bool(f.execute({"type": "contest_enter", "id": "lean_packing"})["ok"]), "entered")
+		for i in 30:
+			_fill_bin(f, 8)
+			f.advance(10000)
+		var e: Dictionary = f.contests["entry"]
+		var waste: int = f._waste() - int(e["base"]["waste"])
+		var made := int(f.stats["packed_portions"]) - int(e["base"]["packed_portions"])
+		assert_true(made > 0, "packed")
+		assert_eq(f.contest_score(e), snappedf(float(waste) * 100.0 / float(made), 0.1), "portions given away per 100 packed")
+		runs[weigher] = {"score": f.contest_score(e), "packs": f.contest_packs(e), "tier": f.contest_tier(e)}
+		_check_conservation(f, "lean %s" % weigher)
+	assert_true(float(runs[false]["score"]) > float(runs[true]["score"]), "the weigher wastes less: %s" % [runs])
+	assert_true(int(runs[true]["packs"]) >= int(Factory.new().contest_format("lean_packing")["min_packs"]), "enough bags")
+	assert_eq(int(runs[true]["tier"]), 3, "exact packs: gold")
+	# Too few bags: no tier, however clean.
+	var g := _contest_shop(625)
+	g.execute({"type": "build", "machine": "bagger"})
+	g.execute({"type": "build", "machine": "P04"})
+	g.advance(2000)
+	g.execute({"type": "contest_enter", "id": "lean_packing"})
+	_fill_bin(g, 4)
+	g.advance(20000)
+	assert_true(g.contest_packs(g.contests["entry"]) < int(g.contest_format("lean_packing")["min_packs"]), "a bag or two")
+	assert_eq(g.contest_tier(g.contests["entry"]), 0, "no tier without the bags")
+
+
+func test_balanced_line_measures_the_book_against_the_shops_own_best() -> void:
+	var f := _contest_factory(627)
+	f.stats["sold"] = 15
+	assert_eq(f.contest_needs("balanced_line"), "err.contest_needs_history", "no mark before minutes of history")
+	for i in 6 * 40:
+		_hand_pop(f, i)
+	assert_eq(f.contest_needs("balanced_line"), "", "then a mark: %d coins a minute" % f.contest_baseline())
+	var ring: Array = f.contests["ring"]
+	var best := 0
+	for i in range(0, ring.size() - 3):
+		best = maxi(best, int(floor(float(int(ring[i + 3]) - int(ring[i])) / 3.0)))
+	assert_eq(f.contest_baseline(), best, "the best three-minute stretch of the book")
+	for a: Dictionary in (f.news["active"] as Array).duplicate():
+		f._news_end(a)
+	f._news_apply()
+	var tiers: Array = f.contest_tiers("balanced_line")
+	var r: Dictionary = f.execute({"type": "contest_enter", "id": "balanced_line"})
+	if not bool(r["ok"]):   # posted? (the board holds three: wait for its turn)
+		for i in 40 * 30:
+			_hand_pop(f, i)
+			if f.contest_problem("balanced_line") == "" and _posted_ids(f).has("balanced_line"):
+				break
+		tiers = f.contest_tiers("balanced_line")
+		r = f.execute({"type": "contest_enter", "id": "balanced_line"})
+	assert_true(bool(r["ok"]), "entered (%s)" % r.get("reason", ""))
+	var e: Dictionary = f.contests["entry"]
+	assert_eq(e["tiers"], tiers, "marks: the mark x 0.9, 1.0, 1.1")
+	var book0: int = f.book()
+	var fees := int(f.stats.get("contest_fees", 0))
+	for i in 5 * 40:
+		_hand_pop(f, i)
+		if not (f.contests["entry"] as Dictionary).is_empty():
+			assert_true(f.contest_quiet().size() == 4 and (f.news["active"] as Array).is_empty(), "a quiet paper while the line is measured")
+	f.advance(1000)
+	var res: Dictionary = (f.contests["results"] as Array).back()
+	assert_eq(int(res["seq"]), int(e["seq"]), "it ended")
+	assert_true(absf(float(res["score"]) - floor(float(f.book() - book0) / 5.0)) <= float(f.book() - book0) * 0.02 / 5.0 + 3.0, "coins a minute from the book (%s, %d in 5 min)" % [res["score"], f.book() - book0])
+	assert_eq(int(f.stats["contest_fees"]), fees, "the fee is not in the book")
+	_check_conservation(f, "balanced line")
+
+
+func _hand_pop(f: PopRules, i: int) -> void:
+	if i % 3 == 0 and f.glass.is_empty() and int(f.cooldown_left) <= 0 and not f.heating:
+		f.execute({"type": "press"})
+	f.advance(1500)
+	if f.heating:
+		f.execute({"type": "release"})
+
+
+func test_a_contest_saves_resumes_and_never_restarts_or_pays_twice() -> void:
+	var f := _contest_shop(629)
+	var c: Dictionary = f.contest_format("perfect_streak")
+	f.execute({"type": "contest_enter", "id": "perfect_streak"})
+	for i in 4:
+		_pop_ready(f)
+	f.advance(30000)
+	var saved := JSON.stringify(f.to_save())
+	var g: PopRules = Factory.new(null, 629)
+	assert_true(g.from_save(JSON.parse_string(saved)), "restored mid-contest")
+	assert_eq(int(g.contests["entry"]["end"]), int(f.contests["entry"]["end"]), "the same deadline (not a fresh start)")
+	assert_eq(float(g.contests_state()["entry"]["score"]), float(f.contests_state()["entry"]["score"]), "the same score")
+	assert_eq(int(g.contests["entry"]["cur"]), int(f.contests["entry"]["cur"]), "the same run going")
+	assert_eq(String(g.execute({"type": "contest_enter", "id": "perfect_streak"})["reason"]), "err.contest_running", "not entered again")
+	for x: PopRules in [f, g]:
+		_pop_ready(x)
+		x.advance(int(c["ms"]))
+	assert_eq(JSON.stringify(g.to_save()), JSON.stringify(f.to_save()), "the same contest, the same shop after a save")
+	assert_eq(int(g.stats["contest_prizes"]), int(c["prizes"][1]), "five in a row: silver, paid once")
+	# A save after the end holds the paid result: loading it never pays again.
+	var after := JSON.stringify(g.to_save())
+	var h: PopRules = Factory.new(null, 629)
+	h.from_save(JSON.parse_string(after))
+	var m0 := int(h.money)
+	h.advance(5000)
+	assert_true(int(h.money) >= m0, "(sales only)")
+	assert_eq(int(h.stats["contest_prizes"]), int(c["prizes"][1]), "still once")
+	# A 0.37 save (no contests): they open from here, like a new shop's.
+	var old: Dictionary = JSON.parse_string(saved)
+	old.erase("contests")
+	var k: PopRules = Factory.new(null, 629)
+	assert_true(k.from_save(old), "a 0.37 save loads")
+	assert_true((k.contests["entry"] as Dictionary).is_empty(), "no contest in it")
+	k.advance(2000)
+	assert_true(bool(k.contests["open"]), "they open (it has sold enough)")
+	# The clock is active time: nothing passes while the page is not stepped (a hidden tab).
+	var left := int(g.contests_state().get("entry", {}).get("left_ms", -1))
+	assert_eq(left, -1, "(g's contest is over)")
+
+
+func test_an_hour_of_contests_on_a_real_factory_conserves_and_money_adds_up() -> void:
+	var f := _still_popularity(_contest_factory(631))
+	f.stats["sold"] = 15
+	var money0 := int(f.money)
+	var book0: int = f.book()
+	var entered := {}
+	for i in 60 * 40:
+		_hand_pop(f, i)
+		if i % 40 == 0 and (f.contests["entry"] as Dictionary).is_empty():
+			for id: String in _posted_ids(f):
+				if f.contest_problem(id) == "" and bool(f.execute({"type": "contest_enter", "id": id})["ok"]):
+					entered[id] = int(entered.get(id, 0)) + 1
+					break
+		if i % 400 == 0:
+			_check_conservation(f, "contest hour %d" % i)
+	assert_true(entered.size() >= 3, "several formats came and were entered: %s" % [entered])
+	var spent := 0
+	for m: Dictionary in f.machines:
+		spent += 0
+	assert_eq(int(f.money) - money0, f.book() - book0 + int(f.stats.get("contest_prizes", 0)) - int(f.stats.get("contest_fees", 0)), "money: the book, prizes in, fees out -- nothing else")
+	var paid := 0
+	for r: Dictionary in f.contests["results"]:
+		paid += int(r["prize"])
+	assert_true(int(f.stats.get("contest_prizes", 0)) >= paid, "every prize in a result")
+	assert_eq(int(f.stats.get("contests_entered", 0)), int(f.stats.get("contests_done", 0)) + int(f.stats.get("contests_cancelled", 0)) + (0 if (f.contests["entry"] as Dictionary).is_empty() else 1), "every entry ended once (or runs)")
+	_check_conservation(f, "contest hour")

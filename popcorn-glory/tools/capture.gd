@@ -165,6 +165,16 @@ func _tick() -> void:
 					"P":
 						# Step 37: the paper opens (as a tap on its icon).
 						_app.frame.play.toggle_news()
+					"K":
+						# Step 38: `K<id>` posts that contest now; `E<id>` enters it (as the Enter button);
+						# `T` shows the paper's contests page; `X` taps cancel (twice: cancels).
+						_app.dev_contest(step.substr(1))
+					"E":
+						_app.on_command("contest_enter", {"type": "contest_enter", "id": step.substr(1)})
+					"T":
+						_app.frame.play.open_contests()
+					"X":
+						_app.on_command("contest_cancel", {"type": "contest_cancel"})
 					"A":
 						# Step 35: `A<id>` sets that coater to AUTO.
 						_app.on_command("set_flavor", {"type": "set_flavor", "id": int(step.substr(1)), "flavor": "auto"})

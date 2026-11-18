@@ -58,6 +58,7 @@ var news := {}             ## Step 37: {"next_ms", "seq", "active": [{n, id, sta
 var news_focus := ""       ## Step 37: the flavor put first while its event runs (the card's button, or U07)
 var news_rng_state := 0    ## Step 37: the news's own generator (orders, arrivals and the cast keep theirs)
 var _nrng := RandomNumberGenerator.new()
+var contests := {}         ## Step 38: the contests ({"open", "posted", "entry", "results", "trophies", "ring"...}: _contests_fresh)
 var order_log: Array = []  ## Step 36: the last orders' recipes (the board's favorite)
 ## Step 33: each floor's lines (1 = the first; data: factory.lines adds places per line).
 ## Two or more packing lines make the raw bin parallel lines: every lot that lands is
@@ -112,6 +113,7 @@ func _init(p_economy: PopEconomy = null, seed_value: int = 20261116) -> void:
 	_nrng.seed = seed_value + 49979687
 	news_rng_state = int(_nrng.state)
 	news = _news_fresh()
+	contests = _contests_fresh()
 	popularity = float(_t().get("reputation", {}).get("start", 50.0))
 	# The first customer is already waiting when the shop opens (design/FACTORY_FLOW.md 5).
 	_arrive()
@@ -365,6 +367,12 @@ func _act(kind: String, cmd: Dictionary) -> Dictionary:
 			return _news_read()
 		"news_focus":   # Step 37: put an event's flavor first (again: let go)
 			return _news_set_focus(String(cmd.get("flavor", "")))
+		"contest_enter":   # Step 38: a posted contest -- its fee now, its prize at the end
+			return _contest_enter(String(cmd.get("id", "")))
+		"contest_cancel":
+			return _contest_cancel()
+		"contests_seen":   # the contests page opened
+			return _contests_seen()
 	if kind == "press" and not finishing.is_empty():
 		return {"ok": false, "reason": "err.hand_busy"}   # one hand: the spoon or the kettle
 	if kind == "press" and not glass.is_empty():
@@ -403,6 +411,7 @@ func _resolve(kind: String) -> Dictionary:
 	_emit("outcome", {"kind": kind, "held_ms": held, "from_centre_ms": held - centre})
 	_emit("pop", {"count": portions, "level": level, "outcome": kind})
 	_emit("lot_popped", {"lot": lot["id"], "grade": kind, "portions": portions, "quality": lot["quality"]})
+	_contest_pop(kind)   # Step 38: the streak counts the hand's pops as they are judged
 	return {"ok": true, "outcome": kind, "pops": portions, "lot": lot["id"]}
 
 
@@ -428,6 +437,7 @@ func _tick(ms: int) -> void:
 func _flow_step(dt: int) -> void:
 	var t := _t()
 	_news_step()   # Step 37: events start and end at their exact flow time
+	_contest_step()   # Step 38: contests post, start and end in the same active time
 	# 1. The glass pours into the lift what the bin will have room for: the whole
 	# lot, or (Step 24 fix) a part of it when the lot is bigger than the room --
 	# a lot bigger than the whole bin (kettle level 7+, or a burst at 6) used to
@@ -1422,6 +1432,7 @@ func _coater_step(m: Dictionary, dt: int) -> void:
 	by[String(h["recipe"])] = int(by.get(String(h["recipe"]), 0)) + int(lot["portions"])
 	stats["coated"] = by
 	_emit("lot_coated", {"machine": m["id"], "lot": lot["id"], "flavor": lot["recipe"], "portions": lot["portions"], "line": lot_line(lot), "quality": out_q, "hand": String(h.get("hand", "")), "lost": lost})
+	_contest_batch(String(lot["recipe"]), out_q)   # Step 38: a batch's quality as it leaves the drum (never changed later)
 
 
 # -- Step 35: the hand's finish (one optional action; data: factory.flavors.hand) ----------
@@ -1694,6 +1705,7 @@ func _take_portions(acc: Dictionary, need: int, recipe: String, line: int) -> vo
 ## A sealed pack for the shelf: what it is, and (Step 35) whose coated portions are in it.
 func _sealed(p: Dictionary) -> Dictionary:
 	var out := {"id": p["id"], "recipe": p["recipe"], "size": p["size"], "quality": p["quality"], "portions": pack_portions(p)}
+	stats["packed_portions"] = int(stats.get("packed_portions", 0)) + int(out["portions"])   # Step 38 (lean packing's measure)
 	for k: String in ["by", "hand"]:
 		if p.has(k):
 			out[k] = p[k]
@@ -3097,7 +3109,8 @@ func _news_start(id: String) -> Dictionary:
 	var pick := id
 	if pick == "":
 		var last := String((news["log"] as Array).back()["id"]) if not (news["log"] as Array).is_empty() else ""
-		var cands: Array = news_ids().filter(func(x: String) -> bool: return news_eligible(x) and not busy.has(news_channel(x)))
+		var quiet := contest_quiet()   # Step 38: nothing on what a running contest measures
+		var cands: Array = news_ids().filter(func(x: String) -> bool: return news_eligible(x) and not busy.has(news_channel(x)) and not quiet.has(news_channel(x)))
 		if cands.size() > 1:
 			cands = cands.filter(func(x: String) -> bool: return x != last)
 		if cands.is_empty():
@@ -3115,7 +3128,7 @@ func _news_start(id: String) -> Dictionary:
 			if u < 0.0:
 				pick = x
 				break
-	elif not news_eligible(pick) or busy.has(news_channel(pick)):
+	elif not news_eligible(pick) or busy.has(news_channel(pick)) or contest_quiet().has(news_channel(pick)):
 		return {"ok": false, "reason": "err.no_news"}
 	news["seq"] = int(news["seq"]) + 1
 	var a := {"n": news["seq"], "id": pick, "start": flow_ms, "end": flow_ms + int(news_event(pick).get("ms", 120000)), "asked": 0, "sold": 0, "saved": 0}
@@ -3260,6 +3273,363 @@ func _news_row(a: Dictionary, running: bool) -> Dictionary:
 	return r
 
 
+# -- Step 38: contests ------------------------------------------------------------------
+## Voluntary local challenges (data: factory.contests) on the paper's second page -- the
+## shop against its own marks, never an invented rival or a ranking. Each format measures
+## what really happens after the entry: the hand's pops, a coated batch, the customers
+## served, the packs and the portions they waste, the book. Up to `board` are posted at a
+## time, each open for entry window_ms of active time; one entry at a time, its fee paid
+## when it starts; it runs ms of active time (a hidden tab stops it like every clock here).
+## At the end its tier pays the prize once, in coins, and the format's trophy keeps the best
+## tier. Cancelled: no prize, no refund, and the format rests -- an interrupted contest never
+## restarts for free. While a contest runs, the news draws nothing on a channel it measures
+## (quiet), and such a contest cannot be entered while that news runs.
+
+func contest_rules() -> Dictionary:
+	return _t().get("contests", {})
+
+
+func contest_format(id: String) -> Dictionary:
+	var f: Variant = (contest_rules().get("formats", {}) as Dictionary).get(id)
+	return f if typeof(f) == TYPE_DICTIONARY else {}
+
+
+func contest_ids() -> Array:
+	return contest_rules().get("order", [])
+
+
+func _contests_fresh() -> Dictionary:
+	return {"open": false, "fresh": false, "posted": [], "rest": {}, "entry": {}, "results": [], "trophies": {}, "seq": 0, "unseen": 0, "ring": [], "ring_at": -1}
+
+
+## What the book says: coins in from sales minus every running cost (upkeep, kernels, oil,
+## ingredients) -- machines bought, fees and prizes are not in it.
+func book() -> int:
+	return int(stats["revenue"]) - int(stats["upkeep_paid"]) - int(stats.get("kernels_paid", 0)) - int(stats.get("oil_paid", 0)) - int(stats.get("ingredient_coins", 0))
+
+
+func _waste() -> int:
+	return int(stats.get("overfill_portions", 0)) + int(stats.get("lost_portions", 0))
+
+
+## The structural need a format has (the shop could take part): "" when it has it.
+func contest_needs(id: String) -> String:
+	var f := contest_format(id)
+	if f.is_empty():
+		return "err.unknown_contest"
+	var nd: Dictionary = f.get("needs", {})
+	if sign_tier < int(nd.get("sign", 0)):
+		return "err.contest_needs_sign"
+	match String(f.get("kind", "")):
+		"best_batch":
+			var fl := String(f.get("flavor", ""))
+			if not flavor_open(fl) or not machines.any(func(m: Dictionary) -> bool: return COATERS.has(String(m["type"])) and coater_serves(m, fl)):
+				return "err.contest_needs_flavor"
+		"waste":
+			if of_type("bagger").is_empty():
+				return "err.contest_needs_bagger"
+		"net":
+			if machines.size() < int(nd.get("machines", 6)):
+				return "err.contest_needs_machines"
+			if contest_baseline() <= 0:
+				return "err.contest_needs_history"
+	return ""
+
+
+## Why the shop cannot enter it now ("" when it can): a need, or news on what it measures.
+func contest_problem(id: String) -> String:
+	var why := contest_needs(id)
+	if why != "":
+		return why
+	var quiet: Array = contest_format(id).get("quiet", [])
+	for a: Dictionary in news.get("active", []):
+		if quiet.has(news_channel(String(a["id"]))):
+			return "err.contest_news"
+	return ""
+
+
+## The channels the running contest keeps the news off.
+func contest_quiet() -> Array:
+	var e: Dictionary = contests.get("entry", {})
+	return [] if e.is_empty() else contest_format(String(e["id"])).get("quiet", [])
+
+
+## Balanced line's mark: the best three-minute stretch of the book (coins a minute) in the
+## minutes the ring holds -- the shop's own recent best, so slowing down first cannot make
+## it easy.
+func contest_baseline() -> int:
+	var r: Array = contests.get("ring", [])
+	var w := int(contest_rules().get("baseline_min", 3))
+	var best := 0
+	for i in range(0, r.size() - w):
+		best = maxi(best, int(floor(float(int(r[i + w]) - int(r[i])) / float(w))))
+	return best
+
+
+## The marks a format would set now (bronze, silver, gold): data, or from the shop's own
+## pace (rush hour: the customers its sign brings in the time; balanced line: its baseline).
+func contest_tiers(id: String) -> Array:
+	var f := contest_format(id)
+	var t: Array = f.get("tiers", [1, 2, 3])
+	match String(f.get("kind", "")):
+		"served":
+			var expect := 60000.0 / float(maxi(1, mean_wait_ms(sign_tier))) * arrival_factor() * float(f.get("ms", 240000)) / 60000.0
+			return t.map(func(k: Variant) -> int: return maxi(1, int(ceil(expect * float(k)))))
+		"net":
+			var b := float(contest_baseline())
+			return t.map(func(k: Variant) -> int: return maxi(1, int(ceil(b * float(k)))))
+	return t.map(func(k: Variant) -> Variant: return int(k) if float(k) == floor(float(k)) else float(k))   # (whole marks stay whole through a save)
+
+
+func _contest_step() -> void:
+	var cr := contest_rules()
+	if cr.is_empty():
+		return
+	if not bool(contests["open"]):
+		if station_open("sign") and int(stats["sold"]) >= int(cr.get("open_after_sold", 15)):
+			contests["open"] = true
+			contests["fresh"] = true
+			contests["ring_at"] = flow_ms
+			_emit("contests_open", {})
+		else:
+			return
+	if flow_ms >= int(contests["ring_at"]):   # the book once a minute (balanced line's mark)
+		var ring: Array = contests["ring"]
+		ring.append(book())
+		while ring.size() > int(cr.get("ring_n", 11)):
+			ring.pop_front()
+		contests["ring_at"] = flow_ms + 60000
+	var e: Dictionary = contests["entry"]
+	if not e.is_empty():
+		if flow_ms >= int(e["end"]):
+			_contest_end("done")
+		elif flow_ms % 1000 == 0 and String(contest_format(String(e["id"])).get("kind", "")) == "served" and contest_tier(e) >= 3:
+			_contest_end("gold")
+	if flow_ms % 1000 != 0:
+		return
+	var posted: Array = contests["posted"]
+	for p: Dictionary in posted.duplicate():
+		if flow_ms >= int(p["until"]):   # its window closed unentered: it rests, then comes back
+			posted.erase(p)
+			contests["rest"][String(p["id"])] = flow_ms + int(cr.get("rest_ms", 240000)) / 2
+			_emit("contest_closed", {"id": p["id"]})
+	_contest_post()
+
+
+## Posts formats while the board has room: the longest-rested first, only those the shop
+## could take part in, never the one running.
+func _contest_post() -> void:
+	var cr := contest_rules()
+	var posted: Array = contests["posted"]
+	var running := String((contests["entry"] as Dictionary).get("id", ""))
+	var cands: Array = []
+	for id: String in contest_ids():
+		if id == running or posted.any(func(p: Dictionary) -> bool: return String(p["id"]) == id):
+			continue
+		if flow_ms < int((contests["rest"] as Dictionary).get(id, 0)) or contest_needs(id) != "":
+			continue
+		cands.append(id)
+	cands.sort_custom(func(a: String, b: String) -> bool:
+		var ra := int((contests["rest"] as Dictionary).get(a, 0))
+		var rb := int((contests["rest"] as Dictionary).get(b, 0))
+		return ra < rb if ra != rb else contest_ids().find(a) < contest_ids().find(b))
+	for id: String in cands:
+		if posted.size() >= int(cr.get("board", 3)):
+			break
+		posted.append({"id": id, "until": flow_ms + int(cr.get("window_ms", 480000))})
+		_emit("contest_posted", {"id": id})
+
+
+## For tests and the dev hook only: post a format now (the shop must still meet its needs);
+## opens the contests as a working shop would.
+func contest_force_post(id: String) -> Dictionary:
+	if contest_rules().is_empty() or contest_format(id).is_empty():
+		return {"ok": false, "reason": "err.unknown_contest"}
+	if not bool(contests["open"]):
+		contests["open"] = true
+		contests["fresh"] = true
+		contests["ring_at"] = flow_ms
+	var why := contest_needs(id)
+	if why != "":
+		return {"ok": false, "reason": why}
+	if String((contests["entry"] as Dictionary).get("id", "")) == id:
+		return {"ok": false, "reason": "err.contest_running"}
+	var posted: Array = contests["posted"]
+	for p: Dictionary in posted:
+		if String(p["id"]) == id:
+			return {"ok": true, "id": id}
+	posted.push_front({"id": id, "until": flow_ms + int(contest_rules().get("window_ms", 480000))})
+	while posted.size() > int(contest_rules().get("board", 3)):
+		posted.pop_back()
+	return {"ok": true, "id": id}
+
+
+func _contest_enter(id: String) -> Dictionary:
+	if contest_rules().is_empty() or not bool(contests["open"]):
+		return {"ok": false, "reason": "err.not_yet"}
+	if not (contests["entry"] as Dictionary).is_empty():
+		return {"ok": false, "reason": "err.contest_running"}
+	var posted: Array = contests["posted"]
+	var at := -1
+	for i in posted.size():
+		if String(posted[i]["id"]) == id:
+			at = i
+	if at < 0:
+		return {"ok": false, "reason": "err.contest_closed"}
+	var why := contest_problem(id)
+	if why != "":
+		return {"ok": false, "reason": why}
+	var f := contest_format(id)
+	var fee := int(f.get("fee", 0))
+	if money < fee:
+		return {"ok": false, "reason": "err.not_enough_money"}
+	money -= fee
+	stats["contest_fees"] = int(stats.get("contest_fees", 0)) + fee
+	stats["contests_entered"] = int(stats.get("contests_entered", 0)) + 1
+	contests["seq"] = int(contests["seq"]) + 1
+	var e := {"seq": contests["seq"], "id": id, "start": flow_ms, "end": flow_ms + int(f.get("ms", 180000)), "fee": fee, "tiers": contest_tiers(id),
+		"best": 0, "cur": 0, "pops": 0, "batches": 0,
+		"base": {"sold": int(stats["sold"]), "waste": _waste(), "packed": int(stats["packed"]), "packed_portions": int(stats.get("packed_portions", 0)), "book": book()}}
+	contests["entry"] = e
+	posted.remove_at(at)
+	_emit("contest_start", {"seq": e["seq"], "id": id, "fee": fee})
+	return {"ok": true, "seq": e["seq"], "id": id, "fee": fee}
+
+
+func _contest_cancel() -> Dictionary:
+	if (contests["entry"] as Dictionary).is_empty():
+		return {"ok": false, "reason": "err.no_contest"}
+	return _contest_end("cancel")
+
+
+## A contest's measure now (from its entry on): the best streak, the best batch's quality,
+## customers served, portions wasted per 100 packed (lower is better), coins a minute.
+func contest_score(e: Dictionary) -> float:
+	var b: Dictionary = e["base"]
+	match String(contest_format(String(e["id"])).get("kind", "")):
+		"streak", "best_batch":
+			return float(e["best"])
+		"served":
+			return float(int(stats["sold"]) - int(b["sold"]))
+		"waste":
+			var made := int(stats.get("packed_portions", 0)) - int(b["packed_portions"])
+			return snappedf(float(_waste() - int(b["waste"])) * 100.0 / float(maxi(1, made)), 0.1) if made > 0 else 0.0
+		"net":
+			var mins := float(maxi(1000, mini(flow_ms, int(e["end"])) - int(e["start"]))) / 60000.0
+			return floor(float(book() - int(b["book"])) / mins)
+	return 0.0
+
+
+func contest_packs(e: Dictionary) -> int:
+	return int(stats["packed"]) - int((e["base"] as Dictionary)["packed"])
+
+
+## 0 (none), 1 bronze, 2 silver, 3 gold. Waste needs min_packs bags and counts down.
+func contest_tier(e: Dictionary) -> int:
+	var f := contest_format(String(e["id"]))
+	var s := contest_score(e)
+	var t: Array = e["tiers"]
+	if String(f.get("kind", "")) == "waste":
+		if contest_packs(e) < int(f.get("min_packs", 10)):
+			return 0
+		for i in range(t.size() - 1, -1, -1):
+			if s <= float(t[i]):
+				return i + 1
+		return 0
+	for i in range(t.size() - 1, -1, -1):
+		if s >= float(t[i]):
+			return i + 1
+	return 0
+
+
+## The one place a contest ends: the entry is cleared and its prize paid in the same step,
+## so a prize is never paid twice (a save holds either the entry or the paid result).
+func _contest_end(how: String) -> Dictionary:
+	var e: Dictionary = contests["entry"]
+	contests["entry"] = {}
+	var f := contest_format(String(e["id"]))
+	var tier := 0 if how == "cancel" else contest_tier(e)
+	var prize := 0 if tier == 0 else int((f.get("prizes", []) as Array)[tier - 1])
+	var r := {"seq": e["seq"], "id": e["id"], "how": how, "score": contest_score(e), "tier": tier, "tiers": e["tiers"], "prize": prize, "fee": e["fee"],
+		"start": e["start"], "end": flow_ms, "ms": int(e["end"]) - int(e["start"]), "packs": contest_packs(e), "best_before": int((contests["trophies"] as Dictionary).get(String(e["id"]), 0))}
+	var res: Array = contests["results"]
+	res.append(r)
+	while res.size() > 6:
+		res.pop_front()
+	if tier > int((contests["trophies"] as Dictionary).get(String(e["id"]), 0)):
+		contests["trophies"][String(e["id"])] = tier
+	contests["unseen"] = int(e["seq"])
+	contests["rest"][String(e["id"])] = flow_ms + int(contest_rules().get("rest_ms", 240000))   # it rests from its end (a cancel too)
+	stats["contests_%s" % ("cancelled" if how == "cancel" else "done")] = int(stats.get("contests_%s" % ("cancelled" if how == "cancel" else "done"), 0)) + 1
+	if prize > 0:
+		stats["contests_won"] = int(stats.get("contests_won", 0)) + 1
+		stats["contest_prizes"] = int(stats.get("contest_prizes", 0)) + prize
+		_earn(prize, {"from": "contest", "seq": e["seq"], "id": e["id"], "tier": tier})
+	_emit("contest_end", r.duplicate())
+	return {"ok": true, "seq": e["seq"], "tier": tier, "prize": prize}
+
+
+## The hand's pop (the kettle's B timing): a perfect adds to the streak, anything else ends it.
+func _contest_pop(kind: String) -> void:
+	var e: Dictionary = contests.get("entry", {})
+	if e.is_empty() or String(contest_format(String(e["id"])).get("kind", "")) != "streak":
+		return
+	e["pops"] = int(e["pops"]) + 1
+	e["cur"] = int(e["cur"]) + 1 if kind == PERFECT else 0
+	e["best"] = maxi(int(e["best"]), int(e["cur"]))
+	_emit("contest_progress", {"seq": e["seq"], "cur": e["cur"], "best": e["best"]})
+	if contest_tier(e) >= 3:
+		_contest_end("gold")
+
+
+## A coated batch done (by the machine or the hand's finish): its quality as it left the drum.
+func _contest_batch(recipe: String, quality: int) -> void:
+	var e: Dictionary = contests.get("entry", {})
+	if e.is_empty():
+		return
+	var f := contest_format(String(e["id"]))
+	if String(f.get("kind", "")) != "best_batch" or String(f.get("flavor", "")) != recipe:
+		return
+	e["batches"] = int(e["batches"]) + 1
+	e["best"] = maxi(int(e["best"]), quality)
+	_emit("contest_progress", {"seq": e["seq"], "best": e["best"]})
+	if contest_tier(e) >= 3:
+		_contest_end("gold")
+
+
+func _contests_seen() -> Dictionary:
+	contests["fresh"] = false
+	contests["unseen"] = 0
+	return {"ok": true}
+
+
+func contests_state() -> Dictionary:
+	var posted: Array = []
+	for p: Dictionary in contests.get("posted", []):
+		var id := String(p["id"])
+		posted.append(_contest_card(id, {"until_left_ms": maxi(0, int(p["until"]) - flow_ms), "tiers": contest_tiers(id), "problem": contest_problem(id)}))
+	var entry := {}
+	var e: Dictionary = contests.get("entry", {})
+	if not e.is_empty():
+		entry = _contest_card(String(e["id"]), {"seq": e["seq"], "left_ms": maxi(0, int(e["end"]) - flow_ms), "tiers": e["tiers"], "score": contest_score(e), "tier": contest_tier(e),
+			"packs": contest_packs(e), "cur": e["cur"], "pops": e["pops"], "batches": e["batches"]})
+	var res: Array = []
+	for r: Dictionary in (contests.get("results", []) as Array).slice(-3):
+		res.append(_contest_card(String(r["id"]), r))
+	return {"open": bool(contests.get("open", false)), "fresh": bool(contests.get("fresh", false)), "unseen": int(contests.get("unseen", 0)),
+		"posted": posted, "entry": entry, "results": res, "trophies": (contests.get("trophies", {}) as Dictionary).duplicate()}
+
+
+func _contest_card(id: String, extra: Dictionary) -> Dictionary:
+	var f := contest_format(id)
+	var c := {"id": id, "name": String(f.get("name", id)), "about": String(f.get("about", "")), "kind": String(f.get("kind", "")), "flavor": String(f.get("flavor", "")),
+		"ms": int(f.get("ms", 0)), "window_ms": int(contest_rules().get("window_ms", 0)), "fee": int(f.get("fee", 0)), "prizes": (f.get("prizes", []) as Array).duplicate(),
+		"min_packs": int(f.get("min_packs", 0)), "trophy": int((contests.get("trophies", {}) as Dictionary).get(id, 0)), "lower": String(f.get("kind", "")) == "waste"}
+	for k: String in extra.keys():
+		c[k] = extra[k]
+	return c
+
+
 func set_demand_mods(mods: Dictionary) -> void:
 	base_mods = mods.duplicate(true)
 	_news_apply()
@@ -3335,7 +3705,7 @@ const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo"
 	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
 const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
 ## Step 23 fields: optional (a 0.22 save has none).
-const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines", "next_machine_id", "auto_rng_state", "bn_ring", "promo", "popularity", "popularity_c", "cast_rng_state", "demand_mods", "order_log", "news", "news_focus", "news_rng_state"]
+const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines", "next_machine_id", "auto_rng_state", "bn_ring", "promo", "popularity", "popularity_c", "cast_rng_state", "demand_mods", "order_log", "news", "news_focus", "news_rng_state", "contests"]
 
 
 func to_save() -> Dictionary:
@@ -3343,7 +3713,7 @@ func to_save() -> Dictionary:
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
 		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate(), "kitchen_heat": kitchen_heat, "overheat_left": overheat_left, "pack_rng_state": str(pack_rng_state), "paying": paying.duplicate(true), "floor_lines": floor_lines.duplicate(), "promo": promo.duplicate(true),
 		"popularity": popularity, "popularity_c": roundi(popularity * 100.0), "cast_rng_state": str(cast_rng_state), "demand_mods": base_mods.duplicate(true), "order_log": order_log.duplicate(),
-		"news": news.duplicate(true), "news_focus": news_focus, "news_rng_state": str(news_rng_state)}
+		"news": news.duplicate(true), "news_focus": news_focus, "news_rng_state": str(news_rng_state), "contests": contests.duplicate(true)}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -3462,6 +3832,17 @@ func _apply_save(d: Dictionary) -> void:
 	if String(d.get("news_rng_state", "")).is_valid_int():
 		news_rng_state = String(d["news_rng_state"]).to_int()
 	_news_apply()
+	# Step 38 (optional: a 0.37 save has no contests -- they open from here, as for a new shop).
+	contests = _contests_fresh()
+	if typeof(d.get("contests")) == TYPE_DICTIONARY:
+		var dc: Dictionary = d["contests"]
+		for k: String in contests.keys():
+			if dc.has(k) and typeof(dc[k]) == typeof(contests[k]):
+				contests[k] = dc[k].duplicate(true) if typeof(dc[k]) in [TYPE_ARRAY, TYPE_DICTIONARY] else dc[k]
+		contests["posted"] = (contests["posted"] as Array).filter(func(p: Variant) -> bool: return typeof(p) == TYPE_DICTIONARY and not contest_format(String(p.get("id", ""))).is_empty())
+		var ce: Dictionary = contests["entry"]
+		if not ce.is_empty() and (contest_format(String(ce.get("id", ""))).is_empty() or not ce.has("base") or not ce.has("end")):
+			contests["entry"] = {}
 	order_log = (d.get("order_log", []) as Array).duplicate() if typeof(d.get("order_log", [])) == TYPE_ARRAY else []
 	bn_ring = (d.get("bn_ring", []) as Array).duplicate() if typeof(d.get("bn_ring", [])) == TYPE_ARRAY else []
 	if String(d.get("auto_rng_state", "")).is_valid_int():
@@ -3566,6 +3947,7 @@ func state() -> Dictionary:
 	s["favorite"] = favorite()
 	s["queue_who"] = queue.map(func(c: Dictionary) -> String: return String(c.get("who", "classic")))
 	s["news"] = news_state()   # Step 37
+	s["contests"] = contests_state()   # Step 38
 	s["demand_mods"] = demand_mods.duplicate(true)
 	for cs: Dictionary in s["coaters"]:
 		var cm := machine(int(cs["id"]))
