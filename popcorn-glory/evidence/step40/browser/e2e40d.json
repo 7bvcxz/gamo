@@ -1,0 +1,408 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/art40.spec.mjs",
+      "specs/factory33.spec.mjs",
+      "--project",
+      "desktop",
+      "--retries=0",
+      "--reporter=json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "art40.spec.mjs",
+      "file": "art40.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "art",
+                  "description": "{\"kettle\":{\"sat\":0.324,\"lumStd\":54.6,\"skyShare\":0.085,\"vivid\":0.328},\"wall\":{\"sat\":0.331,\"lumStd\":7.32,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.219,\"lumStd\":30.58,\"skyShare\":0.662,\"vivid\":0.001},\"tiles\":{\"sat\":0.031,\"lumStd\":5.94,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":451,\"objects\":781,\"primitives\":12877,\"nodes\":54,\"static_mem\":0,\"fps\":28}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5843,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T11:05:31.742Z",
+                  "annotations": [
+                    {
+                      "type": "art",
+                      "description": "{\"kettle\":{\"sat\":0.324,\"lumStd\":54.6,\"skyShare\":0.085,\"vivid\":0.328},\"wall\":{\"sat\":0.331,\"lumStd\":7.32,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.219,\"lumStd\":30.58,\"skyShare\":0.662,\"vivid\":0.001},\"tiles\":{\"sat\":0.031,\"lumStd\":5.94,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":451,\"objects\":781,\"primitives\":12877,\"nodes\":54,\"static_mem\":0,\"fps\":28}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-fa9e772cd49b9ba10d6b",
+          "file": "art40.spec.mjs",
+          "line": 39,
+          "column": 1
+        },
+        {
+          "title": "the upgrade card: a silhouette out of reach, the next machine in its colours once affordable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "card",
+                  "description": "{\"poor\":{\"sat\":0.052,\"lumStd\":31.47,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.732,\"lumStd\":38.73,\"skyShare\":0.014,\"vivid\":0.876}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4846,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T11:05:37.646Z",
+                  "annotations": [
+                    {
+                      "type": "card",
+                      "description": "{\"poor\":{\"sat\":0.052,\"lumStd\":31.47,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.732,\"lumStd\":38.73,\"skyShare\":0.014,\"vivid\":0.876}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-c44a1a3df543d6aeacc1",
+          "file": "art40.spec.mjs",
+          "line": 68,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory33.spec.mjs",
+      "file": "factory33.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 900000,
+              "annotations": [
+                {
+                  "type": "layout",
+                  "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                },
+                {
+                  "type": "ran",
+                  "description": "{\"ran\":39,\"never\":[\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                },
+                {
+                  "type": "lines",
+                  "description": "{\"at_pause\":11,\"before_kitchen_pause\":10,\"moved\":4,\"line_portions\":[0,0,1]}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"before\":255185,\"hidden\":255260,\"after\":257897}"
+                },
+                {
+                  "type": "perf",
+                  "description": "{\"machines\":44,\"fps\":[15.252621544327932,14.86031306287771,14.92815823582075,14.714537969014273,15.18458763254729,14.863258028968431],\"median\":14.92815823582075,\"heap0\":37326699,\"heap1\":45600655,\"kept_mb\":8.273956,\"draw_calls\":[1100,1126,1112,1143,1120,1125],\"objects\":[1286,1311,1298,1329,1300,1298],\"nodes\":[286,287,286,287,285,286],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":238,\"floors\":0,\"goods\":273,\"machines\":607},\"cargo\":{\"made\":348,\"peak\":9,\"reused\":642,\"skipped\":0},\"pool\":{\"bag\":7,\"lot\":2},\"actor_nodes\":59,\"load\":[6.32,6.34]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 197548,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T11:05:42.517Z",
+                  "annotations": [
+                    {
+                      "type": "layout",
+                      "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                    },
+                    {
+                      "type": "ran",
+                      "description": "{\"ran\":39,\"never\":[\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                    },
+                    {
+                      "type": "lines",
+                      "description": "{\"at_pause\":11,\"before_kitchen_pause\":10,\"moved\":4,\"line_portions\":[0,0,1]}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"before\":255185,\"hidden\":255260,\"after\":257897}"
+                    },
+                    {
+                      "type": "perf",
+                      "description": "{\"machines\":44,\"fps\":[15.252621544327932,14.86031306287771,14.92815823582075,14.714537969014273,15.18458763254729,14.863258028968431],\"median\":14.92815823582075,\"heap0\":37326699,\"heap1\":45600655,\"kept_mb\":8.273956,\"draw_calls\":[1100,1126,1112,1143,1120,1125],\"objects\":[1286,1311,1298,1329,1300,1298],\"nodes\":[286,287,286,287,285,286],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":238,\"floors\":0,\"goods\":273,\"machines\":607},\"cargo\":{\"made\":348,\"peak\":9,\"reused\":642,\"skipped\":0},\"pool\":{\"bag\":7,\"lot\":2},\"actor_nodes\":59,\"load\":[6.32,6.34]}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6a1d68b01fe1ef0138d9-938fd3c426879e727695",
+          "file": "factory33.spec.mjs",
+          "line": 105,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-18T11:05:31.347Z",
+    "duration": 208786.867,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,3 @@
+ 10:50:05 up 83 days, 18:31,  2 users,  load average: 3.02, 6.65, 7.01
+ 10:59:29 up 83 days, 18:40,  2 users,  load average: 8.68, 8.98, 8.12
+ 10:59:51 up 83 days, 18:41,  2 users,  load average: 7.40, 8.68, 8.04

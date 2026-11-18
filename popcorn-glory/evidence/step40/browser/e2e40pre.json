@@ -1,0 +1,653 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/art40.spec.mjs",
+      "-g",
+      "three rooms",
+      "--retries=0",
+      "--reporter=json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "art40.spec.mjs",
+      "file": "art40.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "art",
+                  "description": "{\"kettle\":{\"sat\":0.332,\"lumStd\":54.73,\"skyShare\":0.086,\"vivid\":0.323},\"wall\":{\"sat\":0.421,\"lumStd\":2.14,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.384,\"lumStd\":34,\"skyShare\":0.001,\"vivid\":0},\"tiles\":{\"sat\":0.253,\"lumStd\":1.2,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":289,\"objects\":554,\"primitives\":8900,\"nodes\":54,\"static_mem\":0,\"fps\":37}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7462,
+                  "error": {
+                    "message": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.14\u001b[39m",
+                    "stack": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.14\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs:61:80",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                      "column": 80,
+                      "line": 61
+                    },
+                    "snippet": "  59 |   await pop.shot('art40_0m');\n  60 |   testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes, static_mem: info.static_mem, fps: info.fps } }) });\n> 61 |   expect(w.lumStd, 'the kitchen wall has brick texture (not one flat colour)').toBeGreaterThan(3);\n     |                                                                                ^\n  62 |   expect(sw.skyShare, 'the shop\\'s street windows show a sky').toBeGreaterThan(0.15);\n  63 |   expect(t.lumStd, 'the packing wall has tile seams').toBeGreaterThan(1.5);\n  64 |   expect(k.vivid, 'the hand\\'s kettle is vivid (its red body)').toBeGreaterThan(0.15);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                        "column": 80,
+                        "line": 61
+                      },
+                      "message": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.14\u001b[39m\n\n  59 |   await pop.shot('art40_0m');\n  60 |   testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes, static_mem: info.static_mem, fps: info.fps } }) });\n> 61 |   expect(w.lumStd, 'the kitchen wall has brick texture (not one flat colour)').toBeGreaterThan(3);\n     |                                                                                ^\n  62 |   expect(sw.skyShare, 'the shop\\'s street windows show a sky').toBeGreaterThan(0.15);\n  63 |   expect(t.lumStd, 'the packing wall has tile seams').toBeGreaterThan(1.5);\n  64 |   expect(k.vivid, 'the hand\\'s kettle is vivid (its red body)').toBeGreaterThan(0.15);\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs:61:80"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T10:59:30.037Z",
+                  "annotations": [
+                    {
+                      "type": "art",
+                      "description": "{\"kettle\":{\"sat\":0.332,\"lumStd\":54.73,\"skyShare\":0.086,\"vivid\":0.323},\"wall\":{\"sat\":0.421,\"lumStd\":2.14,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.384,\"lumStd\":34,\"skyShare\":0.001,\"vivid\":0},\"tiles\":{\"sat\":0.253,\"lumStd\":1.2,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":289,\"objects\":554,\"primitives\":8900,\"nodes\":54,\"static_mem\":0,\"fps\":37}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art40-the-three-rooms-are--f3cd5--vivid-thing-in-the-kitchen-p720/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                    "column": 80,
+                    "line": 61
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-f753b17342e98864be2d",
+          "file": "art40.spec.mjs",
+          "line": 39,
+          "column": 1
+        },
+        {
+          "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "art",
+                  "description": "{\"kettle\":{\"sat\":0.339,\"lumStd\":55.33,\"skyShare\":0.085,\"vivid\":0.332},\"wall\":{\"sat\":0.421,\"lumStd\":2.13,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.378,\"lumStd\":32.27,\"skyShare\":0,\"vivid\":0.006},\"tiles\":{\"sat\":0.253,\"lumStd\":1.23,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":289,\"objects\":554,\"primitives\":8900,\"nodes\":54,\"static_mem\":0,\"fps\":30}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6483,
+                  "error": {
+                    "message": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.13\u001b[39m",
+                    "stack": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.13\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs:61:80",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                      "column": 80,
+                      "line": 61
+                    },
+                    "snippet": "  59 |   await pop.shot('art40_0m');\n  60 |   testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes, static_mem: info.static_mem, fps: info.fps } }) });\n> 61 |   expect(w.lumStd, 'the kitchen wall has brick texture (not one flat colour)').toBeGreaterThan(3);\n     |                                                                                ^\n  62 |   expect(sw.skyShare, 'the shop\\'s street windows show a sky').toBeGreaterThan(0.15);\n  63 |   expect(t.lumStd, 'the packing wall has tile seams').toBeGreaterThan(1.5);\n  64 |   expect(k.vivid, 'the hand\\'s kettle is vivid (its red body)').toBeGreaterThan(0.15);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                        "column": 80,
+                        "line": 61
+                      },
+                      "message": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.13\u001b[39m\n\n  59 |   await pop.shot('art40_0m');\n  60 |   testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes, static_mem: info.static_mem, fps: info.fps } }) });\n> 61 |   expect(w.lumStd, 'the kitchen wall has brick texture (not one flat colour)').toBeGreaterThan(3);\n     |                                                                                ^\n  62 |   expect(sw.skyShare, 'the shop\\'s street windows show a sky').toBeGreaterThan(0.15);\n  63 |   expect(t.lumStd, 'the packing wall has tile seams').toBeGreaterThan(1.5);\n  64 |   expect(k.vivid, 'the hand\\'s kettle is vivid (its red body)').toBeGreaterThan(0.15);\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs:61:80"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T10:59:37.855Z",
+                  "annotations": [
+                    {
+                      "type": "art",
+                      "description": "{\"kettle\":{\"sat\":0.339,\"lumStd\":55.33,\"skyShare\":0.085,\"vivid\":0.332},\"wall\":{\"sat\":0.421,\"lumStd\":2.13,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.378,\"lumStd\":32.27,\"skyShare\":0,\"vivid\":0.006},\"tiles\":{\"sat\":0.253,\"lumStd\":1.23,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":289,\"objects\":554,\"primitives\":8900,\"nodes\":54,\"static_mem\":0,\"fps\":30}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art40-the-three-rooms-are--f3cd5--vivid-thing-in-the-kitchen-phone/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                    "column": 80,
+                    "line": 61
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-c85d3dcfbe377f1bb7be",
+          "file": "art40.spec.mjs",
+          "line": 39,
+          "column": 1
+        },
+        {
+          "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "art",
+                  "description": "{\"kettle\":{\"sat\":0.333,\"lumStd\":54.82,\"skyShare\":0.085,\"vivid\":0.32},\"wall\":{\"sat\":0.421,\"lumStd\":2.13,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.379,\"lumStd\":29.56,\"skyShare\":0,\"vivid\":0.001},\"tiles\":{\"sat\":0.252,\"lumStd\":1.22,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":365,\"objects\":677,\"primitives\":11478,\"nodes\":54,\"static_mem\":0,\"fps\":33}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6208,
+                  "error": {
+                    "message": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.13\u001b[39m",
+                    "stack": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.13\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs:61:80",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                      "column": 80,
+                      "line": 61
+                    },
+                    "snippet": "  59 |   await pop.shot('art40_0m');\n  60 |   testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes, static_mem: info.static_mem, fps: info.fps } }) });\n> 61 |   expect(w.lumStd, 'the kitchen wall has brick texture (not one flat colour)').toBeGreaterThan(3);\n     |                                                                                ^\n  62 |   expect(sw.skyShare, 'the shop\\'s street windows show a sky').toBeGreaterThan(0.15);\n  63 |   expect(t.lumStd, 'the packing wall has tile seams').toBeGreaterThan(1.5);\n  64 |   expect(k.vivid, 'the hand\\'s kettle is vivid (its red body)').toBeGreaterThan(0.15);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                        "column": 80,
+                        "line": 61
+                      },
+                      "message": "Error: the kitchen wall has brick texture (not one flat colour)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m3\u001b[39m\nReceived:   \u001b[31m2.13\u001b[39m\n\n  59 |   await pop.shot('art40_0m');\n  60 |   testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes, static_mem: info.static_mem, fps: info.fps } }) });\n> 61 |   expect(w.lumStd, 'the kitchen wall has brick texture (not one flat colour)').toBeGreaterThan(3);\n     |                                                                                ^\n  62 |   expect(sw.skyShare, 'the shop\\'s street windows show a sky').toBeGreaterThan(0.15);\n  63 |   expect(t.lumStd, 'the packing wall has tile seams').toBeGreaterThan(1.5);\n  64 |   expect(k.vivid, 'the hand\\'s kettle is vivid (its red body)').toBeGreaterThan(0.15);\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs:61:80"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T10:59:44.690Z",
+                  "annotations": [
+                    {
+                      "type": "art",
+                      "description": "{\"kettle\":{\"sat\":0.333,\"lumStd\":54.82,\"skyShare\":0.085,\"vivid\":0.32},\"wall\":{\"sat\":0.421,\"lumStd\":2.13,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.379,\"lumStd\":29.56,\"skyShare\":0,\"vivid\":0.001},\"tiles\":{\"sat\":0.252,\"lumStd\":1.22,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":365,\"objects\":677,\"primitives\":11478,\"nodes\":54,\"static_mem\":0,\"fps\":33}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art40-the-three-rooms-are--f3cd5--vivid-thing-in-the-kitchen-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/art40.spec.mjs",
+                    "column": 80,
+                    "line": 61
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-fa9e772cd49b9ba10d6b",
+          "file": "art40.spec.mjs",
+          "line": 39,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-18T10:59:29.740Z",
+    "duration": 21256.677,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}
