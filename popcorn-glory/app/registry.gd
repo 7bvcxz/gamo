@@ -42,6 +42,10 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "flavors", "letter": "", "listed": false, "wide": true,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/flavors/flavors_view.gd",
 		"color": Color(0.84, 0.21, 0.17)},
+	# Step 41: the cast, their faces and motion, the icon set and the goods (a design sheet).
+	{"id": "cast", "letter": "", "listed": false,
+		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/cast/cast_view.gd",
+		"color": Color(0.84, 0.21, 0.17)},
 	{"id": "stub", "letter": "S", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/stub/stub_view.gd",
 		"color": Color(0.5, 0.5, 0.5)},

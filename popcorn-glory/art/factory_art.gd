@@ -87,23 +87,29 @@ static func flavor_popcorn(ci: CanvasItem, c: Vector2, s: float, recipe: String)
 		# and each is a draw call (Step 34: the goods layer went 80 -> 229 calls with them).
 		ci.draw_circle(c + Vector2(0.1, -0.1) * s, maxf(1.0, s * 0.16), k["mark"])
 		return
+	# Step 41: each coating reads at a glance -- butter's warm sheen, cheddar's two-tone dust,
+	# chili's flecks and sparkle, caramel's glassy ribbon, cocoa's glaze with a cream drizzle.
 	match recipe:
-		"cheese":   # orange dust
-			for o: Vector2 in [Vector2(-0.55, 0.1), Vector2(0.3, 0.3), Vector2(0.1, -0.45), Vector2(-0.15, 0.55), Vector2(0.6, 0.0)]:
-				ci.draw_circle(c + o * s, maxf(0.8, s * 0.09), k["mark"])
-		"spicy":   # dark red flecks and one bright spark
+		"cheese":   # cheddar dust, two oranges
+			var dust := [Vector2(-0.55, 0.1), Vector2(0.3, 0.3), Vector2(0.1, -0.45), Vector2(-0.15, 0.55), Vector2(0.6, 0.0), Vector2(-0.35, -0.3), Vector2(0.4, -0.15)]
+			for q in dust.size():
+				ci.draw_circle(c + (dust[q] as Vector2) * s, maxf(0.8, s * (0.1 if q % 2 == 0 else 0.07)), k["mark"] if q % 2 == 0 else k["rim"])
+		"spicy":   # dark red flecks and two bright sparks
 			for o: Vector2 in [Vector2(-0.4, 0.25), Vector2(0.4, 0.05), Vector2(0.05, -0.3), Vector2(0.2, 0.55)]:
 				ci.draw_circle(c + o * s, maxf(0.8, s * 0.08), k["mark"])
-			var sp := c + Vector2(0.55, -0.55) * s
-			ci.draw_line(sp + Vector2(-s * 0.22, 0), sp + Vector2(s * 0.22, 0), Color(1.0, 0.9, 0.35), maxf(1.0, s * 0.08))
-			ci.draw_line(sp + Vector2(0, -s * 0.22), sp + Vector2(0, s * 0.22), Color(1.0, 0.9, 0.35), maxf(1.0, s * 0.08))
-		"caramel":   # a glossy highlight and a drip
-			ci.draw_circle(c + Vector2(-0.15, -0.45) * s, s * 0.14, Color(1, 1, 1, 0.75))
+			glint(ci, c + Vector2(0.55, -0.55) * s, s * 0.3, Color(1.0, 0.9, 0.35))
+			glint(ci, c + Vector2(-0.62, -0.2) * s, s * 0.18, Color(1.0, 0.75, 0.3))
+		"caramel":   # a glassy ribbon across the puffs, its shine, a drip
+			ci.draw_arc(c + Vector2(0.05, 0.25) * s, s * 0.62, PI * 1.12, PI * 1.9, 10, k["rim"], maxf(1.5, s * 0.2))
+			ci.draw_arc(c + Vector2(0.05, 0.25) * s, s * 0.66, PI * 1.25, PI * 1.6, 6, Color(1, 0.95, 0.8, 0.85), maxf(1.0, s * 0.06))
 			ci.draw_circle(c + Vector2(0.45, 0.62) * s, s * 0.16, k["rim"])
-		"cocoa":   # a cream swirl across the top
-			ci.draw_arc(c + Vector2(0, -0.1) * s, s * 0.35, PI * 1.1, PI * 2.2, 8, k["mark"], maxf(1.0, s * 0.12))
-		_:   # butter: a sheen
-			ci.draw_circle(c + Vector2(-0.2, -0.45) * s, s * 0.13, Color(1, 1, 1, 0.8))
+		"cocoa":   # a dark glaze over the top, its shine, a cream drizzle
+			ci.draw_colored_polygon(_arc_poly(c + Vector2(0, -0.12) * s, s * 0.62, PI * 1.05, PI * 1.95), Color(0.32, 0.18, 0.11))
+			ci.draw_circle(c + Vector2(-0.2, -0.55) * s, s * 0.1, Color(1, 1, 1, 0.7))
+			ci.draw_polyline(PackedVector2Array([c + Vector2(-0.5, -0.2) * s, c + Vector2(-0.25, -0.45) * s, c + Vector2(0.0, -0.2) * s, c + Vector2(0.25, -0.45) * s, c + Vector2(0.5, -0.2) * s]), k["mark"], maxf(1.0, s * 0.1))
+		_:   # butter: a warm glaze and its sheen
+			ci.draw_circle(c + Vector2(0.15, -0.15) * s, s * 0.32, Color(1.0, 0.86, 0.36, 0.45))
+			ci.draw_circle(c + Vector2(-0.2, -0.45) * s, s * 0.13, Color(1, 1, 1, 0.85))
 			ci.draw_circle(c + Vector2(0.35, 0.05) * s, s * 0.1, k["mark"])
 
 
@@ -131,12 +137,14 @@ static func sku_bag(ci: CanvasItem, foot: Vector2, w: float, recipe: String, ope
 	ci.draw_colored_polygon(pts, Color.WHITE)
 	ci.draw_line(p + Vector2(w * 0.3, 0), p + Vector2(w * 0.33, h), k["stripe"], maxf(2.0, w * 0.1))
 	ci.draw_line(p + Vector2(w * 0.7, 0), p + Vector2(w * 0.67, h), k["stripe"], maxf(2.0, w * 0.1))
+	_folds(ci, p, w, h)
 	ci.draw_rect(Rect2(p, Vector2(w, w * 0.26)), k["band"])
 	var loop := pts.duplicate()
 	loop.append(p)
 	ci.draw_polyline(loop, k["rim"], PopTokens.LINE_PART)
 	var m := p + Vector2(w * 0.5, h * 0.58)
 	var r := w * 0.22
+	_label(ci, m, r, recipe, w)
 	match recipe:
 		"cheese":   # a wedge with holes
 			ci.draw_colored_polygon(PackedVector2Array([m + Vector2(-r, r * 0.7), m + Vector2(r, r * 0.7), m + Vector2(r, -r * 0.5)]), Color(1.0, 0.85, 0.25))
@@ -158,6 +166,34 @@ static func sku_bag(ci: CanvasItem, foot: Vector2, w: float, recipe: String, ope
 	_crimp(ci, p, w, k["rim"])
 	if hand:
 		hand_seal(ci, p + Vector2(w * 0.86, w * 0.3), maxf(3.0, w * 0.2))
+
+
+## Step 41: a paper bag's folds -- the shaded gusset down its right side and the creased bottom
+## (one polygon and one line: the bag reads as paper, not a flat card).
+static func _folds(ci: CanvasItem, p: Vector2, w: float, h: float) -> void:
+	ci.draw_colored_polygon(PackedVector2Array([p + Vector2(w * 0.8, 0), p + Vector2(w, 0), p + Vector2(w * 0.88, h), p + Vector2(w * 0.74, h)]), Color(0.3, 0.16, 0.1, 0.09))
+	if w >= 14.0:
+		ci.draw_line(p + Vector2(w * 0.16, h * 0.9), p + Vector2(w * 0.84, h * 0.9), Color(0.3, 0.16, 0.1, 0.12), maxf(1.0, w * 0.03))
+
+
+## Step 41: the printed label behind a flavor's mark -- its own shape for each (a round seal for
+## cheddar, a flame for chili, a ribbon banner for caramel, a heart for cocoa), so a bag is told
+## apart by its outline as well as its colour. Skipped where a bag is too small to read it.
+static func _label(ci: CanvasItem, m: Vector2, r: float, recipe: String, w: float) -> void:
+	if w < 14.0:
+		return
+	var tint := Color(flavor_look(recipe)["band"], 0.42)
+	match recipe:
+		"cheese":
+			ci.draw_circle(m + Vector2(0, r * 0.1), r * 1.25, tint)
+		"spicy":
+			ci.draw_colored_polygon(PackedVector2Array([m + Vector2(0, -r * 1.5), m + Vector2(r * 0.6, -r * 0.5), m + Vector2(r * 1.15, r * 0.4), m + Vector2(r * 0.6, r * 1.2),
+				m + Vector2(-r * 0.6, r * 1.2), m + Vector2(-r * 1.15, r * 0.4), m + Vector2(-r * 0.45, -r * 0.35), m + Vector2(-r * 0.1, -r * 0.9)]), Color(1.0, 0.6, 0.2, 0.42))
+		"caramel":
+			ci.draw_colored_polygon(PackedVector2Array([m + Vector2(-r * 1.6, -r * 0.55), m + Vector2(r * 1.6, -r * 0.55), m + Vector2(r * 1.25, 0), m + Vector2(r * 1.6, r * 0.55),
+				m + Vector2(-r * 1.6, r * 0.55), m + Vector2(-r * 1.25, 0)]), tint)
+		"cocoa":
+			heart(ci, m + Vector2(0, -r * 0.1), r * 1.3, Color(0.98, 0.9, 0.78, 0.6))
 
 
 ## Step 35: the sealed top -- a zigzag crimp along the band (a bag being filled has none).
@@ -229,6 +265,7 @@ static func bag(ci: CanvasItem, foot: Vector2, w: float, col: Color = PopTokens.
 	ci.draw_polyline(loop, col, PopTokens.LINE_PART)
 	ci.draw_line(p + Vector2(w * 0.35, 0), p + Vector2(w * 0.38, h), col, 3.0)
 	ci.draw_line(p + Vector2(w * 0.65, 0), p + Vector2(w * 0.62, h), col, 3.0)
+	_folds(ci, p, w, h)
 	if open:
 		ci.draw_rect(Rect2(p + Vector2(2, 1), Vector2(w - 4, w * 0.16)), Color(0.55, 0.42, 0.3, 0.55))
 		for k in mini(fill, maxi(1, of)):
@@ -259,9 +296,11 @@ static func cup(ci: CanvasItem, foot: Vector2, w: float, full: bool = true) -> v
 	for q in 3:
 		var x0 := -w * 0.5 + w * (0.17 + 0.33 * q)
 		ci.draw_line(foot + Vector2(x0, -h), foot + Vector2(x0 * 0.72, 0), PopTokens.MACHINE, maxf(1.5, w * 0.1))
+	ci.draw_colored_polygon(PackedVector2Array([pts[1] + Vector2(-w * 0.2, 0), pts[1], pts[2], pts[2] + Vector2(-w * 0.14, 0)]), Color(0.3, 0.16, 0.1, 0.09))   # Step 41: its shaded side
 	var loop := pts.duplicate()
 	loop.append(pts[0])
 	ci.draw_polyline(loop, PopTokens.MACHINE, maxf(1.0, w * 0.06))
+	ci.draw_line(pts[0] + Vector2(-w * 0.03, w * 0.04), pts[1] + Vector2(w * 0.03, w * 0.04), Color.WHITE, maxf(1.5, w * 0.1))   # its rolled rim
 	if full:
 		for q in 3:
 			ci.draw_circle(foot + Vector2((q - 1) * w * 0.25, -h - w * 0.08 - (w * 0.06 if q == 1 else 0.0)), w * 0.17, PopPalette.CREAM)
@@ -367,64 +406,12 @@ static func awning(ci: CanvasItem, r: Rect2, stripes: int = 10) -> void:
 ## cap, a snack hunter wears headphones and a strap, the hurried one is tall with a tie, the
 ## connoisseur has white hair and round glasses; the butter fan is the plain one). Moods: wait,
 ## impatient, happy, thanks (an arm up and a heart), sad (head down, leaving).
-static func customer(ci: CanvasItem, foot: Vector2, head: float, body: Color, skin: Color, mood: String = "wait", who: String = "classic") -> void:
-	var ink := PopPalette.INK
-	var tall := {"kid": 1.35, "rush": 2.15, "elder": 1.7}.get(who, 1.8) as float
-	var hs := head * (0.86 if who == "kid" else 1.0)
-	if mood == "thanks":   # an arm up behind the body
-		ci.draw_line(foot - Vector2(head * 0.9, head * tall * 0.85), foot - Vector2(head * 1.5, head * (tall + 1.3)), body.darkened(0.15), maxf(3.0, head * 0.36))
-		ci.draw_circle(foot - Vector2(head * 1.5, head * (tall + 1.35)), head * 0.24, skin)
-	PopMachineArt._round_rect(ci, Rect2(foot - Vector2(head * 1.05, head * tall), Vector2(head * 2.1, head * tall)), head * 0.8, body)
-	var c := foot - Vector2(0, head * tall + hs * 0.8)
-	if mood == "sad":
-		c += Vector2(head * 0.12, head * 0.18)   # head down
-	match who:
-		"student":   # a bag strap across the body
-			ci.draw_line(foot - Vector2(head * 0.8, head * tall * 0.95), foot - Vector2(-head * 0.75, head * 0.15), body.darkened(0.35), maxf(2.0, head * 0.18))
-		"rush":   # a tie
-			ci.draw_colored_polygon(PackedVector2Array([foot - Vector2(0, head * tall * 0.95), foot - Vector2(head * 0.16, head * tall * 0.75), foot - Vector2(0, head * tall * 0.35), foot - Vector2(-head * 0.16, head * tall * 0.75)]), Color(0.75, 0.15, 0.2))
-	if who == "elder":   # white hair puffs behind the head
-		ci.draw_circle(c + Vector2(-hs * 0.85, -hs * 0.2), hs * 0.42, Color(0.95, 0.95, 0.97))
-		ci.draw_circle(c + Vector2(hs * 0.85, -hs * 0.2), hs * 0.42, Color(0.95, 0.95, 0.97))
-	ci.draw_circle(c, hs, skin)
-	ci.draw_arc(c, hs, 0, TAU, 24, ink, 3.0)
-	match who:
-		"kid":   # a cap with a brim
-			ci.draw_colored_polygon(_arc_poly(c, hs * 1.02, PI, TAU), body.lightened(0.15).lerp(Color(0.9, 0.25, 0.3), 0.6))
-			ci.draw_line(c + Vector2(hs * 0.2, -hs * 0.05), c + Vector2(hs * 1.45, -hs * 0.05), Color(0.7, 0.15, 0.2), maxf(2.0, hs * 0.2))
-		"student":   # headphones
-			ci.draw_arc(c, hs * 1.12, PI * 1.05, PI * 1.95, 12, ink, maxf(2.0, hs * 0.18))
-			ci.draw_circle(c + Vector2(-hs * 1.05, hs * 0.05), hs * 0.26, Color(0.25, 0.55, 0.85))
-			ci.draw_circle(c + Vector2(hs * 1.05, hs * 0.05), hs * 0.26, Color(0.25, 0.55, 0.85))
-		"rush":   # slicked hair
-			ci.draw_colored_polygon(_arc_poly(c + Vector2(0, -hs * 0.08), hs * 0.98, PI * 1.05, PI * 1.98), Color(0.25, 0.18, 0.14))
-		"classic":   # a little tuft
-			ci.draw_arc(c + Vector2(hs * 0.1, -hs * 0.95), hs * 0.25, PI, TAU, 6, ink, 2.5)
-	if who == "elder":   # round glasses
-		ci.draw_arc(c + Vector2(-hs * 0.36, -hs * 0.12), hs * 0.24, 0, TAU, 12, ink, 2.0)
-		ci.draw_arc(c + Vector2(hs * 0.36, -hs * 0.12), hs * 0.24, 0, TAU, 12, ink, 2.0)
-	var head_s := head
-	head = hs
-	var e := head * 0.13
-	ci.draw_circle(c + Vector2(-head * 0.36, -head * 0.12), e, ink)
-	ci.draw_circle(c + Vector2(head * 0.36, -head * 0.12), e, ink)
-	var m := c + Vector2(0, head * 0.38)
-	match mood:
-		"happy":
-			ci.draw_arc(m + Vector2(0, -head * 0.18), head * 0.38, 0.25, PI - 0.25, 10, ink, 2.5)
-			ci.draw_circle(c + Vector2(-head * 0.6, head * 0.22), head * 0.16, Color(1.0, 0.55, 0.55, 0.6))
-			ci.draw_circle(c + Vector2(head * 0.6, head * 0.22), head * 0.16, Color(1.0, 0.55, 0.55, 0.6))
-		"sad":
-			ci.draw_arc(m + Vector2(0, head * 0.22), head * 0.3, PI + 0.4, TAU - 0.4, 10, ink, 2.5)
-		"thanks":   # a big smile and a heart over the raised hand
-			ci.draw_arc(m + Vector2(0, -head * 0.18), head * 0.4, 0.2, PI - 0.2, 10, ink, 2.5)
-			heart(ci, foot - Vector2(head_s * 1.5, head_s * (tall + 2.0)), head_s * 0.32)
-		"impatient":
-			ci.draw_line(m + Vector2(-head * 0.26, 0), m + Vector2(head * 0.26, 0), ink, 2.5)
-			var d := c + Vector2(head * 0.95, -head * 0.55)
-			ci.draw_colored_polygon(PackedVector2Array([d + Vector2(0, -head * 0.3), d + Vector2(head * 0.16, 0), d + Vector2(0, head * 0.12), d + Vector2(-head * 0.16, 0)]), PopTokens.SKY)
-		_:
-			ci.draw_arc(m + Vector2(0, -head * 0.1), head * 0.22, 0.4, PI - 0.4, 8, ink, 2.5)
+static func customer(ci: CanvasItem, foot: Vector2, head: float, body: Color, skin: Color, mood: String = "wait", who: String = "classic", look: Dictionary = {}) -> void:
+	# Step 41: the cast is drawn by art/cast_art.gd; without a look, the cast member's first hair.
+	var lk := look
+	if lk.is_empty():
+		lk = {"body": body, "skin": skin, "hair": PopCastArt.HAIRS[0], "style": String((PopCastArt.STYLES.get(who, PopCastArt.STYLES["classic"]) as Array)[0]), "print": 0}
+	PopCastArt.person(ci, foot, head, lk, mood, who)
 
 
 static func _arc_poly(c: Vector2, r: float, a0: float, a1: float) -> PackedVector2Array:

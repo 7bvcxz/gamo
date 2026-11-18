@@ -343,7 +343,8 @@ func test_faces_follow_patience_the_sale_and_leaving() -> void:
 	f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
 	var actor: Node2D = v.customers[first]
 	await _frames(40, 100)
-	assert_eq(String(actor.mood), "thanks", "served: thanks (Step 36: an arm up and a heart), carrying the bag")
+	assert_eq(String(actor.mood), PopCastArt.exit_mood(first), "served: thanks, a smile or (rarely) delight (Step 41; Step 36's arm up and heart is the first), carrying the bag")
+	assert_true(String(actor.mood) in ["thanks", "happy", "delight"], "one of the three exits")
 	assert_true(actor.carrying, "with the bag")
 	# The others, with no more stock, leave sad.
 	var left_sad := false

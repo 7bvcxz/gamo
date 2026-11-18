@@ -50,10 +50,19 @@ static func has(name: String) -> bool:
 
 
 ## Draws `name` centred on `p`, its larger side `size` pixels, untransformed.
+## Step 41 (tools/sprite_audit.gd): with `audit` on, the largest screen size each sprite is drawn
+## at, as a multiple of its texels (above 1 it is stretched and soft).
+static var audit := false
+static var peak := {}
+
+
 static func draw(ci: CanvasItem, name: String, p: Vector2, size: float, modulate: Color = Color.WHITE) -> void:
 	if not has(name):
 		return
 	var r := region(name)
 	var k := size / maxf(r.size.x, r.size.y)
+	if audit and ci.is_inside_tree():
+		var on_screen := (ci.get_viewport().get_final_transform() * ci.get_global_transform_with_canvas()).get_scale().x * k
+		peak[name] = maxf(float(peak.get(name, 0.0)), on_screen)
 	var s := r.size * k
 	ci.draw_texture_rect_region(texture(), Rect2(p - s / 2, s), r, modulate)

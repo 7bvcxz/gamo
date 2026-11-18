@@ -29,6 +29,18 @@ var order_recipe := "plain"    ## Step 34: the flavor they want (its bag in the 
 var recipe := "plain"          ## Step 34: a lot's or a bag's flavor (and the bag a customer carries)
 var hand := false              ## Step 35: finished by the hand (a glint on the lot, the gold seal on the bag)
 var who := "classic"           ## Step 36: which of the cast (their silhouette)
+var look := {}                 ## Step 41: what they wear, their skin and hair (PopCastArt.look_for)
+var calm := false              ## Step 41: reduced motion -- no sway, no breath, no hops
+## Step 41: a customer's motion is the node's skew (a lean) and scale around their feet (the
+## drawing is not redrawn): the walk sways with the distance walked (a step per stride, so
+## the feet do not slide), standing they breathe on their own period, the impatient rock and
+## pause, a received bag is a hop, the rare delight a bigger one.
+var motion := "idle"           ## what the pose is doing now (walk, idle, queue, receive, delight)
+var moving := false            ## walking this frame (a hop can play over a walk)
+var _walked := 0.0
+var _clock := 0.0
+var _react := ""
+var _react_t := 0.0
 ## The journey: waypoints and the seconds for the whole of it. `steps` (reduced
 ## motion) holds at each waypoint instead of gliding between them.
 var path: PackedVector2Array = PackedVector2Array()
@@ -57,13 +69,167 @@ func walk_to(p: Vector2) -> void:
 
 
 func step(delta: float) -> void:
+	var before := position
+	_move(delta)
+	if kind == CUSTOMER:
+		_pose(delta, position.distance_to(before))
+
+
+## Step 41: a person is forty-odd shapes; drawn once, those are still forty objects every frame
+## (design/DECISIONS.md D-58). So each look and mood is drawn once into a texture at the
+## screen's scale (a SubViewport rendered once, as the machines' icons are) and the actor
+## draws that one texture; the order bubble and the bag they carry stay drawn shapes. Until
+## the texture has rendered (two frames) the actor draws the shapes.
+static var _baked := {}         ## key -> {"vp": SubViewport, "frame": int}
+static var _holder: Node = null
+var _bake_key := ""
+var _bake_wait := false
+
+
+func _person_rect() -> Rect2:
+	return Rect2(Vector2(-size_px * 2.1, -size_px * 4.3), Vector2(size_px * 4.2, size_px * 4.65))
+
+
+func _screen_k() -> float:
+	if not is_inside_tree():
+		return 1.0
+	return clampf(snappedf((get_viewport().get_final_transform() * get_global_transform_with_canvas()).get_scale().y / maxf(0.01, scale.y), 0.25), 0.5, 3.0)
+
+
+func _person_texture() -> Texture2D:
+	if not is_inside_tree() or look.is_empty():
+		return null
+	var k := _screen_k()
+	var key := "%d|%s|%s|%.1f|%.2f" % [model_id, who, mood, size_px, k]
+	_bake_key = key
+	if not _baked.has(key):
+		if _holder == null or not is_instance_valid(_holder):
+			_holder = Node.new()
+			_holder.name = "CastBakes"
+			get_tree().root.add_child.call_deferred(_holder)
+			_bake_wait = true
+			return null
+		if not _holder.is_inside_tree():
+			_bake_wait = true
+			return null
+		var r := _person_rect()
+		var vp := SubViewport.new()
+		vp.size = Vector2i(ceili(r.size.x * k), ceili(r.size.y * k))
+		vp.transparent_bg = true
+		vp.disable_3d = true
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		var n := Node2D.new()
+		n.scale = Vector2(k, k)
+		n.position = -r.position * k
+		var lk := look.duplicate()
+		var w := who
+		var md := mood
+		var hp := size_px
+		n.draw.connect(func() -> void: PopCastArt.person(n, Vector2.ZERO, hp, lk, md, w))
+		vp.add_child(n)
+		_holder.add_child(vp)
+		_baked[key] = {"vp": vp, "frame": Engine.get_frames_drawn()}
+		if _baked.size() > 64:   # people come and go: the oldest looks are let go
+			var old: String = _baked.keys()[0]
+			(_baked[old]["vp"] as Node).queue_free()
+			_baked.erase(old)
+	var e: Dictionary = _baked[key]
+	if Engine.get_frames_drawn() - int(e["frame"]) < 3:
+		_bake_wait = true
+		return null
+	_bake_wait = false
+	return (e["vp"] as SubViewport).get_texture()
+
+
+## Step 41: how much of them shows near the door. Fading, they put their order bubble away
+## (the door is under the shop's top-right corner, where the news paper is).
+var faded := false
+var arrived := false   ## in through the door (seen whole once): no more fading until they leave
+
+
+func fade(alpha: float) -> void:
+	modulate.a = alpha
+	var f := alpha < 0.999
+	if f != faded:
+		faded = f
+		queue_redraw()
+
+
+func shows_bubble() -> bool:
+	return kind == CUSTOMER and order_size > 0 and not carrying and not faded
+
+
+## Step 41: a hop (a bag received) or the rare delight, played over whatever the pose is doing.
+func react(what: String) -> void:
+	_react = what
+	_react_t = 0.0
+
+
+var _sd := -1.0
+
+
+func _seed() -> float:
+	if _sd < 0.0:
+		_sd = float(PopCastArt.mix(model_id, 9) % 1000) / 1000.0
+	return _sd
+
+
+func _pose(delta: float, moved: float) -> void:
+	_clock += delta
+	if _bake_wait:
+		var e: Dictionary = _baked.get(_bake_key, {})
+		if e.is_empty() or Engine.get_frames_drawn() - int(e["frame"]) >= 3:
+			queue_redraw()   # the texture is ready (or the holder is): draw it
+	if calm:
+		skew = 0.0
+		scale = Vector2.ONE
+		motion = "idle"
+		return
+	var rot := 0.0
+	var sy := 1.0
+	moving = moved > 0.02
+	if moving:
+		motion = "walk"
+		_walked += moved
+		var ph := _walked / maxf(4.0, size_px * 1.2) * PI   # one step a stride (distance, not time)
+		rot = sin(ph) * (0.035 if mood == "sad" else 0.07)
+		sy = 1.0 + 0.035 * absf(cos(ph))
+	else:
+		var sd := _seed()
+		motion = "queue" if mood == "impatient" else "idle"
+		sy = 1.0 + 0.018 * sin(_clock * TAU / (2.4 + sd) + sd * 6.0)
+		if mood == "impatient" and fmod(_clock + sd * 3.0, 3.0) < 1.6:   # rocks, then stops
+			rot = 0.045 * sin(_clock * TAU * 1.7)
+	if _react != "":
+		_react_t += delta
+		var dur := 0.45 if _react == "receive" else 0.75
+		var k := _react_t / dur
+		if k >= 1.0:
+			_react = ""
+		else:
+			motion = _react
+			sy *= 1.0 + (0.12 if _react == "receive" else 0.2) * sin(k * TAU) * (1.0 - k)
+	# A lean, not a turn: the skew slides the head and leaves the feet's line where it is (a
+	# rotation about the feet rocked the body on its corners -- the audit measured the foot
+	# point moving 11 px, tools/sprite_audit.gd).
+	skew = rot * 1.3
+	scale = Vector2(1.0 - (sy - 1.0) * 0.6, sy)
+
+
+func _move(delta: float) -> void:
 	if easing_to:
 		var d := target - position
 		if d.length() < 1.0:
 			position = target
 			easing_to = false
 		else:
-			position += d * minf(1.0, delta * 6.0)
+			# Step 41: eased in at the end, but never faster than a walk -- a long way glided in
+			# one slow frame (the old ease covered 80% of any distance at 0.13 s a frame).
+			var stepv := d * minf(1.0, delta * 6.0)
+			var most := maxf(40.0, size_px * 10.0) * delta
+			if stepv.length() > most:
+				stepv = stepv.normalized() * most
+			position += stepv
 		return
 	if done or path.size() < 2:
 		return
@@ -112,8 +278,12 @@ func _draw() -> void:
 		NOZZLE:
 			PopFactoryArt.nozzle(self, size_px, scoop)
 		CUSTOMER:
-			PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood, who)
-			if order_size > 0 and not carrying:
+			var tex := _person_texture()
+			if tex != null:   # Step 41: the person baked once (one draw, not forty shapes a frame)
+				draw_texture_rect(tex, _person_rect(), false)
+			else:
+				PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood, who, look)
+			if shows_bubble():
 				var lift := {"rush": 0.4, "kid": -0.4}.get(who, 0.0) as float   # Step 36: over their own head
 				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * (3.75 + lift)), size_px, order_size, order_premium, order_bargain, order_recipe)
 			if carrying:
