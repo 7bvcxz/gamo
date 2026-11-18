@@ -728,9 +728,11 @@ func _draw_floors(ci: CanvasItem) -> void:
 	for i in 3:
 		PopFactoryArt.floor_panel(ci, floor_rect(i), cols[i], i == selected)
 	# Step 40: the rooms behind the machines (drawn with the floors: only when they change)
-	PopEnvArt.shop(ci, floor_rect(TOP), int(rules.shop_sign()["look"]) if rules else 0)
-	PopEnvArt.packing(ci, packing_rect())
-	PopEnvArt.kitchen(ci, floor_rect(LOW), (rules.of_type("cooker") as Array).size() if rules else 0)
+	# (and each room's look grows with the lines bought on its floor)
+	var fl: Dictionary = rules.get("floor_lines") if rules else {}
+	PopEnvArt.shop(ci, floor_rect(TOP), int(rules.shop_sign()["look"]) if rules else 0, int(fl.get("shop", 1)))
+	PopEnvArt.packing(ci, packing_rect(), int(fl.get("packing", 1)))
+	PopEnvArt.kitchen(ci, floor_rect(LOW), (rules.of_type("cooker") as Array).size() if rules else 0, int(fl.get("kitchen", 1)))
 	_draw_kitchen(ci, floor_rect(LOW))   # (the shop and the packing floor: goods_layer, Step 33)
 	_draw_machines(ci)
 	var tube := tube_rect()
@@ -831,7 +833,9 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 	PopFactoryArt.steel(ci, belt, belt.size.y * 0.5)
 	var hs := r.size.y * 0.46
 	var hop := Rect2(Vector2(r.position.x + r.size.x * 0.14, r.position.y + r.size.y * 0.16), Vector2(hs * 0.9, hs))
+	PopEnvArt.hopper_back(ci, hop, belt.position.y)   # Step 40: a steel stand and spout behind the glass
 	PopFactoryArt.glass(ci, hop, PopTokens.R_PART)
+	PopEnvArt.hopper_rim(ci, hop)
 	# The raw bin's real portions: one puff per portion, piled from the bottom.
 	var portions := int(rules.bin_portions()) if rules else 0
 	var cap := int(rules.state()["bin_cap"]) if rules else 1

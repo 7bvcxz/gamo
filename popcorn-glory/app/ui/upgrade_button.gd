@@ -1,7 +1,7 @@
 class_name PopUpgradeButton
 extends PopPressArea
 
-## The one upgrade: the next machine's silhouette and its price. The button
+## The one upgrade: the next machine (a silhouette until affordable, then in colour) and its price. The button
 ## fills from the bottom as money nears the price and shines when it can be
 ## bought -- the picture of "what comes next", with no words.
 
@@ -90,8 +90,9 @@ func _draw() -> void:
 		_round(Rect2(r.position.x + 6, r.end.y - 6 - fh, r.size.x - 12, fh), rad * 0.8,
 			PopPalette.GOLD.lerp(Color(1, 0.93, 0.6), 0.5 - 0.5 * _shine))
 	_outline(r, rad, PopPalette.GOLD if enabled else PopPalette.DISABLED, 7.0 if hovered and enabled else 5.0)
-	# The next machine, as a silhouette (bright when affordable).
-	var sil := Color(PopPalette.INK, 0.35 + 0.5 * _shine)
+	# The next machine: a quiet silhouette while it is out of reach; in its own colours once it
+	# can be bought (Step 40: the reveal -- what you are about to get, not a grey shape).
+	var sil := Color(PopPalette.INK, 0.35 + 0.5 * _shine) if _shine < 0.5 else Color(0, 0, 0, 0)
 	# Sized so the tallest stage (with its star) stays inside the button.
 	if art.is_valid():
 		art.call(self, Vector2(r.position.x + r.size.y * 0.62, r.end.y - r.size.y * 0.16), r.size.y * 0.74, stage, sil)

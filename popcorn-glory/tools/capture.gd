@@ -179,6 +179,13 @@ func _tick() -> void:
 						# Step 39 (picture setup): `G<tier>` the sign at that tier (its look).
 						_app.rules.sign_tier = int(step.substr(1))
 						_app.rules.stats["sold"] = maxi(1, int(_app.rules.stats["sold"]))
+					"L":
+						# Step 40 (picture setup): `L<k><p><s>` the lines bought per floor (kitchen,
+						# packing, shop) -- the rooms' looks, without filling the floors.
+						var fls: Dictionary = _app.rules.floor_lines
+						fls["kitchen"] = int(step.substr(1, 1))
+						fls["packing"] = int(step.substr(2, 1))
+						fls["shop"] = int(step.substr(3, 1))
 					"A":
 						# Step 35: `A<id>` sets that coater to AUTO.
 						_app.on_command("set_flavor", {"type": "set_flavor", "id": int(step.substr(1)), "flavor": "auto"})

@@ -81,9 +81,9 @@ func _draw() -> void:
 		draw_circle(icon_c, g, Color(0.35, 0.4, 0.5) if enabled else PopPalette.DISABLED)
 		draw_circle(icon_c, g * 0.4, Color(0.93, 0.96, 1.0))
 	else:
-		# The helper kettle at its next look, as a silhouette.
+		# The helper kettle at its next look: a silhouette until affordable, then in colour (Step 40).
 		PopMachineArt.draw(self, icon_c + Vector2(0, r.size.y * 0.36), r.size.y * 0.62, clampi(rung * 2, 0, 14), 0.0, 0.3,
-			Color(PopPalette.INK, 0.35 + 0.5 * _shine))
+			Color(PopPalette.INK, 0.35 + 0.5 * _shine) if _shine < 0.5 else Color(0, 0, 0, 0))
 	var font := ThemeDB.fallback_font
 	var fs := int(size.y * 0.3)
 	var cx := r.position.x + r.size.y * 1.2

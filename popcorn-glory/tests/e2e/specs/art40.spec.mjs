@@ -4,6 +4,8 @@
 //  - the hand's kettle stays the vivid thing in the kitchen: a share of strongly saturated pixels,
 //    the brick wall behind it none
 //    (in the first minutes the backdrop must not compete with the cooker)
+//  - the upgrade card shows the next machine as a quiet silhouette while it is out of reach and in
+//    its own colours once it can be bought (no grey shape on a gold card)
 //  - the render cost is recorded beside the screenshots (compare with the same spec run on the
 //    build before Step 40: POPCORN_E2E_BASE=<public 0.39.0>)
 import { test, expect } from '../lib/pop.mjs';
@@ -55,10 +57,30 @@ test('the three rooms are drawn behind the machines, and the hand\'s kettle stay
   const t = await region(pop, tiles);
   const info = await pop.call('dev_render_info');
   await pop.shot('art40_0m');
-  testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes } }) });
+  testInfo.annotations.push({ type: 'art', description: JSON.stringify({ kettle: k, wall: w, shop_window: sw, tiles: t, render: { draw_calls: info.draw_calls, objects: info.objects, primitives: info.primitives, nodes: info.nodes, static_mem: info.static_mem, fps: info.fps } }) });
   expect(w.lumStd, 'the kitchen wall has brick texture (not one flat colour)').toBeGreaterThan(3);
   expect(sw.skyShare, 'the shop\'s street windows show a sky').toBeGreaterThan(0.15);
   expect(t.lumStd, 'the packing wall has tile seams').toBeGreaterThan(1.5);
   expect(k.vivid, 'the hand\'s kettle is vivid (its red body)').toBeGreaterThan(0.15);
   expect(w.vivid, 'the wall behind it is not: the backdrop stays pastel').toBeLessThan(0.02);
+});
+
+test('the upgrade card: a silhouette out of reach, the next machine in its colours once affordable', async ({ pop }, testInfo) => {
+  test.setTimeout(90_000);
+  await pop.open('./#factory');
+  await pop.page.waitForTimeout(800);
+  const pic = async () => {
+    const s = await pop.state();
+    const u = await toPage(pop, s.rects.upgrade);
+    // the picture's place: the card's left square (the price and arrow are to its right)
+    return region(pop, { x: u.x + u.height * 0.15, y: u.y + u.height * 0.1, width: u.height * 0.95, height: u.height * 0.8 });
+  };
+  const poor = await pic();
+  await pop.call('dev_money', 100);
+  await pop.page.waitForTimeout(900);   // the card's shine settles
+  const rich = await pic();
+  await pop.shot('art40_card_colour');
+  testInfo.annotations.push({ type: 'card', description: JSON.stringify({ poor, rich }) });
+  expect(poor.vivid, 'out of reach: a quiet silhouette').toBeLessThan(0.02);
+  expect(rich.vivid, 'affordable: the kettle in its red').toBeGreaterThan(0.05);
 });
