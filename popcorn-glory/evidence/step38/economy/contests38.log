@@ -1,0 +1,12 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+streak p=0.50: { "p": 0.5, "attempts": 12, "none_bronze_silver_gold": [9, 2, 1, 0], "net_per_attempt": 0.0, "stand_coins_per_min_meanwhile": 100.5, "minutes_per_attempt": 3.23 }  [3296 ms]
+streak p=0.75: { "p": 0.75, "attempts": 12, "none_bronze_silver_gold": [4, 2, 6, 0], "net_per_attempt": 12.5, "stand_coins_per_min_meanwhile": 102.5, "minutes_per_attempt": 3.2 }  [3304 ms]
+streak p=0.90: { "p": 0.9, "attempts": 12, "none_bronze_silver_gold": [1, 5, 5, 1], "net_per_attempt": 18.8, "stand_coins_per_min_meanwhile": 101.6, "minutes_per_attempt": 3.07 }  [3271 ms]
+3801 ignore: book 552.5/min, entered 0, won 0, prizes 0, fees 0 (0.0% of the book), sold 2688  [35198 ms]
+3801 enter: book 549.1/min, entered 13, won 11, prizes 680, fees 205 (1.4% of the book), sold 2660  [35122 ms]
+3802 ignore: book 512.4/min, entered 0, won 0, prizes 0, fees 0 (0.0% of the book), sold 2520  [35244 ms]
+3802 enter: book 526.2/min, entered 13, won 11, prizes 680, fees 190 (1.6% of the book), sold 2584  [35129 ms]
+3803 ignore: book 524.0/min, entered 0, won 0, prizes 0, fees 0 (0.0% of the book), sold 2572  [35254 ms]
+3803 enter: book 549.1/min, entered 14, won 13, prizes 910, fees 185 (2.2% of the book), sold 2661  [35134 ms]
+sabotage: { "running": { "mark": 594, "tiers": [535, 594, 654] }, "paused": { "mark": 572, "tiers": [515, 572, 630] } }

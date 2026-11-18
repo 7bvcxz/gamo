@@ -1,0 +1,497 @@
+{
+ "factory": {
+  "3801_enter": {
+   "book_per_min": 549.1,
+   "entered": 13,
+   "fees": 205,
+   "news_skipped": 4,
+   "prizes": 680,
+   "prizes_share_of_book": 1.4,
+   "results_last6": [
+    {
+     "best_before": 3,
+     "end": 1861500,
+     "fee": 5,
+     "how": "done",
+     "id": "perfect_streak",
+     "ms": 180000,
+     "packs": 132,
+     "prize": 30,
+     "score": 6.0,
+     "seq": 7,
+     "start": 1681500,
+     "tier": 2,
+     "tiers": [
+      3,
+      5,
+      8
+     ]
+    },
+    {
+     "best_before": 1,
+     "end": 2161500,
+     "fee": 10,
+     "how": "done",
+     "id": "caramel_batch",
+     "ms": 240000,
+     "packs": 177,
+     "prize": 30,
+     "score": 85.0,
+     "seq": 8,
+     "start": 1921500,
+     "tier": 1,
+     "tiers": [
+      80,
+      90,
+      100
+     ]
+    },
+    {
+     "best_before": 3,
+     "end": 2461500,
+     "fee": 15,
+     "how": "done",
+     "id": "rush_hour",
+     "ms": 240000,
+     "packs": 159,
+     "prize": 80,
+     "score": 156.0,
+     "seq": 9,
+     "start": 2221500,
+     "tier": 2,
+     "tiers": [
+      116,
+      144,
+      173
+     ]
+    },
+    {
+     "best_before": 3,
+     "end": 2701500,
+     "fee": 5,
+     "how": "gold",
+     "id": "perfect_streak",
+     "ms": 180000,
+     "packs": 152,
+     "prize": 60,
+     "score": 8.0,
+     "seq": 10,
+     "start": 2521500,
+     "tier": 3,
+     "tiers": [
+      3,
+      5,
+      8
+     ]
+    },
+    {
+     "best_before": 1,
+     "end": 3001500,
+     "fee": 20,
+     "how": "done",
+     "id": "lean_packing",
+     "ms": 300000,
+     "packs": 218,
+     "prize": 60,
+     "score": 4.9,
+     "seq": 11,
+     "start": 2701500,
+     "tier": 1,
+     "tiers": [
+      6,
+      3,
+      1
+     ]
+    },
+    {
+     "best_before": 3,
+     "end": 3301500,
+     "fee": 15,
+     "how": "done",
+     "id": "rush_hour",
+     "ms": 240000,
+     "packs": 173,
+     "prize": 80,
+     "score": 172.0,
+     "seq": 12,
+     "start": 3061500,
+     "tier": 2,
+     "tiers": [
+      116,
+      144,
+      173
+     ]
+    }
+   ],
+   "sold": 2660,
+   "trophies": {
+    "caramel_batch": 1,
+    "lean_packing": 1,
+    "perfect_streak": 3,
+    "rush_hour": 3
+   },
+   "won": 11
+  },
+  "3801_ignore": {
+   "book_per_min": 552.5,
+   "entered": 0,
+   "fees": 0,
+   "news_skipped": 0,
+   "prizes": 0,
+   "prizes_share_of_book": 0.0,
+   "results_last6": [],
+   "sold": 2688,
+   "trophies": {},
+   "won": 0
+  },
+  "3802_enter": {
+   "book_per_min": 526.2,
+   "entered": 13,
+   "fees": 190,
+   "news_skipped": 1,
+   "prizes": 680,
+   "prizes_share_of_book": 1.6,
+   "results_last6": [
+    {
+     "best_before": 3,
+     "end": 1861500,
+     "fee": 15,
+     "how": "done",
+     "id": "rush_hour",
+     "ms": 240000,
+     "packs": 152,
+     "prize": 80,
+     "score": 161.0,
+     "seq": 7,
+     "start": 1621500,
+     "tier": 2,
+     "tiers": [
+      116,
+      144,
+      173
+     ]
+    },
+    {
+     "best_before": 1,
+     "end": 2221500,
+     "fee": 20,
+     "how": "done",
+     "id": "lean_packing",
+     "ms": 300000,
+     "packs": 224,
+     "prize": 60,
+     "score": 5.5,
+     "seq": 8,
+     "start": 1921500,
+     "tier": 1,
+     "tiers": [
+      6,
+      3,
+      1
+     ]
+    },
+    {
+     "best_before": 2,
+     "end": 2418000,
+     "fee": 5,
+     "how": "gold",
+     "id": "perfect_streak",
+     "ms": 180000,
+     "packs": 103,
+     "prize": 60,
+     "score": 8.0,
+     "seq": 9,
+     "start": 2281500,
+     "tier": 3,
+     "tiers": [
+      3,
+      5,
+      8
+     ]
+    },
+    {
+     "best_before": 3,
+     "end": 2701500,
+     "fee": 15,
+     "how": "done",
+     "id": "rush_hour",
+     "ms": 240000,
+     "packs": 155,
+     "prize": 80,
+     "score": 156.0,
+     "seq": 10,
+     "start": 2461500,
+     "tier": 2,
+     "tiers": [
+      116,
+      144,
+      173
+     ]
+    },
+    {
+     "best_before": 1,
+     "end": 3061500,
+     "fee": 20,
+     "how": "done",
+     "id": "lean_packing",
+     "ms": 300000,
+     "packs": 225,
+     "prize": 60,
+     "score": 5.1,
+     "seq": 11,
+     "start": 2761500,
+     "tier": 1,
+     "tiers": [
+      6,
+      3,
+      1
+     ]
+    },
+    {
+     "best_before": 0,
+     "end": 3421500,
+     "fee": 40,
+     "how": "done",
+     "id": "balanced_line",
+     "ms": 300000,
+     "packs": 239,
+     "prize": 0,
+     "score": 543.0,
+     "seq": 12,
+     "start": 3121500,
+     "tier": 0,
+     "tiers": [
+      578,
+      642,
+      707
+     ]
+    }
+   ],
+   "sold": 2584,
+   "trophies": {
+    "caramel_batch": 1,
+    "lean_packing": 1,
+    "perfect_streak": 3,
+    "rush_hour": 3
+   },
+   "won": 11
+  },
+  "3802_ignore": {
+   "book_per_min": 512.4,
+   "entered": 0,
+   "fees": 0,
+   "news_skipped": 0,
+   "prizes": 0,
+   "prizes_share_of_book": 0.0,
+   "results_last6": [],
+   "sold": 2520,
+   "trophies": {},
+   "won": 0
+  },
+  "3803_enter": {
+   "book_per_min": 549.1,
+   "entered": 14,
+   "fees": 185,
+   "news_skipped": 2,
+   "prizes": 910,
+   "prizes_share_of_book": 2.2,
+   "results_last6": [
+    {
+     "best_before": 1,
+     "end": 2161500,
+     "fee": 20,
+     "how": "done",
+     "id": "lean_packing",
+     "ms": 300000,
+     "packs": 223,
+     "prize": 60,
+     "score": 5.3,
+     "seq": 8,
+     "start": 1861500,
+     "tier": 1,
+     "tiers": [
+      6,
+      3,
+      1
+     ]
+    },
+    {
+     "best_before": 3,
+     "end": 2400000,
+     "fee": 5,
+     "how": "gold",
+     "id": "perfect_streak",
+     "ms": 180000,
+     "packs": 138,
+     "prize": 60,
+     "score": 8.0,
+     "seq": 9,
+     "start": 2221500,
+     "tier": 3,
+     "tiers": [
+      3,
+      5,
+      8
+     ]
+    },
+    {
+     "best_before": 1,
+     "end": 2641500,
+     "fee": 10,
+     "how": "done",
+     "id": "caramel_batch",
+     "ms": 240000,
+     "packs": 189,
+     "prize": 30,
+     "score": 85.0,
+     "seq": 10,
+     "start": 2401500,
+     "tier": 1,
+     "tiers": [
+      80,
+      90,
+      100
+     ]
+    },
+    {
+     "best_before": 3,
+     "end": 2941000,
+     "fee": 15,
+     "how": "gold",
+     "id": "rush_hour",
+     "ms": 240000,
+     "packs": 174,
+     "prize": 160,
+     "score": 173.0,
+     "seq": 11,
+     "start": 2701500,
+     "tier": 3,
+     "tiers": [
+      116,
+      144,
+      173
+     ]
+    },
+    {
+     "best_before": 3,
+     "end": 3121500,
+     "fee": 5,
+     "how": "done",
+     "id": "perfect_streak",
+     "ms": 180000,
+     "packs": 139,
+     "prize": 30,
+     "score": 6.0,
+     "seq": 12,
+     "start": 2941500,
+     "tier": 2,
+     "tiers": [
+      3,
+      5,
+      8
+     ]
+    },
+    {
+     "best_before": 0,
+     "end": 3481500,
+     "fee": 40,
+     "how": "done",
+     "id": "balanced_line",
+     "ms": 300000,
+     "packs": 209,
+     "prize": 120,
+     "score": 535.0,
+     "seq": 13,
+     "start": 3181500,
+     "tier": 1,
+     "tiers": [
+      528,
+      586,
+      645
+     ]
+    }
+   ],
+   "sold": 2661,
+   "trophies": {
+    "balanced_line": 1,
+    "caramel_batch": 1,
+    "lean_packing": 1,
+    "perfect_streak": 3,
+    "rush_hour": 3
+   },
+   "won": 13
+  },
+  "3803_ignore": {
+   "book_per_min": 524.0,
+   "entered": 0,
+   "fees": 0,
+   "news_skipped": 0,
+   "prizes": 0,
+   "prizes_share_of_book": 0.0,
+   "results_last6": [],
+   "sold": 2572,
+   "trophies": {},
+   "won": 0
+  }
+ },
+ "minutes": 60,
+ "sabotage": {
+  "paused": {
+   "mark": 572,
+   "tiers": [
+    515,
+    572,
+    630
+   ]
+  },
+  "running": {
+   "mark": 594,
+   "tiers": [
+    535,
+    594,
+    654
+   ]
+  }
+ },
+ "streak": [
+  {
+   "attempts": 12,
+   "minutes_per_attempt": 3.23,
+   "net_per_attempt": 0.0,
+   "none_bronze_silver_gold": [
+    9,
+    2,
+    1,
+    0
+   ],
+   "p": 0.5,
+   "stand_coins_per_min_meanwhile": 100.5
+  },
+  {
+   "attempts": 12,
+   "minutes_per_attempt": 3.2,
+   "net_per_attempt": 12.5,
+   "none_bronze_silver_gold": [
+    4,
+    2,
+    6,
+    0
+   ],
+   "p": 0.75,
+   "stand_coins_per_min_meanwhile": 102.5
+  },
+  {
+   "attempts": 12,
+   "minutes_per_attempt": 3.07,
+   "net_per_attempt": 18.8,
+   "none_bronze_silver_gold": [
+    1,
+    5,
+    5,
+    1
+   ],
+   "p": 0.9,
+   "stand_coins_per_min_meanwhile": 101.6
+  }
+ ]
+}

@@ -1,0 +1,57 @@
+{
+ "video_start_wall": 1794968829191,
+ "audio_start_wall": 1794968875475,
+ "run_start_wall": 1794968875476,
+ "enter_wall": 1794968886683,
+ "end_wall": 1794968966600,
+ "result": {
+  "about": "Pop the kettle by hand. Count the perfect pops in a row.",
+  "best_before": 0,
+  "end": 296450,
+  "fee": 5,
+  "flavor": "",
+  "how": "gold",
+  "id": "perfect_streak",
+  "kind": "streak",
+  "lower": false,
+  "min_packs": 0,
+  "ms": 180000,
+  "name": "Perfect Pop streak",
+  "packs": 13,
+  "prize": 60,
+  "prizes": [
+   15,
+   30,
+   60
+  ],
+  "score": 8,
+  "seq": 1,
+  "start": 216600,
+  "tier": 3,
+  "tiers": [
+   3,
+   5,
+   8
+  ],
+  "trophy": 3,
+  "window_ms": 480000
+ },
+ "fees": 5,
+ "prizes": 60,
+ "outcomes_before": {
+  "burnt": 0,
+  "early": 0,
+  "late": 0,
+  "near": 0,
+  "perfect": 16
+ },
+ "outcomes_after": {
+  "burnt": 0,
+  "early": 0,
+  "late": 0,
+  "near": 0,
+  "perfect": 24
+ },
+ "conserved": true,
+ "wrong_sku": 0
+}
