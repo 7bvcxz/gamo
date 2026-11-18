@@ -483,11 +483,11 @@ static func shop_sign(ci: CanvasItem, r: Rect2, look: int, mono: Color = Color(0
 	if look >= 6:   # the landmark's star on top
 		ci.draw_colored_polygon(PopMachineArt._star(r.position + Vector2(r.size.x * 0.5, -r.size.y * 0.12), r.size.y * 0.22, r.size.y * 0.1), PopPalette.GOLD)
 	if look >= 7:   # Step 39: the district sign -- two searchlights sweep up from its corners (wider and brighter at 8)
-		var a := 0.45 if look < 8 else 0.7
+		var a := 0.6 if look < 8 else 0.85
 		for side in [-1.0, 1.0]:
 			var foot := Vector2(r.get_center().x + side * r.size.x * 0.42, r.position.y)
 			var tip := foot + Vector2(side * r.size.x * 0.32, -r.size.y * 0.95)
-			var wide := Vector2(r.size.x * (0.1 if look < 8 else 0.16), 0)
+			var wide := Vector2(r.size.x * (0.12 if look < 8 else 0.17), 0)
 			ci.draw_colored_polygon(PackedVector2Array([foot, tip - wide, tip + wide]), Color(1.0, 0.86, 0.35, a))
 			ci.draw_circle(foot, maxf(3.0, r.size.y * 0.08), Color(1.0, 0.95, 0.7))
 	if look >= 8:   # ... and the city's: a star at each end beside the landmark's
