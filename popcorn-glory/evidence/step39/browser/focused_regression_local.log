@@ -1,0 +1,103 @@
+Running 54 tests using 1 worker
+[1/54] [p720] › specs/career39.spec.mjs:35:1 › real clock: a fresh factory's first three minutes against the sim
+[2/54] [p720] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter
+  1) [p720] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    Error: the seven-figure number stays inside its counter
+    expect(received).toBeLessThan(expected)
+    Expected: < 20
+    Received:   114
+      142 |   await pop.shot('career39_money7');
+      143 |   testInfo.annotations.push({ type: 'money', description: JSON.stringify({ rect: m, inkOutside }) });
+    > 144 |   expect(inkOutside, 'the seven-figure number stays inside its counter').toBeLessThan(20);
+          |                                                                          ^
+      145 | });
+      146 |
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/career39.spec.mjs:144:74
+    Error Context: test-results/career39-a-rich-factory-th-b2017-ure-wallet-fits-the-counter-p720/error-context.md
+[3/54] [p720] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload
+[4/54] [p720] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved
+[5/54] [p720] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for
+[6/54] [p720] › specs/factory28.spec.mjs:8:1 › eight kitchen devices: built from the picker, each doing its own job with real inputs
+[7/54] [p720] › specs/factory29.spec.mjs:53:1 › the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents
+[8/54] [p720] › specs/factory29.spec.mjs:89:1 › without vents five kettles overheat; with them the kitchen keeps cooking
+[9/54] [p720] › specs/factory29.spec.mjs:108:1 › a minute of a busy advanced factory: frame rate and kept memory
+[10/54] [p720] › specs/factory30.spec.mjs:35:1 › the packing floor: cups, the weigher, the sealer, honest SKUs
+[11/54] [p720] › specs/factory30.spec.mjs:73:1 › the dispenser sells large bags at tier 1; an empty floor stops and pays nothing
+[12/54] [p720] › specs/factory30.spec.mjs:97:1 › frame rate with several packers working at once
+[13/54] [p720] › specs/factory31.spec.mjs:42:1 › the storefront: cashier, express window, robot lanes, router -- honest sales
+[14/54] [p720] › specs/factory31.spec.mjs:72:1 › a paused cashier holds its customers sales until it is resumed
+[15/54] [p720] › specs/factory32.spec.mjs:34:1 › support machines on their floors, the upkeep overview, pause and resume everything
+[16/54] [p720] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured
+  2) [p720] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+    Error: nearly every machine worked (never: cooker,kiosk,U08,kiosk,bagger,bagger,cooker)
+    expect(received).toBeGreaterThanOrEqual(expected)
+    Expected: >= 38
+    Received:    37
+      153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while
+      154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).
+    > 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);
+          |                                                                    ^
+      156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);
+      157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);
+      158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68
+    Error Context: test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-p720/error-context.md
+[17/54] [p720] › specs/flavors34.spec.mjs:27:1 › the flavors sheet draws five distinct flavors on this screen
+[18/54] [p720] › specs/flavors34.spec.mjs:98:1 › five flavors are coated, packed, asked for and sold in the browser
+[19/54] [phone] › specs/career39.spec.mjs:35:1 › real clock: a fresh factory's first three minutes against the sim
+[20/54] [phone] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter
+  3) [phone] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    Error: tier 7 lights more than the landmark (searchlights)
+    expect(received).toBeGreaterThan(expected)
+    Expected: > 348644
+    Received:   343379
+      119 |   expect(s.run.sign_cost, 'tier 8 is the last').toBe(-1);
+      120 |   testInfo.annotations.push({ type: 'sign', description: JSON.stringify(lit) });
+    > 121 |   expect(lit[1].warm, 'tier 7 lights more than the landmark (searchlights)').toBeGreaterThan(lit[0].warm);
+          |                                                                              ^
+      122 |   expect(lit[2].warm, 'tier 8 lights more than tier 7 (stars and the arrow)').toBeGreaterThan(lit[1].warm);
+      123 |   await closeCard(pop);
+      124 |   await pop.call('dev_money', 9876543);
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/career39.spec.mjs:121:78
+    Error Context: test-results/career39-a-rich-factory-th-b2017-ure-wallet-fits-the-counter-phone/error-context.md
+[21/54] [phone] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload
+[22/54] [phone] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved
+[23/54] [phone] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for
+[24/54] [phone] › specs/factory28.spec.mjs:8:1 › eight kitchen devices: built from the picker, each doing its own job with real inputs
+[25/54] [phone] › specs/factory29.spec.mjs:53:1 › the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents
+[26/54] [phone] › specs/factory29.spec.mjs:89:1 › without vents five kettles overheat; with them the kitchen keeps cooking
+[27/54] [phone] › specs/factory29.spec.mjs:108:1 › a minute of a busy advanced factory: frame rate and kept memory
+[28/54] [phone] › specs/factory30.spec.mjs:35:1 › the packing floor: cups, the weigher, the sealer, honest SKUs
+[29/54] [phone] › specs/factory30.spec.mjs:73:1 › the dispenser sells large bags at tier 1; an empty floor stops and pays nothing
+[30/54] [phone] › specs/factory30.spec.mjs:97:1 › frame rate with several packers working at once
+[31/54] [phone] › specs/factory31.spec.mjs:42:1 › the storefront: cashier, express window, robot lanes, router -- honest sales
+[32/54] [phone] › specs/factory31.spec.mjs:72:1 › a paused cashier holds its customers sales until it is resumed
+[33/54] [phone] › specs/factory32.spec.mjs:34:1 › support machines on their floors, the upkeep overview, pause and resume everything
+[34/54] [phone] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured
+[35/54] [phone] › specs/flavors34.spec.mjs:27:1 › the flavors sheet draws five distinct flavors on this screen
+[36/54] [phone] › specs/flavors34.spec.mjs:98:1 › five flavors are coated, packed, asked for and sold in the browser
+[37/54] [desktop] › specs/career39.spec.mjs:35:1 › real clock: a fresh factory's first three minutes against the sim
+[38/54] [desktop] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter
+[39/54] [desktop] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload
+[40/54] [desktop] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved
+[41/54] [desktop] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for
+[42/54] [desktop] › specs/factory28.spec.mjs:8:1 › eight kitchen devices: built from the picker, each doing its own job with real inputs
+[43/54] [desktop] › specs/factory29.spec.mjs:53:1 › the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents
+[44/54] [desktop] › specs/factory29.spec.mjs:89:1 › without vents five kettles overheat; with them the kitchen keeps cooking
+[45/54] [desktop] › specs/factory29.spec.mjs:108:1 › a minute of a busy advanced factory: frame rate and kept memory
+[46/54] [desktop] › specs/factory30.spec.mjs:35:1 › the packing floor: cups, the weigher, the sealer, honest SKUs
+[47/54] [desktop] › specs/factory30.spec.mjs:73:1 › the dispenser sells large bags at tier 1; an empty floor stops and pays nothing
+[48/54] [desktop] › specs/factory30.spec.mjs:97:1 › frame rate with several packers working at once
+[49/54] [desktop] › specs/factory31.spec.mjs:42:1 › the storefront: cashier, express window, robot lanes, router -- honest sales
+[50/54] [desktop] › specs/factory31.spec.mjs:72:1 › a paused cashier holds its customers sales until it is resumed
+[51/54] [desktop] › specs/factory32.spec.mjs:34:1 › support machines on their floors, the upkeep overview, pause and resume everything
+[52/54] [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured
+[53/54] [desktop] › specs/flavors34.spec.mjs:27:1 › the flavors sheet draws five distinct flavors on this screen
+[54/54] [desktop] › specs/flavors34.spec.mjs:98:1 › five flavors are coated, packed, asked for and sold in the browser
+  3 failed
+    [p720] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    [p720] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+    [phone] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+  11 skipped
+  40 passed (48.9m)
+rc=1

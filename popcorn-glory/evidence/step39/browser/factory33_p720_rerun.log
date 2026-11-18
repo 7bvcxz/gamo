@@ -1,0 +1,55 @@
+ 08:09:55 up 83 days, 15:51,  1 user,  load average: 1.88, 6.80, 8.73
+Running 3 tests using 1 worker
+[1/3] [p720] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter
+  1) [p720] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    Error: tier 7 lights more than the landmark (searchlights)
+    expect(received).toBeGreaterThan(expected)
+    Expected: > 754
+    Received:   723
+      121 |   expect(s.run.sign_cost, 'tier 8 is the last').toBe(-1);
+      122 |   testInfo.annotations.push({ type: 'sign', description: JSON.stringify(lit) });
+    > 123 |   expect(lit[1].warm, 'tier 7 lights more than the landmark (searchlights)').toBeGreaterThan(lit[0].warm);
+          |                                                                              ^
+      124 |   expect(lit[2].warm, 'tier 8 lights more than tier 7 (stars and the arrow)').toBeGreaterThan(lit[1].warm);
+      125 |   await closeCard(pop);
+      126 |   // the ink beside the counter with a one-digit wallet and with seven digits: the long number
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/career39.spec.mjs:123:78
+    Error Context: test-results/career39-a-rich-factory-th-b2017-ure-wallet-fits-the-counter-p720/error-context.md
+[2/3] [phone] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter
+  2) [phone] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    Error: tier 7 lights more than the landmark (searchlights)
+    expect(received).toBeGreaterThan(expected)
+    Expected: > 3384
+    Received:   3384
+      121 |   expect(s.run.sign_cost, 'tier 8 is the last').toBe(-1);
+      122 |   testInfo.annotations.push({ type: 'sign', description: JSON.stringify(lit) });
+    > 123 |   expect(lit[1].warm, 'tier 7 lights more than the landmark (searchlights)').toBeGreaterThan(lit[0].warm);
+          |                                                                              ^
+      124 |   expect(lit[2].warm, 'tier 8 lights more than tier 7 (stars and the arrow)').toBeGreaterThan(lit[1].warm);
+      125 |   await closeCard(pop);
+      126 |   // the ink beside the counter with a one-digit wallet and with seven digits: the long number
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/career39.spec.mjs:123:78
+    Error Context: test-results/career39-a-rich-factory-th-b2017-ure-wallet-fits-the-counter-phone/error-context.md
+[3/3] [desktop] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter
+  3) [desktop] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    Error: tier 7 lights more than the landmark (searchlights)
+    expect(received).toBeGreaterThan(expected)
+    Expected: > 33
+    Received:   33
+      121 |   expect(s.run.sign_cost, 'tier 8 is the last').toBe(-1);
+      122 |   testInfo.annotations.push({ type: 'sign', description: JSON.stringify(lit) });
+    > 123 |   expect(lit[1].warm, 'tier 7 lights more than the landmark (searchlights)').toBeGreaterThan(lit[0].warm);
+          |                                                                              ^
+      124 |   expect(lit[2].warm, 'tier 8 lights more than tier 7 (stars and the arrow)').toBeGreaterThan(lit[1].warm);
+      125 |   await closeCard(pop);
+      126 |   // the ink beside the counter with a one-digit wallet and with seven digits: the long number
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/career39.spec.mjs:123:78
+    Error Context: test-results/career39-a-rich-factory-th-b2017-ure-wallet-fits-the-counter-desktop/error-context.md
+  3 failed
+    [p720] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    [phone] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+    [desktop] › specs/career39.spec.mjs:90:1 › a rich factory: the sign's new tiers draw more, and a seven-figure wallet fits the counter 
+Running 1 test using 1 worker
+[1/1] [p720] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured
+  1 passed (2.4m)
+ 08:13:23 up 83 days, 15:54,  1 user,  load average: 9.15, 8.78, 9.15
