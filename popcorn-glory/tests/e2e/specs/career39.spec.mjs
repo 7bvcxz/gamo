@@ -117,7 +117,9 @@ test('a rich factory: the sign\'s new tiers draw more, and a twelve-digit wallet
       // customer stands there. Against the landmark's own strip: pixels that turned yellower
       // (blue down by 10 or more, red kept) are the new lights.
       const h = r.height * 0.7;
-      const png = await pop.page.screenshot({ clip: { x: r.x, y: Math.max(0, r.y - h), width: r.width, height: Math.min(h, r.y) } });
+      // (the beams lean out past the sign's sides: the strip is half a sign wider each way)
+      const x0 = Math.max(0, r.x - r.width * 0.5);
+      const png = await pop.page.screenshot({ clip: { x: x0, y: Math.max(0, r.y - h), width: r.width * 2, height: Math.min(h, r.y) } });
       const { decodePng } = await import('../lib/png.mjs');
       const img = decodePng(png);
       if (tier === 6) base6 = img;

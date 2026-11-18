@@ -46,7 +46,7 @@ func _draw() -> void:
 	# Step 39: a long number shrinks to stay inside the counter (a forty-machine factory's wallet).
 	var room := size.x - h * 0.9 - 16.0
 	if tw > room and room > 0.0:
-		fs = maxi(8, int(floor(fs * room / tw)))
+		fs = maxi(8, int(floor(fs * room * 0.92 / tw)))   # (a little air at the box's edges)
 		tw = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var total := h * 0.9 + 12.0 + tw
 	var x0 := (size.x - total) / 2
