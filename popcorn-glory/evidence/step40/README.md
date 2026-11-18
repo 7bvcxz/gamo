@@ -15,6 +15,7 @@ authorize; so no raster source exists to keep in `art_src/` (DECISIONS D-57).
 | `xvfb/before_*` | 0.39.0 (before) at 0/3/10/40 machines, phone and desktop |
 | `xvfb/after_*` | the first pass (b2abc825), same scenes (and four kettles: three lamps lit) |
 | `xvfb/levels_*`, `xvfb/final_*` | the final build: the floor levels; money 100 (card in colour); lines 3/3/2 with sign 6; 44 machines with sign 8 |
+| `xvfb/final_*_360x640.png` | the review procedure's small screen (ART_DIRECTION 6): money 100, and 44 machines with sign 8 |
 | `browser/art40_*.png` | `art40.spec.mjs` screenshots on three screens (the rooms at 0 minutes; the card in colour) |
 | `browser/e2e40pre.json` | `art40` (rooms) run against the **public 0.39.0** -- it fails (no rooms there), recorded for the "before" render cost |
 | `browser/e2e40b_unbaked.json` | `art40` + `factory33` on the first full 0.40.0 build, walls drawn as rects (objects +50% at 44 machines) |
