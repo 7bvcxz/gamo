@@ -4570,3 +4570,145 @@ func test_an_hour_of_contests_on_a_real_factory_conserves_and_money_adds_up() ->
 	assert_true(int(f.stats.get("contest_prizes", 0)) >= paid, "every prize in a result")
 	assert_eq(int(f.stats.get("contests_entered", 0)), int(f.stats.get("contests_done", 0)) + int(f.stats.get("contests_cancelled", 0)) + (0 if (f.contests["entry"] as Dictionary).is_empty() else 1), "every entry ended once (or runs)")
 	_check_conservation(f, "contest hour")
+
+
+# -- Step 39 ------------------------------------------------------------------
+
+## A factory where every one-is-enough device can be built (sign 6, station 3, two packing
+## lines, a kettle) with the money for anything.
+func _device_factory(seed_value: int) -> PopRules:
+	var f: PopRules = _steady(Factory.new(null, seed_value))
+	f.sign_tier = 6
+	f.packer_tier = 3
+	f.level = 4
+	f.money = 1 << 30
+	_open(f)
+	_open_sign(f)
+	for id in ["M07", "M07", "M01", "bagger", "P07", "S03"]:
+		f.execute({"type": "build", "machine": id})
+	return f
+
+
+func test_a_one_is_enough_device_is_sold_once_and_a_second_would_only_cost() -> void:
+	var f := _device_factory(3901)
+	for id: String in Factory.ONE_IS_ENOUGH:
+		if not f.of_type(id).is_empty():
+			continue
+		var fl := String(Factory.FLOOR_OF[id])
+		if fl == "any":
+			fl = "packing" if id in ["U05"] else ("shop" if id == "U07" else "kitchen")
+		if f.floor_full(fl) and int(f.line_cost(fl)) >= 0:
+			f.execute({"type": "buy_line", "floor": fl})
+		var r: Dictionary = f.execute({"type": "build", "machine": id, "floor": fl})
+		if not bool(r["ok"]):
+			assert_true(String(r["reason"]) in ["err.not_yet", "err.locked"], "%s: the first is sold (or honestly not yet): %s" % [id, r.get("reason", "")])
+			continue
+		var m0 := int(f.money)
+		var r2: Dictionary = f.execute({"type": "build", "machine": id, "floor": fl})
+		assert_false(bool(r2["ok"]), "%s: a second copy is not sold" % id)
+		assert_eq(String(r2["reason"]), "err.one_enough", "%s: with the honest reason" % id)
+		assert_eq(int(f.money), m0, "%s: nothing taken" % id)
+	# Selling the one sells the right to build it again (no lock-out).
+	var s06: Array = f.of_type("S06")
+	assert_false(s06.is_empty(), "the menu board stands")
+	assert_true(bool(f.execute({"type": "sell_machine", "id": s06[0]["id"]})["ok"]), "sold")
+	assert_true(bool(f.execute({"type": "build", "machine": "S06", "floor": "shop"})["ok"]), "and built again")
+	# What a second copy would have done: put two in by hand (an old save could hold two) --
+	# the same customers, the same sales, only more upkeep.
+	for id: String in ["S06", "S01", "M08", "P07"]:
+		var runs: Array = []
+		for copies in [1, 2]:
+			var g := _device_factory(3911)
+			if g.of_type(id).is_empty():
+				g.execute({"type": "build", "machine": id, "floor": String(Factory.FLOOR_OF[id])})
+			if copies == 2:
+				var one: Dictionary = g.of_type(id)[0]
+				var fl2 := String(one["floor"])
+				if g._free_slot(fl2) < 0:
+					g.execute({"type": "buy_line", "floor": fl2})
+				var two: Dictionary = one.duplicate(true)
+				two["id"] = g.next_machine_id
+				g.next_machine_id += 1
+				two["slot"] = g._free_slot(fl2)
+				g.machines.append(two)
+			g.money = 2000
+			for i in 120:
+				_hand_pop(g, i)
+			_check_conservation(g, "%s x%d" % [id, copies])
+			runs.append({"sold": int(g.stats["sold"]), "made": int(g.stats["made_portions"]), "upkeep": int(g.stats["upkeep_paid"])})
+		assert_eq(runs[1]["sold"], runs[0]["sold"], "%s: a second copy sells nothing more (%s)" % [id, runs])
+		assert_eq(runs[1]["made"], runs[0]["made"], "%s: and makes nothing more" % id)
+		assert_true(int(runs[1]["upkeep"]) >= int(runs[0]["upkeep"]), "%s: it only pays more upkeep (%s)" % [id, runs])
+	# An old save with two copies still loads both (nothing taken back after the fact).
+	var h := _device_factory(3921)
+	var one2: Dictionary = h.of_type("P07")[0]
+	var dup: Dictionary = one2.duplicate(true)
+	dup["id"] = h.next_machine_id
+	h.next_machine_id += 1
+	h.execute({"type": "buy_line", "floor": "packing"})
+	dup["slot"] = h._free_slot("packing")
+	h.machines.append(dup)
+	var k: PopRules = Factory.new(null, 3921)
+	assert_true(k.from_save(JSON.parse_string(JSON.stringify(h.to_save()))), "it loads")
+	assert_eq(k.of_type("P07").size(), 2, "an old save keeps both")
+
+
+func test_coaters_on_a_line_without_a_filler_are_fed_by_the_first_line() -> void:
+	# The career sim's stuck factory: the first packing line's places hold fillers, the second
+	# line holds only coaters and the cup feeder (no filler -- nothing is routed to it).
+	var f: PopRules = _steady(Factory.new(null, 3931))
+	f.sign_tier = 4
+	f.packer_tier = 2
+	f.level = 4
+	f.money = 1 << 30
+	_open(f)
+	_open_sign(f)
+	for id in ["M07", "M07", "M01"]:
+		f.execute({"type": "build", "machine": id})
+	for i in f.slots("packing"):
+		f.execute({"type": "build", "machine": "bagger", "floor": "packing"})
+	assert_true(bool(f.execute({"type": "buy_line", "floor": "packing"})["ok"]), "a second packing line")
+	var r: Dictionary = f.execute({"type": "build", "machine": "P05", "floor": "packing"})
+	assert_true(bool(r["ok"]), "a coater on the second line")
+	f.execute({"type": "set_flavor", "id": r["machine"], "flavor": "cheese"})
+	assert_eq(int(f.line_of("packing", int(f.machine(int(r["machine"]))["slot"]))), 1, "it stands on the second line")
+	assert_true(f.line_fillers(1).is_empty(), "which has no filler")
+	f.money = 3000
+	for i in 240:
+		_hand_pop(f, i)
+		if i % 40 == 39:
+			_check_conservation(f, "coater line %d" % i)
+	assert_true(int((f.stats.get("coated", {}) as Dictionary).get("cheese", 0)) > 0, "the coater coated cheese (%s)" % f.stats.get("coated", {}))
+	assert_true(int((f.stats.get("flavor_sold", {}) as Dictionary).get("cheese", 0)) > 0, "and cheese bags sold (%s)" % f.stats.get("flavor_sold", {}))
+	assert_true(int(f.stats.get("coater_starved_ms", 0)) < 240 * 1500 / 2, "it did not starve most of the time (%d ms)" % int(f.stats.get("coater_starved_ms", 0)))
+
+
+func test_the_ticket_printer_does_not_hold_a_customer_behind_a_pack_that_cannot_be_shelved() -> void:
+	# The career sim's half-hour lock: S02 kept the head of the queue's patience while "their pack
+	# was being made" -- but the pack was finished in a filler that could not shelve it (the
+	# shelf full of what the people behind wanted), so nobody ever left and nothing sold.
+	var f: PopRules = _steady(Factory.new(null, 3941))
+	f.sign_tier = 5
+	f.packer_tier = 3
+	f.money = 1 << 20
+	_open(f)
+	_open_sign(f)
+	_quiet_shop(f)
+	var r: Dictionary = f.execute({"type": "build", "machine": "bagger", "floor": "packing"})
+	assert_true(bool(r["ok"]), "a filler")
+	assert_true(bool(f.execute({"type": "build", "machine": "S02", "floor": "shop"})["ok"]), "the ticket printer")
+	var bagger: Dictionary = f.machine(int(r["machine"]))
+	# A finished large Classic Butter in the filler, the shelf full of small cheese bags.
+	bagger["held"] = {"id": f._new_id(), "recipe": "plain", "size": 4, "portions": 4, "quality": 100, "lots": [], "left_ms": 0}
+	while f.shelf.size() < int(f.state()["shelf_cap"]):
+		f.shelf.append({"id": f._new_id(), "recipe": "cheese", "size": 2, "portions": 2, "quality": 100})
+	f.queue.append({"id": f._new_id(), "order": {"recipe": "plain", "size": 4}, "patience_ms": 60000, "who": "classic"})
+	var before := int(f.queue[0]["patience_ms"])
+	f.advance(3000)
+	assert_false(f.queue.is_empty(), "the customer still waits")
+	assert_true(int(f.queue[0]["patience_ms"]) < before, "a pack that cannot be shelved does not keep their patience (%d -> %d)" % [before, int(f.queue[0]["patience_ms"])])
+	# A pack still being filled does (the printer's promise).
+	bagger["held"]["left_ms"] = 60000
+	var mid := int(f.queue[0]["patience_ms"])
+	f.advance(1000)
+	assert_eq(int(f.queue[0]["patience_ms"]), mid, "a pack in the filler's hands keeps it")

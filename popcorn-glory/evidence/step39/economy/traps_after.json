@@ -1,0 +1,673 @@
+{
+ "_doc": "AUTOMATIC SIMULATION. Each check: what it measures, the numbers, flagged or not.",
+ "T1_automation_cannot_pay": {
+  "what": "minutes with net < 0 after the first machine; kettles' unpaid ms; upkeep+inputs as a share of sales in 30-60",
+  "runs": {
+   "skilled/balanced/3901": {
+    "minutes_after_first_machine": 76,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.042
+   },
+   "average/balanced/3901": {
+    "minutes_after_first_machine": 75,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.146
+   },
+   "slow/balanced/3901": {
+    "minutes_after_first_machine": 73,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.13
+   },
+   "idle/balanced/3901": {
+    "minutes_after_first_machine": 72,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.161
+   },
+   "average/early/3901": {
+    "minutes_after_first_machine": 83,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.189
+   },
+   "average/cautious/3901": {
+    "minutes_after_first_machine": 71,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.069
+   },
+   "average/specialist/3901": {
+    "minutes_after_first_machine": 75,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.144
+   },
+   "average/variety/3901": {
+    "minutes_after_first_machine": 75,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.148
+   },
+   "average/spikes/3901": {
+    "minutes_after_first_machine": 77,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.125
+   },
+   "average/no_news/3901": {
+    "minutes_after_first_machine": 74,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.22
+   },
+   "idle/early/3901": {
+    "minutes_after_first_machine": 79,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.209
+   },
+   "skilled/balanced/3902": {
+    "minutes_after_first_machine": 76,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.04
+   },
+   "average/balanced/3902": {
+    "minutes_after_first_machine": 76,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.166
+   },
+   "slow/balanced/3902": {
+    "minutes_after_first_machine": 71,
+    "minutes_net_negative": 1,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.153
+   },
+   "idle/balanced/3902": {
+    "minutes_after_first_machine": 75,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.137
+   },
+   "average/early/3902": {
+    "minutes_after_first_machine": 83,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.172
+   },
+   "average/cautious/3902": {
+    "minutes_after_first_machine": 74,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.119
+   },
+   "average/specialist/3902": {
+    "minutes_after_first_machine": 76,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.155
+   },
+   "average/variety/3902": {
+    "minutes_after_first_machine": 76,
+    "minutes_net_negative": 2,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.154
+   },
+   "average/spikes/3902": {
+    "minutes_after_first_machine": 76,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.145
+   },
+   "average/no_news/3902": {
+    "minutes_after_first_machine": 75,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.099
+   },
+   "idle/early/3902": {
+    "minutes_after_first_machine": 77,
+    "minutes_net_negative": 0,
+    "unpaid_ms": 0,
+    "upkeep_share_30_60": 0.202
+   }
+  },
+  "flagged": false
+ },
+ "T2_too_few_customers": {
+  "what": "share of minutes 30-60 whose bottleneck is demand; share of built machines not working",
+  "runs": {
+   "skilled/balanced/3901": {
+    "demand_share_30_60": 0.93,
+    "idle_machine_share_30_60": 0.47,
+    "sign_at_60": "6"
+   },
+   "average/balanced/3901": {
+    "demand_share_30_60": 0.3,
+    "idle_machine_share_30_60": 0.41,
+    "sign_at_60": "4"
+   },
+   "slow/balanced/3901": {
+    "demand_share_30_60": 0.47,
+    "idle_machine_share_30_60": 0.4,
+    "sign_at_60": "4"
+   },
+   "idle/balanced/3901": {
+    "demand_share_30_60": 0.37,
+    "idle_machine_share_30_60": 0.37,
+    "sign_at_60": "4"
+   },
+   "average/early/3901": {
+    "demand_share_30_60": 0.27,
+    "idle_machine_share_30_60": 0.43,
+    "sign_at_60": "4"
+   },
+   "average/cautious/3901": {
+    "demand_share_30_60": 0.47,
+    "idle_machine_share_30_60": 0.44,
+    "sign_at_60": "5"
+   },
+   "average/specialist/3901": {
+    "demand_share_30_60": 0.3,
+    "idle_machine_share_30_60": 0.42,
+    "sign_at_60": "4"
+   },
+   "average/variety/3901": {
+    "demand_share_30_60": 0.27,
+    "idle_machine_share_30_60": 0.38,
+    "sign_at_60": "4"
+   },
+   "average/spikes/3901": {
+    "demand_share_30_60": 0.63,
+    "idle_machine_share_30_60": 0.45,
+    "sign_at_60": "4"
+   },
+   "average/no_news/3901": {
+    "demand_share_30_60": 0.23,
+    "idle_machine_share_30_60": 0.37,
+    "sign_at_60": "4"
+   },
+   "idle/early/3901": {
+    "demand_share_30_60": 0.03,
+    "idle_machine_share_30_60": 0.43,
+    "sign_at_60": "3"
+   },
+   "skilled/balanced/3902": {
+    "demand_share_30_60": 0.9,
+    "idle_machine_share_30_60": 0.45,
+    "sign_at_60": "6"
+   },
+   "average/balanced/3902": {
+    "demand_share_30_60": 0.27,
+    "idle_machine_share_30_60": 0.3,
+    "sign_at_60": "5"
+   },
+   "slow/balanced/3902": {
+    "demand_share_30_60": 0.5,
+    "idle_machine_share_30_60": 0.31,
+    "sign_at_60": "4"
+   },
+   "idle/balanced/3902": {
+    "demand_share_30_60": 0.47,
+    "idle_machine_share_30_60": 0.41,
+    "sign_at_60": "4"
+   },
+   "average/early/3902": {
+    "demand_share_30_60": 0.3,
+    "idle_machine_share_30_60": 0.43,
+    "sign_at_60": "4"
+   },
+   "average/cautious/3902": {
+    "demand_share_30_60": 0.4,
+    "idle_machine_share_30_60": 0.34,
+    "sign_at_60": "5"
+   },
+   "average/specialist/3902": {
+    "demand_share_30_60": 0.37,
+    "idle_machine_share_30_60": 0.24,
+    "sign_at_60": "5"
+   },
+   "average/variety/3902": {
+    "demand_share_30_60": 0.4,
+    "idle_machine_share_30_60": 0.34,
+    "sign_at_60": "5"
+   },
+   "average/spikes/3902": {
+    "demand_share_30_60": 0.23,
+    "idle_machine_share_30_60": 0.51,
+    "sign_at_60": "4"
+   },
+   "average/no_news/3902": {
+    "demand_share_30_60": 0.4,
+    "idle_machine_share_30_60": 0.43,
+    "sign_at_60": "5"
+   },
+   "idle/early/3902": {
+    "demand_share_30_60": 0.03,
+    "idle_machine_share_30_60": 0.42,
+    "sign_at_60": "3"
+   }
+  },
+  "flagged": true
+ },
+ "T3_recipe_superior": {
+  "what": "per flavor: margin a batch, coins a coater-minute, order share, margin x share; bags sold over all runs",
+  "flavors": {
+   "cheese": {
+    "margin_per_batch": 24.0,
+    "coins_per_coater_min": 600.0,
+    "order_share": 0.16,
+    "loss": 0.0,
+    "demand_weighted": 3.84
+   },
+   "spicy": {
+    "margin_per_batch": 29.0,
+    "coins_per_coater_min": 483.3,
+    "order_share": 0.07,
+    "loss": 0.05,
+    "demand_weighted": 2.03
+   },
+   "caramel": {
+    "margin_per_batch": 32.0,
+    "coins_per_coater_min": 192.0,
+    "order_share": 0.13,
+    "loss": 0.12,
+    "demand_weighted": 4.16
+   },
+   "cocoa": {
+    "margin_per_batch": 38.0,
+    "coins_per_coater_min": 190.0,
+    "order_share": 0.09,
+    "loss": 0.08,
+    "demand_weighted": 3.42
+   }
+  },
+  "sold_all_runs": {
+   "cheese": 3166,
+   "spicy": 1079,
+   "caramel": 706,
+   "cocoa": 52
+  },
+  "flagged": false
+ },
+ "T4_sign_beats_all": {
+  "what": "median measured payback (minutes; 999 = no gain seen) by kind; share of all money spent",
+  "payback_median_min": {
+   "sign": 5.4,
+   "station": 29.3,
+   "kitchen": 999.0,
+   "coater": 999.0,
+   "shop": 32.8,
+   "packing": 999.0,
+   "support": 155.6,
+   "line": 999.0,
+   "kettle": 11.9
+  },
+  "spent_share": {
+   "sign": 0.157,
+   "station": 0.121,
+   "kitchen": 0.17,
+   "coater": 0.076,
+   "shop": 0.123,
+   "packing": 0.143,
+   "support": 0.025,
+   "line": 0.14,
+   "kettle": 0.044
+  },
+  "flagged": false
+ },
+ "T5_overflow_lock": {
+  "what": "minutes after minute 5 with portions made and no sale (or the kettles blocked all minute); longest stall: minutes after 15 whose ten-minute net is under half the run's best ten minutes so far",
+  "runs": {
+   "skilled/balanced/3901": 0,
+   "average/balanced/3901": 0,
+   "slow/balanced/3901": 0,
+   "idle/balanced/3901": 0,
+   "average/early/3901": 0,
+   "average/cautious/3901": 0,
+   "average/specialist/3901": 0,
+   "average/variety/3901": 0,
+   "average/spikes/3901": 0,
+   "average/no_news/3901": 0,
+   "idle/early/3901": 0,
+   "skilled/balanced/3902": 0,
+   "average/balanced/3902": 0,
+   "slow/balanced/3902": 0,
+   "idle/balanced/3902": 0,
+   "average/early/3902": 0,
+   "average/cautious/3902": 0,
+   "average/specialist/3902": 0,
+   "average/variety/3902": 0,
+   "average/spikes/3902": 0,
+   "average/no_news/3902": 0,
+   "idle/early/3902": 0
+  },
+  "stall_longest_min": {
+   "skilled/balanced/3901": 0,
+   "average/balanced/3901": 0,
+   "slow/balanced/3901": 0,
+   "idle/balanced/3901": 0,
+   "average/early/3901": 0,
+   "average/cautious/3901": 0,
+   "average/specialist/3901": 0,
+   "average/variety/3901": 0,
+   "average/spikes/3901": 0,
+   "average/no_news/3901": 0,
+   "idle/early/3901": 0,
+   "skilled/balanced/3902": 0,
+   "average/balanced/3902": 0,
+   "slow/balanced/3902": 0,
+   "idle/balanced/3902": 0,
+   "average/early/3902": 0,
+   "average/cautious/3902": 0,
+   "average/specialist/3902": 0,
+   "average/variety/3902": 2,
+   "average/spikes/3902": 0,
+   "average/no_news/3902": 0,
+   "idle/early/3902": 0
+  },
+  "flagged": false
+ },
+ "T6_single_optimal_build": {
+  "what": "the average hand's policies: book + prizes - fees at the end (ranked); segments one policy led by > 20%",
+  "ranked": [
+   [
+    "average/balanced/3902",
+    26678
+   ],
+   [
+    "average/no_news/3902",
+    26490
+   ],
+   [
+    "average/specialist/3902",
+    25046
+   ],
+   [
+    "average/specialist/3901",
+    24959
+   ],
+   [
+    "average/cautious/3901",
+    24879
+   ],
+   [
+    "average/cautious/3902",
+    23989
+   ],
+   [
+    "average/balanced/3901",
+    23787
+   ],
+   [
+    "average/variety/3902",
+    22985
+   ],
+   [
+    "average/variety/3901",
+    22838
+   ],
+   [
+    "average/spikes/3902",
+    19985
+   ],
+   [
+    "average/no_news/3901",
+    19116
+   ],
+   [
+    "average/spikes/3901",
+    18373
+   ],
+   [
+    "average/early/3901",
+    14585
+   ],
+   [
+    "average/early/3902",
+    14552
+   ]
+  ],
+  "spread_best_to_median": 1.14,
+  "segment_leads": {},
+  "flagged": false
+ },
+ "T7_numbers": {
+  "what": "largest wallet and minute's sales in any run (the counter groups thousands: 1,234,567)",
+  "max_money": 6264,
+  "max_revenue_pm": 816,
+  "flagged": false
+ },
+ "milestones_vs_target": {
+  "first_sale": {
+   "target": [
+    0,
+    0.5
+   ],
+   "step13_guess": null,
+   "average_balanced": [
+    0.19,
+    0.18
+   ],
+   "ok": true
+  },
+  "first_packing_line": {
+   "target": [
+    5,
+    20
+   ],
+   "step13_guess": null,
+   "average_balanced": [
+    13.68,
+    13.59
+   ],
+   "ok": true
+  },
+  "first_auto_cooker": {
+   "target": [
+    10,
+    25
+   ],
+   "step13_guess": [
+    6,
+    8
+   ],
+   "average_balanced": [
+    19.95,
+    20.27
+   ],
+   "ok": true
+  },
+  "first_flavor_line": {
+   "target": [
+    15,
+    50
+   ],
+   "step13_guess": [
+    12,
+    18
+   ],
+   "average_balanced": [
+    45.59,
+    27.18
+   ],
+   "ok": true
+  },
+  "first_contest_win": {
+   "target": [
+    3,
+    25
+   ],
+   "step13_guess": null,
+   "average_balanced": [
+    5.78,
+    5.78
+   ],
+   "ok": true
+  },
+  "three_floors": {
+   "target": [
+    25,
+    75
+   ],
+   "step13_guess": null,
+   "average_balanced": [
+    58.01,
+    43.73
+   ],
+   "ok": true
+  },
+  "built_10": {
+   "target": [
+    20,
+    40
+   ],
+   "step13_guess": [
+    10,
+    30
+   ],
+   "average_balanced": [
+    28.93,
+    33.6
+   ],
+   "ok": true
+  },
+  "built_20": {
+   "target": [
+    45,
+    95
+   ],
+   "step13_guess": [
+    30,
+    60
+   ],
+   "average_balanced": [
+    62.93,
+    60.16
+   ],
+   "ok": true
+  }
+ },
+ "dead_zone": {
+  "average/balanced/3901": {
+   "dead_min": 0.2,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 8.2
+  },
+  "average/balanced/3902": {
+   "dead_min": 0.2,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 8.2
+  },
+  "average/cautious/3901": {
+   "dead_min": 0.1,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 10.2
+  },
+  "average/cautious/3902": {
+   "dead_min": 0.1,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 10.9
+  },
+  "average/early/3901": {
+   "dead_min": 0.1,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 6.4
+  },
+  "average/early/3902": {
+   "dead_min": 0.1,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 7.8
+  },
+  "average/no_news/3901": {
+   "dead_min": 2.8,
+   "dead_longest_min": 1.9,
+   "no_buy_longest_min": 6.4
+  },
+  "average/no_news/3902": {
+   "dead_min": 0.2,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 7.2
+  },
+  "average/specialist/3901": {
+   "dead_min": 0.4,
+   "dead_longest_min": 0.3,
+   "no_buy_longest_min": 6.4
+  },
+  "average/specialist/3902": {
+   "dead_min": 0.1,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 11.1
+  },
+  "average/spikes/3901": {
+   "dead_min": 5.7,
+   "dead_longest_min": 1.6,
+   "no_buy_longest_min": 8.7
+  },
+  "average/spikes/3902": {
+   "dead_min": 0.1,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 14.4
+  },
+  "average/variety/3901": {
+   "dead_min": 0.2,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 6.4
+  },
+  "average/variety/3902": {
+   "dead_min": 10.7,
+   "dead_longest_min": 3.8,
+   "no_buy_longest_min": 5.6
+  },
+  "idle/balanced/3901": {
+   "dead_min": 1.2,
+   "dead_longest_min": 0.6,
+   "no_buy_longest_min": 7.5
+  },
+  "idle/balanced/3902": {
+   "dead_min": 2.5,
+   "dead_longest_min": 1.2,
+   "no_buy_longest_min": 6.3
+  },
+  "idle/early/3901": {
+   "dead_min": 0.8,
+   "dead_longest_min": 0.6,
+   "no_buy_longest_min": 8.0
+  },
+  "idle/early/3902": {
+   "dead_min": 2.3,
+   "dead_longest_min": 0.7,
+   "no_buy_longest_min": 8.9
+  },
+  "skilled/balanced/3901": {
+   "dead_min": 0.1,
+   "dead_longest_min": 0.1,
+   "no_buy_longest_min": 10.6
+  },
+  "skilled/balanced/3902": {
+   "dead_min": 0.6,
+   "dead_longest_min": 0.4,
+   "no_buy_longest_min": 4.6
+  },
+  "slow/balanced/3901": {
+   "dead_min": 7.4,
+   "dead_longest_min": 2.5,
+   "no_buy_longest_min": 5.8
+  },
+  "slow/balanced/3902": {
+   "dead_min": 4.3,
+   "dead_longest_min": 1.2,
+   "no_buy_longest_min": 8.0
+  }
+ },
+ "presses_per_min_idle": {
+  "idle/balanced/3901": 1.0,
+  "idle/balanced/3902": 1.6,
+  "idle/early/3901": 0.8,
+  "idle/early/3902": 0.7
+ }
+}

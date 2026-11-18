@@ -43,6 +43,11 @@ func _draw() -> void:
 	var text := _format(money)
 	var fs := int(h * 0.62 * s)
 	var tw := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	# Step 39: a long number shrinks to stay inside the counter (a forty-machine factory's wallet).
+	var room := size.x - h * 0.9 - 16.0
+	if tw > room and room > 0.0:
+		fs = maxi(8, int(floor(fs * room / tw)))
+		tw = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var total := h * 0.9 + 12.0 + tw
 	var x0 := (size.x - total) / 2
 	_coin = Vector2(x0 + h * 0.45, h * 0.5)

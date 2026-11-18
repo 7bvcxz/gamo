@@ -175,6 +175,10 @@ func _tick() -> void:
 						_app.frame.play.open_contests()
 					"X":
 						_app.on_command("contest_cancel", {"type": "contest_cancel"})
+					"G":
+						# Step 39 (picture setup): `G<tier>` the sign at that tier (its look).
+						_app.rules.sign_tier = int(step.substr(1))
+						_app.rules.stats["sold"] = maxi(1, int(_app.rules.stats["sold"]))
 					"A":
 						# Step 35: `A<id>` sets that coater to AUTO.
 						_app.on_command("set_flavor", {"type": "set_flavor", "id": int(step.substr(1)), "flavor": "auto"})

@@ -784,7 +784,11 @@ func _orders_being_made() -> Dictionary:
 	var out := {}
 	var making: Array = packing.duplicate()
 	for m: Dictionary in machines:
-		if String(m["type"]) in ["bagger", "P01"] and not (m["held"] as Dictionary).is_empty():
+		# Step 39: only a pack still being filled -- a finished one waiting for shelf room is not
+		# "being made". The career sim found the ticket printer holding the head of the queue
+		# forever behind a full shelf (the pack it waited for could not be shelved, nobody left,
+		# nothing sold for half an hour).
+		if String(m["type"]) in ["bagger", "P01"] and not (m["held"] as Dictionary).is_empty() and int((m["held"] as Dictionary).get("left_ms", 0)) > 0:
 			making.append(m["held"])
 	for p: Dictionary in making:
 		var key := "%s|%d" % [p["recipe"], p["size"]]
@@ -1362,6 +1366,12 @@ func _set_flavor(id: int, f: String) -> Dictionary:
 func _coater_step(m: Dictionary, dt: int) -> void:
 	var h: Dictionary = m["held"]
 	var line := line_of("packing", int(m["slot"]))
+	# Step 39: a line with no filler gets no popcorn routed to it (and its goods go back to the
+	# first line), so its coater takes the first line's plain and gives its batch back there.
+	# The career sim found a second line of coaters starving all hour while their flavor's
+	# customers waited at the head of the queue and the shop behind them walked past.
+	if line > 0 and line_fillers(line).is_empty():
+		line = 0
 	if h.is_empty():
 		var f := _auto_pick(m) if String(m.get("flavor", "")) == AUTO else coater_flavor(m)
 		if f == "" or not flavor_open(f) or not recipe_problems(f).is_empty() or not _flavor_wanted(f):
@@ -1829,6 +1839,18 @@ const FLOOR_OF := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop",
 	"S01": "shop", "S02": "shop", "S03": "shop", "S04": "shop", "S05": "shop", "S06": "shop", "S08": "shop",
 	"U01": "any", "U02": "any", "U03": "any", "U04": "packing", "U05": "packing", "U06": "any", "U07": "any", "U08": "packing"}
 ## Step 28: the kitchen's devices that serve the kettles (each a catalog id and its own runtime).
+## Step 39: devices whose effect is one for the whole shop (the rules ask `_device_on`, or
+## the best tier among them): a second copy would add nothing but its price and upkeep, so it
+## is not sold while one stands (the career sim found players buying three menu boards).
+## Kettles, hoppers, fillers, cup feeders, kiosks, the express window, the serving robot, the
+## per-kettle agitator and detector, the distributor, the lift and the energy saver do stack.
+const ONE_IS_ENOUGH := ["M02", "M03", "M06", "M08", "M09", "M11", "M12", "M13", "M14", "M15", "P04", "P07", "S01", "S02", "S03", "S04", "S06", "U01", "U05", "U07"]
+
+
+func one_is_enough(type: String) -> bool:
+	return ONE_IS_ENOUGH.has(type)
+
+
 const KITCHEN_DEVICES := ["M01", "M02", "M03", "M04", "M05", "M06", "M08", "M09", "M10", "M11", "M12", "M13", "M14", "M15", "M16"]
 ## Step 29: what cooks lots on its own (the auto kettle and the rotary popper): kernels,
 ## hoppers, the heat and the dispatcher treat them alike.
@@ -2191,6 +2213,8 @@ func _build(type: String, slot: int, on_floor: String = "") -> Dictionary:
 		return {"ok": false, "reason": "err.locked"}
 	if type == "U08" and not parallel_lines():
 		return {"ok": false, "reason": "err.needs_lines"}   # Step 33: it balances two lines or does nothing
+	if one_is_enough(type) and _count(type) > 0:
+		return {"ok": false, "reason": "err.one_enough"}   # Step 39: a second copy would do nothing and pay upkeep
 	if COATERS.has(type) and _open_flavors_of(type).is_empty():
 		return {"ok": false, "reason": "err.locked"}   # Step 34: none of its flavors is open yet
 	var floor := String(FLOOR_OF[type])

@@ -1,0 +1,24 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+DUMP average/balanced/3901 @65: glass { "id": 3176, "recipe": "plain", "quality": 100, "portions": 18 } heating false cooldown 0 finishing {  } bin { "plain": 20 } (cap 24) shelf 4 queue 1 packing 0 money 302 bottleneck production
+   bagger #1 packing slot 0 state run kernels 0 held ["id", "recipe", "size", "quality", "lots", "left_ms"] flavor 
+   S06 #2 shop slot 0 state run kernels 0 held [] flavor 
+   S01 #3 shop slot 1 state run kernels 0 held [] flavor 
+   cooker #4 kitchen slot 0 state run kernels 5 held [] flavor 
+   M08 #5 kitchen slot 1 state run kernels 0 held [] flavor 
+   bagger #6 packing slot 1 state run kernels 0 held ["id", "recipe", "size", "quality", "lots", "left_ms"] flavor 
+   M06 #7 kitchen slot 2 state run kernels 0 held [] flavor 
+   bagger #8 packing slot 2 state starved kernels 0 held [] flavor 
+   M01 #9 kitchen slot 3 state idle kernels 0 held [] flavor 
+   bagger #10 packing slot 3 state starved kernels 0 held [] flavor 
+   M04 #11 kitchen slot 4 state run kernels 0 held [] flavor 
+   M02 #12 kitchen slot 5 state run kernels 0 held [] flavor 
+   P05 #13 packing slot 4 state starved kernels 0 held [] flavor spicy
+   P05 #14 packing slot 5 state starved kernels 0 held [] flavor cheese
+   M01 #15 kitchen slot 6 state idle kernels 0 held [] flavor 
+   cooker #16 kitchen slot 7 state run kernels 4 held ["id", "recipe", "quality", "portions"] flavor 
+   P01 #17 packing slot 6 state starved kernels 0 held [] flavor 
+   shelf: ["plain4", "plain4", "plain1", "plain2"]
+   queue: ["cheese1"]
+average/balanced/3901: book 11579, spent 11613, machines 17 (running peak 13), kinds 11, sign 4 station 2 kettle 5, dead 0.8 min (longest 0.7), no buy 8.1, contests 16 (prizes 590 fees 195)  [20122 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.61, "first_contest_win": 5.78, "first_full_queue": 12.01, "first_packing_line": 13.68, "first_auto_cooker": 19.95, "built_10": 30.5, "running_10": 38.72 }

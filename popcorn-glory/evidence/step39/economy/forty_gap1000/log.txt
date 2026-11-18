@@ -1,0 +1,4 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+forty sign 6: { "sign": 6, "machines": 44, "avg_running": 27.8, "ever_worked": 42, "sold_pm": 49.9, "net_pm": 370.9, "lost": 0, "upkeep_pm": 44.5, "max_money": 24259, "money_end": 24253, "queue_end": 0 }  [63660 ms]
+forty sign 8: { "sign": 8, "machines": 44, "avg_running": 29.6, "ever_worked": 42, "sold_pm": 59.9, "net_pm": 442.3, "lost": 0, "upkeep_pm": 48.9, "max_money": 28535, "money_end": 28535, "queue_end": 0 }  [62382 ms]

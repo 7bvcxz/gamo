@@ -1,0 +1,22 @@
+DUMP average/variety/3902 @65: glass { "id": 3692, "recipe": "plain", "quality": 80, "portions": 10 } heating false cooldown 0 finishing {  } bin { "spicy": 3, "cocoa": 4, "caramel": 12, "plain": 1, "cheese": 4 } (cap 24) shelf 8 queue 8 packing 0 money 386 bottleneck packaging
+   M08 #1 kitchen slot 0 state idle kernels 0 held [] flavor 
+   bagger #2 packing slot 0 state blocked kernels 0 held ["id", "recipe", "size", "quality", "lots", "left_ms"] flavor 
+   S06 #3 shop slot 0 state run kernels 0 held [] flavor 
+   S01 #4 shop slot 1 state run kernels 0 held [] flavor 
+   M06 #5 kitchen slot 1 state idle kernels 0 held [] flavor 
+   cooker #6 kitchen slot 2 state blocked kernels 5 held ["id", "recipe", "quality", "portions"] flavor 
+   P05 #7 packing slot 1 state idle kernels 0 held [] flavor spicy
+   P05 #8 packing slot 2 state idle kernels 0 held [] flavor cheese
+   P06 #9 packing slot 3 state idle kernels 0 held [] flavor caramel
+   M01 #10 kitchen slot 3 state idle kernels 0 held [] flavor 
+   M04 #11 kitchen slot 4 state idle kernels 0 held [] flavor 
+   M02 #12 kitchen slot 5 state idle kernels 0 held [] flavor 
+   M05 #13 kitchen slot 6 state idle kernels 0 held [] flavor 
+   M03 #14 kitchen slot 7 state idle kernels 0 held [] flavor 
+   kiosk #15 shop slot 2 state idle kernels 0 held [] flavor 
+   S02 #16 shop slot 3 state run kernels 0 held [] flavor 
+   P06 #17 packing slot 4 state starved kernels 0 held [] flavor cocoa
+   shelf: ["spicy2", "caramel2", "cheese2", "plain2", "caramel2", "plain2", "plain2", "cocoa2"]
+   queue: ["plain4", "caramel2", "plain2", "cocoa2", "plain2", "cheese2", "cheese2", "cocoa2"]
+average/variety/3902: book 13569, spent 14136, machines 17 (running peak 15), kinds 16, sign 5 station 3 kettle 4, dead 0.1 min (longest 0.1), no buy 7.2, contests 16 (prizes 1175 fees 225)  [12844 ms]
+   milestones { "first_sale": 0.18, "first_crowd_rush": 4.31, "first_contest_win": 5.78, "first_full_queue": 13.17, "first_packing_line": 13.59, "first_auto_cooker": 20.27, "first_flavor_line": 27.18, "built_10": 33.95, "running_10": 37.91, "three_floors": 42.11 }

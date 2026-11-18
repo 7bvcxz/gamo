@@ -55,7 +55,7 @@
     "kernels"
    ],
    "cost": 250,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -112,7 +112,7 @@
     "oil"
    ],
    "cost": 300,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -166,7 +166,7 @@
     "heat_model"
    ],
    "cost": 350,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -216,7 +216,7 @@
    },
    "requires": [],
    "cost": 280,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -268,7 +268,7 @@
    },
    "requires": [],
    "cost": 320,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -314,7 +314,7 @@
    },
    "requires": [],
    "cost": 220,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -362,7 +362,7 @@
    },
    "requires": [],
    "cost": 300,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 4,
    "tiers": [
     {
@@ -411,7 +411,7 @@
    },
    "requires": [],
    "cost": 200,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -465,7 +465,7 @@
    },
    "requires": [],
    "cost": 600,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 3,
    "tiers": [
     {
@@ -511,7 +511,7 @@
    },
    "requires": [],
    "cost": 1200,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -562,7 +562,7 @@
    },
    "requires": [],
    "cost": 900,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -611,7 +611,7 @@
     "flavors"
    ],
    "cost": 700,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -665,7 +665,7 @@
     "heat_model"
    ],
    "cost": 800,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -714,7 +714,7 @@
    },
    "requires": [],
    "cost": 900,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 0,
    "tiers": [
     {
@@ -766,7 +766,7 @@
    },
    "requires": [],
    "cost": 1000,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -817,7 +817,7 @@
    },
    "requires": [],
    "cost": 2500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 6,
    "tiers": [
     {
@@ -866,7 +866,7 @@
    },
    "requires": [],
    "cost": 300,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -915,7 +915,7 @@
    },
    "requires": [],
    "cost": 400,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -962,7 +962,7 @@
    },
    "requires": [],
    "cost": 350,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 3,
    "tiers": [
     {
@@ -1011,7 +1011,7 @@
    },
    "requires": [],
    "cost": 500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1066,7 +1066,7 @@
     "flavors"
    ],
    "cost": 700,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1131,7 +1131,7 @@
     "flavors"
    ],
    "cost": 900,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 3,
    "tiers": [
     {
@@ -1187,7 +1187,7 @@
    },
    "requires": [],
    "cost": 600,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1235,7 +1235,7 @@
    },
    "requires": [],
    "cost": 1200,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1283,7 +1283,7 @@
    },
    "requires": [],
    "cost": 400,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -1331,7 +1331,7 @@
    },
    "requires": [],
    "cost": 500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -1376,7 +1376,7 @@
    },
    "requires": [],
    "cost": 600,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1424,7 +1424,7 @@
    },
    "requires": [],
    "cost": 700,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -1469,7 +1469,7 @@
    },
    "requires": [],
    "cost": 800,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1516,7 +1516,7 @@
    },
    "requires": [],
    "cost": 500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -1561,7 +1561,7 @@
    },
    "requires": [],
    "cost": 500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 3,
    "tiers": [
     {
@@ -1608,7 +1608,7 @@
    },
    "requires": [],
    "cost": 2000,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 4,
    "tiers": [
     {
@@ -1657,7 +1657,7 @@
    },
    "requires": [],
    "cost": 600,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1705,7 +1705,7 @@
     "oil"
    ],
    "cost": 500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -1754,7 +1754,7 @@
    },
    "requires": [],
    "cost": 700,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 0,
    "tiers": [
     {
@@ -1801,7 +1801,7 @@
    },
    "requires": [],
    "cost": 500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -1853,7 +1853,7 @@
    },
    "requires": [],
    "cost": 600,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 1,
    "tiers": [
     {
@@ -1900,7 +1900,7 @@
     "aging"
    ],
    "cost": 600,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1951,7 +1951,7 @@
     "flavors"
    ],
    "cost": 1200,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {
@@ -1999,7 +1999,7 @@
     "parallel_lines"
    ],
    "cost": 1500,
-   "growth": 1.25,
+   "growth": 1.15,
    "upkeep_per_min": 2,
    "tiers": [
     {

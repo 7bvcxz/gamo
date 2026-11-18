@@ -1,0 +1,24 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+skilled/balanced/3901: book 18626, spent 18912, machines 20 (running peak 18), kinds 14, sign 6 station 3 kettle 4, dead 0.1 min (longest 0.1), no buy 5.0, contests 16 (prizes 1450 fees 225)  [13912 ms]
+   milestones { "first_sale": 0.16, "first_crowd_rush": 3.6, "first_contest_win": 4.8, "first_packing_line": 12.16, "first_full_queue": 32.55, "three_floors": 38.71, "built_10": 38.71, "running_10": 38.77, "first_flavor_line": 43.99, "first_auto_cooker": 53.72, "built_20": 53.95 }
+average/balanced/3901: book 17306, spent 17771, machines 17 (running peak 15), kinds 13, sign 6 station 3 kettle 0, dead 0.1 min (longest 0.1), no buy 4.7, contests 15 (prizes 1760 fees 255)  [12278 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.58, "first_contest_win": 5.78, "first_full_queue": 11.71, "first_packing_line": 12.4, "first_flavor_line": 33.61, "built_10": 34.96, "three_floors": 36.89, "running_10": 40.05, "first_auto_cooker": 53.46 }
+slow/balanced/3901: book 13628, spent 12671, machines 16 (running peak 16), kinds 9, sign 6 station 2 kettle 4, dead 0.2 min (longest 0.2), no buy 5.0, contests 11 (prizes 1460 fees 215)  [12718 ms]
+   milestones { "first_sale": 0.26, "first_crowd_rush": 3.7, "first_contest_win": 10.7, "first_full_queue": 14.14, "first_packing_line": 14.72, "built_10": 34.92, "three_floors": 42.64, "running_10": 44.77, "first_auto_cooker": 55.79 }
+idle/balanced/3901: book 9263, spent 9730, machines 16 (running peak 15), kinds 10, sign 5 station 2 kettle 4, dead 0.8 min (longest 0.6), no buy 5.3, contests 10 (prizes 960 fees 170)  [11618 ms]
+   milestones { "first_sale": 0.66, "first_crowd_rush": 4.09, "first_auto_cooker": 14.05, "first_contest_win": 15.89, "first_full_queue": 26.77, "first_packing_line": 28.62, "built_10": 35.08, "running_10": 37.24, "three_floors": 48.13 }
+average/early/3901: book 6668, spent 6859, machines 14 (running peak 11), kinds 9, sign 4 station 2 kettle 0, dead 0.1 min (longest 0.1), no buy 6.3, contests 14 (prizes 615 fees 180)  [18510 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.58, "first_contest_win": 5.78, "first_auto_cooker": 14.61, "first_packing_line": 27.23, "built_10": 34.27, "running_10": 57.92 }
+average/cautious/3901: book 14271, spent 10223, machines 12 (running peak 12), kinds 6, sign 5 station 3 kettle 1, dead 0.1 min (longest 0.1), no buy 10.2, contests 0 (prizes 0 fees 0)  [9922 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.61, "first_packing_line": 19.87, "first_full_queue": 36.79, "first_flavor_line": 40.87, "built_10": 49.66, "three_floors": 49.71, "first_auto_cooker": 49.76, "running_10": 49.89 }
+average/specialist/3901: book 14876, spent 13502, machines 16 (running peak 16), kinds 11, sign 5 station 3 kettle 6, dead 4.3 min (longest 4.1), no buy 7.5, contests 14 (prizes 1300 fees 240)  [16034 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.58, "first_contest_win": 5.78, "first_full_queue": 11.71, "first_packing_line": 12.4, "first_flavor_line": 34.54, "built_10": 36.33, "running_10": 36.41, "three_floors": 36.68, "first_auto_cooker": 43.14 }
+average/variety/3901: book 16222, spent 17286, machines 16 (running peak 13), kinds 15, sign 6 station 3 kettle 0, dead 0.1 min (longest 0.1), no buy 8.0, contests 15 (prizes 1555 fees 225)  [11406 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.58, "first_contest_win": 5.78, "first_full_queue": 11.71, "first_packing_line": 12.4, "three_floors": 37.97, "built_10": 37.97, "running_10": 38.01 }
+average/spikes/3901: book 16439, spent 13986, machines 15 (running peak 14), kinds 14, sign 6 station 1 kettle 0, dead 0.1 min (longest 0.1), no buy 6.6, contests 15 (prizes 1415 fees 255)  [10587 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.58, "first_contest_win": 5.78, "first_full_queue": 11.74, "first_packing_line": 13.1, "three_floors": 36.8, "built_10": 36.8, "running_10": 36.89 }
+average/no_news/3901: book 11117, spent 11384, machines 11 (running peak 11), kinds 8, sign 5 station 1 kettle 0, dead 0.1 min (longest 0.1), no buy 9.5, contests 15 (prizes 1330 fees 220)  [9264 ms]
+   milestones { "first_sale": 0.19, "first_contest_win": 5.79, "first_packing_line": 28.88, "first_full_queue": 36.35, "built_10": 53.33, "running_10": 55.05 }
+idle/early/3901: book 5811, spent 5640, machines 12 (running peak 9), kinds 7, sign 3 station 2 kettle 3, dead 1.0 min (longest 0.6), no buy 6.9, contests 9 (prizes 860 fees 175)  [17553 ms]
+   milestones { "first_sale": 0.66, "first_crowd_rush": 4.09, "first_auto_cooker": 16.75, "first_contest_win": 18.74, "first_packing_line": 31.26, "built_10": 38.02, "first_full_queue": 54.33 }

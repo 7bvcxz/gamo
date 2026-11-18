@@ -376,7 +376,7 @@ func machine_base() -> Vector2:
 func extra_rects() -> Dictionary:
 	var out := {"floor_top": floor_rect(TOP), "floor_mid": floor_rect(MID), "floor_low": floor_rect(LOW),
 		"badge_top": badge_rect(TOP), "badge_mid": badge_rect(MID), "badge_low": badge_rect(LOW),
-		"news": news_rect(), "tube": tube_rect()}
+		"news": news_rect(), "tube": tube_rect(), "sign": _sign_rect()}   # Step 39: the sign (its tiers 7-8 measured)
 	var c := machine_centre()
 	var r := ring_radius() + machine_size() * 0.045
 	out["ring"] = Rect2(c - Vector2(r, r), Vector2(r * 2.0, r * 2.0))
@@ -3333,6 +3333,8 @@ func _floor_choices(floor: String) -> Array:
 	for id: String in devices:
 		if id == "U08" and not rules.parallel_lines():
 			continue   # Step 33: the route balancer needs two packing lines
+		if rules.one_is_enough(id) and not rules.of_type(id).is_empty():
+			continue   # Step 39: one is enough -- a second would do nothing (its card shows the one that works)
 		if rules.station_open(id) and rules.catalog_buildable(id):
 			out.append(id)
 	return out

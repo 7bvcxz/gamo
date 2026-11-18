@@ -1,0 +1,603 @@
+{
+ "_doc": "AUTOMATIC SIMULATION on the game's own rules (tools/sim/career39.gd) -- simulated hands and purchase policies, not players and not fun.",
+ "economy_md5": "c6cc60a0e65c6de2301052bee1dbbcbd",
+ "minutes": 150,
+ "runs": {
+  "average/balanced/3901": {
+   "abandoned": 0,
+   "asked_recipe": {
+    "cheese": 728,
+    "plain": 4553,
+    "premium": 77,
+    "spicy": 225
+   },
+   "book": 50679,
+   "bursts": 0,
+   "contest_results": [
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 60,
+     "tier": 1
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 40,
+     "id": "balanced_line",
+     "prize": 240,
+     "tier": 2
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 60,
+     "tier": 1
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 15,
+     "tier": 1
+    }
+   ],
+   "contests_entered": 36,
+   "dead_longest_min": 0.1,
+   "dead_min": 0.2,
+   "fees": 595,
+   "flavor_revenue": {
+    "cheese": 8670,
+    "spicy": 3453
+   },
+   "flavor_sold": {
+    "cheese": 727,
+    "spicy": 225
+   },
+   "kettle": 5,
+   "kinds": 31,
+   "lines": {
+    "kitchen": 3,
+    "packing": 3,
+    "shop": 2
+   },
+   "machines": 38,
+   "max_money": 0,
+   "milestones": {
+    "built_10": 28.93,
+    "built_20": 62.93,
+    "first_auto_cooker": 19.95,
+    "first_contest_win": 5.78,
+    "first_crowd_rush": 3.61,
+    "first_flavor_line": 45.59,
+    "first_full_queue": 12.01,
+    "first_packing_line": 13.68,
+    "first_sale": 0.19,
+    "running_10": 32.12,
+    "running_20": 84.17,
+    "three_floors": 58.01
+   },
+   "money": 5382,
+   "news_started": 35,
+   "no_buy_longest_min": 15.1,
+   "passed_by": 31,
+   "peak_running": 33,
+   "popularity": 100.0,
+   "presses": 495,
+   "prizes": 2795,
+   "refill_coins": 80,
+   "refills": 16,
+   "sign": 7,
+   "sold": 5581,
+   "spent": 47497,
+   "station": 3,
+   "unpaid_ms": 0
+  },
+  "average/balanced/3902": {
+   "abandoned": 0,
+   "asked_recipe": {
+    "cheese": 784,
+    "plain": 5070,
+    "spicy": 261
+   },
+   "book": 52509,
+   "bursts": 0,
+   "contest_results": [
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 40,
+     "id": "balanced_line",
+     "prize": 240,
+     "tier": 2
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 60,
+     "tier": 1
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    }
+   ],
+   "contests_entered": 36,
+   "dead_longest_min": 0.1,
+   "dead_min": 0.2,
+   "fees": 635,
+   "flavor_revenue": {
+    "cheese": 9682,
+    "spicy": 3938
+   },
+   "flavor_sold": {
+    "cheese": 782,
+    "spicy": 261
+   },
+   "kettle": 5,
+   "kinds": 29,
+   "lines": {
+    "kitchen": 3,
+    "packing": 3,
+    "shop": 2
+   },
+   "machines": 44,
+   "max_money": 0,
+   "milestones": {
+    "built_10": 33.6,
+    "built_20": 60.16,
+    "built_40": 140.33,
+    "first_auto_cooker": 20.27,
+    "first_contest_win": 5.78,
+    "first_crowd_rush": 4.31,
+    "first_flavor_line": 27.18,
+    "first_full_queue": 13.17,
+    "first_packing_line": 13.59,
+    "first_sale": 0.18,
+    "running_10": 38.47,
+    "running_20": 76.22,
+    "three_floors": 43.73
+   },
+   "money": 4339,
+   "news_started": 33,
+   "no_buy_longest_min": 16.1,
+   "passed_by": 37,
+   "peak_running": 37,
+   "popularity": 100.0,
+   "presses": 494,
+   "prizes": 2775,
+   "refill_coins": 95,
+   "refills": 19,
+   "sign": 7,
+   "sold": 6113,
+   "spent": 50310,
+   "station": 3,
+   "unpaid_ms": 0
+  },
+  "idle/balanced/3901": {
+   "abandoned": 12,
+   "asked_recipe": {
+    "cheese": 351,
+    "plain": 2484,
+    "spicy": 66
+   },
+   "book": 24136,
+   "bursts": 0,
+   "contest_results": [
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 60,
+     "tier": 1
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 40,
+     "id": "balanced_line",
+     "prize": 240,
+     "tier": 2
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 60,
+     "tier": 1
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 60,
+     "tier": 1
+    }
+   ],
+   "contests_entered": 30,
+   "dead_longest_min": 1.5,
+   "dead_min": 2.8,
+   "fees": 635,
+   "flavor_revenue": {
+    "cheese": 4187,
+    "spicy": 987
+   },
+   "flavor_sold": {
+    "cheese": 341,
+    "spicy": 66
+   },
+   "kettle": 6,
+   "kinds": 21,
+   "lines": {
+    "kitchen": 2,
+    "packing": 3,
+    "shop": 1
+   },
+   "machines": 32,
+   "max_money": 0,
+   "milestones": {
+    "built_10": 36.02,
+    "built_20": 74.05,
+    "first_auto_cooker": 20.6,
+    "first_contest_win": 16.29,
+    "first_crowd_rush": 4.09,
+    "first_flavor_line": 54.83,
+    "first_full_queue": 19.67,
+    "first_packing_line": 17.85,
+    "first_sale": 0.66,
+    "running_10": 36.45,
+    "running_20": 117.57,
+    "three_floors": 71.05
+   },
+   "money": 44,
+   "news_started": 33,
+   "no_buy_longest_min": 23.1,
+   "passed_by": 25,
+   "peak_running": 24,
+   "popularity": 100.0,
+   "presses": 93,
+   "prizes": 2820,
+   "refill_coins": 110,
+   "refills": 22,
+   "sign": 4,
+   "sold": 2888,
+   "spent": 26277,
+   "station": 3,
+   "unpaid_ms": 0
+  },
+  "idle/balanced/3902": {
+   "abandoned": 11,
+   "asked_recipe": {
+    "cheese": 526,
+    "plain": 3737,
+    "premium": 248,
+    "spicy": 141
+   },
+   "book": 41006,
+   "bursts": 0,
+   "contest_results": [
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 60,
+     "tier": 1
+    },
+    {
+     "fee": 40,
+     "id": "balanced_line",
+     "prize": 120,
+     "tier": 1
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 120,
+     "tier": 2
+    },
+    {
+     "fee": 40,
+     "id": "balanced_line",
+     "prize": 0,
+     "tier": 0
+    }
+   ],
+   "contests_entered": 28,
+   "dead_longest_min": 5.0,
+   "dead_min": 9.0,
+   "fees": 620,
+   "flavor_revenue": {
+    "cheese": 6387,
+    "spicy": 2107
+   },
+   "flavor_sold": {
+    "cheese": 520,
+    "spicy": 141
+   },
+   "kettle": 7,
+   "kinds": 30,
+   "lines": {
+    "kitchen": 3,
+    "packing": 2,
+    "shop": 2
+   },
+   "machines": 40,
+   "max_money": 0,
+   "milestones": {
+    "built_10": 39.03,
+    "built_20": 93.01,
+    "built_40": 139.5,
+    "first_auto_cooker": 24.66,
+    "first_contest_win": 24.56,
+    "first_crowd_rush": 4.81,
+    "first_flavor_line": 47.07,
+    "first_full_queue": 13.72,
+    "first_packing_line": 26.75,
+    "first_sale": 0.66,
+    "running_10": 42.15,
+    "running_20": 95.69,
+    "three_floors": 45.74
+   },
+   "money": 1720,
+   "news_started": 31,
+   "no_buy_longest_min": 7.0,
+   "passed_by": 256,
+   "peak_running": 35,
+   "popularity": 100.0,
+   "presses": 219,
+   "prizes": 3660,
+   "refill_coins": 105,
+   "refills": 21,
+   "sign": 6,
+   "sold": 4638,
+   "spent": 42326,
+   "station": 3,
+   "unpaid_ms": 0
+  },
+  "skilled/balanced/3901": {
+   "abandoned": 8,
+   "asked_recipe": {
+    "cheese": 789,
+    "plain": 4442,
+    "premium": 985,
+    "spicy": 199
+   },
+   "book": 58814,
+   "bursts": 0,
+   "contest_results": [
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 15,
+     "tier": 1
+    },
+    {
+     "fee": 40,
+     "id": "balanced_line",
+     "prize": 240,
+     "tier": 2
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 120,
+     "tier": 2
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 40,
+     "id": "balanced_line",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    }
+   ],
+   "contests_entered": 37,
+   "dead_longest_min": 6.8,
+   "dead_min": 17.8,
+   "fees": 665,
+   "flavor_revenue": {
+    "cheese": 9247,
+    "spicy": 2970
+   },
+   "flavor_sold": {
+    "cheese": 782,
+    "spicy": 199
+   },
+   "kettle": 7,
+   "kinds": 28,
+   "lines": {
+    "kitchen": 3,
+    "packing": 3,
+    "shop": 2
+   },
+   "machines": 44,
+   "max_money": 0,
+   "milestones": {
+    "built_10": 34.23,
+    "built_20": 66.41,
+    "built_40": 133.74,
+    "first_auto_cooker": 66.51,
+    "first_contest_win": 4.8,
+    "first_crowd_rush": 3.6,
+    "first_flavor_line": 18.58,
+    "first_full_queue": 50.9,
+    "first_packing_line": 23.41,
+    "first_sale": 0.16,
+    "running_10": 44.59,
+    "running_20": 66.64,
+    "three_floors": 39.31
+   },
+   "money": 7659,
+   "news_started": 32,
+   "no_buy_longest_min": 15.1,
+   "passed_by": 115,
+   "peak_running": 37,
+   "popularity": 100.0,
+   "presses": 1182,
+   "prizes": 3250,
+   "refill_coins": 0,
+   "refills": 0,
+   "sign": 7,
+   "sold": 6405,
+   "spent": 53740,
+   "station": 3,
+   "unpaid_ms": 0
+  },
+  "skilled/balanced/3902": {
+   "abandoned": 29,
+   "asked_recipe": {
+    "cheese": 833,
+    "plain": 5034,
+    "premium": 1095,
+    "spicy": 241
+   },
+   "book": 69417,
+   "bursts": 0,
+   "contest_results": [
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 240,
+     "tier": 3
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 240,
+     "tier": 3
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    }
+   ],
+   "contests_entered": 42,
+   "dead_longest_min": 5.7,
+   "dead_min": 11.2,
+   "fees": 565,
+   "flavor_revenue": {
+    "cheese": 9584,
+    "spicy": 3573
+   },
+   "flavor_sold": {
+    "cheese": 803,
+    "spicy": 241
+   },
+   "kettle": 7,
+   "kinds": 29,
+   "lines": {
+    "kitchen": 3,
+    "packing": 3,
+    "shop": 2
+   },
+   "machines": 44,
+   "max_money": 0,
+   "milestones": {
+    "built_10": 35.92,
+    "built_20": 64.62,
+    "built_40": 115.54,
+    "first_auto_cooker": 82.83,
+    "first_contest_win": 6.27,
+    "first_crowd_rush": 4.33,
+    "first_flavor_line": 21.36,
+    "first_full_queue": 54.63,
+    "first_packing_line": 14.11,
+    "first_sale": 0.16,
+    "running_10": 44.62,
+    "running_20": 82.76,
+    "three_floors": 38.94
+   },
+   "money": 5472,
+   "news_started": 41,
+   "no_buy_longest_min": 34.2,
+   "passed_by": 366,
+   "peak_running": 39,
+   "popularity": 100.0,
+   "presses": 1727,
+   "prizes": 4960,
+   "refill_coins": 70,
+   "refills": 14,
+   "sign": 8,
+   "sold": 7170,
+   "spent": 68340,
+   "station": 3,
+   "unpaid_ms": 0
+  }
+ }
+}

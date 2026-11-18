@@ -1,0 +1,2 @@
+c6cc60a0e65c6de2301052bee1dbbcbd  data/economy.json
+67004aedd03c03e35df388578d5207fd  data/machines.json
