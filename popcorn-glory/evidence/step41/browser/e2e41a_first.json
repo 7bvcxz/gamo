@@ -1,0 +1,734 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/art41.spec.mjs",
+      "--retries=0",
+      "--reporter=json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "art41.spec.mjs",
+      "file": "art41.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"worst_iou\":0.507,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":150,\"news\":241,\"pack_rate\":0,\"perfect\":107,\"pop_rate\":0,\"queue\":118,\"sales\":0,\"sign_up\":156,\"stock\":250,\"trophy\":0,\"upkeep\":25},\"mean\":{\"heat\":[184,85,45],\"news\":[158,111,81],\"pack_rate\":[242,118,89],\"perfect\":[190,147,56],\"pop_rate\":[185,147,91],\"queue\":[130,152,169],\"sales\":[225,179,75],\"sign_up\":[164,112,92],\"stock\":[116,55,38],\"trophy\":[210,156,36],\"upkeep\":[209,175,92]},\"feet_drift\":0,\"lean\":0.09,\"motions\":[\"idle\",\"delight\",\"receive\",\"walk\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16905,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T13:55:59.222Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"worst_iou\":0.507,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":150,\"news\":241,\"pack_rate\":0,\"perfect\":107,\"pop_rate\":0,\"queue\":118,\"sales\":0,\"sign_up\":156,\"stock\":250,\"trophy\":0,\"upkeep\":25},\"mean\":{\"heat\":[184,85,45],\"news\":[158,111,81],\"pack_rate\":[242,118,89],\"perfect\":[190,147,56],\"pop_rate\":[185,147,91],\"queue\":[130,152,169],\"sales\":[225,179,75],\"sign_up\":[164,112,92],\"stock\":[116,55,38],\"trophy\":[210,156,36],\"upkeep\":[209,175,92]},\"feet_drift\":0,\"lean\":0.09,\"motions\":[\"idle\",\"delight\",\"receive\",\"walk\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-cast-sheet-an-ic-b0ac7-walkers-whose-feet-stay-put-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-840abaf9a6dc6a4c99bb",
+          "file": "art41.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.4,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.4,\"most\":14,\"looks\":14,\"stats\":{\"delight\":14,\"happy\":51,\"receive\":110,\"thanks\":45},\"hits\":[]},\"render\":{\"draw_calls\":1088,\"objects\":1654,\"fps\":19}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 142450,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T13:56:16.183Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.4,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.4,\"most\":14,\"looks\":14,\"stats\":{\"delight\":14,\"happy\":51,\"receive\":110,\"thanks\":45},\"hits\":[]},\"render\":{\"draw_calls\":1088,\"objects\":1654,\"fps\":19}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-shop-at-0-m-3-m--d827e-of-the-tube-and-the-buttons-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-2c072ecc18212f91e177",
+          "file": "art41.spec.mjs",
+          "line": 119,
+          "column": 1
+        },
+        {
+          "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"worst_iou\":0.531,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":183,\"news\":281,\"pack_rate\":0,\"perfect\":126,\"pop_rate\":0,\"queue\":137,\"sales\":0,\"sign_up\":159,\"stock\":312,\"trophy\":0,\"upkeep\":28},\"mean\":{\"heat\":[182,85,44],\"news\":[155,106,75],\"pack_rate\":[243,118,89],\"perfect\":[189,146,55],\"pop_rate\":[185,147,91],\"queue\":[129,153,170],\"sales\":[224,178,72],\"sign_up\":[173,111,90],\"stock\":[111,53,37],\"trophy\":[208,155,38],\"upkeep\":[210,177,95]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 18572,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T13:58:38.977Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"worst_iou\":0.531,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":183,\"news\":281,\"pack_rate\":0,\"perfect\":126,\"pop_rate\":0,\"queue\":137,\"sales\":0,\"sign_up\":159,\"stock\":312,\"trophy\":0,\"upkeep\":28},\"mean\":{\"heat\":[182,85,44],\"news\":[155,106,75],\"pack_rate\":[243,118,89],\"perfect\":[189,146,55],\"pop_rate\":[185,147,91],\"queue\":[129,153,170],\"sales\":[224,178,72],\"sign_up\":[173,111,90],\"stock\":[111,53,37],\"trophy\":[208,155,38],\"upkeep\":[210,177,95]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-cast-sheet-an-ic-b0ac7-walkers-whose-feet-stay-put-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-56440dba0bc514cc394d",
+          "file": "art41.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":0,\"hits\":[]},\"30m\":{\"minute\":31.5,\"most\":14,\"looks\":12,\"stats\":{\"delight\":11,\"happy\":48,\"receive\":110,\"thanks\":51},\"hits\":[]},\"render\":{\"draw_calls\":1074,\"objects\":1622,\"fps\":17}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 150625,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T13:58:57.607Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":0,\"hits\":[]},\"30m\":{\"minute\":31.5,\"most\":14,\"looks\":12,\"stats\":{\"delight\":11,\"happy\":48,\"receive\":110,\"thanks\":51},\"hits\":[]},\"render\":{\"draw_calls\":1074,\"objects\":1622,\"fps\":17}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-shop-at-0-m-3-m--d827e-of-the-tube-and-the-buttons-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-01b32bdac3a6407f922e",
+          "file": "art41.spec.mjs",
+          "line": 119,
+          "column": 1
+        },
+        {
+          "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"worst_iou\":0.553,\"pair\":\"news~queue\",\"ink\":{\"heat\":71,\"news\":157,\"pack_rate\":0,\"perfect\":48,\"pop_rate\":0,\"queue\":53,\"sales\":0,\"sign_up\":82,\"stock\":111,\"trophy\":0,\"upkeep\":17},\"mean\":{\"heat\":[184,86,44],\"news\":[131,94,68],\"pack_rate\":[244,118,89],\"perfect\":[192,148,56],\"pop_rate\":[185,147,91],\"queue\":[129,152,169],\"sales\":[224,178,73],\"sign_up\":[154,89,69],\"stock\":[120,57,39],\"trophy\":[209,156,38],\"upkeep\":[209,171,84]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"receive\",\"delight\",\"walk\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17003,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T14:01:28.591Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"worst_iou\":0.553,\"pair\":\"news~queue\",\"ink\":{\"heat\":71,\"news\":157,\"pack_rate\":0,\"perfect\":48,\"pop_rate\":0,\"queue\":53,\"sales\":0,\"sign_up\":82,\"stock\":111,\"trophy\":0,\"upkeep\":17},\"mean\":{\"heat\":[184,86,44],\"news\":[131,94,68],\"pack_rate\":[244,118,89],\"perfect\":[192,148,56],\"pop_rate\":[185,147,91],\"queue\":[129,152,169],\"sales\":[224,178,73],\"sign_up\":[154,89,69],\"stock\":[120,57,39],\"trophy\":[209,156,38],\"upkeep\":[209,171,84]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"receive\",\"delight\",\"walk\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-cast-sheet-an-ic-b0ac7-walkers-whose-feet-stay-put-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-c1e6351fe9f653bde3d3",
+          "file": "art41.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.4,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.3,\"most\":14,\"looks\":14,\"stats\":{\"delight\":10,\"happy\":53,\"receive\":109,\"thanks\":46},\"hits\":[]},\"render\":{\"draw_calls\":975,\"objects\":1479,\"fps\":18}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 139690,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T14:01:45.653Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.4,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.3,\"most\":14,\"looks\":14,\"stats\":{\"delight\":10,\"happy\":53,\"receive\":109,\"thanks\":46},\"hits\":[]},\"render\":{\"draw_calls\":975,\"objects\":1479,\"fps\":18}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-shop-at-0-m-3-m--d827e-of-the-tube-and-the-buttons-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-41115607acc2a3f3bdac",
+          "file": "art41.spec.mjs",
+          "line": 119,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-18T13:55:58.780Z",
+    "duration": 486627.724,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
