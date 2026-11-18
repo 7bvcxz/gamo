@@ -1,0 +1,11 @@
+ 05:56:30 up 83 days, 13:37,  1 user,  load average: 2.02, 7.11, 7.90
+Running 6 tests using 1 worker
+[1/6] [p720] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes
+[2/6] [p720] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters
+[3/6] [phone] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes
+[4/6] [phone] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters
+[5/6] [desktop] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes
+[6/6] [desktop] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters
+  6 passed (12.3m)
+rc=0
+ 06:08:51 up 83 days, 13:50,  1 user,  load average: 8.79, 10.14, 9.43
