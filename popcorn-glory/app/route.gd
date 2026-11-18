@@ -6,7 +6,7 @@ extends RefCounted
 ## (`godot --path popcorn-glory -- --exp stub --dev`).
 
 static func parse(hash: String, search: String, args: PackedStringArray) -> Dictionary:
-	var out := {"exp": "", "dev": false, "sound": true, "motion": "", "trial": false, "burst": false, "seed": -1, "scene": ""}
+	var out := {"exp": "", "dev": false, "sound": true, "motion": "", "trial": false, "burst": false, "seed": -1, "scene": "", "fx": ""}
 	var h := hash.trim_prefix("#").strip_edges()
 	if h != "":
 		out["exp"] = h.uri_decode()
@@ -29,6 +29,8 @@ static func parse(hash: String, search: String, args: PackedStringArray) -> Dict
 				out["seed"] = v.to_int() if v.is_valid_int() else -1   # Step 22: a measured session's seed
 			"scene":
 				out["scene"] = v   # Step 35: a measured session that starts at a prepared point (blind first use)
+			"fx":
+				out["fx"] = v   # Step 42: ?fx=low -- the low effects budget (the game is the same)
 	var i := 0
 	while i < args.size():
 		match args[i]:

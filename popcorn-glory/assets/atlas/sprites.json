@@ -65,9 +65,19 @@
       "source": "piece_c.svg",
       "sha": "824d6246269a9956"
     },
-    "kernel": {
+    "steam": {
       "rect": [
         100,
+        65,
+        43,
+        42
+      ],
+      "source": "steam.svg",
+      "sha": "f90cd09d43dfdbce"
+    },
+    "kernel": {
+      "rect": [
+        147,
         65,
         24,
         37

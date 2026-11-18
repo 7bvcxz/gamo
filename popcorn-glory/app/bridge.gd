@@ -72,6 +72,10 @@ func query(name: String, arg: Variant) -> Variant:
 		"dev_contest":
 			# Step 38: a named contest posted now (the board's rotation is tested headless).
 			return _app.call("dev_contest", String(arg))
+		"dev_build":
+			# Step 42: a later factory for the motion tests: {plan: [[type, floor]...], sign, packer}.
+			var a: Dictionary = arg if typeof(arg) == TYPE_DICTIONARY else {}
+			return _app.call("dev_build", a.get("plan", []), int(a.get("sign", 6)), int(a.get("packer", 3)))
 		"dev_level":
 			# A picture of a later machine for render checks -- not a play
 			# (the play tests never call it).

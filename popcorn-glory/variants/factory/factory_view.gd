@@ -107,6 +107,28 @@ var news_tab := "news"           ## Step 38: the paper's page -- "news" or "cont
 var _contest_info := ""          ## Step 38: the contest whose one-line description is shown (asked for)
 var _cancel_armed := 0.0         ## Step 38: seconds the cancel waits for its second tap
 var _cticker := {}               ## Step 38: {"kind": "end", "t", "row"} -- a contest's end slides out of its chip
+## Step 42: the motion director (art/motion.gd, design/MOTION.md) -- the budgets, the floors'
+## light and the celebration sweep; the light and the belts are their own nodes (drawn once,
+## moved and faded), so nothing here redraws a layer every frame.
+var motion := PopMotion.new()
+var low_effects := false         ## ?fx=low (set by the app)
+var belt_layer := Node2D.new()   ## under the goods and machines: the belts' moving chevrons
+var light_layer := Node2D.new()  ## under the goods, machines and kettle: a glow per floor, the tube's sweep
+var _glows: Array = []           ## three Node2D (TOP, MID, LOW), each a warm light drawn once
+var _sweep_node := Node2D.new()
+var _belts: Array = []           ## [{node, floor, from, to}]: a line's belt and the places on it
+var _belt_key := ""
+var _emitters: Array = []        ## machine ids that give off ambient pieces (running kettles, coaters)
+var _emit_t := 0.0
+var _emit_i := 0
+static var _belt_shader: Shader
+static var _glow_tex: GradientTexture2D
+## A floor's light at its brightest: a warm tint (normal blend). The first version added light
+## (additive, 0.26) and on the pale packing floor it burned the shelf to white in the sign's
+## celebration (motion42's screenshot, p720) -- the light must never hide a number or a bag.
+const LIGHT_ALPHA := 0.15
+const FLOOR_LIGHT := [Color(1.0, 0.78, 0.4), Color(1.0, 0.84, 0.5), Color(1.0, 0.66, 0.3)]   ## shop, packing, kitchen
+const BELT_SPEED := 30.0          ## chevrons a second, in px at a 720-wide screen (scaled by the head)
 
 
 func setup(p_rules: PopRules) -> void:
@@ -138,6 +160,9 @@ func setup(p_rules: PopRules) -> void:
 	_spoon_seen = -1.0
 	_spooning = false
 	_kernel_flights.clear()
+	motion = PopMotion.new()
+	_belt_key = ""
+	_emitters.clear()
 	_nozzle_key = ""
 	_status = ""
 	_cue_key = ""
@@ -208,6 +233,7 @@ func setup(p_rules: PopRules) -> void:
 				_draw_news_card(detail_layer, detail_rect())
 			elif selected >= 0:
 				_draw_detail(detail_layer, selected, detail_rect()))
+		_setup_light()
 	_floors_key = ""
 	_wide_default = true
 
@@ -591,6 +617,7 @@ func _process(delta: float) -> void:
 	_step_machine_motion(delta)
 	_step_spoons(delta)
 	_step_news(delta)
+	_step_motion_fx(delta)
 
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and
@@ -684,11 +711,19 @@ func on_events(events: Array[Dictionary]) -> void:
 		elif String(e["type"]) in ["news_start", "news_end"]:   # Step 37: the ticker slides out of the icon
 			_ticker = {"n": int(e["data"].get("n", -1)), "t": 0.0, "end": String(e["type"]) == "news_end"}
 			_sound("ding", 1.5 if String(e["type"]) == "news_start" else 1.1, -14.0)
+			if String(e["type"]) == "news_start":
+				# Step 42: a rush of customers (an arrivals event) surges in -- the shop lights up.
+				var nrow := _news_row(int(e["data"].get("n", -1)))
+				if String(nrow.get("channel", "")) == "arrivals":
+					_celebrate("rush")
+				else:
+					motion.light(TOP, 0.5)
 		elif String(e["type"]) == "contest_end":   # Step 38: the end slides out of the chip
 			_cticker = {"kind": "end", "t": 0.0, "row": (e["data"] as Dictionary).duplicate()}
 			_cancel_armed = 0.0
 			if int(e["data"].get("tier", 0)) > 0:
 				_sound("fanfare", 1.0 + 0.1 * int(e["data"]["tier"]), -8.0)
+				_celebrate("contest")   # Step 42: a prize -- the light climbs the factory
 			else:
 				_sound("ding", 0.9, -14.0)
 		elif String(e["type"]) == "contest_start":
@@ -702,16 +737,19 @@ func on_events(events: Array[Dictionary]) -> void:
 			if st_name in ["cooker", "bagger", "kiosk"]:
 				# Step 26: a new machine sparkles in its place.
 				_sound("upgrade", 1.15)
+				motion.light(int(FLOOR_INDEX[String(FLOOR_OF_TYPE[st_name])]), 0.9)
 				if not reduced_motion:
-					fx.sparkle(slot_rect(String(FLOOR_OF_TYPE[st_name]), int(e["data"].get("slot", 0))).get_center(), machine_size() / 900.0, rng, 6, 100.0)
+					fx.sparkle(slot_rect(String(FLOOR_OF_TYPE[st_name]), int(e["data"].get("slot", 0))).get_center(), machine_size() / 900.0, rng, motion.sparkles(6), 100.0)
 			elif st_name == "sign":
 				_sound("fanfare", 1.0 + 0.04 * tier, -6.0)
+				_celebrate("sign")
 				if not reduced_motion:
 					fx.burst(_sign_rect().get_center(), 10 + tier * 2, machine_size() / 900.0, rng, PopPalette.GOLD, 0.8, 1.0)
 					fx.sparkle(_sign_rect().get_center(), machine_size() / 900.0, rng, 6, 120.0)
 			else:
 				_sound("upgrade", 1.0 + 0.06 * tier)
 				_sound("clink", 1.1 + 0.05 * tier, -8.0)
+				_celebrate("packer")
 				if not reduced_motion:
 					fx.sparkle(_station_rect().get_center(), machine_size() / 900.0, rng, 6, 120.0)
 			_nozzle_key = ""
@@ -1856,7 +1894,7 @@ func _new_actor(kind: String, id: int) -> Node2D:
 		a.recipe = "plain"
 		a.hand = false
 		a.visible = true
-		for meta in ["to", "end_on_arrival"]:
+		for meta in ["to", "end_on_arrival", "trip"]:
 			if a.has_meta(meta):
 				a.remove_meta(meta)
 		a.queue_redraw()
@@ -1902,7 +1940,11 @@ func _bin_kinds(n: int) -> Array:
 	return out
 
 
+var log_count := 0   ## Step 42: entries ever written (the log keeps the last 400)
+
+
 func _log(id: int, kind: String, what: String) -> void:
+	log_count += 1
 	cargo_log.append({"id": id, "kind": kind, "what": what, "t": now_ms})
 	if cargo_log.size() > 400:
 		cargo_log.pop_front()
@@ -2088,8 +2130,10 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				a.start(path, _seconds("lift"), reduced_motion)
 				cargo[int(d["lot"])] = a
 				_log(int(d["lot"]), "lot", "start")
+				motion.light(LOW, 0.5)   # Step 42: the arc's first light -- the kitchen sends a batch up
 			"lot_binned":
 				_end_cargo(int(d["lot"]), "lot")
+				motion.light(MID, 0.45)   # ... the packing floor receives it
 			"coat_started", "lot_coated":
 				# Step 34: plain popcorn hops from the bin into the coater; the batch comes back
 				# in its flavor (the same portions, a new colour).
@@ -2108,7 +2152,9 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				var path := PackedVector2Array([bin_at, mid, c_at]) if String(e["type"]) == "coat_started" else PackedVector2Array([c_at, mid, bin_at])
 				a.start(path, 0.6, reduced_motion)
 				a.set_meta("end_on_arrival", true)
+				a.set_meta("trip", "coat")   # Step 42: its own record (it once ended as a "bag" with a lot's id)
 				cargo[-lid if String(e["type"]) == "coat_started" else lid] = a
+				_log(-lid if String(e["type"]) == "coat_started" else lid, "coat", "start")
 				_sound("pop_1", 0.8 if String(e["type"]) == "coat_started" else 1.6, -20.0)
 			"pack_started":
 				# Step 20: an empty open bag indexes in under its head; its fill follows the model's clock.
@@ -2161,6 +2207,10 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				b.set_meta("end_on_arrival", true)
 				cargo[int(d["pack"])] = b
 				_log(int(d["pack"]), "bag", "start")
+				# Step 42: sealed -- a glint on the bag as it leaves its head (from the sparkle budget).
+				motion.light(MID, 0.55)
+				if not reduced_motion and motion.allow("sparkle", 1) > 0:
+					fx.sparkle(from + Vector2(0, -_bag_px() * 0.4), machine_size() / 1800.0, rng, 1, 10.0)
 			"serve_started":
 				# The pack leaves the shelf, rides the tube up to the counter; the customer steps to the hand-over spot.
 				var pid := int(d["pack"])
@@ -2191,6 +2241,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				bag.start(PackedVector2Array([from, Vector2(tube_x, from.y), Vector2(tube_x, hand.y), hand]), _seconds("serve"), reduced_motion)
 				cargo[pid] = bag
 				_log(pid, "bag", "redirect" if redirected else "serve")
+				motion.light(TOP, 0.4)   # ... the shop calls for it
 				var cid := int(d["customer"])
 				if not customers.has(cid):   # served the step they came in: they still walk in
 					customers[cid] = _make_customer(cid, _arrived.get(cid, {}), _door())
@@ -2212,6 +2263,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 			"sale":
 				var pid := int(d["pack"])
 				_end_cargo(pid, "bag")
+				motion.light(TOP, 0.65)   # ... and sells it: the arc ends at the top
 				if not reduced_motion and customers.has(int(d["customer"])):
 					var cc: Node2D = customers[int(d["customer"])]
 					fx.burst(cc.position + Vector2(0, -_head_px() * 2.0), 3, machine_size() / 1500.0, rng, PopPalette.GOLD, 0.7, 0.8)   # coins pop
@@ -2351,7 +2403,7 @@ func _step_actors(delta: float) -> void:
 	for id in cargo.keys():
 		var a: Node2D = cargo[id]
 		if a.done and a.has_meta("end_on_arrival"):
-			_end_cargo(int(id), "bag")
+			_end_cargo(int(id), String(a.get_meta("trip", "bag")))   # Step 42: a coat hop ends as one
 			_redraw_once = true
 			goods_layer.queue_redraw()   # the bag lands on the shelf (the goods layer, Step 33)
 	for a in customers.values():
@@ -2428,7 +2480,8 @@ func debug_state() -> Dictionary:
 		"redraws": redraws.duplicate(), "machine_nodes": _mnodes.size(), "actor_nodes": actor_layer.get_child_count(), "dense": {"kitchen": dense("kitchen"), "packing": dense("packing"), "shop": dense("shop")},
 		"ov_machine": ov_machine, "selected": selected, "sel_machine": sel_machine, "sel_slot": sel_slot,
 		"news_open": news_open, "ticker": int(_ticker.get("n", -1)), "ticker_end": bool(_ticker.get("end", false)), "news_marks": _news_marks().size(),
-		"news_tab": news_tab, "contest_info": _contest_info, "cancel_armed": _cancel_armed > 0.0, "contest_chip": _chip_visible(), "cticker": int((_cticker.get("row", {}) as Dictionary).get("seq", -1))}
+		"news_tab": news_tab, "contest_info": _contest_info, "cancel_armed": _cancel_armed > 0.0, "contest_chip": _chip_visible(), "cticker": int((_cticker.get("row", {}) as Dictionary).get("seq", -1)),
+		"motion": motion_debug()}
 
 
 # -- Step 20: the packing station ---------------------------------------------
@@ -3397,8 +3450,13 @@ func _machine_event(e: Dictionary) -> void:
 	var s := machine_size() / 1500.0
 	match String(e["type"]):
 		"auto_lot":
-			if not reduced_motion:
-				fx.burst(at, 3, s, rng, PopPalette.CREAM if String(d.get("grade", "")) != "perfect" else PopPalette.GOLD, 0.6, 0.7)
+			# Step 42: a little fountain of kernels popping out of the kettle, its size from the
+			# tier's budget (six with one machine, one with forty) -- and the kitchen's light.
+			motion.light(LOW, 0.35)
+			if not reduced_motion and _fx_visible(at):
+				var n := motion.allow("lot", motion.lot_pieces())
+				if n > 0:
+					fx.burst(at, n, s, rng, PopPalette.CREAM if String(d.get("grade", "")) != "perfect" else PopPalette.GOLD, 0.35, 0.75)
 			_sound("pop_1", 1.3, -18.0)
 		"overheat":   # Step 29: the kitchen too hot -- a hiss, steam from every kettle
 			_sound("hiss", 0.8, -10.0)
@@ -3409,12 +3467,14 @@ func _machine_event(e: Dictionary) -> void:
 			floor_layer.queue_redraw()
 		"machine_assisted":
 			if not reduced_motion:
-				fx.sparkle(at, s * 1.6, rng, 4, 80.0)
+				fx.sparkle(at, s * 1.6, rng, motion.sparkles(4), 80.0)
 			_sound("ding", 1.5, -10.0)
 		"machine_upgraded":
 			_sound("upgrade", 1.25)
+			if not m.is_empty():
+				motion.light(int(FLOOR_INDEX[String(m["floor"])]), 0.8)
 			if not reduced_motion:
-				fx.sparkle(at, s * 1.6, rng, 5, 90.0)
+				fx.sparkle(at, s * 1.6, rng, motion.sparkles(5), 90.0)
 		"machine_sold":
 			_sound("coin", 0.9, -6.0)
 		"machine_paused":
@@ -4327,3 +4387,215 @@ func _clock_icon(ci: CanvasItem, c: Vector2, r: float) -> void:
 	ci.draw_arc(c, r, 0, TAU, 16, PopPalette.INK, 2.0)
 	ci.draw_line(c, c + Vector2(0, -r * 0.7), PopPalette.INK, 2.0)
 	ci.draw_line(c, c + Vector2(r * 0.5, 0), PopPalette.INK, 2.0)
+
+
+# -- Step 42: light, belts and the ambient pieces (design/MOTION.md) --------------
+
+## The layers, once: the belts' chevrons just over the floors, then the light -- both under the
+## goods, the machines, the people and the kettle with its ring: the light tints the rooms only.
+func _setup_light() -> void:
+	belt_layer.name = "Belts"
+	add_child(belt_layer)
+	move_child(belt_layer, floor_layer.get_index() + 1)
+	light_layer.name = "Light"
+	add_child(light_layer)
+	move_child(light_layer, belt_layer.get_index() + 1)   # under the goods: the room is lit, never a bag
+	if _glow_tex == null:
+		var g := Gradient.new()
+		g.set_color(0, Color(1, 1, 1, 1))
+		g.set_color(1, Color(1, 1, 1, 0))
+		g.add_point(0.55, Color(1, 1, 1, 0.45))
+		_glow_tex = GradientTexture2D.new()
+		_glow_tex.gradient = g
+		_glow_tex.fill = GradientTexture2D.FILL_RADIAL
+		_glow_tex.fill_from = Vector2(0.5, 0.5)
+		_glow_tex.fill_to = Vector2(1.0, 0.5)
+		_glow_tex.width = 128
+		_glow_tex.height = 128
+	if _belt_shader == null:
+		_belt_shader = load("res://art/belt.gdshader")
+	for i in 3:
+		var n := Node2D.new()
+		n.name = "Glow%d" % i
+		n.modulate = Color(1, 1, 1, 0)
+		n.visible = false
+		var fi := i
+		n.draw.connect(func() -> void: _draw_glow(n, fi))
+		light_layer.add_child(n)
+		_glows.append(n)
+	_sweep_node.name = "Sweep"
+	_sweep_node.visible = false
+	_sweep_node.draw.connect(func() -> void: _draw_sweep(_sweep_node))
+	light_layer.add_child(_sweep_node)
+
+
+## A floor's light: one soft warm ellipse over the floor (drawn once per layout; its node fades).
+func _draw_glow(ci: CanvasItem, i: int) -> void:
+	var r := floor_rect(i)
+	var c: Color = FLOOR_LIGHT[i]
+	ci.draw_texture_rect(_glow_tex, Rect2(r.position - Vector2(r.size.x * 0.1, r.size.y * 0.15), r.size * Vector2(1.2, 1.3)), false, Color(c, 1.0))
+
+
+## The sweep: a light that climbs the glass tube (the node moves; drawn once per layout).
+func _draw_sweep(ci: CanvasItem) -> void:
+	var t := tube_rect()
+	var h := maxf(40.0, t.size.y * 0.32)
+	ci.draw_texture_rect(_glow_tex, Rect2(Vector2(-t.size.x * 1.3, -h * 0.5), Vector2(t.size.x * 2.6, h)), false, Color(1.0, 0.76, 0.3, 1.0))
+	ci.draw_texture_rect(_glow_tex, Rect2(Vector2(-t.size.x * 0.45, -h * 0.3), Vector2(t.size.x * 0.9, h * 0.6)), false, Color(1.0, 0.97, 0.82, 1.0))   # a bright core
+
+
+## The belts of the dense floors (the same rectangles _draw_line_paths draws in steel).
+func _belt_rects() -> Array:
+	var out: Array = []
+	if rules == null:
+		return out
+	var tube_x := tube_rect().get_center().x
+	if dense("kitchen"):
+		var k := 0
+		for g: int in _line_groups("kitchen"):
+			var last := slot_rect("kitchen", k + g - 1)
+			var first := slot_rect("kitchen", k)
+			out.append({"floor": "kitchen", "from": k, "to": k + g - 1, "rect": Rect2(Vector2(first.position.x - 4, last.end.y + 3.0), Vector2(tube_x - first.position.x - 8, 5))})
+			k += g
+	if dense("packing"):
+		var k := 0
+		for g: int in _line_groups("packing"):
+			var a := slot_rect("packing", k)
+			var b := slot_rect("packing", k + g - 1)
+			out.append({"floor": "packing", "from": k, "to": k + g - 1, "rect": Rect2(Vector2(a.position.x - 3, a.end.y - 2), Vector2(b.end.x - a.position.x + 6, 5))})
+			k += g
+	return out
+
+
+func _rebuild_belts() -> void:
+	for b: Dictionary in _belts:
+		(b["node"] as Node2D).queue_free()
+	_belts.clear()
+	for b: Dictionary in _belt_rects():
+		var r: Rect2 = b["rect"]
+		var n := Node2D.new()
+		var mat := ShaderMaterial.new()
+		mat.shader = _belt_shader
+		mat.set_shader_parameter("height", r.size.y)
+		mat.set_shader_parameter("spacing", maxf(9.0, _head_px() * 0.62))
+		n.material = mat
+		n.position = r.position
+		var sz := r.size
+		n.draw.connect(func() -> void: n.draw_rect(Rect2(Vector2.ZERO, sz), Color.WHITE))
+		belt_layer.add_child(n)
+		b["node"] = n
+		b["phase"] = 0.0
+		b["moving"] = false
+		_belts.append(b)
+
+
+## Every frame: the director's step, the light's fade, the belts and the ambient pieces.
+func _step_motion_fx(delta: float) -> void:
+	if rules == null or _glows.is_empty():
+		return
+	motion.reduced = reduced_motion
+	motion.forced_low = low_effects
+	var holding := bool(_r()["heating"])
+	# B's anticipation: the kitchen warms with the hand's heat (a light under the kettle, not on the ring).
+	if holding:
+		var w: Array = _r()["window"]
+		motion.light(LOW, 0.45 * clampf(float(_r()["heat_ms"]) / maxf(1.0, float(w[1])), 0.0, 1.0))
+	var start := motion.step(delta, holding)
+	if start != "":
+		motion.begin(start)
+	for i in 3:
+		var a := float(motion.glow[i]) * LIGHT_ALPHA
+		var n: Node2D = _glows[i]
+		n.visible = a > 0.004
+		n.modulate.a = a
+	var sp := motion.sweep_progress()
+	_sweep_node.visible = sp >= 0.0
+	if sp >= 0.0:
+		var t := tube_rect()
+		var k := sin(sp * PI)
+		_sweep_node.position = Vector2(t.get_center().x, t.end.y - t.size.y * (sp * 1.1 - 0.05))
+		_sweep_node.modulate.a = 0.9 * k   # under the goods: a bag in the tube rides over it
+	# The machines that run now (the tier) and the ones that give off pieces.
+	_emit_t -= delta
+	var key := "%s|%s|%d" % [size, _structure_key(), rules.get("machines").size()]
+	if key != _belt_key:
+		_belt_key = key
+		_rebuild_belts()
+		for n: Node2D in _glows:
+			n.queue_redraw()
+		_sweep_node.queue_redraw()
+		_emit_t = 0.0
+	if _emit_t <= 0.0:
+		_emit_t = 0.5
+		_emitters.clear()
+		var run := 0
+		for m: Dictionary in rules.get("machines"):
+			if String(m["state"]) != "run":
+				continue
+			run += 1
+			if String(m["type"]) in ["cooker", "M16", "P05", "P06"] and _fx_visible(slot_rect(String(m["floor"]), int(m["slot"])).get_center()):
+				_emitters.append(int(m["id"]))
+		motion.running = run
+		for b: Dictionary in _belts:
+			var mv := false
+			for m: Dictionary in rules.get("machines"):
+				if String(m["floor"]) == String(b["floor"]) and int(m["slot"]) >= int(b["from"]) and int(m["slot"]) <= int(b["to"]) and String(m["state"]) == "run":
+					mv = true
+					break
+			b["moving"] = mv
+	if not reduced_motion:
+		var v := BELT_SPEED * _head_px() / 21.8
+		for b: Dictionary in _belts:
+			if bool(b["moving"]):
+				b["phase"] = fmod(float(b["phase"]) + delta * v, 1000.0)
+				((b["node"] as Node2D).material as ShaderMaterial).set_shader_parameter("phase", float(b["phase"]))
+	# Ambient pieces: the factory's budget a second, shared round the emitters.
+	if not _emitters.is_empty():
+		var give := motion.allow("ambient", mini(3, _emitters.size()))
+		var s := machine_size() / 1500.0
+		for j in give:
+			_emit_i = (_emit_i + 1) % _emitters.size()
+			var m: Dictionary = rules.machine(int(_emitters[_emit_i]))
+			if m.is_empty():
+				continue
+			var r := slot_rect(String(m["floor"]), int(m["slot"]))
+			if String(m["type"]) in ["P05", "P06"]:
+				fx.sparkle(Vector2(r.get_center().x, r.position.y + r.size.y * 0.45), s * 0.55, rng, 1, 40.0)
+			else:
+				fx.steam(Vector2(r.get_center().x, r.position.y + r.size.y * 0.12), s * maxf(1.0, r.size.x / 60.0), rng)
+
+
+## Whether an effect at `p` would be seen: inside the scene and not under the open card.
+func _fx_visible(p: Vector2) -> bool:
+	if not scene_rect().has_point(p):
+		return false
+	if (selected >= 0 or overview or news_open) and detail_rect().has_point(p):
+		return false
+	return true
+
+
+## A celebration of something the player did or won (light up the tube, floor by floor).
+func _celebrate(kind: String) -> void:
+	motion.celebrate(kind, bool(_r()["heating"]))
+
+
+func _on_upgrade(level: int) -> void:
+	super(level)
+	_celebrate("kettle")
+
+
+func motion_debug() -> Dictionary:
+	var d := motion.debug()
+	d["belts"] = _belts.size()
+	d["belts_moving"] = _belts.filter(func(b: Dictionary) -> bool: return bool(b["moving"])).size()
+	d["belt_phase"] = _belts.map(func(b: Dictionary) -> float: return snappedf(float(b["phase"]), 0.01))
+	d["emitters"] = _emitters.size()
+	d["fx_alive"] = fx.alive
+	d["fx_peak"] = fx.peak
+	d["fx_dropped"] = fx.dropped
+	d["glow_nodes"] = _glows.size()
+	d["light_children"] = light_layer.get_child_count()
+	d["belt_children"] = belt_layer.get_child_count()
+	d["ring"] = [machine_centre().x, machine_centre().y, ring_radius()]
+	d["kettle"] = [machine_node.position.x, machine_node.position.y]
+	return d

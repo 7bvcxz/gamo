@@ -28,6 +28,7 @@ var clock := PopClock.new()
 var session := PopSession.new()
 var history: Array[Dictionary] = []
 var reduced_motion := false
+var low_effects := false   ## Step 42: ?fx=low
 ## Step 14: ?burst=1 turns on the stand's crescendo (off = the stand as it was).
 var burst := false
 ## Step 22: ?seed=N -- a measured session from that seed: a fresh run that is
@@ -86,6 +87,7 @@ func _ready() -> void:
 	route = PopRoute.parse(PopWeb.location_hash(), PopWeb.location_search(), OS.get_cmdline_user_args())
 	# ?motion=reduce forces it, ?motion=full overrides the system's setting.
 	reduced_motion = String(route["motion"]) == "reduce" or (String(route["motion"]) != "full" and PopWeb.prefers_reduced_motion())
+	low_effects = String(route.get("fx", "")) == "low"
 	frame.dev = bool(route["dev"])
 	frame.trial = bool(route["trial"])
 	burst = bool(route["burst"])
@@ -243,6 +245,33 @@ func dev_contest(id: String) -> Dictionary:
 	return r
 
 
+## Step 42: a later factory for the motion tests -- the machines of `plan` ([[type, floor], ...])
+## bought through the app's own commands (each floor's next line when it is full), at sign
+## `sign`, the packing station at `packer`. Setup, not play (the play tests build by hand).
+func dev_build(plan: Array, sign: int, packer: int) -> Dictionary:
+	if rules == null or not rules.has_method("floor_full"):
+		return {"ok": false}
+	rules.sign_tier = maxi(int(rules.sign_tier), 6)
+	rules.packer_tier = maxi(int(rules.packer_tier), packer)
+	rules.level = maxi(int(rules.level), 6)
+	rules.stats["packed"] = maxi(1, int(rules.stats["packed"]))
+	rules.stats["sold"] = maxi(1, int(rules.stats["sold"]))
+	var before: int = rules.money
+	rules.money += 1 << 24
+	var built := 0
+	for row: Array in plan:
+		var fl := String(row[1])
+		if rules.floor_full(fl) and int(rules.line_cost(fl)) >= 0:
+			on_command("buy_line", {"type": "buy_line", "floor": fl})
+		var n: int = rules.machines.size()
+		on_command("build", {"type": "build", "machine": String(row[0]), "floor": fl})
+		built += rules.machines.size() - n
+	rules.sign_tier = maxi(int(rules.sign_tier), sign)
+	rules.money = maxi(before, 3000)
+	_flush()
+	return {"ok": true, "built": built, "machines": rules.machines.size()}
+
+
 func dev_level(level: int) -> void:
 	if rules != null:
 		rules.level = clampi(level, 0, rules.max_level())
@@ -395,6 +424,8 @@ func _start(id: String) -> void:
 	var view_script: GDScript = load(String(entry["view"]))
 	var view: PopPlayView = view_script.new()
 	view.reduced_motion = reduced_motion
+	if "low_effects" in view:
+		view.set("low_effects", low_effects)
 	view.audio = audio
 	audio.stop_all()
 	view.command.connect(on_command)
@@ -467,7 +498,7 @@ func state() -> Dictionary:
 	var out := {"version": version(), "screen": screen, "exp": exp_id,
 		"window": [get_window().size.x, get_window().size.y] if get_window() else [0, 0],
 		"listed": PopRegistry.listed().map(func(e: Dictionary) -> String: return String(e["id"])),
-		"history": history.size(), "rects": _rects(), "reduced_motion": reduced_motion}
+		"history": history.size(), "rects": _rects(), "reduced_motion": reduced_motion, "low_effects": low_effects}
 	# Step 18: what the picture is doing (the factory's journeys), for the tests.
 	if screen == "play" and frame.play != null and frame.play.has_method("debug_state"):
 		out["view"] = frame.play.call("debug_state")

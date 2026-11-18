@@ -14,7 +14,7 @@ var vel := PackedVector2Array()
 var life := PackedFloat32Array()     # seconds left; <= 0 is a free slot
 var size := PackedFloat32Array()
 var rot := PackedFloat32Array()
-var kind := PackedByteArray()        # 0 popcorn, 1 coin, 2 smoke, 3 kernel, 4 sparkle
+var kind := PackedByteArray()        # 0 popcorn, 1 coin, 2 smoke, 3 kernel, 4 sparkle, 5 steam (Step 42)
 var tint := PackedColorArray()
 var target := Vector2.ZERO           # where coins fly (the money counter)
 var alive := 0
@@ -73,6 +73,12 @@ func rain(left: float, right: float, top: float, n: int, scale: float, rng: Rand
 			rng.randf_range(1.4, 2.0), rng.randf_range(15.0, 22.0) * scale, rng.randf() * TAU, col)
 
 
+## Step 42: a pale wisp rising slowly from a working kettle (never covers more than its machine).
+func steam(from: Vector2, scale: float, rng: RandomNumberGenerator) -> void:
+	_spawn(5, from + Vector2(rng.randf_range(-10.0, 10.0), 0.0) * scale, Vector2(rng.randf_range(-16.0, 16.0), rng.randf_range(-95.0, -60.0)) * scale,
+		rng.randf_range(0.9, 1.3), rng.randf_range(10.0, 14.0) * scale, 0.0, Color.WHITE)
+
+
 func coin(from: Vector2, scale: float) -> void:
 	_spawn(1, from, Vector2.ZERO, 0.55, 20.0 * scale, 0.0, PopPalette.GOLD)
 
@@ -91,6 +97,9 @@ func step(delta: float) -> void:
 		elif kind[i] == 2:
 			pos[i] += vel[i] * delta
 			size[i] += delta * 30.0
+		elif kind[i] == 5:
+			pos[i] += vel[i] * delta
+			size[i] += delta * 9.0
 		elif kind[i] == 4:
 			size[i] += delta * 20.0
 		else:
@@ -119,6 +128,8 @@ func draw(ci: CanvasItem) -> void:
 				PopMachineArt.draw_coin(ci, pos[i], size[i])
 			2:
 				ci.draw_circle(pos[i], size[i], Color(tint[i], tint[i].a * fade))
+			5:
+				ci.draw_circle(pos[i], size[i], Color(1, 1, 1, 0.35 * fade))
 			3:
 				ci.draw_circle(pos[i], size[i], Color(tint[i], fade))
 			_:
@@ -140,7 +151,7 @@ const PIECES := ["piece_a", "piece_b", "piece_c"]
 func _draw_sprites(ci: CanvasItem) -> void:
 	var tex := PopAtlas.texture()
 	var regs := {}
-	for n: String in ["piece_a", "piece_b", "piece_c", "coin", "smoke", "kernel", "sparkle"]:
+	for n: String in ["piece_a", "piece_b", "piece_c", "coin", "smoke", "kernel", "sparkle", "steam"]:
 		regs[n] = PopAtlas.region(n)
 	for i in CAP:
 		if life[i] <= 0.0:
@@ -163,6 +174,9 @@ func _draw_sprites(ci: CanvasItem) -> void:
 			4:
 				name = "sparkle"
 				col = Color(1, 1, 1, clampf(life[i] / 0.3, 0.0, 1.0))
+			5:
+				name = "steam" if regs.has("steam") and (regs["steam"] as Rect2).size.x > 0.0 else "smoke"
+				col = Color(1, 1, 1, clampf(life[i] / 0.45, 0.0, 1.0))
 			_:
 				name = PIECES[i % 3]
 				d = size[i] * 2.3
