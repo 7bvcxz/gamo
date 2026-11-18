@@ -3612,7 +3612,7 @@ func contests_state() -> Dictionary:
 	var e: Dictionary = contests.get("entry", {})
 	if not e.is_empty():
 		entry = _contest_card(String(e["id"]), {"seq": e["seq"], "left_ms": maxi(0, int(e["end"]) - flow_ms), "tiers": e["tiers"], "score": contest_score(e), "tier": contest_tier(e),
-			"packs": contest_packs(e), "cur": e["cur"], "pops": e["pops"], "batches": e["batches"]})
+			"packs": contest_packs(e), "cur": e["cur"], "pops": e["pops"], "batches": e["batches"], "base": (e["base"] as Dictionary).duplicate()})
 	var res: Array = []
 	for r: Dictionary in (contests.get("results", []) as Array).slice(-3):
 		res.append(_contest_card(String(r["id"]), r))

@@ -308,16 +308,20 @@ test('contests: an advanced factory enters lean packing and its score comes from
   await pop.tap('contest_enter_lean_packing');
   await expect.poll(async () => C(await pop.state()).entry.id).toBe('lean_packing');
   s = await pop.state();
-  const base = s.run.stats;
   const w = (st) => (st.overfill_portions || 0) + (st.lost_portions || 0);
+  const base0 = st0;
   for (let i = 0; i < 80; i++) {
     if (i % 2 === 0) await cook(pop);
     const st = await pop.call('dev_advance', 2000);
     if (i === 30) { await pop.page.waitForTimeout(200); await pop.shot('contests38_factory_live'); }
     if (!C(st.state).entry.id) break;
     const e = C(st.state).entry;
-    const made = (st.state.run.stats.packed_portions || 0) - (base.packed_portions || 0);
-    if (made > 0) expect(Math.abs(e.score - Math.round((w(st.state.run.stats) - w(base)) * 1000 / made) / 10), 'its score: given away per 100 packed').toBeLessThanOrEqual(0.11);
+    // (from the entry's own baseline, taken by the game at the tick it entered: a state read after
+    // the tap is later on a loaded machine, and the line packs and overfills in between)
+    const b = e.base;
+    expect(b.packed_portions, 'the entry keeps its baseline').toBeGreaterThanOrEqual(base0.packed_portions || 0);
+    const made = (st.state.run.stats.packed_portions || 0) - b.packed_portions;
+    if (made > 0) expect(Math.abs(e.score - Math.round((w(st.state.run.stats) - b.waste) * 1000 / made) / 10), 'its score: given away per 100 packed').toBeLessThanOrEqual(0.11);
   }
   for (let i = 0; i < 100; i++) {
     const st = await pop.call('dev_advance', 3000);

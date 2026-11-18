@@ -4232,6 +4232,9 @@ func test_a_first_entry_pays_its_fee_once_and_one_contest_runs_at_a_time() -> vo
 	assert_true(bool(r["ok"]), "entered")
 	assert_eq(int(f.money), m0 - fee, "the fee, once")
 	assert_eq(int(f.stats["contest_fees"]), fee, "counted")
+	var shown: Dictionary = (f.contests_state()["entry"] as Dictionary).get("base", {})
+	assert_eq(int(shown.get("packed_portions", -1)), int(f.stats.get("packed_portions", 0)), "the state shows the baseline taken at entry (a test reads it, not a later state)")
+	assert_eq(int(shown.get("waste", -1)), int(f._waste()), "and its waste")
 	assert_false(_posted_ids(f).has("perfect_streak"), "off the board while it runs")
 	for id: String in _posted_ids(f):
 		assert_eq(String(f.execute({"type": "contest_enter", "id": id})["reason"]), "err.contest_running", "one at a time (%s)" % id)
