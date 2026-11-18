@@ -1,0 +1,1061 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/motion42.spec.mjs",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "motion42.spec.mjs",
+      "file": "motion42.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "arc",
+                  "description": "{\"glow_at\":[10.291562962963,7.87513333333334,3.02667677777778],\"tier\":\"solo\"}"
+                },
+                {
+                  "type": "celebrate",
+                  "description": "{\"climb\":[0.0484444444444444,0.205740740740741,0.353296296296296,0.767518518518518,0.906407407407407,1,1,1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14744,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:06:00.120Z",
+                  "annotations": [
+                    {
+                      "type": "arc",
+                      "description": "{\"glow_at\":[10.291562962963,7.87513333333334,3.02667677777778],\"tier\":\"solo\"}"
+                    },
+                    {
+                      "type": "celebrate",
+                      "description": "{\"climb\":[0.0484444444444444,0.205740740740741,0.353296296296296,0.767518518518518,0.906407407407407,1,1,1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-one-batch-lights--38227-ration-never-moves-the-ring-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-67610f35b63ab3042895",
+          "file": "motion42.spec.mjs",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "crescendo",
+                  "description": "{\"samples\":[{\"t\":9,\"running\":38,\"alive\":18,\"given\":{\"ambient\":98,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":12.1},{\"t\":19,\"running\":34,\"alive\":19,\"given\":{\"ambient\":118,\"lot\":42,\"sparkle\":38},\"low\":true,\"fps\":11.8},{\"t\":29,\"running\":32,\"alive\":15,\"given\":{\"ambient\":141,\"lot\":56,\"sparkle\":51},\"low\":true,\"fps\":11.3},{\"t\":39,\"running\":35,\"alive\":24,\"given\":{\"ambient\":162,\"lot\":70,\"sparkle\":61},\"low\":true,\"fps\":11.5}],\"tiers\":[\"swarm\"],\"peak\":104,\"belts\":6,\"render\":{\"draw_calls\":1156,\"objects\":1375,\"fps\":11,\"nodes\":394},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":124,\"open\":3,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 41929,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:06:14.919Z",
+                  "annotations": [
+                    {
+                      "type": "crescendo",
+                      "description": "{\"samples\":[{\"t\":9,\"running\":38,\"alive\":18,\"given\":{\"ambient\":98,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":12.1},{\"t\":19,\"running\":34,\"alive\":19,\"given\":{\"ambient\":118,\"lot\":42,\"sparkle\":38},\"low\":true,\"fps\":11.8},{\"t\":29,\"running\":32,\"alive\":15,\"given\":{\"ambient\":141,\"lot\":56,\"sparkle\":51},\"low\":true,\"fps\":11.3},{\"t\":39,\"running\":35,\"alive\":24,\"given\":{\"ambient\":162,\"lot\":70,\"sparkle\":61},\"low\":true,\"fps\":11.5}],\"tiers\":[\"swarm\"],\"peak\":104,\"belts\":6,\"render\":{\"draw_calls\":1156,\"objects\":1375,\"fps\":11,\"nodes\":394},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":124,\"open\":3,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-forty-four-machin-a5c97-h-a-resize-and-a-hidden-tab-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-bce09d87d923f0890835",
+          "file": "motion42.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "low effects",
+                  "description": "{\"low\":true,\"reduced\":false,\"given\":54,\"secs\":13.297,\"phase\":[[48.88,48.88,48.88,17.04,0,48.88],[449.36,449.36,449.36,369.51,322.07,449.36]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19376,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:06:56.855Z",
+                  "annotations": [
+                    {
+                      "type": "low effects",
+                      "description": "{\"low\":true,\"reduced\":false,\"given\":54,\"secs\":13.297,\"phase\":[[48.88,48.88,48.88,17.04,0,48.88],[449.36,449.36,449.36,369.51,322.07,449.36]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-low-effects-small-9f1da-ill-travels-kitchen-to-shop-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-c4f7ce7483a411bd69d9",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        },
+        {
+          "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "reduced motion",
+                  "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.255,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19217,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:07:16.240Z",
+                  "annotations": [
+                    {
+                      "type": "reduced motion",
+                      "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.255,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-reduced-motion-sm-b92b9-ill-travels-kitchen-to-shop-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-ce303693c819bc347732",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        },
+        {
+          "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "arc",
+                  "description": "{\"glow_at\":[10.7154666666667,8.34322222222222,3.4541],\"tier\":\"solo\"}"
+                },
+                {
+                  "type": "celebrate",
+                  "description": "{\"climb\":[0.0586666666666667,0.199592592592593,0.329222222222222,0.929304526748971,1,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15816,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:07:35.783Z",
+                  "annotations": [
+                    {
+                      "type": "arc",
+                      "description": "{\"glow_at\":[10.7154666666667,8.34322222222222,3.4541],\"tier\":\"solo\"}"
+                    },
+                    {
+                      "type": "celebrate",
+                      "description": "{\"climb\":[0.0586666666666667,0.199592592592593,0.329222222222222,0.929304526748971,1,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-one-batch-lights--38227-ration-never-moves-the-ring-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-563017c56138125269b0",
+          "file": "motion42.spec.mjs",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "crescendo",
+                  "description": "{\"samples\":[{\"t\":9,\"running\":39,\"alive\":25,\"given\":{\"ambient\":90,\"lot\":30,\"sparkle\":28},\"low\":true,\"fps\":10.4},{\"t\":19,\"running\":32,\"alive\":13,\"given\":{\"ambient\":111,\"lot\":43,\"sparkle\":41},\"low\":true,\"fps\":10.3},{\"t\":29,\"running\":31,\"alive\":17,\"given\":{\"ambient\":134,\"lot\":58,\"sparkle\":53},\"low\":true,\"fps\":9.5},{\"t\":39,\"running\":36,\"alive\":25,\"given\":{\"ambient\":155,\"lot\":72,\"sparkle\":63},\"low\":true,\"fps\":9.8}],\"tiers\":[\"swarm\"],\"peak\":105,\"belts\":6,\"render\":{\"draw_calls\":1140,\"objects\":1365,\"fps\":11,\"nodes\":391},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":124,\"open\":4,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 43347,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:07:51.652Z",
+                  "annotations": [
+                    {
+                      "type": "crescendo",
+                      "description": "{\"samples\":[{\"t\":9,\"running\":39,\"alive\":25,\"given\":{\"ambient\":90,\"lot\":30,\"sparkle\":28},\"low\":true,\"fps\":10.4},{\"t\":19,\"running\":32,\"alive\":13,\"given\":{\"ambient\":111,\"lot\":43,\"sparkle\":41},\"low\":true,\"fps\":10.3},{\"t\":29,\"running\":31,\"alive\":17,\"given\":{\"ambient\":134,\"lot\":58,\"sparkle\":53},\"low\":true,\"fps\":9.5},{\"t\":39,\"running\":36,\"alive\":25,\"given\":{\"ambient\":155,\"lot\":72,\"sparkle\":63},\"low\":true,\"fps\":9.8}],\"tiers\":[\"swarm\"],\"peak\":105,\"belts\":6,\"render\":{\"draw_calls\":1140,\"objects\":1365,\"fps\":11,\"nodes\":391},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":124,\"open\":4,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-forty-four-machin-a5c97-h-a-resize-and-a-hidden-tab-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-e2c06e41428148057289",
+          "file": "motion42.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "low effects",
+                  "description": "{\"low\":true,\"reduced\":false,\"given\":56,\"secs\":13.93,\"phase\":[[56.52,56.52,56.52,16.01,0,56.52],[555.22,555.22,555.22,456.59,401.59,555.22]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 20558,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:08:35.010Z",
+                  "annotations": [
+                    {
+                      "type": "low effects",
+                      "description": "{\"low\":true,\"reduced\":false,\"given\":56,\"secs\":13.93,\"phase\":[[56.52,56.52,56.52,16.01,0,56.52],[555.22,555.22,555.22,456.59,401.59,555.22]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-low-effects-small-9f1da-ill-travels-kitchen-to-shop-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-c4a8c05a71b496bb2722",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        },
+        {
+          "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "reduced motion",
+                  "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.827,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 20456,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:08:55.579Z",
+                  "annotations": [
+                    {
+                      "type": "reduced motion",
+                      "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.827,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-reduced-motion-sm-b92b9-ill-travels-kitchen-to-shop-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-993c702cbbd1057954da",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        },
+        {
+          "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "arc",
+                  "description": "{\"glow_at\":[10.3442666666667,7.92245000000001,3.06973333333333],\"tier\":\"solo\"}"
+                },
+                {
+                  "type": "celebrate",
+                  "description": "{\"climb\":[0.0416666666666667,0.19317695473251,0.353251028806584,0.792139917695473,0.938899176954732,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14873,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:09:16.373Z",
+                  "annotations": [
+                    {
+                      "type": "arc",
+                      "description": "{\"glow_at\":[10.3442666666667,7.92245000000001,3.06973333333333],\"tier\":\"solo\"}"
+                    },
+                    {
+                      "type": "celebrate",
+                      "description": "{\"climb\":[0.0416666666666667,0.19317695473251,0.353251028806584,0.792139917695473,0.938899176954732,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-one-batch-lights--38227-ration-never-moves-the-ring-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-d1cc7d51bfe770ad7d11",
+          "file": "motion42.spec.mjs",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "crescendo",
+                  "description": "{\"samples\":[{\"t\":9,\"running\":38,\"alive\":17,\"given\":{\"ambient\":99,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":10.3},{\"t\":19,\"running\":32,\"alive\":11,\"given\":{\"ambient\":121,\"lot\":43,\"sparkle\":40},\"low\":true,\"fps\":10.9},{\"t\":29,\"running\":31,\"alive\":23,\"given\":{\"ambient\":144,\"lot\":58,\"sparkle\":52},\"low\":true,\"fps\":10.9},{\"t\":39,\"running\":36,\"alive\":26,\"given\":{\"ambient\":165,\"lot\":72,\"sparkle\":63},\"low\":true,\"fps\":10.2}],\"tiers\":[\"swarm\"],\"peak\":100,\"belts\":6,\"render\":{\"draw_calls\":1343,\"objects\":1658,\"fps\":10,\"nodes\":393},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":123,\"open\":2,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 43069,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:09:31.300Z",
+                  "annotations": [
+                    {
+                      "type": "crescendo",
+                      "description": "{\"samples\":[{\"t\":9,\"running\":38,\"alive\":17,\"given\":{\"ambient\":99,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":10.3},{\"t\":19,\"running\":32,\"alive\":11,\"given\":{\"ambient\":121,\"lot\":43,\"sparkle\":40},\"low\":true,\"fps\":10.9},{\"t\":29,\"running\":31,\"alive\":23,\"given\":{\"ambient\":144,\"lot\":58,\"sparkle\":52},\"low\":true,\"fps\":10.9},{\"t\":39,\"running\":36,\"alive\":26,\"given\":{\"ambient\":165,\"lot\":72,\"sparkle\":63},\"low\":true,\"fps\":10.2}],\"tiers\":[\"swarm\"],\"peak\":100,\"belts\":6,\"render\":{\"draw_calls\":1343,\"objects\":1658,\"fps\":10,\"nodes\":393},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":123,\"open\":2,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-forty-four-machin-a5c97-h-a-resize-and-a-hidden-tab-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-f9cbb8c6e57301cb1c2e",
+          "file": "motion42.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "low effects",
+                  "description": "{\"low\":true,\"reduced\":false,\"given\":55,\"secs\":13.516,\"phase\":[[44.74,44.74,44.74,15.46,0,44.74],[426.78,426.78,426.78,352.73,308.14,426.78]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19683,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:10:14.377Z",
+                  "annotations": [
+                    {
+                      "type": "low effects",
+                      "description": "{\"low\":true,\"reduced\":false,\"given\":55,\"secs\":13.516,\"phase\":[[44.74,44.74,44.74,15.46,0,44.74],[426.78,426.78,426.78,352.73,308.14,426.78]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-low-effects-small-9f1da-ill-travels-kitchen-to-shop-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-104f6724140f1d8e9eed",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        },
+        {
+          "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "reduced motion",
+                  "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.454,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19575,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:10:34.068Z",
+                  "annotations": [
+                    {
+                      "type": "reduced motion",
+                      "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.454,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-reduced-motion-sm-b92b9-ill-travels-kitchen-to-shop-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-7526b30c6748d5c747fa",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-18T19:05:59.718Z",
+    "duration": 294006.809,
+    "expected": 12,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

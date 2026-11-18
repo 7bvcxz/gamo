@@ -1,0 +1,3611 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/factory17.spec.mjs",
+      "specs/factory18.spec.mjs",
+      "specs/factory19.spec.mjs",
+      "specs/stall09.spec.mjs",
+      "specs/burst14.spec.mjs",
+      "specs/factory30.spec.mjs",
+      "specs/factory31.spec.mjs",
+      "specs/flavors34.spec.mjs",
+      "specs/customers36.spec.mjs",
+      "specs/news37.spec.mjs",
+      "specs/contests38.spec.mjs",
+      "specs/art40.spec.mjs",
+      "specs/art41.spec.mjs",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "art40.spec.mjs",
+      "file": "art40.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "art",
+                  "description": "{\"kettle\":{\"sat\":0.32,\"lumStd\":54.98,\"skyShare\":0.085,\"vivid\":0.327},\"wall\":{\"sat\":0.338,\"lumStd\":7.49,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.233,\"lumStd\":43.21,\"skyShare\":0.616,\"vivid\":0},\"tiles\":{\"sat\":0.031,\"lumStd\":5.79,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":362,\"objects\":648,\"primitives\":9999,\"nodes\":63,\"static_mem\":0,\"fps\":32}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5365,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:11:13.501Z",
+                  "annotations": [
+                    {
+                      "type": "art",
+                      "description": "{\"kettle\":{\"sat\":0.32,\"lumStd\":54.98,\"skyShare\":0.085,\"vivid\":0.327},\"wall\":{\"sat\":0.338,\"lumStd\":7.49,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.233,\"lumStd\":43.21,\"skyShare\":0.616,\"vivid\":0},\"tiles\":{\"sat\":0.031,\"lumStd\":5.79,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":362,\"objects\":648,\"primitives\":9999,\"nodes\":63,\"static_mem\":0,\"fps\":32}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-f753b17342e98864be2d",
+          "file": "art40.spec.mjs",
+          "line": 39,
+          "column": 1
+        },
+        {
+          "title": "the upgrade card: a silhouette out of reach, the next machine in its colours once affordable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "card",
+                  "description": "{\"poor\":{\"sat\":0.055,\"lumStd\":31.4,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.73,\"lumStd\":38.33,\"skyShare\":0.014,\"vivid\":0.871}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4571,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:11:18.926Z",
+                  "annotations": [
+                    {
+                      "type": "card",
+                      "description": "{\"poor\":{\"sat\":0.055,\"lumStd\":31.4,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.73,\"lumStd\":38.33,\"skyShare\":0.014,\"vivid\":0.871}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-082ef10e924646a05afe",
+          "file": "art40.spec.mjs",
+          "line": 68,
+          "column": 1
+        },
+        {
+          "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "art",
+                  "description": "{\"kettle\":{\"sat\":0.326,\"lumStd\":55.31,\"skyShare\":0.083,\"vivid\":0.334},\"wall\":{\"sat\":0.345,\"lumStd\":7.3,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.228,\"lumStd\":43.96,\"skyShare\":0.603,\"vivid\":0.005},\"tiles\":{\"sat\":0.031,\"lumStd\":5.65,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":354,\"objects\":640,\"primitives\":9983,\"nodes\":63,\"static_mem\":0,\"fps\":26}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6136,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:26:55.943Z",
+                  "annotations": [
+                    {
+                      "type": "art",
+                      "description": "{\"kettle\":{\"sat\":0.326,\"lumStd\":55.31,\"skyShare\":0.083,\"vivid\":0.334},\"wall\":{\"sat\":0.345,\"lumStd\":7.3,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.228,\"lumStd\":43.96,\"skyShare\":0.603,\"vivid\":0.005},\"tiles\":{\"sat\":0.031,\"lumStd\":5.65,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":354,\"objects\":640,\"primitives\":9983,\"nodes\":63,\"static_mem\":0,\"fps\":26}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-c85d3dcfbe377f1bb7be",
+          "file": "art40.spec.mjs",
+          "line": 39,
+          "column": 1
+        },
+        {
+          "title": "the upgrade card: a silhouette out of reach, the next machine in its colours once affordable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "card",
+                  "description": "{\"poor\":{\"sat\":0.055,\"lumStd\":31.23,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.732,\"lumStd\":37.33,\"skyShare\":0.015,\"vivid\":0.877}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5229,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:27:02.142Z",
+                  "annotations": [
+                    {
+                      "type": "card",
+                      "description": "{\"poor\":{\"sat\":0.055,\"lumStd\":31.23,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.732,\"lumStd\":37.33,\"skyShare\":0.015,\"vivid\":0.877}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-05f9d306d5243a95b687",
+          "file": "art40.spec.mjs",
+          "line": 68,
+          "column": 1
+        },
+        {
+          "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "art",
+                  "description": "{\"kettle\":{\"sat\":0.324,\"lumStd\":54.77,\"skyShare\":0.083,\"vivid\":0.329},\"wall\":{\"sat\":0.331,\"lumStd\":7.32,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.219,\"lumStd\":36.93,\"skyShare\":0.655,\"vivid\":0},\"tiles\":{\"sat\":0.031,\"lumStd\":5.94,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":467,\"objects\":821,\"primitives\":13145,\"nodes\":63,\"static_mem\":0,\"fps\":29}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5728,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:42:53.330Z",
+                  "annotations": [
+                    {
+                      "type": "art",
+                      "description": "{\"kettle\":{\"sat\":0.324,\"lumStd\":54.77,\"skyShare\":0.083,\"vivid\":0.329},\"wall\":{\"sat\":0.331,\"lumStd\":7.32,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.219,\"lumStd\":36.93,\"skyShare\":0.655,\"vivid\":0},\"tiles\":{\"sat\":0.031,\"lumStd\":5.94,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":467,\"objects\":821,\"primitives\":13145,\"nodes\":63,\"static_mem\":0,\"fps\":29}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-fa9e772cd49b9ba10d6b",
+          "file": "art40.spec.mjs",
+          "line": 39,
+          "column": 1
+        },
+        {
+          "title": "the upgrade card: a silhouette out of reach, the next machine in its colours once affordable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "card",
+                  "description": "{\"poor\":{\"sat\":0.052,\"lumStd\":31.47,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.729,\"lumStd\":38.82,\"skyShare\":0.014,\"vivid\":0.872}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4758,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:42:59.121Z",
+                  "annotations": [
+                    {
+                      "type": "card",
+                      "description": "{\"poor\":{\"sat\":0.052,\"lumStd\":31.47,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.729,\"lumStd\":38.82,\"skyShare\":0.014,\"vivid\":0.872}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91d22c52688c1e634f75-c44a1a3df543d6aeacc1",
+          "file": "art40.spec.mjs",
+          "line": 68,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "art41.spec.mjs",
+      "file": "art41.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"worst_iou\":0.507,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":150,\"news\":241,\"pack_rate\":0,\"perfect\":107,\"pop_rate\":0,\"queue\":118,\"sales\":0,\"sign_up\":156,\"stock\":250,\"trophy\":0,\"upkeep\":25},\"mean\":{\"heat\":[184,85,45],\"news\":[158,111,81],\"pack_rate\":[242,118,89],\"perfect\":[190,147,56],\"pop_rate\":[185,147,91],\"queue\":[130,152,169],\"sales\":[225,179,75],\"sign_up\":[157,92,71],\"stock\":[116,55,38],\"trophy\":[210,156,36],\"upkeep\":[209,175,92]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"receive\",\"delight\",\"walk\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16933,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:24:16.375Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"worst_iou\":0.507,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":150,\"news\":241,\"pack_rate\":0,\"perfect\":107,\"pop_rate\":0,\"queue\":118,\"sales\":0,\"sign_up\":156,\"stock\":250,\"trophy\":0,\"upkeep\":25},\"mean\":{\"heat\":[184,85,45],\"news\":[158,111,81],\"pack_rate\":[242,118,89],\"perfect\":[190,147,56],\"pop_rate\":[185,147,91],\"queue\":[130,152,169],\"sales\":[225,179,75],\"sign_up\":[157,92,71],\"stock\":[116,55,38],\"trophy\":[210,156,36],\"upkeep\":[209,175,92]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"receive\",\"delight\",\"walk\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-cast-sheet-an-ic-b0ac7-walkers-whose-feet-stay-put-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-840abaf9a6dc6a4c99bb",
+          "file": "art41.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.4,\"most\":14,\"looks\":13,\"stats\":{\"delight\":14,\"happy\":52,\"receive\":109,\"thanks\":43},\"hits\":[]},\"render\":{\"draw_calls\":866,\"objects\":1367,\"fps\":19}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 142252,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:24:33.369Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.4,\"most\":14,\"looks\":13,\"stats\":{\"delight\":14,\"happy\":52,\"receive\":109,\"thanks\":43},\"hits\":[]},\"render\":{\"draw_calls\":866,\"objects\":1367,\"fps\":19}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-shop-at-0-m-3-m--d827e-of-the-tube-and-the-buttons-p720/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-2c072ecc18212f91e177",
+          "file": "art41.spec.mjs",
+          "line": 119,
+          "column": 1
+        },
+        {
+          "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"worst_iou\":0.531,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":183,\"news\":281,\"pack_rate\":0,\"perfect\":126,\"pop_rate\":0,\"queue\":137,\"sales\":0,\"sign_up\":159,\"stock\":312,\"trophy\":0,\"upkeep\":28},\"mean\":{\"heat\":[182,85,44],\"news\":[155,106,75],\"pack_rate\":[243,118,89],\"perfect\":[189,146,55],\"pop_rate\":[185,147,91],\"queue\":[129,153,170],\"sales\":[224,178,72],\"sign_up\":[169,94,74],\"stock\":[111,53,37],\"trophy\":[208,155,38],\"upkeep\":[210,177,95]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17687,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:40:03.777Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"worst_iou\":0.531,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":183,\"news\":281,\"pack_rate\":0,\"perfect\":126,\"pop_rate\":0,\"queue\":137,\"sales\":0,\"sign_up\":159,\"stock\":312,\"trophy\":0,\"upkeep\":28},\"mean\":{\"heat\":[182,85,44],\"news\":[155,106,75],\"pack_rate\":[243,118,89],\"perfect\":[189,146,55],\"pop_rate\":[185,147,91],\"queue\":[129,153,170],\"sales\":[224,178,72],\"sign_up\":[169,94,74],\"stock\":[111,53,37],\"trophy\":[208,155,38],\"upkeep\":[210,177,95]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-cast-sheet-an-ic-b0ac7-walkers-whose-feet-stay-put-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-56440dba0bc514cc394d",
+          "file": "art41.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.5,\"most\":13,\"looks\":14,\"stats\":{\"delight\":12,\"happy\":51,\"receive\":110,\"thanks\":47},\"hits\":[]},\"render\":{\"draw_calls\":894,\"objects\":1403,\"fps\":16}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 151471,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:40:21.522Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.5,\"most\":13,\"looks\":14,\"stats\":{\"delight\":12,\"happy\":51,\"receive\":110,\"thanks\":47},\"hits\":[]},\"render\":{\"draw_calls\":894,\"objects\":1403,\"fps\":16}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-shop-at-0-m-3-m--d827e-of-the-tube-and-the-buttons-phone/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-01b32bdac3a6407f922e",
+          "file": "art41.spec.mjs",
+          "line": 119,
+          "column": 1
+        },
+        {
+          "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"worst_iou\":0.553,\"pair\":\"news~queue\",\"ink\":{\"heat\":71,\"news\":157,\"pack_rate\":0,\"perfect\":48,\"pop_rate\":0,\"queue\":53,\"sales\":0,\"sign_up\":82,\"stock\":111,\"trophy\":0,\"upkeep\":17},\"mean\":{\"heat\":[184,86,44],\"news\":[131,94,68],\"pack_rate\":[244,118,89],\"perfect\":[192,148,56],\"pop_rate\":[185,147,91],\"queue\":[129,152,169],\"sales\":[224,178,73],\"sign_up\":[175,125,105],\"stock\":[120,57,39],\"trophy\":[209,156,38],\"upkeep\":[209,171,84]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\",\"delight\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16685,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:58:18.775Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"worst_iou\":0.553,\"pair\":\"news~queue\",\"ink\":{\"heat\":71,\"news\":157,\"pack_rate\":0,\"perfect\":48,\"pop_rate\":0,\"queue\":53,\"sales\":0,\"sign_up\":82,\"stock\":111,\"trophy\":0,\"upkeep\":17},\"mean\":{\"heat\":[184,86,44],\"news\":[131,94,68],\"pack_rate\":[244,118,89],\"perfect\":[192,148,56],\"pop_rate\":[185,147,91],\"queue\":[129,152,169],\"sales\":[224,178,73],\"sign_up\":[175,125,105],\"stock\":[120,57,39],\"trophy\":[209,156,38],\"upkeep\":[209,171,84]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\",\"delight\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-cast-sheet-an-ic-b0ac7-walkers-whose-feet-stay-put-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-c1e6351fe9f653bde3d3",
+          "file": "art41.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.4,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.3,\"most\":14,\"looks\":14,\"stats\":{\"delight\":15,\"happy\":49,\"receive\":109,\"thanks\":45},\"hits\":[]},\"render\":{\"draw_calls\":744,\"objects\":1193,\"fps\":19}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 138491,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:58:35.516Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.4,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.3,\"most\":14,\"looks\":14,\"stats\":{\"delight\":15,\"happy\":49,\"receive\":109,\"thanks\":45},\"hits\":[]},\"render\":{\"draw_calls\":744,\"objects\":1193,\"fps\":19}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/art41-the-shop-at-0-m-3-m--d827e-of-the-tube-and-the-buttons-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b8ef6a23580d45fed3c6-41115607acc2a3f3bdac",
+          "file": "art41.spec.mjs",
+          "line": 119,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "burst14.spec.mjs",
+      "file": "burst14.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10622,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:11:23.519Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e716f8394997284ec390-724f4208e5c13060197b",
+          "file": "burst14.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "without ?burst=1 the stand has no crescendo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10336,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:11:34.150Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e716f8394997284ec390-fdb49e0ca976bcbfc2ca",
+          "file": "burst14.spec.mjs",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "the fountain is heard and does not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures the sound",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/burst14.spec.mjs",
+                    "line": 52,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 31,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:11:44.494Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures the sound",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/burst14.spec.mjs",
+                        "line": 52,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e716f8394997284ec390-e29171ed87379f153641",
+          "file": "burst14.spec.mjs",
+          "line": 51,
+          "column": 1
+        },
+        {
+          "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11120,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:27:07.396Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e716f8394997284ec390-0957e1d0fd6fd6995742",
+          "file": "burst14.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "without ?burst=1 the stand has no crescendo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10655,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:27:18.526Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e716f8394997284ec390-bf6ce6fc547944b33401",
+          "file": "burst14.spec.mjs",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "the fountain is heard and does not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures the sound",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/burst14.spec.mjs",
+                    "line": 52,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 34,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:27:29.190Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures the sound",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/burst14.spec.mjs",
+                        "line": 52,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e716f8394997284ec390-642f8019347a6fbd8d50",
+          "file": "burst14.spec.mjs",
+          "line": 51,
+          "column": 1
+        },
+        {
+          "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10563,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:43:03.897Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e716f8394997284ec390-10eb21a75b68193cf030",
+          "file": "burst14.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "without ?burst=1 the stand has no crescendo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10156,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:43:14.470Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e716f8394997284ec390-8e52b72fa6232cd5d87f",
+          "file": "burst14.spec.mjs",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "the fountain is heard and does not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fountain rms 0.227 peak 0.776"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17426,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:43:24.635Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fountain rms 0.227 peak 0.776"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e716f8394997284ec390-412fc0065bee62c3c2d2",
+          "file": "burst14.spec.mjs",
+          "line": 51,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "contests38.spec.mjs",
+      "file": "contests38.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 720000,
+              "annotations": [
+                {
+                  "type": "dot",
+                  "description": "{\"dot\":191,\"posted\":[\"perfect_streak\"]}"
+                },
+                {
+                  "type": "live",
+                  "description": "{\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"left0\":136750,\"leftHidden\":136700}"
+                },
+                {
+                  "type": "result",
+                  "description": "{\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":390000,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":21,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":210000,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}"
+                },
+                {
+                  "type": "reload",
+                  "description": "{\"before\":{\"seq\":3,\"left\":208250,\"score\":6},\"after\":{\"seq\":3,\"left\":207050,\"score\":6},\"wall\":1733}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 120705,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:11:44.540Z",
+                  "annotations": [
+                    {
+                      "type": "dot",
+                      "description": "{\"dot\":191,\"posted\":[\"perfect_streak\"]}"
+                    },
+                    {
+                      "type": "live",
+                      "description": "{\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"left0\":136750,\"leftHidden\":136700}"
+                    },
+                    {
+                      "type": "result",
+                      "description": "{\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":390000,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":21,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":210000,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}"
+                    },
+                    {
+                      "type": "reload",
+                      "description": "{\"before\":{\"seq\":3,\"left\":208250,\"score\":6},\"after\":{\"seq\":3,\"left\":207050,\"score\":6},\"wall\":1733}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0d56ad8db08504000a5b-6537e0754766f7032140",
+          "file": "contests38.spec.mjs",
+          "line": 95,
+          "column": 1
+        },
+        {
+          "title": "contests: an advanced factory enters lean packing and its score comes from the counters",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "lean",
+                  "description": "{\"score\":0.8,\"packs\":137,\"tier\":3,\"prize\":240,\"overfill\":3,\"lost\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 139605,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:13:45.251Z",
+                  "annotations": [
+                    {
+                      "type": "lean",
+                      "description": "{\"score\":0.8,\"packs\":137,\"tier\":3,\"prize\":240,\"overfill\":3,\"lost\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0d56ad8db08504000a5b-17d125613c7b1c9f4d8c",
+          "file": "contests38.spec.mjs",
+          "line": 283,
+          "column": 1
+        },
+        {
+          "title": "contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 720000,
+              "annotations": [
+                {
+                  "type": "dot",
+                  "description": "{\"dot\":221,\"posted\":[\"perfect_streak\"]}"
+                },
+                {
+                  "type": "live",
+                  "description": "{\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"left0\":137050,\"leftHidden\":137000}"
+                },
+                {
+                  "type": "result",
+                  "description": "{\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":389650,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":21,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":209650,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}"
+                },
+                {
+                  "type": "reload",
+                  "description": "{\"before\":{\"seq\":3,\"left\":207700,\"score\":6},\"after\":{\"seq\":3,\"left\":206200,\"score\":6},\"wall\":2003}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 122356,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:27:29.239Z",
+                  "annotations": [
+                    {
+                      "type": "dot",
+                      "description": "{\"dot\":221,\"posted\":[\"perfect_streak\"]}"
+                    },
+                    {
+                      "type": "live",
+                      "description": "{\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"left0\":137050,\"leftHidden\":137000}"
+                    },
+                    {
+                      "type": "result",
+                      "description": "{\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":389650,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":21,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":209650,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}"
+                    },
+                    {
+                      "type": "reload",
+                      "description": "{\"before\":{\"seq\":3,\"left\":207700,\"score\":6},\"after\":{\"seq\":3,\"left\":206200,\"score\":6},\"wall\":2003}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0d56ad8db08504000a5b-66f00bf81135502da7fe",
+          "file": "contests38.spec.mjs",
+          "line": 95,
+          "column": 1
+        },
+        {
+          "title": "contests: an advanced factory enters lean packing and its score comes from the counters",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "lean",
+                  "description": "{\"score\":1.1,\"packs\":135,\"tier\":2,\"prize\":120,\"overfill\":5,\"lost\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 150974,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:29:31.601Z",
+                  "annotations": [
+                    {
+                      "type": "lean",
+                      "description": "{\"score\":1.1,\"packs\":135,\"tier\":2,\"prize\":120,\"overfill\":5,\"lost\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0d56ad8db08504000a5b-3dc13bc755732951c635",
+          "file": "contests38.spec.mjs",
+          "line": 283,
+          "column": 1
+        },
+        {
+          "title": "contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 720000,
+              "annotations": [
+                {
+                  "type": "dot",
+                  "description": "{\"dot\":137,\"posted\":[\"perfect_streak\"]}"
+                },
+                {
+                  "type": "live",
+                  "description": "{\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"left0\":135450,\"leftHidden\":135400}"
+                },
+                {
+                  "type": "result",
+                  "description": "{\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":387600,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":22,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":207600,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}"
+                },
+                {
+                  "type": "reload",
+                  "description": "{\"before\":{\"seq\":3,\"left\":208650,\"score\":6},\"after\":{\"seq\":3,\"left\":207350,\"score\":6},\"wall\":1846}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 111189,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:43:42.078Z",
+                  "annotations": [
+                    {
+                      "type": "dot",
+                      "description": "{\"dot\":137,\"posted\":[\"perfect_streak\"]}"
+                    },
+                    {
+                      "type": "live",
+                      "description": "{\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"left0\":135450,\"leftHidden\":135400}"
+                    },
+                    {
+                      "type": "result",
+                      "description": "{\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":387600,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":22,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":207600,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}"
+                    },
+                    {
+                      "type": "reload",
+                      "description": "{\"before\":{\"seq\":3,\"left\":208650,\"score\":6},\"after\":{\"seq\":3,\"left\":207350,\"score\":6},\"wall\":1846}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0d56ad8db08504000a5b-e71be115a97cc42440a6",
+          "file": "contests38.spec.mjs",
+          "line": 95,
+          "column": 1
+        },
+        {
+          "title": "contests: an advanced factory enters lean packing and its score comes from the counters",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "lean",
+                  "description": "{\"score\":1.1,\"packs\":137,\"tier\":2,\"prize\":120,\"overfill\":5,\"lost\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 134955,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:45:33.276Z",
+                  "annotations": [
+                    {
+                      "type": "lean",
+                      "description": "{\"score\":1.1,\"packs\":137,\"tier\":2,\"prize\":120,\"overfill\":5,\"lost\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0d56ad8db08504000a5b-84567deb609010be8081",
+          "file": "contests38.spec.mjs",
+          "line": 283,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "customers36.spec.mjs",
+      "file": "customers36.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "a classic first customer, then a cast with their own tastes, faces and stars",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"arrived_who\":{\"classic\":13,\"elder\":2,\"kid\":7,\"student\":13},\"passed_by_who\":{\"kid\":8,\"rush\":13},\"sold\":30,\"happy\":29,\"popularity\":[50.4,55.8],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":158,\"thanks\":true,\"flavor_sold\":{\"caramel\":3,\"cheese\":2}}"
+                },
+                {
+                  "type": "stopped",
+                  "description": "{\"abandoned\":[0,4],\"passed\":[21,55],\"popularity\":[55.8,52.6],\"stars\":3}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 52259,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:16:04.874Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"arrived_who\":{\"classic\":13,\"elder\":2,\"kid\":7,\"student\":13},\"passed_by_who\":{\"kid\":8,\"rush\":13},\"sold\":30,\"happy\":29,\"popularity\":[50.4,55.8],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":158,\"thanks\":true,\"flavor_sold\":{\"caramel\":3,\"cheese\":2}}"
+                    },
+                    {
+                      "type": "stopped",
+                      "description": "{\"abandoned\":[0,4],\"passed\":[21,55],\"popularity\":[55.8,52.6],\"stars\":3}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f12d1c20486264113d21-dfb786fa8a015717b908",
+          "file": "customers36.spec.mjs",
+          "line": 49,
+          "column": 1
+        },
+        {
+          "title": "a classic first customer, then a cast with their own tastes, faces and stars",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"arrived_who\":{\"classic\":13,\"elder\":2,\"kid\":7,\"student\":13},\"passed_by_who\":{\"kid\":8,\"rush\":13},\"sold\":30,\"happy\":29,\"popularity\":[50.4,55.8],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":587,\"thanks\":true,\"flavor_sold\":{\"caramel\":1,\"cheese\":2}}"
+                },
+                {
+                  "type": "stopped",
+                  "description": "{\"abandoned\":[0,4],\"passed\":[21,54],\"popularity\":[55.8,52.8],\"stars\":3}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 55992,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:32:02.593Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"arrived_who\":{\"classic\":13,\"elder\":2,\"kid\":7,\"student\":13},\"passed_by_who\":{\"kid\":8,\"rush\":13},\"sold\":30,\"happy\":29,\"popularity\":[50.4,55.8],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":587,\"thanks\":true,\"flavor_sold\":{\"caramel\":1,\"cheese\":2}}"
+                    },
+                    {
+                      "type": "stopped",
+                      "description": "{\"abandoned\":[0,4],\"passed\":[21,54],\"popularity\":[55.8,52.8],\"stars\":3}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f12d1c20486264113d21-f541c2bd58799e238896",
+          "file": "customers36.spec.mjs",
+          "line": 49,
+          "column": 1
+        },
+        {
+          "title": "a classic first customer, then a cast with their own tastes, faces and stars",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "cast",
+                  "description": "{\"arrived_who\":{\"classic\":12,\"elder\":2,\"kid\":9,\"student\":13},\"passed_by_who\":{\"kid\":6,\"rush\":13},\"sold\":31,\"happy\":31,\"popularity\":[50.4,56.2],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":80,\"thanks\":true,\"flavor_sold\":{\"caramel\":2,\"cheese\":6}}"
+                },
+                {
+                  "type": "stopped",
+                  "description": "{\"abandoned\":[0,4],\"passed\":[19,53],\"popularity\":[56.2,52.8],\"stars\":3}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 50268,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:47:48.245Z",
+                  "annotations": [
+                    {
+                      "type": "cast",
+                      "description": "{\"arrived_who\":{\"classic\":12,\"elder\":2,\"kid\":9,\"student\":13},\"passed_by_who\":{\"kid\":6,\"rush\":13},\"sold\":31,\"happy\":31,\"popularity\":[50.4,56.2],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":80,\"thanks\":true,\"flavor_sold\":{\"caramel\":2,\"cheese\":6}}"
+                    },
+                    {
+                      "type": "stopped",
+                      "description": "{\"abandoned\":[0,4],\"passed\":[19,53],\"popularity\":[56.2,52.8],\"stars\":3}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f12d1c20486264113d21-195e6b1bcff733120a64",
+          "file": "customers36.spec.mjs",
+          "line": 49,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory17.spec.mjs",
+      "file": "factory17.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12043,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:16:57.144Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3ec6bd18b7ae2b9c45fb-99e5791068652e845f1c",
+          "file": "factory17.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12440,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:32:58.594Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3ec6bd18b7ae2b9c45fb-5a76c5cbf720991d0703",
+          "file": "factory17.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12106,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:48:38.523Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3ec6bd18b7ae2b9c45fb-1dd4a1fd182cf7d011d9",
+          "file": "factory17.spec.mjs",
+          "line": 7,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory18.spec.mjs",
+      "file": "factory18.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "one batch from the kettle to a satisfied customer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12689,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:17:09.194Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1c5009fe05fee265f5b3-c24bde0c35a5e9ab7889",
+          "file": "factory18.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "one batch from the kettle to a satisfied customer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13250,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:33:11.048Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1c5009fe05fee265f5b3-4ac43ac74d032995110b",
+          "file": "factory18.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "one batch from the kettle to a satisfied customer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12910,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:48:50.640Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1c5009fe05fee265f5b3-a347fed8c229df75516d",
+          "file": "factory18.spec.mjs",
+          "line": 8,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory19.spec.mjs",
+      "file": "factory19.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4299,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:17:21.893Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f44da0f51e4a7ef2a456-1b38feb6c3618709e08f",
+          "file": "factory19.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4936,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:33:24.311Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f44da0f51e4a7ef2a456-97ea0a9673490afd91ae",
+          "file": "factory19.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4392,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:49:03.559Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f44da0f51e4a7ef2a456-ae00853547631767e9dd",
+          "file": "factory19.spec.mjs",
+          "line": 7,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory30.spec.mjs",
+      "file": "factory30.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the packing floor: cups, the weigher, the sealer, honest SKUs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "packing",
+                  "description": "{\"cups_sold\":14,\"small\":28,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":70,\"upkeep\":36}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 73335,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:17:26.200Z",
+                  "annotations": [
+                    {
+                      "type": "packing",
+                      "description": "{\"cups_sold\":14,\"small\":28,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":70,\"upkeep\":36}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-a2afaa3616cd59a6f800",
+          "file": "factory30.spec.mjs",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "the dispenser sells large bags at tier 1; an empty floor stops and pays nothing",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop runs the details",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                    "line": 74,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 32,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:18:39.542Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop runs the details",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                        "line": 74,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-2730de55c69fdafc73a2",
+          "file": "factory30.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "frame rate with several packers working at once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                    "line": 98,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 21,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:18:39.584Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                        "line": 98,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-e0f55bc3710531ec3356",
+          "file": "factory30.spec.mjs",
+          "line": 97,
+          "column": 1
+        },
+        {
+          "title": "the packing floor: cups, the weigher, the sealer, honest SKUs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "packing",
+                  "description": "{\"cups_sold\":19,\"small\":29,\"large\":11,\"bagger\":20,\"cup_feeder\":20,\"packed\":67,\"upkeep\":33}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 66512,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:33:29.255Z",
+                  "annotations": [
+                    {
+                      "type": "packing",
+                      "description": "{\"cups_sold\":19,\"small\":29,\"large\":11,\"bagger\":20,\"cup_feeder\":20,\"packed\":67,\"upkeep\":33}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-42e146230551c04066d7",
+          "file": "factory30.spec.mjs",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "the dispenser sells large bags at tier 1; an empty floor stops and pays nothing",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop runs the details",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                    "line": 74,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 41,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:34:35.772Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop runs the details",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                        "line": 74,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-62c88838865ca5c1bbf3",
+          "file": "factory30.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "frame rate with several packers working at once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                    "line": 98,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:34:35.820Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory30.spec.mjs",
+                        "line": 98,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-8ea020e3508d9c733037",
+          "file": "factory30.spec.mjs",
+          "line": 97,
+          "column": 1
+        },
+        {
+          "title": "the packing floor: cups, the weigher, the sealer, honest SKUs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "packing",
+                  "description": "{\"cups_sold\":14,\"small\":27,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":69,\"upkeep\":35}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 70631,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:49:07.961Z",
+                  "annotations": [
+                    {
+                      "type": "packing",
+                      "description": "{\"cups_sold\":14,\"small\":27,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":69,\"upkeep\":35}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-eaae1eee6dc5cfd273bb",
+          "file": "factory30.spec.mjs",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "the dispenser sells large bags at tier 1; an empty floor stops and pays nothing",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 200000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 69660,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:50:18.597Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-6043b0f3c7b7ce363296",
+          "file": "factory30.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "frame rate with several packers working at once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 200000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"fps\":[21.6,20.6,19.7,19.9,18.9,18.7],\"median\":19.93620415052086,\"packers_running\":[3,2,2,2,2,2],\"draw_calls\":[647,704,716,782,818,877],\"objects\":[1040,1100,1141,1187,1228,1284],\"load\":10.88}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 60693,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:51:28.267Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"fps\":[21.6,20.6,19.7,19.9,18.9,18.7],\"median\":19.93620415052086,\"packers_running\":[3,2,2,2,2,2],\"draw_calls\":[647,704,716,782,818,877],\"objects\":[1040,1100,1141,1187,1228,1284],\"load\":10.88}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-94f48e248b62ed6f7a76",
+          "file": "factory30.spec.mjs",
+          "line": 97,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory31.spec.mjs",
+      "file": "factory31.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the storefront: cashier, express window, robot lanes, router -- honest sales",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 260000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"sold\":107,\"cashier\":53,\"express\":51,\"routed\":0,\"express_jumped\":8,\"lanes\":4,\"lost\":48,\"upkeep\":69,\"revenue\":1228}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 101935,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:18:39.613Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"sold\":107,\"cashier\":53,\"express\":51,\"routed\":0,\"express_jumped\":8,\"lanes\":4,\"lost\":48,\"upkeep\":69,\"revenue\":1228}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-9bc7290881cb077e9bef",
+          "file": "factory31.spec.mjs",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "a paused cashier holds its customers sales until it is resumed",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop runs the details",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory31.spec.mjs",
+                    "line": 73,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 34,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:20:21.554Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop runs the details",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory31.spec.mjs",
+                        "line": 73,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-49ad9131dbd92b849d8b",
+          "file": "factory31.spec.mjs",
+          "line": 72,
+          "column": 1
+        },
+        {
+          "title": "the storefront: cashier, express window, robot lanes, router -- honest sales",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 260000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"sold\":109,\"cashier\":56,\"express\":50,\"routed\":2,\"express_jumped\":6,\"lanes\":4,\"lost\":51,\"upkeep\":72,\"revenue\":1263}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 111302,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:34:35.850Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"sold\":109,\"cashier\":56,\"express\":50,\"routed\":2,\"express_jumped\":6,\"lanes\":4,\"lost\":51,\"upkeep\":72,\"revenue\":1263}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-18acd83a205e06710cc7",
+          "file": "factory31.spec.mjs",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "a paused cashier holds its customers sales until it is resumed",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop runs the details",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory31.spec.mjs",
+                    "line": 73,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 49,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:36:27.159Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop runs the details",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory31.spec.mjs",
+                        "line": 73,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-b37592f2c106dee85d61",
+          "file": "factory31.spec.mjs",
+          "line": 72,
+          "column": 1
+        },
+        {
+          "title": "the storefront: cashier, express window, robot lanes, router -- honest sales",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 260000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"sold\":106,\"cashier\":54,\"express\":49,\"routed\":2,\"express_jumped\":9,\"lanes\":4,\"lost\":46,\"upkeep\":68,\"revenue\":1235}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 98738,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:52:28.969Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"sold\":106,\"cashier\":54,\"express\":49,\"routed\":2,\"express_jumped\":9,\"lanes\":4,\"lost\":46,\"upkeep\":68,\"revenue\":1235}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-15132cf45de97304dcb5",
+          "file": "factory31.spec.mjs",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "a paused cashier holds its customers sales until it is resumed",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 200000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 55978,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:54:07.714Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-6b1659681beb1a77f12d",
+          "file": "factory31.spec.mjs",
+          "line": 72,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "flavors34.spec.mjs",
+      "file": "flavors34.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the flavors sheet draws five distinct flavors on this screen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "flavor pixels",
+                  "description": "{\"counts\":{\"plain\":916,\"cheese\":1173,\"spicy\":1196,\"caramel\":1034,\"cocoa\":703},\"scale\":1}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2751,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:20:21.600Z",
+                  "annotations": [
+                    {
+                      "type": "flavor pixels",
+                      "description": "{\"counts\":{\"plain\":916,\"cheese\":1173,\"spicy\":1196,\"caramel\":1034,\"cocoa\":703},\"scale\":1}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-5090a21c79b3a2e29aee",
+          "file": "flavors34.spec.mjs",
+          "line": 27,
+          "column": 1
+        },
+        {
+          "title": "five flavors are coated, packed, asked for and sold in the browser",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "flavor trade",
+                  "description": "{\"sold\":{\"caramel\":6,\"cheese\":21,\"cocoa\":1,\"spicy\":4},\"revenue\":{\"caramel\":102,\"cheese\":259,\"cocoa\":30,\"spicy\":79},\"coated\":{\"caramel\":25,\"cheese\":56,\"cocoa\":4,\"spicy\":16},\"ingredients\":78,\"minutes\":6.668333333333333,\"sold_total\":118,\"seen_coating\":[\"caramel\",\"spicy\",\"cheese\",\"cocoa\"],\"asked\":{\"caramel\":8,\"cheese\":21,\"cocoa\":4,\"duo\":7,\"plain\":90,\"spicy\":5},\"news\":[\"cheese_fans\"]}"
+                },
+                {
+                  "type": "flavor pixels on the floors",
+                  "description": "{\"cheese\":19,\"spicy\":812,\"caramel\":155,\"cocoa\":78}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 104242,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:20:24.359Z",
+                  "annotations": [
+                    {
+                      "type": "flavor trade",
+                      "description": "{\"sold\":{\"caramel\":6,\"cheese\":21,\"cocoa\":1,\"spicy\":4},\"revenue\":{\"caramel\":102,\"cheese\":259,\"cocoa\":30,\"spicy\":79},\"coated\":{\"caramel\":25,\"cheese\":56,\"cocoa\":4,\"spicy\":16},\"ingredients\":78,\"minutes\":6.668333333333333,\"sold_total\":118,\"seen_coating\":[\"caramel\",\"spicy\",\"cheese\",\"cocoa\"],\"asked\":{\"caramel\":8,\"cheese\":21,\"cocoa\":4,\"duo\":7,\"plain\":90,\"spicy\":5},\"news\":[\"cheese_fans\"]}"
+                    },
+                    {
+                      "type": "flavor pixels on the floors",
+                      "description": "{\"cheese\":19,\"spicy\":812,\"caramel\":155,\"cocoa\":78}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-a4323b7cad1239dc41f6",
+          "file": "flavors34.spec.mjs",
+          "line": 98,
+          "column": 1
+        },
+        {
+          "title": "the flavors sheet draws five distinct flavors on this screen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "flavor pixels",
+                  "description": "{\"counts\":{\"plain\":2252,\"cheese\":2681,\"spicy\":2746,\"caramel\":2380,\"cocoa\":2017},\"scale\":1}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3337,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:36:27.220Z",
+                  "annotations": [
+                    {
+                      "type": "flavor pixels",
+                      "description": "{\"counts\":{\"plain\":2252,\"cheese\":2681,\"spicy\":2746,\"caramel\":2380,\"cocoa\":2017},\"scale\":1}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-07e817d8eeff504eaa0e",
+          "file": "flavors34.spec.mjs",
+          "line": 27,
+          "column": 1
+        },
+        {
+          "title": "five flavors are coated, packed, asked for and sold in the browser",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "flavor trade",
+                  "description": "{\"sold\":{\"caramel\":5,\"cheese\":8,\"cocoa\":1,\"spicy\":2},\"revenue\":{\"caramel\":99,\"cheese\":91,\"cocoa\":28,\"spicy\":28},\"coated\":{\"caramel\":18,\"cheese\":28,\"cocoa\":4,\"spicy\":4},\"ingredients\":47,\"minutes\":3.3041666666666667,\"sold_total\":61,\"seen_coating\":[\"caramel\",\"cocoa\",\"cheese\"],\"asked\":{\"caramel\":6,\"cheese\":8,\"cocoa\":3,\"duo\":5,\"plain\":43,\"spicy\":3},\"news\":[]}"
+                },
+                {
+                  "type": "flavor pixels on the floors",
+                  "description": "{\"cheese\":280,\"spicy\":16,\"caramel\":132,\"cocoa\":115}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 78145,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:36:30.565Z",
+                  "annotations": [
+                    {
+                      "type": "flavor trade",
+                      "description": "{\"sold\":{\"caramel\":5,\"cheese\":8,\"cocoa\":1,\"spicy\":2},\"revenue\":{\"caramel\":99,\"cheese\":91,\"cocoa\":28,\"spicy\":28},\"coated\":{\"caramel\":18,\"cheese\":28,\"cocoa\":4,\"spicy\":4},\"ingredients\":47,\"minutes\":3.3041666666666667,\"sold_total\":61,\"seen_coating\":[\"caramel\",\"cocoa\",\"cheese\"],\"asked\":{\"caramel\":6,\"cheese\":8,\"cocoa\":3,\"duo\":5,\"plain\":43,\"spicy\":3},\"news\":[]}"
+                    },
+                    {
+                      "type": "flavor pixels on the floors",
+                      "description": "{\"cheese\":280,\"spicy\":16,\"caramel\":132,\"cocoa\":115}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-79382ddf3c521251636f",
+          "file": "flavors34.spec.mjs",
+          "line": 98,
+          "column": 1
+        },
+        {
+          "title": "the flavors sheet draws five distinct flavors on this screen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "flavor pixels",
+                  "description": "{\"counts\":{\"plain\":1901,\"cheese\":1389,\"spicy\":1439,\"caramel\":1249,\"cocoa\":1055},\"scale\":1}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2915,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:55:03.708Z",
+                  "annotations": [
+                    {
+                      "type": "flavor pixels",
+                      "description": "{\"counts\":{\"plain\":1901,\"cheese\":1389,\"spicy\":1439,\"caramel\":1249,\"cocoa\":1055},\"scale\":1}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-08f72e17c3d7cbaeeb88",
+          "file": "flavors34.spec.mjs",
+          "line": 27,
+          "column": 1
+        },
+        {
+          "title": "five flavors are coated, packed, asked for and sold in the browser",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "flavor trade",
+                  "description": "{\"sold\":{\"caramel\":4,\"cheese\":9,\"cocoa\":3,\"spicy\":1},\"revenue\":{\"caramel\":81,\"cheese\":107,\"cocoa\":70,\"spicy\":14},\"coated\":{\"caramel\":18,\"cheese\":24,\"cocoa\":8,\"spicy\":4},\"ingredients\":47,\"minutes\":3.13,\"sold_total\":59,\"seen_coating\":[\"caramel\",\"spicy\",\"cocoa\"],\"asked\":{\"caramel\":5,\"cheese\":9,\"cocoa\":6,\"duo\":4,\"plain\":43,\"spicy\":1},\"news\":[]}"
+                },
+                {
+                  "type": "flavor pixels on the floors",
+                  "description": "{\"cheese\":29,\"spicy\":20,\"caramel\":72,\"cocoa\":27}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 66681,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:55:06.634Z",
+                  "annotations": [
+                    {
+                      "type": "flavor trade",
+                      "description": "{\"sold\":{\"caramel\":4,\"cheese\":9,\"cocoa\":3,\"spicy\":1},\"revenue\":{\"caramel\":81,\"cheese\":107,\"cocoa\":70,\"spicy\":14},\"coated\":{\"caramel\":18,\"cheese\":24,\"cocoa\":8,\"spicy\":4},\"ingredients\":47,\"minutes\":3.13,\"sold_total\":59,\"seen_coating\":[\"caramel\",\"spicy\",\"cocoa\"],\"asked\":{\"caramel\":5,\"cheese\":9,\"cocoa\":6,\"duo\":4,\"plain\":43,\"spicy\":1},\"news\":[]}"
+                    },
+                    {
+                      "type": "flavor pixels on the floors",
+                      "description": "{\"cheese\":29,\"spicy\":20,\"caramel\":72,\"cocoa\":27}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-bf75decb1493a52102be",
+          "file": "flavors34.spec.mjs",
+          "line": 98,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "news37.spec.mjs",
+      "file": "news37.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the news: quiet at opening, a craze that brings real customers, readable, never in the way",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "still",
+                  "description": "{\"badge\":318,\"strip\":1549,\"unread\":1,\"marks\":1}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"left0\":113150,\"leftHidden\":113100}"
+                },
+                {
+                  "type": "craze",
+                  "description": "{\"row\":{\"asked\":13,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":15},\"afterAsked\":5,\"flavor_sold\":{\"caramel\":16}}"
+                },
+                {
+                  "type": "reload",
+                  "description": "{\"before\":79850,\"after\":78250,\"wall\":2152}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 124341,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:22:08.614Z",
+                  "annotations": [
+                    {
+                      "type": "still",
+                      "description": "{\"badge\":318,\"strip\":1549,\"unread\":1,\"marks\":1}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"left0\":113150,\"leftHidden\":113100}"
+                    },
+                    {
+                      "type": "craze",
+                      "description": "{\"row\":{\"asked\":13,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":15},\"afterAsked\":5,\"flavor_sold\":{\"caramel\":16}}"
+                    },
+                    {
+                      "type": "reload",
+                      "description": "{\"before\":79850,\"after\":78250,\"wall\":2152}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0f3b38cbbffaf0f0048a-71078062e13be753b868",
+          "file": "news37.spec.mjs",
+          "line": 64,
+          "column": 1
+        },
+        {
+          "title": "the news: quiet at opening, a craze that brings real customers, readable, never in the way",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "still",
+                  "description": "{\"badge\":377,\"strip\":1869,\"unread\":1,\"marks\":1}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"left0\":112500,\"leftHidden\":112400}"
+                },
+                {
+                  "type": "craze",
+                  "description": "{\"row\":{\"asked\":14,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":14},\"afterAsked\":3,\"flavor_sold\":{\"caramel\":15}}"
+                },
+                {
+                  "type": "reload",
+                  "description": "{\"before\":79850,\"after\":77900,\"wall\":2481}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 131368,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:37:48.721Z",
+                  "annotations": [
+                    {
+                      "type": "still",
+                      "description": "{\"badge\":377,\"strip\":1869,\"unread\":1,\"marks\":1}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"left0\":112500,\"leftHidden\":112400}"
+                    },
+                    {
+                      "type": "craze",
+                      "description": "{\"row\":{\"asked\":14,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":14},\"afterAsked\":3,\"flavor_sold\":{\"caramel\":15}}"
+                    },
+                    {
+                      "type": "reload",
+                      "description": "{\"before\":79850,\"after\":77900,\"wall\":2481}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0f3b38cbbffaf0f0048a-8d414f587d4a408d69cc",
+          "file": "news37.spec.mjs",
+          "line": 64,
+          "column": 1
+        },
+        {
+          "title": "the news: quiet at opening, a craze that brings real customers, readable, never in the way",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "still",
+                  "description": "{\"badge\":215,\"strip\":1015,\"unread\":1,\"marks\":1}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"left0\":113250,\"leftHidden\":113200}"
+                },
+                {
+                  "type": "craze",
+                  "description": "{\"row\":{\"asked\":16,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":17},\"afterAsked\":6,\"flavor_sold\":{\"caramel\":17}}"
+                },
+                {
+                  "type": "reload",
+                  "description": "{\"before\":79850,\"after\":78200,\"wall\":2135}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 122039,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:56:13.331Z",
+                  "annotations": [
+                    {
+                      "type": "still",
+                      "description": "{\"badge\":215,\"strip\":1015,\"unread\":1,\"marks\":1}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"left0\":113250,\"leftHidden\":113200}"
+                    },
+                    {
+                      "type": "craze",
+                      "description": "{\"row\":{\"asked\":16,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":17},\"afterAsked\":6,\"flavor_sold\":{\"caramel\":17}}"
+                    },
+                    {
+                      "type": "reload",
+                      "description": "{\"before\":79850,\"after\":78200,\"wall\":2135}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0f3b38cbbffaf0f0048a-fd0e0321cc8d6ff98a7c",
+          "file": "news37.spec.mjs",
+          "line": 64,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stall09.spec.mjs",
+      "file": "stall09.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "hold",
+                  "description": "finger 1551 ms, game judged 1567 ms (perfect)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3073,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:24:12.965Z",
+                  "annotations": [
+                    {
+                      "type": "hold",
+                      "description": "finger 1551 ms, game judged 1567 ms (perfect)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0b0b470e3b71983625b5-185831e6f9c23dc2a083",
+          "file": "stall09.spec.mjs",
+          "line": 9,
+          "column": 1
+        },
+        {
+          "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "hold",
+                  "description": "finger 1551 ms, game judged 1589 ms (perfect)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3350,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:40:00.098Z",
+                  "annotations": [
+                    {
+                      "type": "hold",
+                      "description": "finger 1551 ms, game judged 1589 ms (perfect)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0b0b470e3b71983625b5-283959435ee4656b7fe7",
+          "file": "stall09.spec.mjs",
+          "line": 9,
+          "column": 1
+        },
+        {
+          "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "hold",
+                  "description": "finger 1551 ms, game judged 1568 ms (perfect)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3054,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T19:58:15.391Z",
+                  "annotations": [
+                    {
+                      "type": "hold",
+                      "description": "finger 1551 ms, game judged 1568 ms (perfect)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0b0b470e3b71983625b5-4a8a7f2cae264e936874",
+          "file": "stall09.spec.mjs",
+          "line": 9,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-18T19:11:13.063Z",
+    "duration": 2981015.085,
+    "expected": 58,
+    "skipped": 8,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,13 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+ok   integration/test_motion.gd::test_tiers_follow_the_running_machines_and_each_share_shrinks
+ok   integration/test_motion.gd::test_a_hidden_tab_or_a_long_frame_pours_no_backlog
+ok   integration/test_motion.gd::test_slow_frames_lower_the_effects_and_fast_frames_restore_them
+ok   integration/test_motion.gd::test_a_celebration_waits_for_the_hand_and_the_ring_stays_put
+ok   integration/test_motion.gd::test_one_batch_lights_the_floors_from_the_bottom_to_the_top
+motion42 forty: {"ambient":[191,13.6657808080809],"d":{"ambient_per_s":14.0,"auto_low":false,"belt_children":6,"belt_phase":[780.42,780.42,780.42,750.18,750.18,780.42],"belts":6,"belts_moving":6,"emitters":9,"forced_low":false,"fps_avg":44.0,"fx_alive":52,"fx_dropped":0,"fx_peak":268,"glow":[0.445,0.497,0.345],"glow_at":[25.8337054848486,25.9250250000001,25.8337054848486],"glow_nodes":3,"kettle":[229.279998779297,819.738647460938],"light_children":4,"lot_pieces":1,"low":false,"queued":"","reduced":false,"ring":[229.279998779297,691.66943359375,121.9706875],"running":34,"sparkle_scale":0.4,"stats":{"asked":{"ambient":3600,"lot":199,"sparkle":156},"auto_low_off":0,"auto_low_on":0,"celebrations":24,"deferred":0,"given":{"ambient":363,"lot":199,"sparkle":156},"refused":{"ambient":3237}},"sweep":-1.0,"sweep_kind":"packer","tier":3,"tier_name":"swarm"},"nodes":[400,398],"peak_alive":268,"tiers":["swarm"]}
+ok   integration/test_motion.gd::test_forty_four_machines_stay_bounded_for_two_minutes
+motion42 stress: {"calm":[175,5,5,99,40],"full_stress":[175,5,5,99,54,{"asked":{"ambient":932,"lot":58,"sparkle":104},"auto_low_off":0,"auto_low_on":0,"celebrations":6,"deferred":0,"given":{"ambient":75,"lot":54,"sparkle":104},"refused":{"ambient":857,"lot":4}}],"hard":[175,5,5,99,54]}
+ok   integration/test_motion.gd::test_stress_keeps_every_journey_whole_and_the_game_the_same
+
+7 passed, 0 failed, 51 checks, 7 files, 50.9s
