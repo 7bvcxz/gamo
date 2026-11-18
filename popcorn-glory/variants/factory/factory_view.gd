@@ -727,6 +727,10 @@ func _draw_floors(ci: CanvasItem) -> void:
 	var cols := [PopTokens.FLOOR_TOP, PopTokens.FLOOR_MID, PopTokens.FLOOR_LOW]
 	for i in 3:
 		PopFactoryArt.floor_panel(ci, floor_rect(i), cols[i], i == selected)
+	# Step 40: the rooms behind the machines (drawn with the floors: only when they change)
+	PopEnvArt.shop(ci, floor_rect(TOP), int(rules.shop_sign()["look"]) if rules else 0)
+	PopEnvArt.packing(ci, packing_rect())
+	PopEnvArt.kitchen(ci, floor_rect(LOW), (rules.of_type("cooker") as Array).size() if rules else 0)
 	_draw_kitchen(ci, floor_rect(LOW))   # (the shop and the packing floor: goods_layer, Step 33)
 	_draw_machines(ci)
 	var tube := tube_rect()
