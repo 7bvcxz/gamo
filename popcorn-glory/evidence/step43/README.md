@@ -5,7 +5,7 @@ output, read by an AudioWorklet meter, a stereo meter, Web Audio buffer counts a
 (`tests/e2e/lib/audio_tap.mjs`) on the exported web build. The offline spectra come from the game's own
 sound files. The score is `design/SOUND.md`; the decision is D-63.
 
-**No human ear evaluated these sounds, and no real phone speaker played them** (Step 48). The figures and
+**No human ear evaluated these sounds.** On the real S23 the page's output was measured, but the media volume was 0 and nobody listened (`device/`; real listening is Step 48). The figures and
 pictures below are the whole basis.
 
 | file | what |
@@ -17,6 +17,7 @@ pictures below are the whole basis.
 | `browser/e2e43_sound05_responsive07_after_off.json` · `load_sound05.txt` | after "off" became "play nothing": `sound05` and `responsive07` on three screens, 51/51 |
 | `browser/e2e43_soak_paired.json` · `load_soak_paired.txt` · `audio/soak43_rows_off.json` · `audio/soak43_rows.json` · `audio/soak44_minute1_30s_desktop.webm` | **the final soak, 2/2**: ten real minutes at 44 machines with the sound off (the control), then ten with it on. The rows are below the table. |
 | `browser/e2e43_soak_try2_failed.json` · `load_soak_try2.txt` · `audio/soak43_rows_try3_before_control.json` · `audio/soak43_rows_nocopy.json` | the earlier soaks, kept as they failed. See the history after the table. |
+| `device/` | **the real S23** (Chrome 157, Android, held in landscape): the public 0.43.0 in the phone's own Chrome, with the page's output measured on the phone's audio thread (the same `AUDIO_TAP`, injected through DevTools over `adb forward`). Each kettle hold was a real finger, `adb shell input swipe`, at a point calibrated by one real tap. Run 1: four holds (3 Perfect, 1 early), peak 0.44–0.48, mean loudness 0.022–0.029, AudioContext `running`, no page errors. Run 2 (`?dev=1`): four Perfects, peak 0.45–0.47, then 12 machines: floor mean 0.0060, 1 bed playing, voices peak 3. Media volume was 0, as found, and **nobody listened**: this proves the page sends the sound on the device, not how it sounds. The context was already `running` before the first touch here (Chrome on Android, opened through DevTools), so the first-gesture unlock was measured only in the desktop browser (`sound43` test 1). The game's save was removed from the phone afterwards. `s23_sound.mjs` is the script. |
 | `headless/full_try1_315_1.log` · `full_316_0.log` · `full_final_316_0.log` | the full headless suite. The first try failed on `test_assets` because `patter` was 0.02 s, under the 0.03 s floor; the sound was lengthened to 0.06 s. Then 316/0, and 316/0 again on the final source. |
 
 ## sound43 in the regression run (desktop; p720 and phone within a few %)
@@ -44,6 +45,21 @@ pictures below are the whole basis.
 The rest of the growth happens with the sound off as well, so it belongs to the factory and the software
 renderer. It is recorded as a finding for Step 46, the performance and long-run suite. It was not
 changed here.
+
+## The public 0.43.0 suite (`tests/results/step43/public/`)
+
+`tools/test_all.sh --public` on https://7bvcxz.github.io/gamo/popcorn-glory/ once Pages served 0.43.0
+(`version_tested.json`: `game-9bea9c452e14.pck`, 972,888 bytes, source 6cd69a6c, the same pack as the local run).
+
+- headless: 316 passed, 0 failed (22,789 checks, 21 files).
+- browser, three screens: 264 passed, 0 failed, 39 skipped. One test needed a retry: `craft35` on the
+  desktop, `TypeError` reading the spoon's rect at `pop.hold` (the batch ended before the hold began).
+  It passed on the retry and on p720 and phone. The same spoon race was seen in the Step 42 public run
+  (`tests/results/step42/public/`), so it is not Step 43 code. Load at the start 1.11, at the end 11.27 (`load.txt`).
+- The paired soak ran again on the public build (`audio/soak43_rows_off_public.json`, `audio/soak43_rows_public.json`):
+  off 0 plays, renderer 332 → 536 MB (+204); on 3,686 plays, 1,195 MB copied, renderer 393 → 555 MB (+162),
+  loudest 0.478, mean loudness 0.0137–0.0186, voices peak 7, samples 16 → 17. The sound's own share is again
+  inside the noise (−42 MB here, +21 MB locally). The hand popped 3 times in each run: the bin was full.
 
 ## History of the soak
 

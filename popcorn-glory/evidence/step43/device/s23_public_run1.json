@@ -1,0 +1,182 @@
+[
+ {
+  "k": "version",
+  "v": "0.43.0"
+ },
+ {
+  "k": "screen",
+  "v": "play"
+ },
+ {
+  "k": "contexts_before_touch",
+  "v": [
+   "running"
+  ]
+ },
+ {
+  "k": "geometry",
+  "v": {
+   "geo": {
+    "dpr": 3,
+    "ih": 280,
+    "iw": 705,
+    "sh": 360,
+    "sw": 780
+   },
+   "seen": [
+    173,
+    153.33334350585938
+   ],
+   "offx": 81,
+   "offy": 239.99996948242188,
+   "cx": 182.5271606445313,
+   "cy": 215.80642700195315,
+   "dx": 629,
+   "dy": 887
+  }
+ },
+ {
+  "k": "try",
+  "v": {
+   "i": 0,
+   "holdMs": 1513,
+   "rms": 0.16892826481952009,
+   "peak": 0.4390104115009308,
+   "mean_rms": 0.022302331116110883,
+   "played": {
+    "door": 2,
+    "heat": 1,
+    "patter": 2,
+    "perfect": 1,
+    "rise": 1,
+    "seal": 1,
+    "thud": 1
+   },
+   "outcomes": {
+    "burnt": 0,
+    "early": 1,
+    "late": 0,
+    "near": 0,
+    "perfect": 1
+   }
+  }
+ },
+ {
+  "k": "try",
+  "v": {
+   "i": 1,
+   "holdMs": 1513,
+   "rms": 0.16975184646232136,
+   "peak": 0.4798271954059601,
+   "mean_rms": 0.022514561608510692,
+   "played": {
+    "cash": 1,
+    "door": 2,
+    "heat": 2,
+    "patter": 5,
+    "perfect": 2,
+    "rise": 2,
+    "seal": 2,
+    "thud": 1
+   },
+   "outcomes": {
+    "burnt": 0,
+    "early": 1,
+    "late": 0,
+    "near": 0,
+    "perfect": 2
+   }
+  }
+ },
+ {
+  "k": "try",
+  "v": {
+   "i": 2,
+   "holdMs": 1513,
+   "rms": 0.16935360811975284,
+   "peak": 0.4398299753665924,
+   "mean_rms": 0.022585170914786585,
+   "played": {
+    "cash": 2,
+    "door": 3,
+    "heat": 3,
+    "patter": 8,
+    "perfect": 3,
+    "rise": 3,
+    "seal": 4,
+    "thud": 1
+   },
+   "outcomes": {
+    "burnt": 0,
+    "early": 1,
+    "late": 0,
+    "near": 0,
+    "perfect": 3
+   }
+  }
+ },
+ {
+  "k": "try",
+  "v": {
+   "i": 3,
+   "holdMs": 1513,
+   "rms": 0.170015080522492,
+   "peak": 0.4457716941833496,
+   "mean_rms": 0.028973483718572102,
+   "played": {
+    "bloom": 1,
+    "cash": 3,
+    "door": 3,
+    "heat": 4,
+    "patter": 10,
+    "perfect": 4,
+    "rise": 4,
+    "seal": 5,
+    "thud": 1
+   },
+   "outcomes": {
+    "burnt": 0,
+    "early": 1,
+    "late": 0,
+    "near": 0,
+    "perfect": 4
+   }
+  }
+ },
+ {
+  "k": "contexts_after_touch",
+  "v": [
+   "running"
+  ]
+ },
+ {
+  "k": "built",
+  "v": {
+   "error": "dev hooks need ?dev=1",
+   "ok": false
+  }
+ },
+ {
+  "k": "floor_12",
+  "v": {
+   "rms": 0.0336835920129277,
+   "peak": 0.06208653002977371,
+   "mean_rms": 0.001992854086107451,
+   "beds": 0,
+   "voices_peak": 2
+  }
+ },
+ {
+  "k": "counts",
+  "v": {
+   "buffers": 10,
+   "copies": 46,
+   "copy_mb": 17.807830810546875,
+   "sources": 46
+  }
+ },
+ {
+  "k": "errors",
+  "v": []
+ }
+]
