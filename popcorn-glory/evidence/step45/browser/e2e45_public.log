@@ -1,0 +1,25 @@
+
+Running 18 tests using 1 worker
+
+  ✓   1 [p720] › specs/save45.spec.mjs:48:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (8.4s)
+  -   2 [p720] › specs/save45.spec.mjs:81:1 › a killed browser loses seconds, never goods: nothing sold twice, every machine there
+  ✓   3 [p720] › specs/save45.spec.mjs:122:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.4s)
+  ✓   4 [p720] › specs/save45.spec.mjs:144:1 › a broken save is set aside, the backup comes back, and the saves page shows both (4.1s)
+  ✓   5 [p720] › specs/save45.spec.mjs:181:1 › the saves page exports and imports, and the factory comes back from the file (6.4s)
+  ✓   6 [p720] › specs/save45.spec.mjs:210:1 › restart takes two taps and the old factory waits in the backup (5.0s)
+  ✓   7 [phone] › specs/save45.spec.mjs:48:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (8.1s)
+  -   8 [phone] › specs/save45.spec.mjs:81:1 › a killed browser loses seconds, never goods: nothing sold twice, every machine there
+  ✓   9 [phone] › specs/save45.spec.mjs:122:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.8s)
+  ✓  10 [phone] › specs/save45.spec.mjs:144:1 › a broken save is set aside, the backup comes back, and the saves page shows both (4.3s)
+  ✓  11 [phone] › specs/save45.spec.mjs:181:1 › the saves page exports and imports, and the factory comes back from the file (7.0s)
+  ✓  12 [phone] › specs/save45.spec.mjs:210:1 › restart takes two taps and the old factory waits in the backup (5.6s)
+  ✓  13 [desktop] › specs/save45.spec.mjs:48:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (7.2s)
+
+  ✓  14 [desktop] › specs/save45.spec.mjs:81:1 › a killed browser loses seconds, never goods: nothing sold twice, every machine there (13.3s)
+  ✓  15 [desktop] › specs/save45.spec.mjs:122:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.4s)
+  ✓  16 [desktop] › specs/save45.spec.mjs:144:1 › a broken save is set aside, the backup comes back, and the saves page shows both (4.1s)
+  ✓  17 [desktop] › specs/save45.spec.mjs:181:1 › the saves page exports and imports, and the factory comes back from the file (6.4s)
+  ✓  18 [desktop] › specs/save45.spec.mjs:210:1 › restart takes two taps and the old factory waits in the backup (4.9s)
+
+  2 skipped
+  16 passed (1.6m)
