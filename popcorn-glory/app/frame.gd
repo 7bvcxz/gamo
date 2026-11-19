@@ -18,6 +18,8 @@ signal denied(which: String)
 signal sound_pressed
 ## Step 44: the motion button -- full movement, or calm (reduced motion and low effects).
 signal motion_pressed
+## Step 45: this run's save was refused and set aside -- the way to it (web/saves.html).
+signal recover_pressed
 ## Dev mode only (?dev=1): download this run's local log as JSON.
 signal log_pressed
 
@@ -32,6 +34,8 @@ var show_motion := false:
 		motion_button.visible = v
 		_layout()
 var log_button := PopIconButton.new()
+## Step 45: shown only when the save was refused and set aside (no words: a box set aside).
+var recover_button := PopIconButton.new()
 var money_view := PopMoneyView.new()
 var upgrade_button := PopUpgradeButton.new()
 var auto_button := PopAutoButton.new()
@@ -65,6 +69,9 @@ func _init() -> void:
 	log_button.name = "Log"
 	log_button.icon = "log"
 	log_button.visible = false
+	recover_button.name = "Recover"
+	recover_button.icon = "aside"
+	recover_button.visible = false
 	sound_button.icon = "sound"
 	motion_button.name = "Motion"
 	motion_button.icon = "motion"
@@ -73,7 +80,7 @@ func _init() -> void:
 	upgrade_button.name = "Upgrade"
 	auto_button.name = "Auto"
 	auto_button.visible = false
-	for c: Control in [money_view, upgrade_button, auto_button, back_button, restart_button, sound_button, motion_button, log_button]:
+	for c: Control in [money_view, upgrade_button, auto_button, back_button, restart_button, sound_button, motion_button, log_button, recover_button]:
 		add_child(c)
 	back_button.pressed.connect(func() -> void: back_pressed.emit())
 	restart_button.pressed.connect(_on_restart)
@@ -86,6 +93,7 @@ func _init() -> void:
 	sound_button.pressed.connect(func() -> void: sound_pressed.emit())
 	motion_button.pressed.connect(func() -> void: motion_pressed.emit())
 	log_button.pressed.connect(func() -> void: log_pressed.emit())
+	recover_button.pressed.connect(func() -> void: recover_pressed.emit())
 
 
 ## Step 44: calm motion shows a still sparkle; full motion a sparkle with its trail.
@@ -144,6 +152,8 @@ func _layout() -> void:
 	log_button.position = Vector2(x0 + 24, 160)
 	log_button.size = Vector2(72, 72)
 	log_button.visible = dev
+	recover_button.position = Vector2(x0 + 24, 244 if dev else 160)
+	recover_button.size = Vector2(72, 72)
 	money_view.position = Vector2(x0 + 120, 34)
 	money_view.size = Vector2(col - (422 if show_motion else 330), 76)
 	var bh := clampf(h * 0.13, 120.0, 170.0)
@@ -172,6 +182,8 @@ func _layout_wide(w: float, h: float) -> void:
 	log_button.position = Vector2(24, 120)
 	log_button.size = Vector2(72, 72)
 	log_button.visible = dev
+	recover_button.position = Vector2(24, 204 if dev else 120)
+	recover_button.size = Vector2(72, 72)
 	money_view.position = Vector2(w * 0.5 - 200, 26)
 	money_view.size = Vector2(400, 72)
 	# The right column: the selected floor's card at the top (the play view
@@ -212,14 +224,17 @@ func refresh(rules: PopRules, p_clock_ms: int) -> void:
 	clock_ms = p_clock_ms
 
 
-## On the stand (saved progress) the first tap arms the restart button and a
-## second within ARM_MS restarts; elsewhere one tap restarts as before.
+## On a saved run (the stand, the factory) the first tap arms the restart button
+## and a second within ARM_MS restarts; elsewhere one tap restarts as before.
+## Step 45: the factory has no auto offer, so until 0.44 one tap erased a whole
+## forty-machine factory -- the arming now follows the save, not the offer.
 const ARM_MS := 2500
 var _armed_at := -1
+var arms_restart := false
 
 
 func _on_restart() -> void:
-	if not has_auto:
+	if not has_auto and not arms_restart:
 		restart_pressed.emit()
 		return
 	var now := Time.get_ticks_msec()

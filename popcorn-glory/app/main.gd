@@ -82,6 +82,7 @@ func _ready() -> void:
 	frame.sound_pressed.connect(toggle_sound)
 	frame.motion_pressed.connect(toggle_motion)
 	frame.log_pressed.connect(download_log)
+	frame.recover_pressed.connect(func() -> void: PopWeb.open_page("saves.html"))
 	audio = PopAudio.new()
 	audio.name = "Audio"
 	add_child(audio)
@@ -386,35 +387,90 @@ func _save_name(id: String) -> String:
 	return save_prefix + id + ".v1"
 
 
+## Step 45: the last good save is copied to "<name>.bak" when it is picked up and
+## then once a minute of play (the text written a minute ago, not the one just made).
+const BACKUP_EVERY_MS := 60000
+var _backup_at_ms := 0
+const RESTART_KEEP_MS := 600000
+var _restart_keep_ms := 0
+var _last_text := ""
+## What happened to the save this session (bridge, web/saves.html, tests):
+## "from": "main" | "backup" | "fresh" | "none"; "rejected": the reason the main save
+## was refused ("" when it was not); "failed_writes": writes that did not hold.
+var save_info := {"from": "none", "rejected": "", "backup_rejected": "", "failed_writes": 0}
+
+
 ## Writes the run now: every SAVE_EVERY_MS of play, after a purchase or a
 ## recipe, when the tab hides and when the player leaves.
 func save_now() -> bool:
 	if not _saves():
 		return false
 	_saved_at_ms = clock.now_ms
-	var doc := {"schema": SAVE_SCHEMA, "game": "popcorn-glory", "exp": exp_id, "version": version(),
-		"active_ms": clock.now_ms, "rules": rules.call("to_save")}
-	return PopSaveStore.write(_save_name(exp_id), JSON.stringify(doc))
-
-
-## Picks a saved run up if there is one and it is whole; a broken, foreign or
-## older-schema save is left alone and a fresh run starts (and overwrites it).
-func _load_saved(id: String) -> void:
-	var text := PopSaveStore.read(_save_name(id))
-	if text == "":
-		return
-	# JSON.parse (not parse_string): a broken save must not print an engine error.
-	var json := JSON.new()
-	var doc: Variant = json.data if json.parse(text) == OK else null
-	var ok := typeof(doc) == TYPE_DICTIONARY and int((doc as Dictionary).get("schema", -1)) == SAVE_SCHEMA \
-		and String((doc as Dictionary).get("game", "")) == "popcorn-glory" and String((doc as Dictionary).get("exp", "")) == id \
-		and typeof((doc as Dictionary).get("rules")) == TYPE_DICTIONARY and bool(rules.call("from_save", (doc as Dictionary)["rules"]))
+	var text := PopSaveDoc.encode(exp_id, version(), clock.now_ms, int(Time.get_unix_time_from_system()), rules.call("to_save"))
+	var name := _save_name(exp_id)
+	if _last_text != "" and clock.now_ms - _backup_at_ms >= BACKUP_EVERY_MS:
+		PopSaveStore.write(name + ".bak", _last_text)
+		_backup_at_ms = clock.now_ms
+	# A write that does not read back whole did not happen (a full quota, a private
+	# window): the previous save stays, and the next tick tries again.
+	var ok := PopSaveStore.write(name, text) and PopSaveStore.read(name) == text
 	if not ok:
-		session.record(0, "save_rejected", {"bytes": text.length()})
+		save_info["failed_writes"] = int(save_info["failed_writes"]) + 1
+		session.record(clock.now_ms, "save_failed", {"bytes": text.length()})
+		return false
+	_last_text = text
+	return true
+
+
+## Picks a saved run up if there is one and it is whole (PopSaveDoc, then the rules'
+## own from_save, which changes nothing when it refuses). Step 45: a refused save is
+## never written over -- it is set aside as "<name>.rejected" first, and the last good
+## save ("<name>.bak") is tried; only when both fail does a fresh run start.
+func _load_saved(id: String) -> void:
+	var name := _save_name(id)
+	var text := PopSaveStore.read(name)
+	if text == "":
+		save_info["from"] = "none"
 		return
-	clock.add_ms(maxi(0, int((doc as Dictionary).get("active_ms", 0))))
+	var why := _try_load(text, id)
+	if why == "":
+		save_info["from"] = "main"
+		_after_load(text)
+		return
+	save_info["rejected"] = why
+	if PopSaveStore.read(name + ".rejected") != text:
+		PopSaveStore.write(name + ".rejected", text)
+	session.record(0, "save_rejected", {"bytes": text.length(), "reason": why})
+	var backup := PopSaveStore.read(name + ".bak")
+	var why_b := _try_load(backup, id) if backup != "" and backup != text else "none"
+	if why_b == "":
+		save_info["from"] = "backup"
+		session.record(clock.now_ms, "restored_backup", {"level": rules.level, "money": rules.money})
+		_after_load(backup)
+		return
+	save_info["backup_rejected"] = why_b
+	save_info["from"] = "fresh"
+
+
+## "" when the text was applied, else why not (nothing applied).
+func _try_load(text: String, id: String) -> String:
+	var r := PopSaveDoc.decode(text, id)
+	if not bool(r["ok"]):
+		return String(r["reason"])
+	if not bool(rules.call("from_save", r["rules"])):
+		return "rules"
+	clock.add_ms(maxi(0, int((r["doc"] as Dictionary).get("active_ms", 0))))
+	session.record(clock.now_ms, "restored", {"level": rules.level, "money": rules.money, "from": String((r["doc"] as Dictionary).get("version", ""))})
+	return ""
+
+
+func _after_load(text: String) -> void:
 	_saved_at_ms = clock.now_ms
-	session.record(clock.now_ms, "restored", {"level": rules.level, "money": rules.money, "from": String((doc as Dictionary).get("version", ""))})
+	_backup_at_ms = clock.now_ms
+	_last_text = text
+	# The save the player came back to is the fallback until a minute of new play.
+	if PopSaveStore.read(_save_name(exp_id) + ".bak") != text:
+		PopSaveStore.write(_save_name(exp_id) + ".bak", text)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -456,6 +512,10 @@ func _start(id: String) -> void:
 		clock = PopClock.new()
 		session = PopSession.new(id)
 		_saved_at_ms = 0
+		_last_text = ""
+		_backup_at_ms = _restart_keep_ms
+		_restart_keep_ms = 0
+		save_info = {"from": "none", "rejected": "", "backup_rejected": "", "failed_writes": 0}
 		if seed >= 0 and rules.has_method("reseed"):
 			rules.reseed(seed)
 		elif bool(entry.get("save", false)) and not frame.trial:
@@ -478,6 +538,8 @@ func _start(id: String) -> void:
 	view.command.connect(on_command)
 	frame.accent = entry["color"]
 	frame.has_auto = rules.has_method("auto_offer")
+	frame.arms_restart = bool(entry.get("save", false)) and seed < 0 and not frame.trial
+	frame.recover_button.visible = String(save_info["rejected"]) != ""
 	frame.show_motion = id == "factory"
 	frame.wide = bool(entry.get("wide", false))
 	frame.set_play(view)
@@ -503,7 +565,13 @@ func _finish_run(keep: bool = true) -> void:
 		return
 	_parked.erase(exp_id)
 	if not keep and _saves():
-		PopSaveStore.clear(_save_name(exp_id))   # restart: the saved run goes too
+		# Restart (two taps): the run goes, but the factory it was stays in "<name>.bak"
+		# for the new run's first RESTART_KEEP_MS of play (web/saves.html undoes it).
+		var old := PopSaveStore.read(_save_name(exp_id))
+		if old != "":
+			PopSaveStore.write(_save_name(exp_id) + ".bak", old)
+			_restart_keep_ms = RESTART_KEEP_MS - BACKUP_EVERY_MS
+		PopSaveStore.clear(_save_name(exp_id))
 	if screen == "play" and rules != null:
 		session.reset(clock.now_ms)
 		history.append(summary())
@@ -546,7 +614,8 @@ func state() -> Dictionary:
 	var out := {"version": version(), "screen": screen, "exp": exp_id,
 		"window": [get_window().size.x, get_window().size.y] if get_window() else [0, 0],
 		"listed": PopRegistry.listed().map(func(e: Dictionary) -> String: return String(e["id"])),
-		"history": history.size(), "rects": _rects(), "reduced_motion": reduced_motion, "low_effects": low_effects}
+		"history": history.size(), "rects": _rects(), "reduced_motion": reduced_motion, "low_effects": low_effects,
+		"save": save_info.duplicate(), "armed_restart": frame.arms_restart}
 	# Step 18: what the picture is doing (the factory's journeys), for the tests.
 	if screen == "play" and frame.play != null and frame.play.has_method("debug_state"):
 		out["view"] = frame.play.call("debug_state")
@@ -565,7 +634,7 @@ func _rects() -> Dictionary:
 	var named: Dictionary = {}
 	if screen == "play":
 		named = {"play": frame.play, "upgrade": frame.upgrade_button, "back": frame.back_button,
-			"restart": frame.restart_button, "money": frame.money_view, "sound": frame.sound_button, "motion": frame.motion_button}
+			"restart": frame.restart_button, "recover": frame.recover_button, "money": frame.money_view, "sound": frame.sound_button, "motion": frame.motion_button}
 	else:
 		for t: Dictionary in chooser.tiles:
 			named["tile_" + String(t["id"])] = t["button"]
@@ -574,7 +643,7 @@ func _rects() -> Dictionary:
 		named["auto"] = frame.auto_button
 	for key: String in named.keys():
 		var c: Control = named[key]
-		if key == "motion" and not c.visible:
+		if key in ["motion", "recover"] and not c.visible:
 			continue
 		var r := xf * c.get_global_rect()
 		out[key] = [r.position.x, r.position.y, r.size.x, r.size.y]

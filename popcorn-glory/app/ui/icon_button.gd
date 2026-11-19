@@ -64,6 +64,17 @@ func _draw() -> void:
 			for i in 3:
 				draw_line(c + Vector2(-k * 0.4, -k * 0.55 + i * k * 0.35), c + Vector2(k * 0.4, -k * 0.55 + i * k * 0.35), PopPalette.INK, k * 0.12)
 			draw_colored_polygon(PackedVector2Array([c + Vector2(-k * 0.45, k * 0.55), c + Vector2(k * 0.45, k * 0.55), c + Vector2(0, k * 1.05)]), PopPalette.RED)
+		"aside":
+			# Step 45: a save set aside -- a box pushed off its place (dashed outline left
+			# behind) with an arrow back to it: "your save is kept; get it back here".
+			for i in 4:
+				var y0 := c.y - k * 0.75 + i * k * 0.42
+				draw_line(Vector2(c.x - k * 1.05, y0), Vector2(c.x - k * 1.05, y0 + k * 0.22), PopPalette.INK, k * 0.12)
+			draw_rect(Rect2(c + Vector2(-k * 0.35, -k * 0.75), Vector2(k * 1.3, k * 1.3)), PopPalette.GOLD)
+			draw_rect(Rect2(c + Vector2(-k * 0.35, -k * 0.75), Vector2(k * 1.3, k * 1.3)), PopPalette.INK, false, k * 0.14)
+			draw_line(c + Vector2(-k * 0.35, -k * 0.2), c + Vector2(k * 0.95, -k * 0.2), PopPalette.INK, k * 0.12)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-k * 1.25, k * 0.95), c + Vector2(-k * 0.6, k * 0.6), c + Vector2(-k * 0.6, k * 1.3)]), PopPalette.RED)
+			draw_line(c + Vector2(-k * 0.65, k * 0.95), c + Vector2(k * 0.6, k * 0.95), PopPalette.RED, k * 0.18)
 		"restart":
 			var ink := Color.WHITE if armed else PopPalette.INK
 			draw_arc(c, k, deg_to_rad(-60), deg_to_rad(230), 24, ink, k * 0.38)

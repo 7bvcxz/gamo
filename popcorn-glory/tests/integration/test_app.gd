@@ -18,6 +18,8 @@ func before_each() -> void:
 	app.save_prefix = "test."
 	PopSaveStore.clear("test.stand.v1")
 	PopSaveStore.clear("test.factory.v1")
+	for n: String in ["test.stand.v1.bak", "test.stand.v1.rejected", "test.factory.v1.bak", "test.factory.v1.rejected"]:
+		PopSaveStore.clear(n)   # Step 45: the neighbours too (AGENTS.md 2026-10-26: a save's backup)
 	tree.root.add_child(app)
 	await tree.process_frame
 	await tree.process_frame
@@ -380,7 +382,8 @@ func test_the_stand_is_saved_and_restored() -> void:
 	_click(app.frame.restart_button)
 	assert_eq(app.rules.level, 0, "the second tap restarts")
 	assert_eq(PopSaveStore.read("test.stand.v1"), "", "and the save is gone")
-	# A broken save: a fresh stand, and the log says so.
+	assert_true(PopSaveStore.read("test.stand.v1.bak") != "", "(Step 45: the stand before the restart waits in the backup)")
+	# A broken save: set aside, and the stand from before the restart comes back from the backup.
 	app.back()   # (leaving saves the fresh run -- the broken save is written after)
 	PopSaveStore.write("test.stand.v1", "{not json")
 	var app3: PopApp = Main.instantiate()
@@ -388,10 +391,26 @@ func test_the_stand_is_saved_and_restored() -> void:
 	tree.root.add_child(app3)
 	await tree.process_frame
 	app3.open("stand")
-	assert_eq(app3.rules.level, 0, "fresh")
+	assert_eq(app3.rules.level, level, "the backup: the stand before the restart")
+	assert_eq(String(app3.save_info["from"]), "backup", "from the backup")
+	assert_eq(PopSaveStore.read("test.stand.v1.rejected"), "{not json", "the broken save set aside")
 	assert_eq(app3.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "save_rejected").size(), 1, "rejected, logged")
 	app3.queue_free()
 	await tree.process_frame
+	# Broken with no backup: a fresh stand, the log says so, the broken save kept.
+	PopSaveStore.write("test.stand.v1", "{not json")
+	PopSaveStore.clear("test.stand.v1.bak")
+	var app4: PopApp = Main.instantiate()
+	app4.save_prefix = "test."
+	tree.root.add_child(app4)
+	await tree.process_frame
+	app4.open("stand")
+	assert_eq(app4.rules.level, 0, "fresh")
+	assert_eq(String(app4.save_info["from"]), "fresh", "a fresh stand")
+	assert_true(app4.frame.recover_button.visible, "and the set-aside icon")
+	app4.queue_free()
+	await tree.process_frame
+	PopSaveStore.clear("test.stand.v1.rejected")
 
 
 func test_the_experiments_are_never_saved() -> void:

@@ -1,0 +1,36 @@
+extends SceneTree
+## Step 45: writes a save fixture the way this checkout's own build wrote it
+## (app/main.gd save_now: schema 1 envelope, JSON.stringify). Run inside a detached
+## worktree of an old version. EXP=stand|factory OUT=<file> MINUTES=<n> FORTY=1
+func _init() -> void:
+	var exp := OS.get_environment("EXP")
+	var out := OS.get_environment("OUT")
+	var minutes := int(OS.get_environment("MINUTES"))
+	var rules: PopRules
+	if OS.get_environment("FORTY") == "1":
+		var T = load("res://tests/unit/test_factory_rules.gd").new()
+		rules = T._forty(44, 81)
+	else:
+		rules = PopRegistry.make_rules(exp, null)
+	var ms := 0
+	var pops := 0
+	while ms < minutes * 60000:
+		if not bool(rules.heating) and int(rules.cooldown_left) <= 0 and (not ("glass" in rules) or (rules.get("glass") as Dictionary).is_empty()):
+			if bool(rules.execute({"type": "press"})["ok"]):
+				var w := int(rules.window_start()) + 30
+				rules.advance(w)
+				ms += w
+				rules.execute({"type": "release"})
+				pops += 1
+		rules.execute({"type": "buy"})
+		if rules.has_method("auto_offer"):
+			rules.execute({"type": "buy_auto"})
+		rules.advance(1500)
+		ms += 1500
+	var ver := String(ProjectSettings.get_setting("application/config/version"))
+	var doc := {"schema": 1, "game": "popcorn-glory", "exp": exp, "version": ver, "active_ms": ms, "rules": rules.call("to_save")}
+	var f := FileAccess.open(out, FileAccess.WRITE)
+	f.store_string(JSON.stringify(doc))
+	f.close()
+	print("fixture %s %s: %d ms, %d pops, level %d, money %d, bytes %d" % [exp, ver, ms, pops, int(rules.level), int(rules.money), JSON.stringify(doc).length()])
+	quit(0)

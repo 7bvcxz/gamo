@@ -3853,7 +3853,54 @@ func from_save(raw: Dictionary) -> bool:
 	probe._apply_save(d)
 	if int(probe.portions_everywhere()) != int((d["stats"] as Dictionary).get("made_portions", -1)):
 		return false
+	if not probe._within_limits(d):
+		return false
 	_apply_save(d)
+	return true
+
+
+## Step 45: a save is also finite and in place -- no count beyond what play can make,
+## every machine a known one on its own floor in a place that exists, no two in one
+## place, no id twice. (A hand-edited or damaged save that adds up is still refused.)
+const SAVE_MAX_INT := 9007199254740991   # 2^53 - 1: what a JSON number holds exactly
+const SAVE_MAX_GOODS := {"lift": 400, "bin": 4000, "packing": 400, "shelf": 4000, "queue": 400, "serves": 400, "ledger": 600, "arrival_log": 500}
+
+
+func _within_limits(d: Dictionary) -> bool:
+	for k: String in SAVE_INTS:
+		if int(d[k]) > SAVE_MAX_INT:
+			return false
+	for k: String in SAVE_MAX_GOODS.keys():
+		if (d[k] as Array).size() > int(SAVE_MAX_GOODS[k]):
+			return false
+	var total := 0
+	for f: String in ["kitchen", "packing", "shop"]:
+		total += slots(f)
+	if machines.size() > total:
+		return false
+	var ids := {}
+	var places := {}
+	for m: Variant in machines:
+		if typeof(m) != TYPE_DICTIONARY:
+			return false
+		var type := String((m as Dictionary).get("type", ""))
+		var floor := String((m as Dictionary).get("floor", ""))
+		var slot: Variant = (m as Dictionary).get("slot", -1)
+		var id: Variant = (m as Dictionary).get("id", 0)
+		var tier: Variant = (m as Dictionary).get("tier", 0)
+		if not FLOOR_OF.has(type) or not floor in ["kitchen", "packing", "shop"] or not String(FLOOR_OF[type]) in [floor, "any"]:
+			return false
+		if typeof(slot) != TYPE_INT or int(slot) < 0 or int(slot) >= slots(floor):
+			return false
+		if typeof(id) != TYPE_INT or int(id) <= 0 or ids.has(int(id)):
+			return false
+		if typeof(tier) != TYPE_INT or int(tier) < 0 or int(tier) > 9:
+			return false
+		var place := "%s/%d" % [floor, int(slot)]
+		if places.has(place):
+			return false
+		ids[int(id)] = true
+		places[place] = true
 	return true
 
 

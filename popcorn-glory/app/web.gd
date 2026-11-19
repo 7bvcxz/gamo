@@ -66,6 +66,12 @@ static func set_route(id: String) -> void:
 		eval("location.hash = %s;" % JSON.stringify(id))
 
 
+## Step 45: opens a page beside the game (web/saves.html) in a new tab.
+static func open_page(file_name: String) -> void:
+	if available():
+		JavaScriptBridge.eval("window.open(%s, '_blank')" % JSON.stringify("./" + file_name), true)
+
+
 static func download(text: String, file_name: String, mime: String) -> void:
 	if available():
 		JavaScriptBridge.download_buffer(text.to_utf8_buffer(), file_name, mime)
