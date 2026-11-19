@@ -1,0 +1,68 @@
+extends SceneTree
+## Step 44: which of the forty-four machines never work in the factory33 minute and a half,
+## with and without the hand reserve (D-64) and the coater rescue (D-66). Scratch tool.
+const Factory := preload("res://variants/factory/factory_rules.gd")
+const Rules := preload("res://tests/unit/test_factory_rules.gd")
+
+func _forty(seed: int, hand_first: bool, fair: bool) -> PopRules:
+	var f: PopRules = Factory.new(null, seed)
+	f.hand_first = hand_first
+	f.coater_fair = fair
+	f.packer_tier = 3
+	f.sign_tier = 8
+	f.level = 6
+	f.money = 1 << 30
+	f.stats["packed"] = maxi(1, int(f.stats["packed"]))
+	f.stats["sold"] = maxi(1, int(f.stats["sold"]))
+	for row: Array in Rules.FORTY_PLAN:
+		if f.machines.size() >= 44:
+			break
+		var floor := String(row[1])
+		if f.floor_full(floor) and int(f.line_cost(floor)) >= 0:
+			f.execute({"type": "buy_line", "floor": floor})
+		if String(row[0]) == "U08" and not f.parallel_lines():
+			continue
+		f.execute({"type": "build", "machine": "cooker" if String(row[0]) == "M07" else String(row[0]), "floor": floor})
+	return f
+
+func _idle(seed: int, hand_first: bool, fair: bool, late: int) -> Array:
+	var f := _forty(seed, hand_first, fair)
+	var warm := int(OS.get_environment("WARM")) if OS.get_environment("WARM") != "" else 0
+	for w in warm:
+		f.advance(1000)
+	var done0 := {}
+	for m: Dictionary in f.machines:
+		done0[m["id"]] = int(m.get("done", 0))
+	var ran := {}
+	for i in 36:
+		if i % 2 == 0 and not bool(f.heating) and f.glass.is_empty() and int(f.cooldown_left) <= 0:
+			if bool(f.execute({"type": "press"})["ok"]):
+				f.advance(int(f.window_start()) + 50 + late)
+				f.execute({"type": "release"})
+		for k in 25:
+			f.advance(100)
+			for m: Dictionary in f.machines:
+				if String(m["state"]) == "run" or int(m.get("done", 0)) > int(done0[m["id"]]):
+					ran[m["id"]] = true
+	var idle := []
+	for m: Dictionary in f.machines:
+		if not ran.has(m["id"]):
+			idle.append(String(m["type"]))
+	return idle
+
+func _init() -> void:
+	var seeds := int(OS.get_environment("SEEDS")) if OS.get_environment("SEEDS") != "" else 40
+	for cfg in [[false, false], [true, false], [false, true], [true, true]]:
+		for late in [0, 400]:
+			var cookers_idle := {}
+			var under := 0
+			var ran_n := {}
+			for s in seeds:
+				var idle := _idle(s + 1, cfg[0], cfg[1], late)
+				var c := idle.count("cooker")
+				cookers_idle[c] = int(cookers_idle.get(c, 0)) + 1
+				ran_n[44 - idle.size()] = int(ran_n.get(44 - idle.size(), 0)) + 1
+				if 44 - idle.size() < 38:
+					under += 1
+			print("hand_first=%s coater_fair=%s late=%d: cookers never ran %s; runs under 38: %d/%d; ran %s" % [cfg[0], cfg[1], late, JSON.stringify(cookers_idle), under, seeds, JSON.stringify(ran_n)])
+	quit(0)

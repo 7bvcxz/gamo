@@ -1,0 +1,562 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/factory33.spec.mjs",
+      "--project=desktop",
+      "--retries=0",
+      "--repeat-each=4",
+      "-g",
+      "forty-four",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 4,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 4,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "factory33.spec.mjs",
+      "file": "factory33.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 900000,
+              "annotations": [
+                {
+                  "type": "layout",
+                  "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                },
+                {
+                  "type": "ran",
+                  "description": "{\"ran\":37,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\",\"cooker\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 159802,
+                  "error": {
+                    "message": "Error: nearly every machine worked (never: cooker,kiosk,U08,kiosk,bagger,bagger,cooker)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m",
+                    "stack": "Error: nearly every machine worked (never: cooker,kiosk,U08,kiosk,bagger,bagger,cooker)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                      "column": 68,
+                      "line": 155
+                    },
+                    "snippet": "  153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while\n  154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).\n> 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);\n      |                                                                    ^\n  156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);\n  157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);\n  158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn."
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                        "column": 68,
+                        "line": 155
+                      },
+                      "message": "Error: nearly every machine worked (never: cooker,kiosk,U08,kiosk,bagger,bagger,cooker)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m\n\n  153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while\n  154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).\n> 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);\n      |                                                                    ^\n  156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);\n  157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);\n  158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T20:16:13.396Z",
+                  "annotations": [
+                    {
+                      "type": "layout",
+                      "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                    },
+                    {
+                      "type": "ran",
+                      "description": "{\"ran\":37,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\",\"cooker\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                    "column": 68,
+                    "line": 155
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "6a1d68b01fe1ef0138d9-938fd3c426879e727695",
+          "file": "factory33.spec.mjs",
+          "line": 105,
+          "column": 1
+        },
+        {
+          "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 900000,
+              "annotations": [
+                {
+                  "type": "layout",
+                  "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                },
+                {
+                  "type": "ran",
+                  "description": "{\"ran\":37,\"never\":[\"cooker\",\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 159633,
+                  "error": {
+                    "message": "Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m",
+                    "stack": "Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                      "column": 68,
+                      "line": 155
+                    },
+                    "snippet": "  153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while\n  154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).\n> 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);\n      |                                                                    ^\n  156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);\n  157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);\n  158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn."
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                        "column": 68,
+                        "line": 155
+                      },
+                      "message": "Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m\n\n  153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while\n  154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).\n> 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);\n      |                                                                    ^\n  156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);\n  157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);\n  158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T20:18:53.588Z",
+                  "annotations": [
+                    {
+                      "type": "layout",
+                      "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                    },
+                    {
+                      "type": "ran",
+                      "description": "{\"ran\":37,\"never\":[\"cooker\",\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop-repeat1/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                    "column": 68,
+                    "line": 155
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "6a1d68b01fe1ef0138d9-2e1217e942edffb75b9b",
+          "file": "factory33.spec.mjs",
+          "line": 105,
+          "column": 1
+        },
+        {
+          "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 900000,
+              "annotations": [
+                {
+                  "type": "layout",
+                  "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                },
+                {
+                  "type": "ran",
+                  "description": "{\"ran\":39,\"never\":[\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                },
+                {
+                  "type": "lines",
+                  "description": "{\"at_pause\":10,\"before_kitchen_pause\":8,\"moved\":2,\"line_portions\":[4,0,4]}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"before\":306195,\"hidden\":306279,\"after\":308849}"
+                },
+                {
+                  "type": "perf",
+                  "description": "{\"machines\":44,\"fps\":[13.979031452820768,14.485755673587638,14.359563464026671,14.40645408087663,14.84266771654262,13.518733096603913],\"median\":14.40645408087663,\"heap0\":61528286,\"heap1\":61443432,\"kept_mb\":-0.084854,\"draw_calls\":[1174,1159,1156,1162,1128,1176],\"objects\":[1410,1360,1353,1359,1317,1382],\"nodes\":[441,440,441,440,439,441],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":209,\"floors\":0,\"goods\":247,\"machines\":517},\"cargo\":{\"made\":309,\"peak\":11,\"reused\":715,\"skipped\":0},\"pool\":{\"bag\":7,\"lot\":1},\"actor_nodes\":60,\"load\":[7.49,7.56]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 255164,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T20:21:33.610Z",
+                  "annotations": [
+                    {
+                      "type": "layout",
+                      "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                    },
+                    {
+                      "type": "ran",
+                      "description": "{\"ran\":39,\"never\":[\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                    },
+                    {
+                      "type": "lines",
+                      "description": "{\"at_pause\":10,\"before_kitchen_pause\":8,\"moved\":2,\"line_portions\":[4,0,4]}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"before\":306195,\"hidden\":306279,\"after\":308849}"
+                    },
+                    {
+                      "type": "perf",
+                      "description": "{\"machines\":44,\"fps\":[13.979031452820768,14.485755673587638,14.359563464026671,14.40645408087663,14.84266771654262,13.518733096603913],\"median\":14.40645408087663,\"heap0\":61528286,\"heap1\":61443432,\"kept_mb\":-0.084854,\"draw_calls\":[1174,1159,1156,1162,1128,1176],\"objects\":[1410,1360,1353,1359,1317,1382],\"nodes\":[441,440,441,440,439,441],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":209,\"floors\":0,\"goods\":247,\"machines\":517},\"cargo\":{\"made\":309,\"peak\":11,\"reused\":715,\"skipped\":0},\"pool\":{\"bag\":7,\"lot\":1},\"actor_nodes\":60,\"load\":[7.49,7.56]}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6a1d68b01fe1ef0138d9-5d3cc5482b5e78ccd150",
+          "file": "factory33.spec.mjs",
+          "line": 105,
+          "column": 1
+        },
+        {
+          "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 900000,
+              "annotations": [
+                {
+                  "type": "layout",
+                  "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                },
+                {
+                  "type": "ran",
+                  "description": "{\"ran\":37,\"never\":[\"cooker\",\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 159554,
+                  "error": {
+                    "message": "Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m",
+                    "stack": "Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                      "column": 68,
+                      "line": 155
+                    },
+                    "snippet": "  153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while\n  154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).\n> 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);\n      |                                                                    ^\n  156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);\n  157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);\n  158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn."
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                        "column": 68,
+                        "line": 155
+                      },
+                      "message": "Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m38\u001b[39m\nReceived:    \u001b[31m37\u001b[39m\n\n  153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while\n  154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).\n> 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);\n      |                                                                    ^\n  156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);\n  157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);\n  158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T20:25:49.153Z",
+                  "annotations": [
+                    {
+                      "type": "layout",
+                      "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                    },
+                    {
+                      "type": "ran",
+                      "description": "{\"ran\":37,\"never\":[\"cooker\",\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop-repeat3/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs",
+                    "column": 68,
+                    "line": 155
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "6a1d68b01fe1ef0138d9-241499c5d4f819cca01a",
+          "file": "factory33.spec.mjs",
+          "line": 105,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T20:16:12.995Z",
+    "duration": 735844.42,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

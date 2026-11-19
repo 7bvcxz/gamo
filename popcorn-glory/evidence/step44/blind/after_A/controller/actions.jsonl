@@ -1,0 +1,31 @@
+{"t":0.3,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":7.2,"issued":7.2,"cmd":"note","args":{"text":"Popcorn shop. Top: customers waiting at a counter wanting popcorn. Middle: some kitchen with a tank and a hook. Bottom: a red popcorn machine inside a ring (red/blue/white arc, a little gauge needle). Coins 0. Bottom card: 30 coins, +4 -> +6, up arrow - an upgrade I can't afford. I think I tap or hold the popcorn machine to pop corn; the ring looks like a timing/heat meter. Expect popcorn to come out and go to customers."}}
+{"t":9.1,"issued":8.2,"cmd":"tap","args":{"x":260,"y":860},"shot":"002.png"}
+{"t":13.8,"issued":13,"cmd":"tap","args":{"x":260,"y":860},"shot":"003.png"}
+{"t":20.9,"issued":17.6,"cmd":"wait","args":{"s":3},"shot":"004.png"}
+{"t":25.8,"issued":25.8,"cmd":"note","args":{"text":"Two taps on the machine -> popcorn went up to the middle station, into a bucket, customers took it and I got +8 each, 16 coins. The upgrade card at the bottom is filling with yellow as I get closer to 30. Nice, clear loop. I'll keep tapping to afford the upgrade. Wondering what the ring/dot around the machine means - timing?"}}
+{"t":27.6,"issued":26.8,"cmd":"tap","args":{"x":260,"y":860},"shot":"005.png"}
+{"t":32,"issued":31.2,"cmd":"tap","args":{"x":260,"y":860},"shot":"006.png"}
+{"t":36.1,"issued":33.9,"cmd":"wait","args":{"s":2},"shot":"007.png"}
+{"t":41.3,"issued":40.5,"cmd":"tap","args":{"x":290,"y":490},"shot":"008.png"}
+{"t":47.4,"issued":47.4,"cmd":"note","args":{"text":"32 coins. Tapping the middle station selected it: bottom card switched to its upgrade (250 coins, 15>20) and a stats panel appeared (time 4.0>3.0, 15>20). So each floor has its own upgrade. The machine's upgrade was 30 - I can afford that now. Going to tap the machine floor to select it again and press the up arrow."}}
+{"t":49.2,"issued":48.4,"cmd":"tap","args":{"x":48,"y":611},"shot":"009.png"}
+{"t":53.3,"issued":52.5,"cmd":"tap","args":{"x":455,"y":1175},"shot":"010.png"}
+{"t":59.3,"issued":59.3,"cmd":"note","args":{"text":"Bought the machine upgrade! Satisfying burst of popcorn, machine got an awning. Now +6 per batch, next level 54. Still don't get the ring around the machine - there's a white dot that moves, a yellow arc on the left, red arc top-left. Going to try holding the machine instead of tapping to see if the ring is a heat/hold meter."}}
+{"t":63,"issued":60.3,"cmd":"hold","args":{"x":260,"y":860,"s":2},"shot":"011.png","held_ms":2077}
+{"t":70,"issued":70,"cmd":"note","args":{"text":"Aha - holding makes a needle sweep clockwise around the ring! I held 2s and it ended near the top of the yellow arc / start of red. One of the 9 little dots under the machine turned gold. I bet releasing in the yellow zone is a 'perfect' pop and the red is burnt. Trying a 1.6s hold to land mid-yellow."}}
+{"t":73.3,"issued":71,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"012.png","held_ms":1659}
+{"t":80.6,"issued":78,"cmd":"hold","args":{"x":260,"y":860,"s":1.8},"shot":"013.png","held_ms":1885}
+{"t":85.2,"issued":85.2,"cmd":"note","args":{"text":"Got it! Holding ~1.8s releases right in the yellow - big popcorn spray, customer gives a heart and +10. The row of dots under the machine fills gold: 5 now, with a bigger 10th dot at the end. Feels like a streak/combo meter. Going for the full row."}}
+{"t":88.8,"issued":86.2,"cmd":"hold","args":{"x":260,"y":860,"s":1.8},"shot":"014.png","held_ms":1875}
+{"t":99.5,"issued":97,"cmd":"hold","args":{"x":260,"y":860,"s":1.8},"shot":"015.png","held_ms":1877}
+{"t":110.8,"issued":110.8,"cmd":"note","args":{"text":"Big popcorn explosion and the gold dots reset - I think filling the row gave a bonus burst. But now the counter is empty: no customers, and 3 filled buckets are piling up in the middle floor. So I'm now making popcorn faster than people come. The little sign top-left shows a bucket with dots filling - maybe customers coming? 50 coins, 4 short of the next machine upgrade."}}
+{"t":115.1,"issued":111.8,"cmd":"wait","args":{"s":3},"shot":"016.png"}
+{"t":123.8,"issued":122.9,"cmd":"tap","args":{"x":455,"y":1175},"shot":"017.png"}
+{"t":124.7,"issued":123.9,"cmd":"tap","args":{"x":48,"y":146},"shot":"018.png"}
+{"t":135,"issued":135,"cmd":"note","args":{"text":"Bought machine upgrade 2 - it's a cart with wheels now. Selected the counter floor: its upgrade costs 40, stats show 4.0>5.5 people and 15.0>11.0 seconds - looks like it brings customers more often. That's what I need: 7 buckets are stacked up waiting and nobody's at the counter. Only 16 coins though; waiting for customers to buy the stockpile."}}
+{"t":144.3,"issued":136,"cmd":"wait","args":{"s":8},"shot":"019.png"}
+{"t":162.5,"issued":161.7,"cmd":"tap","args":{"x":300,"y":230},"shot":"020.png"}
+{"t":167,"issued":167,"cmd":"note","args":{"text":"Customers trickle in slowly, coins 26 creeping toward the 40 counter upgrade. Tried tapping the counter window to see if it calls customers. Waiting on customers feels a bit slow compared to the fun of timing the popcorn."}}
+{"t":178.4,"issued":177.5,"cmd":"tap","args":{"x":48,"y":146},"shot":"021.png"}
+{"t":179.3,"issued":178.4,"cmd":"tap","args":{"x":455,"y":1175},"shot":"022.png"}

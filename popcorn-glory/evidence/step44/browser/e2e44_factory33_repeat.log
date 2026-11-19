@@ -1,0 +1,103 @@
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:13] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 4 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:13] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:13] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:13] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:13] "GET /popcorn-glory/game-54f215a65e98.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:13] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:14] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:16:14] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  1 [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (2.7m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:18:53] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:18:53] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:18:53] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:18:53] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:18:53] "GET /popcorn-glory/game-54f215a65e98.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:18:54] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:18:54] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘  2 [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (2.7m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:21:33] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:21:33] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:21:33] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:21:33] "GET /popcorn-glory/game-54f215a65e98.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:21:33] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:21:34] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:21:34] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  3 [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (4.3m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:25:49] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:25:49] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:25:49] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:25:49] "GET /popcorn-glory/game-54f215a65e98.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:25:49] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:25:50] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 20:25:50] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘  4 [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (2.7m)
+
+
+  1) [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+
+    Error: nearly every machine worked (never: cooker,kiosk,U08,kiosk,bagger,bagger,cooker)
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 38
+    Received:    37
+
+      153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while
+      154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).
+    > 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);
+          |                                                                    ^
+      156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);
+      157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);
+      158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68
+
+    Error Context: test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop/error-context.md
+
+  2) [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+
+    Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 38
+    Received:    37
+
+      153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while
+      154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).
+    > 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);
+          |                                                                    ^
+      156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);
+      157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);
+      158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68
+
+    Error Context: test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop-repeat1/error-context.md
+
+  3) [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+
+    Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 38
+    Received:    37
+
+      153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while
+      154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).
+    > 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);
+          |                                                                    ^
+      156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);
+      157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);
+      158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68
+
+    Error Context: test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop-repeat3/error-context.md
+
+  3 failed
+    [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+    [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+    [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+  1 passed (12.3m)

@@ -1,0 +1,14 @@
+{
+  "reason": "time",
+  "elapsed_s": 181,
+  "counts": {
+    "look": 1,
+    "note": 9,
+    "tap": 12,
+    "wait": 4,
+    "hold": 5
+  },
+  "shots": 23,
+  "final_shot": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/evidence/step44/blind/after_A/player/shots/023.png",
+  "version": "0.44.0"
+}

@@ -1,0 +1,16 @@
+warm=120 hand_first=false coater_fair=false late=0: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":20}
+warm=120 hand_first=false coater_fair=false late=400: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":20}
+warm=120 hand_first=true coater_fair=false late=0: cookers never ran {"0":14,"1":5,"2":1}; runs under 38: 0/20; ran {"40":1,"41":5,"42":14}
+warm=120 hand_first=true coater_fair=false late=400: cookers never ran {"0":16,"1":4}; runs under 38: 0/20; ran {"41":4,"42":16}
+warm=120 hand_first=false coater_fair=true late=0: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":20}
+warm=120 hand_first=false coater_fair=true late=400: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":20}
+warm=120 hand_first=true coater_fair=true late=0: cookers never ran {"0":14,"1":5,"2":1}; runs under 38: 0/20; ran {"40":1,"41":5,"42":14}
+warm=120 hand_first=true coater_fair=true late=400: cookers never ran {"0":16,"1":4}; runs under 38: 0/20; ran {"41":4,"42":16}
+warm=300 hand_first=false coater_fair=false late=0: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":18,"42":2}
+warm=300 hand_first=false coater_fair=false late=400: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":18,"42":2}
+warm=300 hand_first=true coater_fair=false late=0: cookers never ran {"0":19,"1":1}; runs under 38: 0/20; ran {"41":1,"42":19}
+warm=300 hand_first=true coater_fair=false late=400: cookers never ran {"0":20}; runs under 38: 0/20; ran {"42":20}
+warm=300 hand_first=false coater_fair=true late=0: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":18,"42":2}
+warm=300 hand_first=false coater_fair=true late=400: cookers never ran {"0":20}; runs under 38: 0/20; ran {"41":18,"42":2}
+warm=300 hand_first=true coater_fair=true late=0: cookers never ran {"0":19,"1":1}; runs under 38: 0/20; ran {"41":1,"42":19}
+warm=300 hand_first=true coater_fair=true late=400: cookers never ran {"0":20}; runs under 38: 0/20; ran {"42":20}

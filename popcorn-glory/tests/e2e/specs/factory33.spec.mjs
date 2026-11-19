@@ -136,23 +136,32 @@ test('forty-four machines at once: built by hand, readable, routed, recovering, 
   // working, or with work done -- a kiosk serves only while the counter is full, the
   // balancer only moves a stopped line's goods).
   const ran = new Set();
+  const waited = new Set();   // kettles holding a finished lot, the bin full (Step 44, D-64)
   const done0 = Object.fromEntries(s.run.machines.map((m) => [m.id, m.done]));
   let people = 0;
   for (let i = 0; i < 36; i++) {
     if (i % 2 === 0) await popIfFree(pop);
     const r = await pop.call('dev_advance', 2500);
     for (const m of r.state.run.machines) if (m.state === 'run' || m.done > (done0[m.id] || 0)) ran.add(m.id);
+    for (const m of r.state.run.machines) if (m.type === 'cooker' && m.state === 'blocked') waited.add(m.id);
     people = Math.max(people, r.state.view.customers + r.state.view.leaving);
     expect(r.state.run.portions_everywhere, 'every portion is somewhere').toBe(r.state.run.stats.made_portions);
     expect(r.state.run.money).toBeGreaterThanOrEqual(0);
   }
   s = await pop.state();
   const idle = s.run.machines.filter((m) => !ran.has(m.id)).map((m) => m.type);
-  testInfo.annotations.push({ type: 'ran', description: JSON.stringify({ ran: ran.size, never: idle }) });
+  const holding = s.run.machines.filter((m) => !ran.has(m.id) && waited.has(m.id)).map((m) => m.type);
+  testInfo.annotations.push({ type: 'ran', description: JSON.stringify({ ran: ran.size, never: idle, holding_a_lot: holding }) });
   // Forty-four run every step; in 90 s the ones with nothing to do stay idle: the kiosks while
   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while
-  // the shelf is stocked (the unit test: at most two never work in ten minutes).
-  expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);
+  // the shelf is stocked (the unit test: at most two never work in ten minutes). Step 44 (D-64):
+  // while the hand's glass waits and the bin drains, the bin keeps the glass's room, so a spare
+  // kettle can hold its finished lot the whole 90 s (blocked: the packers are the bottleneck,
+  // the lots are alike, sales are the same). It made its lot and waits -- it is not dead. In
+  // 0.43.0 at most one kettle stayed idle; with the reserve, two in 3 of 4 desktop runs.
+  expect(holding.length, 'only spare kettles wait with a lot').toBeLessThanOrEqual(3);
+  expect(ran.size + holding.length, `nearly every machine worked or holds its work (never: ${idle})`).toBeGreaterThanOrEqual(38);
+  expect(idle.filter((t) => t === 'cooker').length, 'every idle kettle holds a finished lot').toBe(holding.length);
   expect(s.run.stats.wrong_sku || 0).toBe(0);
   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);
   // A shop with lanes to spare serves people the step they come in: they are still drawn.

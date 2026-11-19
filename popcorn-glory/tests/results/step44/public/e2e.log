@@ -1,0 +1,356 @@
+
+Running 303 tests using 1 worker
+
+  ✓    1 [p720] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (6.7s)
+  ✓    2 [p720] › specs/art15.spec.mjs:14:1 › the chooser does not list the artboard (2.3s)
+  ✓    3 [p720] › specs/art40.spec.mjs:39:1 › the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen (6.1s)
+  ✓    4 [p720] › specs/art40.spec.mjs:68:1 › the upgrade card: a silhouette out of reach, the next machine in its colours once affordable (5.4s)
+  ✓    5 [p720] › specs/burst14.spec.mjs:11:1 › burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst (11.5s)
+  ✓    6 [p720] › specs/burst14.spec.mjs:41:1 › without ?burst=1 the stand has no crescendo (11.8s)
+  -    7 [p720] › specs/burst14.spec.mjs:51:1 › the fountain is heard and does not clip
+  ✓    8 [p720] › specs/career39.spec.mjs:43:1 › real clock: a fresh factory's first three minutes against the sim (3.0m)
+  ✓    9 [p720] › specs/career39.spec.mjs:98:1 › a rich factory: the sign's new tiers draw more, and a twelve-digit wallet fits the counter (32.3s)
+  ✓   10 [p720] › specs/catalog27.spec.mjs:4:1 › the machine catalog sheet draws on this screen (3.1s)
+  ✓   11 [p720] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes (1.9m)
+  ✓   12 [p720] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters (2.4m)
+  ✓   13 [p720] › specs/craft35.spec.mjs:84:1 › the spoon finishes a batch by hand; the machine, the mix and the payback stay honest (2.8m)
+  ✓   14 [p720] › specs/customers36.spec.mjs:49:1 › a classic first customer, then a cast with their own tastes, faces and stars (54.5s)
+  ✓   15 [p720] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (4.1s)
+  ✓   16 [p720] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (2.4s)
+  ✓   17 [p720] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (4.5s)
+  ✓   18 [p720] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (4.6s)
+  ✓   19 [p720] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (7.9s)
+  ✓   20 [p720] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (4.1s)
+  ✓   21 [p720] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (3.9s)
+  ✓   22 [p720] › specs/factory16.spec.mjs:12:1 › the factory: three floors fit, the ring is in the kitchen, nothing covers them (2.8s)
+  ✓   23 [p720] › specs/factory16.spec.mjs:30:1 › the factory: the kettle cooks, a floor opens its detail without cooking (6.2s)
+  -   24 [p720] › specs/factory16.spec.mjs:74:1 › idle memory: the factory keeps far less than the stand
+  ✓   25 [p720] › specs/factory17.spec.mjs:7:1 › the factory: no money at the pop, the first sale pays the pack price, goods are conserved (12.9s)
+  ✓   26 [p720] › specs/factory18.spec.mjs:8:1 › one batch from the kettle to a satisfied customer (13.6s)
+  ✓   27 [p720] › specs/factory19.spec.mjs:7:1 › the factory kettle: a real lot, the crescendo fills, an unaffordable card answers (5.2s)
+  ✓   28 [p720] › specs/factory20.spec.mjs:7:1 › the packing station: fill, seal, shelf; the middle floor card sells the station (10.6s)
+  ✓   29 [p720] › specs/factory21.spec.mjs:7:1 › first pop -> first pack -> one paid hand-over; a calm empty shop between customers (24.2s)
+  ✓   30 [p720] › specs/factory21.spec.mjs:39:1 › no stock, no sale: the queue fills, faces change, people leave, money stays 0 (3.7s)
+  ✓   31 [p720] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (21.3s)
+  ✓   32 [p720] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (2.9s)
+  ✓   33 [p720] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck (1.0m)
+  ✓   34 [p720] › specs/factory26.spec.mjs:19:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.3m)
+  ✓   35 [p720] › specs/factory28.spec.mjs:8:1 › eight kitchen devices: built from the picker, each doing its own job with real inputs (31.0s)
+  ✓   36 [p720] › specs/factory29.spec.mjs:53:1 › the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents (1.7m)
+  -   37 [p720] › specs/factory29.spec.mjs:89:1 › without vents five kettles overheat; with them the kitchen keeps cooking
+  -   38 [p720] › specs/factory29.spec.mjs:108:1 › a minute of a busy advanced factory: frame rate and kept memory
+  ✓   39 [p720] › specs/factory30.spec.mjs:35:1 › the packing floor: cups, the weigher, the sealer, honest SKUs (1.2m)
+  -   40 [p720] › specs/factory30.spec.mjs:73:1 › the dispenser sells large bags at tier 1; an empty floor stops and pays nothing
+  -   41 [p720] › specs/factory30.spec.mjs:97:1 › frame rate with several packers working at once
+  ✓   42 [p720] › specs/factory31.spec.mjs:54:1 › the storefront: cashier, express window, robot lanes, router -- honest sales (1.8m)
+  -   43 [p720] › specs/factory31.spec.mjs:85:1 › a paused cashier holds its customers sales until it is resumed
+  ✓   44 [p720] › specs/factory32.spec.mjs:34:1 › support machines on their floors, the upkeep overview, pause and resume everything (1.3m)
+  ✓   45 [p720] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (3.6m)
+  ✓   46 [p720] › specs/flavors34.spec.mjs:27:1 › the flavors sheet draws five distinct flavors on this screen (3.7s)
+  ✓   47 [p720] › specs/flavors34.spec.mjs:98:1 › five flavors are coated, packed, asked for and sold in the browser (1.2m)
+  -   48 [p720] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase
+  -   49 [p720] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once
+  -   50 [p720] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back
+  ✓   51 [p720] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B (5.2s)
+  ✓   52 [p720] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page (3.0s)
+  ✓   53 [p720] › specs/news37.spec.mjs:64:1 › the news: quiet at opening, a craze that brings real customers, readable, never in the way (2.2m)
+  -   54 [p720] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake
+  -   55 [p720] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart
+  ✓   56 [p720] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (10.1s)
+  ✓   57 [p720] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (21.4s)
+  ✓   58 [p720] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (4.1s)
+  ✓   59 [p720] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.8s)
+  ✓   60 [p720] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion (6.3s)
+  -   61 [p720] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  ✓   62 [p720] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins) (301ms)
+  ✓   63 [p720] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere (580ms)
+  ✓   64 [p720] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (603ms)
+  -   65 [p720] › specs/soak43.spec.mjs:110:3 › ten minutes at forty-four machines › the control: the sound off plays nothing
+  -   66 [p720] › specs/soak43.spec.mjs:118:3 › ten minutes at forty-four machines › the sound on: no clip, bounded voices, no buffer growth, and no memory of its own
+  ✓   67 [p720] › specs/sound05.spec.mjs:22:1 › A: a press is heard (3.4s)
+  ✓   68 [p720] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (5.3s)
+  ✓   69 [p720] › specs/sound05.spec.mjs:53:1 › stand: a perfect pop, and the busy top stand, do not clip (31.3s)
+  ✓   70 [p720] › specs/sound05.spec.mjs:87:1 › stand: the shake clinks and the helper pops on its own (9.7s)
+  ✓   71 [p720] › specs/sound05.spec.mjs:125:1 › C: kernels clink and the eruption booms (4.9s)
+  ✓   72 [p720] › specs/sound05.spec.mjs:137:1 › the speaker button steps loud -> soft -> calm -> off, and back on (7.4s)
+  ✓   73 [p720] › specs/sound05.spec.mjs:168:1 › ?sound=off starts muted (4.0s)
+  ✓   74 [p720] › specs/sound43.spec.mjs:50:1 › the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips (37.8s)
+  ✓   75 [p720] › specs/sound43.spec.mjs:107:1 › a sound on the left is louder on the left, on the right louder on the right (8.9s)
+  ✓   76 [p720] › specs/sound43.spec.mjs:125:1 › a hidden tab is silent, and the factory is heard again after (18.0s)
+  ✓   77 [p720] › specs/sound43.spec.mjs:150:1 › calm: no beds, the hand still heard, and the choice survives a reload (24.6s)
+  ✓   78 [p720] › specs/sound43.spec.mjs:180:1 › one sale, one cash sound (16.9s)
+  ✓   79 [p720] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (5.1s)
+  ✓   80 [p720] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (10.9s)
+  ✓   81 [p720] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (3.1s)
+  ✓   82 [p720] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (4.9s)
+  ✓   83 [p720] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (2.7s)
+  ✓   84 [p720] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (6.6s)
+  ✓   85 [p720] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (3.6s)
+  ✓   86 [p720] › specs/art41.spec.mjs:43:1 › the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put (17.7s)
+  ✓   87 [p720] › specs/art41.spec.mjs:119:1 › the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons (2.4m)
+  ✓   88 [p720] › specs/motion42.spec.mjs:56:1 › one batch lights the floors bottom to top, and a celebration never moves the ring (15.3s)
+  ✓   89 [p720] › specs/motion42.spec.mjs:92:1 › forty-four machines: a bounded crescendo through a resize and a hidden tab (48.2s)
+  ✓   90 [p720] › specs/motion42.spec.mjs:145:3 › low effects: smaller or still effects, and a batch still travels kitchen to shop (19.9s)
+  ✓   91 [p720] › specs/motion42.spec.mjs:145:3 › reduced motion: smaller or still effects, and a batch still travels kitchen to shop (19.7s)
+  ✓   92 [phone] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (2.8s)
+  ✓   93 [phone] › specs/art15.spec.mjs:14:1 › the chooser does not list the artboard (2.5s)
+  ✓   94 [phone] › specs/art40.spec.mjs:39:1 › the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen (6.9s)
+  ✓   95 [phone] › specs/art40.spec.mjs:68:1 › the upgrade card: a silhouette out of reach, the next machine in its colours once affordable (6.0s)
+  ✓   96 [phone] › specs/burst14.spec.mjs:11:1 › burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst (12.2s)
+  ✓   97 [phone] › specs/burst14.spec.mjs:41:1 › without ?burst=1 the stand has no crescendo (11.5s)
+  -   98 [phone] › specs/burst14.spec.mjs:51:1 › the fountain is heard and does not clip
+  -   99 [phone] › specs/career39.spec.mjs:43:1 › real clock: a fresh factory's first three minutes against the sim
+  ✓  100 [phone] › specs/career39.spec.mjs:98:1 › a rich factory: the sign's new tiers draw more, and a twelve-digit wallet fits the counter (35.5s)
+  ✓  101 [phone] › specs/catalog27.spec.mjs:4:1 › the machine catalog sheet draws on this screen (3.4s)
+  ✓  102 [phone] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes (2.1m)
+  ✓  103 [phone] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters (2.5m)
+  ✓  104 [phone] › specs/craft35.spec.mjs:84:1 › the spoon finishes a batch by hand; the machine, the mix and the payback stay honest (1.9m)
+  ✓  105 [phone] › specs/customers36.spec.mjs:49:1 › a classic first customer, then a cast with their own tastes, faces and stars (56.4s)
+  ✓  106 [phone] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (5.0s)
+  ✓  107 [phone] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (2.6s)
+  ✓  108 [phone] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (5.4s)
+  ✓  109 [phone] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (4.9s)
+  ✓  110 [phone] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (8.2s)
+  ✓  111 [phone] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (4.7s)
+  ✓  112 [phone] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (4.6s)
+  ✓  113 [phone] › specs/factory16.spec.mjs:12:1 › the factory: three floors fit, the ring is in the kitchen, nothing covers them (3.0s)
+  ✓  114 [phone] › specs/factory16.spec.mjs:30:1 › the factory: the kettle cooks, a floor opens its detail without cooking (6.7s)
+  -  115 [phone] › specs/factory16.spec.mjs:74:1 › idle memory: the factory keeps far less than the stand
+  ✓  116 [phone] › specs/factory17.spec.mjs:7:1 › the factory: no money at the pop, the first sale pays the pack price, goods are conserved (12.4s)
+  ✓  117 [phone] › specs/factory18.spec.mjs:8:1 › one batch from the kettle to a satisfied customer (13.1s)
+  ✓  118 [phone] › specs/factory19.spec.mjs:7:1 › the factory kettle: a real lot, the crescendo fills, an unaffordable card answers (5.7s)
+  ✓  119 [phone] › specs/factory20.spec.mjs:7:1 › the packing station: fill, seal, shelf; the middle floor card sells the station (11.1s)
+  ✓  120 [phone] › specs/factory21.spec.mjs:7:1 › first pop -> first pack -> one paid hand-over; a calm empty shop between customers (25.0s)
+  ✓  121 [phone] › specs/factory21.spec.mjs:39:1 › no stock, no sale: the queue fills, faces change, people leave, money stays 0 (4.0s)
+  ✓  122 [phone] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (22.9s)
+  ✓  123 [phone] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (3.1s)
+  ✓  124 [phone] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck (1.0m)
+  ✓  125 [phone] › specs/factory26.spec.mjs:19:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.4m)
+  ✓  126 [phone] › specs/factory28.spec.mjs:8:1 › eight kitchen devices: built from the picker, each doing its own job with real inputs (34.9s)
+  ✓  127 [phone] › specs/factory29.spec.mjs:53:1 › the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents (1.9m)
+  -  128 [phone] › specs/factory29.spec.mjs:89:1 › without vents five kettles overheat; with them the kitchen keeps cooking
+  -  129 [phone] › specs/factory29.spec.mjs:108:1 › a minute of a busy advanced factory: frame rate and kept memory
+  ✓  130 [phone] › specs/factory30.spec.mjs:35:1 › the packing floor: cups, the weigher, the sealer, honest SKUs (1.2m)
+  -  131 [phone] › specs/factory30.spec.mjs:73:1 › the dispenser sells large bags at tier 1; an empty floor stops and pays nothing
+  -  132 [phone] › specs/factory30.spec.mjs:97:1 › frame rate with several packers working at once
+  ✓  133 [phone] › specs/factory31.spec.mjs:54:1 › the storefront: cashier, express window, robot lanes, router -- honest sales (1.9m)
+  -  134 [phone] › specs/factory31.spec.mjs:85:1 › a paused cashier holds its customers sales until it is resumed
+  ✓  135 [phone] › specs/factory32.spec.mjs:34:1 › support machines on their floors, the upkeep overview, pause and resume everything (1.4m)
+  ✓  136 [phone] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (4.0m)
+  ✓  137 [phone] › specs/flavors34.spec.mjs:27:1 › the flavors sheet draws five distinct flavors on this screen (4.6s)
+  ✓  138 [phone] › specs/flavors34.spec.mjs:98:1 › five flavors are coated, packed, asked for and sold in the browser (1.2m)
+  -  139 [phone] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase
+  -  140 [phone] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once
+  -  141 [phone] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back
+  ✓  142 [phone] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B (5.5s)
+  ✓  143 [phone] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page (3.3s)
+  ✓  144 [phone] › specs/news37.spec.mjs:64:1 › the news: quiet at opening, a craze that brings real customers, readable, never in the way (2.3m)
+  -  145 [phone] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake
+  -  146 [phone] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart
+  ✓  147 [phone] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (12.3s)
+  ✓  148 [phone] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (27.0s)
+  ✓  149 [phone] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (5.0s)
+  ✓  150 [phone] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (6.3s)
+  -  151 [phone] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -  152 [phone] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -  153 [phone] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  154 [phone] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  155 [phone] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (564ms)
+  -  156 [phone] › specs/soak43.spec.mjs:110:3 › ten minutes at forty-four machines › the control: the sound off plays nothing
+  -  157 [phone] › specs/soak43.spec.mjs:118:3 › ten minutes at forty-four machines › the sound on: no clip, bounded voices, no buffer growth, and no memory of its own
+  ✓  158 [phone] › specs/sound05.spec.mjs:22:1 › A: a press is heard (3.7s)
+  ✓  159 [phone] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (5.7s)
+  ✓  160 [phone] › specs/sound05.spec.mjs:53:1 › stand: a perfect pop, and the busy top stand, do not clip (32.5s)
+  ✓  161 [phone] › specs/sound05.spec.mjs:87:1 › stand: the shake clinks and the helper pops on its own (10.1s)
+  ✓  162 [phone] › specs/sound05.spec.mjs:125:1 › C: kernels clink and the eruption booms (5.4s)
+  ✓  163 [phone] › specs/sound05.spec.mjs:137:1 › the speaker button steps loud -> soft -> calm -> off, and back on (8.5s)
+  ✓  164 [phone] › specs/sound05.spec.mjs:168:1 › ?sound=off starts muted (4.6s)
+  ✓  165 [phone] › specs/sound43.spec.mjs:50:1 › the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips (39.1s)
+  ✓  166 [phone] › specs/sound43.spec.mjs:107:1 › a sound on the left is louder on the left, on the right louder on the right (9.3s)
+  ✓  167 [phone] › specs/sound43.spec.mjs:125:1 › a hidden tab is silent, and the factory is heard again after (18.5s)
+  ✓  168 [phone] › specs/sound43.spec.mjs:150:1 › calm: no beds, the hand still heard, and the choice survives a reload (24.2s)
+  ✓  169 [phone] › specs/sound43.spec.mjs:180:1 › one sale, one cash sound (17.1s)
+  ✓  170 [phone] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (4.2s)
+  ✓  171 [phone] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (11.4s)
+  ✓  172 [phone] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (3.3s)
+  ✓  173 [phone] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (5.8s)
+  ✓  174 [phone] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (3.1s)
+  ✓  175 [phone] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (6.8s)
+  ✓  176 [phone] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.6s)
+  ✓  177 [phone] › specs/art41.spec.mjs:43:1 › the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put (19.1s)
+  ✓  178 [phone] › specs/art41.spec.mjs:119:1 › the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons (2.5m)
+  ✓  179 [phone] › specs/motion42.spec.mjs:56:1 › one batch lights the floors bottom to top, and a celebration never moves the ring (17.2s)
+  ✓  180 [phone] › specs/motion42.spec.mjs:92:1 › forty-four machines: a bounded crescendo through a resize and a hidden tab (50.7s)
+  ✓  181 [phone] › specs/motion42.spec.mjs:145:3 › low effects: smaller or still effects, and a batch still travels kitchen to shop (23.4s)
+  ✓  182 [phone] › specs/motion42.spec.mjs:145:3 › reduced motion: smaller or still effects, and a batch still travels kitchen to shop (21.0s)
+  ✓  183 [desktop] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (2.6s)
+  ✓  184 [desktop] › specs/art15.spec.mjs:14:1 › the chooser does not list the artboard (2.2s)
+  ✓  185 [desktop] › specs/art40.spec.mjs:39:1 › the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen (6.4s)
+  ✓  186 [desktop] › specs/art40.spec.mjs:68:1 › the upgrade card: a silhouette out of reach, the next machine in its colours once affordable (5.6s)
+  ✓  187 [desktop] › specs/burst14.spec.mjs:11:1 › burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst (11.4s)
+  ✓  188 [desktop] › specs/burst14.spec.mjs:41:1 › without ?burst=1 the stand has no crescendo (11.0s)
+  ✓  189 [desktop] › specs/burst14.spec.mjs:51:1 › the fountain is heard and does not clip (18.4s)
+  ✓  190 [desktop] › specs/career39.spec.mjs:43:1 › real clock: a fresh factory's first three minutes against the sim (3.0m)
+  ✓  191 [desktop] › specs/career39.spec.mjs:98:1 › a rich factory: the sign's new tiers draw more, and a twelve-digit wallet fits the counter (31.5s)
+  ✓  192 [desktop] › specs/catalog27.spec.mjs:4:1 › the machine catalog sheet draws on this screen (3.2s)
+  ✓  193 [desktop] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes (1.9m)
+  ✓  194 [desktop] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters (2.3m)
+  ✓  195 [desktop] › specs/craft35.spec.mjs:84:1 › the spoon finishes a batch by hand; the machine, the mix and the payback stay honest (1.6m)
+  ✓  196 [desktop] › specs/customers36.spec.mjs:49:1 › a classic first customer, then a cast with their own tastes, faces and stars (51.6s)
+  ✓  197 [desktop] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (3.5s)
+  ✓  198 [desktop] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (2.3s)
+  ✓  199 [desktop] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (4.3s)
+  ✓  200 [desktop] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (4.6s)
+  ✓  201 [desktop] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (7.8s)
+  ✓  202 [desktop] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (3.9s)
+  ✓  203 [desktop] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (3.5s)
+  ✓  204 [desktop] › specs/factory16.spec.mjs:12:1 › the factory: three floors fit, the ring is in the kitchen, nothing covers them (2.8s)
+  ✓  205 [desktop] › specs/factory16.spec.mjs:30:1 › the factory: the kettle cooks, a floor opens its detail without cooking (6.7s)
+IDLE factory 0.31 stand 0.97
+  ✓  206 [desktop] › specs/factory16.spec.mjs:74:1 › idle memory: the factory keeps far less than the stand (3.3m)
+  ✓  207 [desktop] › specs/factory17.spec.mjs:7:1 › the factory: no money at the pop, the first sale pays the pack price, goods are conserved (13.2s)
+  ✓  208 [desktop] › specs/factory18.spec.mjs:8:1 › one batch from the kettle to a satisfied customer (13.7s)
+  ✓  209 [desktop] › specs/factory19.spec.mjs:7:1 › the factory kettle: a real lot, the crescendo fills, an unaffordable card answers (5.2s)
+  ✓  210 [desktop] › specs/factory20.spec.mjs:7:1 › the packing station: fill, seal, shelf; the middle floor card sells the station (10.7s)
+  ✓  211 [desktop] › specs/factory21.spec.mjs:7:1 › first pop -> first pack -> one paid hand-over; a calm empty shop between customers (24.3s)
+  ✓  212 [desktop] › specs/factory21.spec.mjs:39:1 › no stock, no sale: the queue fills, faces change, people leave, money stays 0 (3.8s)
+  ✓  213 [desktop] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (21.4s)
+  ✓  214 [desktop] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (2.9s)
+  ✓  215 [desktop] › specs/factory23.spec.mjs:7:1 › two products: each customer gets the bag they ordered, once; the cue names the bottleneck (1.0m)
+  ✓  216 [desktop] › specs/factory26.spec.mjs:19:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.3m)
+  ✓  217 [desktop] › specs/factory28.spec.mjs:8:1 › eight kitchen devices: built from the picker, each doing its own job with real inputs (30.0s)
+  ✓  218 [desktop] › specs/factory29.spec.mjs:53:1 › the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents (1.7m)
+  ✓  219 [desktop] › specs/factory29.spec.mjs:89:1 › without vents five kettles overheat; with them the kitchen keeps cooking (36.2s)
+  ✓  220 [desktop] › specs/factory29.spec.mjs:108:1 › a minute of a busy advanced factory: frame rate and kept memory (1.6m)
+  ✓  221 [desktop] › specs/factory30.spec.mjs:35:1 › the packing floor: cups, the weigher, the sealer, honest SKUs (1.2m)
+  ✓  222 [desktop] › specs/factory30.spec.mjs:73:1 › the dispenser sells large bags at tier 1; an empty floor stops and pays nothing (1.2m)
+  ✓  223 [desktop] › specs/factory30.spec.mjs:97:1 › frame rate with several packers working at once (1.0m)
+  ✓  224 [desktop] › specs/factory31.spec.mjs:54:1 › the storefront: cashier, express window, robot lanes, router -- honest sales (1.7m)
+  ✓  225 [desktop] › specs/factory31.spec.mjs:85:1 › a paused cashier holds its customers sales until it is resumed (57.4s)
+  ✓  226 [desktop] › specs/factory32.spec.mjs:34:1 › support machines on their floors, the upkeep overview, pause and resume everything (1.2m)
+  ✘  227 [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (2.7m)
+  ✘  228 [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured (retry #1) (4.2m)
+  ✓  229 [desktop] › specs/flavors34.spec.mjs:27:1 › the flavors sheet draws five distinct flavors on this screen (5.6s)
+  ✓  230 [desktop] › specs/flavors34.spec.mjs:98:1 › five flavors are coated, packed, asked for and sold in the browser (1.1m)
+  ✓  231 [desktop] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase (8.5s)
+  ✓  232 [desktop] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once (7.6s)
+  ✓  233 [desktop] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back (4.6s)
+  -  234 [desktop] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B
+  -  235 [desktop] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page
+  ✓  236 [desktop] › specs/news37.spec.mjs:64:1 › the news: quiet at opening, a craze that brings real customers, readable, never in the way (2.1m)
+  ✓  237 [desktop] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake (1.2m)
+  ✓  238 [desktop] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart (1.2m)
+  ✓  239 [desktop] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (9.1s)
+  ✓  240 [desktop] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (18.9s)
+  ✓  241 [desktop] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (3.6s)
+  ✓  242 [desktop] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.4s)
+  -  243 [desktop] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  ✓  244 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (1.1m)
+  -  245 [desktop] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  246 [desktop] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  247 [desktop] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (696ms)
+  ✓  248 [desktop] › specs/soak43.spec.mjs:110:3 › ten minutes at forty-four machines › the control: the sound off plays nothing (10.4m)
+  ✓  249 [desktop] › specs/soak43.spec.mjs:118:3 › ten minutes at forty-four machines › the sound on: no clip, bounded voices, no buffer growth, and no memory of its own (10.6m)
+  ✓  250 [desktop] › specs/sound05.spec.mjs:22:1 › A: a press is heard (5.0s)
+  ✓  251 [desktop] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (5.3s)
+  ✓  252 [desktop] › specs/sound05.spec.mjs:53:1 › stand: a perfect pop, and the busy top stand, do not clip (30.7s)
+  ✓  253 [desktop] › specs/sound05.spec.mjs:87:1 › stand: the shake clinks and the helper pops on its own (12.7s)
+  ✓  254 [desktop] › specs/sound05.spec.mjs:125:1 › C: kernels clink and the eruption booms (4.5s)
+  ✓  255 [desktop] › specs/sound05.spec.mjs:137:1 › the speaker button steps loud -> soft -> calm -> off, and back on (7.3s)
+  ✓  256 [desktop] › specs/sound05.spec.mjs:168:1 › ?sound=off starts muted (3.9s)
+  ✓  257 [desktop] › specs/sound43.spec.mjs:50:1 › the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips (38.6s)
+  ✓  258 [desktop] › specs/sound43.spec.mjs:107:1 › a sound on the left is louder on the left, on the right louder on the right (9.3s)
+  ✓  259 [desktop] › specs/sound43.spec.mjs:125:1 › a hidden tab is silent, and the factory is heard again after (18.0s)
+  ✓  260 [desktop] › specs/sound43.spec.mjs:150:1 › calm: no beds, the hand still heard, and the choice survives a reload (22.8s)
+  ✓  261 [desktop] › specs/sound43.spec.mjs:180:1 › one sale, one cash sound (16.6s)
+  ✓  262 [desktop] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (3.9s)
+  ✓  263 [desktop] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (11.3s)
+  ✓  264 [desktop] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (2.9s)
+  ✓  265 [desktop] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (4.7s)
+  ✓  266 [desktop] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (2.6s)
+  ✓  267 [desktop] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (6.6s)
+  ✓  268 [desktop] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.4s)
+  ✓  269 [desktop] › specs/art41.spec.mjs:43:1 › the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put (16.6s)
+  ✓  270 [desktop] › specs/art41.spec.mjs:119:1 › the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons (2.3m)
+  ✓  271 [desktop] › specs/motion42.spec.mjs:56:1 › one batch lights the floors bottom to top, and a celebration never moves the ring (15.2s)
+  ✓  272 [desktop] › specs/motion42.spec.mjs:92:1 › forty-four machines: a bounded crescendo through a resize and a hidden tab (49.6s)
+  ✓  273 [desktop] › specs/motion42.spec.mjs:145:3 › low effects: smaller or still effects, and a batch still travels kitchen to shop (20.2s)
+  ✓  274 [desktop] › specs/motion42.spec.mjs:145:3 › reduced motion: smaller or still effects, and a batch still travels kitchen to shop (20.2s)
+  ✓  275 [m-p720] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (2.9s)
+  ✓  276 [m-p720] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (2.9s)
+  ✓  277 [m-p720] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (2.8s)
+  ✓  278 [m-p720] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (2.9s)
+  ✓  279 [m-p720] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (4.0s)
+  ✓  280 [m-p720] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (3.0s)
+  ✓  281 [m-hd] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (3.5s)
+  ✓  282 [m-hd] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (3.4s)
+  ✓  283 [m-hd] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (3.4s)
+  ✓  284 [m-hd] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (3.7s)
+  ✓  285 [m-hd] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (5.2s)
+  ✓  286 [m-hd] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (3.7s)
+  ✓  287 [m-small] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (3.8s)
+  ✓  288 [m-small] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (3.6s)
+  ✓  289 [m-small] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (3.6s)
+  ✓  290 [m-small] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (3.7s)
+  ✓  291 [m-small] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (6.0s)
+  ✓  292 [m-small] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (4.0s)
+  ✓  293 [m-tablet] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (4.4s)
+  ✓  294 [m-tablet] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (4.3s)
+  ✓  295 [m-tablet] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (4.2s)
+  ✓  296 [m-tablet] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (4.3s)
+  ✓  297 [m-tablet] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (7.8s)
+  ✓  298 [m-tablet] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (5.0s)
+  ✓  299 [m-landscape] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (4.2s)
+  ✓  300 [m-landscape] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (4.1s)
+  ✓  301 [m-landscape] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (4.1s)
+  ✓  302 [m-landscape] › specs/responsive07.spec.mjs:43:1 › factory: floors fit, ring in the kitchen, nothing overlaps (4.4s)
+  ✓  303 [m-landscape] › specs/responsive07.spec.mjs:65:1 › reduced motion and sound off still play (7.2s)
+  ✓  304 [m-landscape] › specs/responsive07.spec.mjs:79:1 › stand: card, shakers and helper fit (4.5s)
+
+
+  1) [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+
+    Error: nearly every machine worked (never: cooker,cooker,kiosk,U08,kiosk,bagger,bagger)
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 38
+    Received:    37
+
+      153 |   // the counter's lanes keep up, the balancer until a line stops (below), a spare filler while
+      154 |   // the shelf is stocked (the unit test: at most two never work in ten minutes).
+    > 155 |   expect(ran.size, `nearly every machine worked (never: ${idle})`).toBeGreaterThanOrEqual(38);
+          |                                                                    ^
+      156 |   expect(s.run.stats.wrong_sku || 0).toBe(0);
+      157 |   expect(s.run.stats.sold, 'customers were served').toBeGreaterThan(20);
+      158 |   // A shop with lanes to spare serves people the step they come in: they are still drawn.
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:155:68
+
+    Error Context: test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: frame rate with forty-four machines (load 5.3)
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 20
+    Received:   13.853156548512606
+
+      283 |     expect(redraws.floors, 'the floors are not redrawn for the machines\' states').toBeLessThan(30);
+      284 |     expect(s.view.cargo_stats.reused, 'lots and bags are reused, not made each time').toBeGreaterThan(s.view.cargo_stats.made);
+    > 285 |     if (load0 < 6) expect(median, `frame rate with forty-four machines (load ${load0.toFixed(1)})`).toBeGreaterThan(20);
+          |                                                                                                     ^
+      286 |   }
+      287 |   expect(pop.errors).toEqual([]);
+      288 | });
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory33.spec.mjs:285:101
+
+    Error Context: test-results/factory33-forty-four-machi-f9d34--routed-recovering-measured-desktop-retry1/error-context.md
+
+  Slow test file: [desktop] › specs/soak43.spec.mjs (21.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [desktop] › specs/factory33.spec.mjs:105:1 › forty-four machines at once: built by hand, readable, routed, recovering, measured 
+  39 skipped
+  263 passed (2.6h)

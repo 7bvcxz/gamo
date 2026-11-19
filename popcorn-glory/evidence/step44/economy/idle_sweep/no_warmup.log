@@ -1,0 +1,10 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+hand_first=false coater_fair=false late=0: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
+hand_first=false coater_fair=false late=400: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
+hand_first=true coater_fair=false late=0: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
+hand_first=true coater_fair=false late=400: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
+hand_first=false coater_fair=true late=0: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
+hand_first=false coater_fair=true late=400: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
+hand_first=true coater_fair=true late=0: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
+hand_first=true coater_fair=true late=400: cookers never ran {"0":40}; runs under 38: 0/40; ran {"42":40}
