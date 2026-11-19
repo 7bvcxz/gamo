@@ -1,0 +1,2410 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/sound05.spec.mjs",
+      "specs/responsive07.spec.mjs",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "sound05.spec.mjs",
+      "file": "sound05.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2621,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:49:41.186Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-2987b295aa6bba5e35a6",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4505,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:49:43.862Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-62052ddb3d14afb6b404",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: a perfect pop, and the busy top stand, do not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.236 peak 0.789"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 30483,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:49:48.377Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.236 peak 0.789"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-597927b32320727b80f1",
+          "file": "sound05.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8793,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:50:18.869Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-4af0a10747e897c91746",
+          "file": "sound05.spec.mjs",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3868,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:50:27.671Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f9b6d4cb8f4728782c70",
+          "file": "sound05.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6687,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:50:31.553Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-597403db6bfef40d38b8",
+          "file": "sound05.spec.mjs",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3194,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:50:38.255Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f2ca6e9bc96af487b500",
+          "file": "sound05.spec.mjs",
+          "line": 168,
+          "column": 1
+        },
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2931,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:50:41.764Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-7a1782977f8c6ffbec34",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4894,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:50:44.751Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-cbd148cfd53651e42634",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: a perfect pop, and the busy top stand, do not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.226 peak 0.759"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 31727,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:50:49.656Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.226 peak 0.759"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-d00ac25ac32886cfa24c",
+          "file": "sound05.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9404,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:51:21.393Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-b2818d78599024cf35aa",
+          "file": "sound05.spec.mjs",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4515,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:51:30.806Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-4ab441764f33b305e57d",
+          "file": "sound05.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7717,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:51:35.343Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-73255ae4dd36dc6e19cb",
+          "file": "sound05.spec.mjs",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3738,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:51:43.070Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-3d45fceb40aed66188ee",
+          "file": "sound05.spec.mjs",
+          "line": 168,
+          "column": 1
+        },
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2622,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:51:47.130Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-3dede72a1da916dd88c2",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4455,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:51:49.806Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-300494eb8b1555f2af07",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: a perfect pop, and the busy top stand, do not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fresh perfect rms 0.223 peak 0.773; top stand rms 0.224 peak 0.764"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 29815,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:51:54.271Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fresh perfect rms 0.223 peak 0.773; top stand rms 0.224 peak 0.764"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-ce0301e05f5e433903e0",
+          "file": "sound05.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9161,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:24.094Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-8f94b5e2f95bd5cc7ae1",
+          "file": "sound05.spec.mjs",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3716,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:33.270Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f810a8e7bfcd6172ea13",
+          "file": "sound05.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6614,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:37.001Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-590f6dbef72bcce668a1",
+          "file": "sound05.spec.mjs",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3029,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:43.630Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-41b1b0b40c54a429fdd8",
+          "file": "sound05.spec.mjs",
+          "line": 168,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "responsive07.spec.mjs",
+      "file": "responsive07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2100,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:46.976Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-1444432be00b6ce1b722",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1970,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:49.132Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2f744804bc10eb239c43",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2001,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:51.110Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-5d8c414fc68382c4610f",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 332 CSS px, floors 218/191/476 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2090,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:53.118Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 332 CSS px, floors 218/191/476 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-11d63eb4cf619fbed17c",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3110,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:55.215Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-708679552f93b0ea7739",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2265,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:52:58.333Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-295b8d1a95cbb979382e",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2652,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:00.933Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-487405d238d9b7bcf3df",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2560,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:03.645Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-7798ccdb4a009d48e1b4",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2566,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:06.217Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-c9f4ea4252d815627a5a",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 342 CSS px, floors 224/195/489 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2804,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:08.793Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 342 CSS px, floors 224/195/489 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-a592137efa8d2deb60bd",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4361,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:11.617Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-072b528f6c509ad93607",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2834,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:15.994Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-f2c13cd6b73215374470",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2878,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:19.159Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2afb9e3a722eafb76db1",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2769,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:22.096Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-d40e74b5e20e60f8c9b7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2762,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:24.878Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-6473b25f6efc7130c33b",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 166 CSS px, floors 109/95/238 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2862,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:27.648Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 166 CSS px, floors 109/95/238 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-e898b002b150916a77c7",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5132,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:30.521Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-a82ef9c0b97b8e697b8a",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3210,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:35.666Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-dfc386cd4901268a6c91",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3551,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:39.206Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-ba19dd8d627f47a166d6",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3492,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:42.816Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-91b9ab428be3da2fe824",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3437,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:46.320Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-93e691da6283a3195fd0",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 266 CSS px, floors 175/153/381 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3426,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:49.781Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 266 CSS px, floors 175/153/381 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-89dfcfe30c57a23c0932",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6928,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:53:53.218Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2d9ff859918f70bb5b36",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4170,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:54:00.156Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-88aafda8a6e89bc06950",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3437,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:54:04.654Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-13bb3a8233e47a614ae0",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3321,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:54:08.149Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-56db4fe6d972b56a2bd7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3212,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:54:11.483Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-fcd7f88621fab0a3bda7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 123 CSS px, floors 81/71/177 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3625,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:54:14.705Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 123 CSS px, floors 81/71/177 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-8576ffb668d69853faf9",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6477,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:54:18.338Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-f8d398b4b6612ccfd1f6",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3757,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T07:54:24.826Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-d3f59f7271843f7d6498",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T07:49:40.772Z",
+    "duration": 287893.464,
+    "expected": 51,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

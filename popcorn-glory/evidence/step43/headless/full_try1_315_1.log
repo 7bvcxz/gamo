@@ -1,0 +1,13 @@
+FAIL unit/test_assets.gd::test_every_sound_loads
+       patter plays for 0.02 s  (test_assets.gd:27)
+  1 machines: ten model minutes in 373 ms, sold 431, upkeep 2, revenue 5296
+  5 machines: ten model minutes in 1135 ms, sold 416, upkeep 133, revenue 4909
+  10 machines: ten model minutes in 2118 ms, sold 401, upkeep 254, revenue 4542
+  20 machines: ten model minutes in 5229 ms, sold 391, upkeep 435, revenue 4281
+  44 machines: ten model minutes in 13608 ms, sold 390, upkeep 378, revenue 4014
+  the special: on at 21400 ms, surplus gone at 396850 ms, spicy sold 5
+  no special: surplus gone at -1 ms, spicy sold 2
+  tastes: { "classic": { "sweet": 0.06666666666667, "savoury": 0.09466666666667, "plain": 0.817, "large": 0.37266666666667 }, "kid": { "sweet": 0.406, "savoury": 0.16533333333333, "plain": 0.34233333333333, "large": 0.23866666666667 }, "student": { "sweet": 0.08533333333333, "savoury": 0.31533333333333, "plain": 0.56833333333333, "large": 0.26666666666667 }, "rush": { "sweet": 0.17233333333333, "savoury": 0.192, "plain": 0.59366666666667, "large": 0.576 }, "elder": { "sweet": 0.29533333333333, "savoury": 0.194, "plain": 0.448, "large": 0.399 } }
+315 passed, 1 failed, 22788 checks, 21 files, 729.8s
+── test.sh: FAILED (exit 1, engine problems 0)
+exit 1

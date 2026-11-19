@@ -1,0 +1,367 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/soak43.spec.mjs",
+      "--project",
+      "desktop",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "soak43.spec.mjs",
+      "file": "soak43.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "ten minutes at forty-four machines",
+          "file": "soak43.spec.mjs",
+          "line": 109,
+          "column": 15,
+          "specs": [
+            {
+              "title": "the control: the sound off plays nothing",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 840000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/soak43.spec.mjs",
+                        "line": 109,
+                        "column": 15
+                      }
+                    },
+                    {
+                      "type": "soak",
+                      "description": "[{\"t\":36,\"pops\":3,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":343,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":41},{\"t\":68,\"pops\":0,\"blocked\":19,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":364,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":82},{\"t\":100,\"pops\":0,\"blocked\":19,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":381,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":122},{\"t\":133,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":373,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":167},{\"t\":167,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":380,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":215},{\"t\":199,\"pops\":0,\"blocked\":19,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":403,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":259},{\"t\":232,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":417,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":307},{\"t\":265,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":431,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":353},{\"t\":299,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":457,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":402},{\"t\":333,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":459,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":451},{\"t\":366,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":471,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":499},{\"t\":400,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":455,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":547},{\"t\":433,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":525,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":597},{\"t\":467,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":533,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":646},{\"t\":500,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":537,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":695},{\"t\":534,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":521,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":750},{\"t\":567,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":519,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":807},{\"t\":601,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":523,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":866}]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 605025,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-19T07:19:39.659Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/soak43.spec.mjs",
+                            "line": 109,
+                            "column": 15
+                          }
+                        },
+                        {
+                          "type": "soak",
+                          "description": "[{\"t\":36,\"pops\":3,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":343,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":41},{\"t\":68,\"pops\":0,\"blocked\":19,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":364,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":82},{\"t\":100,\"pops\":0,\"blocked\":19,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":381,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":122},{\"t\":133,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":373,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":167},{\"t\":167,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":380,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":215},{\"t\":199,\"pops\":0,\"blocked\":19,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":403,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":259},{\"t\":232,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":417,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":307},{\"t\":265,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":431,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":353},{\"t\":299,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":457,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":402},{\"t\":333,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":459,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":451},{\"t\":366,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":471,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":499},{\"t\":400,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":455,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":547},{\"t\":433,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":525,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":597},{\"t\":467,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":533,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":646},{\"t\":500,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":537,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":695},{\"t\":534,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":521,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":750},{\"t\":567,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":519,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":807},{\"t\":601,\"pops\":0,\"blocked\":20,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":51,\"renderer_mb\":523,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":866}]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "26fbbeadab5c01ff7d56-c691050190d7b96471b7",
+              "file": "soak43.spec.mjs",
+              "line": 110,
+              "column": 3
+            },
+            {
+              "title": "the sound on: no clip, bounded voices, no buffer growth, and no memory of its own",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 840000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/soak43.spec.mjs",
+                        "line": 109,
+                        "column": 15
+                      }
+                    },
+                    {
+                      "type": "soak",
+                      "description": "[{\"t\":33,\"pops\":3,\"blocked\":10,\"rms\":0.1679,\"peak\":0.492,\"mean_rms\":0.0189,\"buffers\":16,\"copies\":181,\"copy_mb\":66.5,\"sources\":181,\"heap_mb\":61,\"renderer_mb\":352,\"fps\":13,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":39},{\"t\":66,\"pops\":0,\"blocked\":20,\"rms\":0.0517,\"peak\":0.131,\"mean_rms\":0.0137,\"buffers\":16,\"copies\":353,\"copy_mb\":129.3,\"sources\":353,\"heap_mb\":61,\"renderer_mb\":378,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":82},{\"t\":100,\"pops\":0,\"blocked\":20,\"rms\":0.0528,\"peak\":0.142,\"mean_rms\":0.0135,\"buffers\":16,\"copies\":521,\"copy_mb\":189.1,\"sources\":521,\"heap_mb\":61,\"renderer_mb\":407,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":126},{\"t\":134,\"pops\":0,\"blocked\":20,\"rms\":0.0559,\"peak\":0.151,\"mean_rms\":0.0137,\"buffers\":16,\"copies\":698,\"copy_mb\":250.9,\"sources\":698,\"heap_mb\":61,\"renderer_mb\":403,\"fps\":13,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":169},{\"t\":166,\"pops\":0,\"blocked\":19,\"rms\":0.055,\"peak\":0.136,\"mean_rms\":0.0146,\"buffers\":16,\"copies\":884,\"copy_mb\":311.2,\"sources\":884,\"heap_mb\":61,\"renderer_mb\":409,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":216},{\"t\":200,\"pops\":0,\"blocked\":20,\"rms\":0.0578,\"peak\":0.142,\"mean_rms\":0.0142,\"buffers\":16,\"copies\":1074,\"copy_mb\":376,\"sources\":1074,\"heap_mb\":61,\"renderer_mb\":457,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":263},{\"t\":233,\"pops\":0,\"blocked\":20,\"rms\":0.0571,\"peak\":0.148,\"mean_rms\":0.014,\"buffers\":16,\"copies\":1255,\"copy_mb\":436.4,\"sources\":1255,\"heap_mb\":61,\"renderer_mb\":437,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":310},{\"t\":267,\"pops\":0,\"blocked\":20,\"rms\":0.0737,\"peak\":0.148,\"mean_rms\":0.0148,\"buffers\":17,\"copies\":1449,\"copy_mb\":500.9,\"sources\":1449,\"heap_mb\":61,\"renderer_mb\":449,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":357},{\"t\":300,\"pops\":0,\"blocked\":20,\"rms\":0.0567,\"peak\":0.147,\"mean_rms\":0.0143,\"buffers\":17,\"copies\":1638,\"copy_mb\":563.6,\"sources\":1638,\"heap_mb\":61,\"renderer_mb\":495,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":406},{\"t\":334,\"pops\":0,\"blocked\":20,\"rms\":0.054,\"peak\":0.141,\"mean_rms\":0.0138,\"buffers\":17,\"copies\":1826,\"copy_mb\":628.3,\"sources\":1826,\"heap_mb\":61,\"renderer_mb\":477,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":455},{\"t\":367,\"pops\":0,\"blocked\":20,\"rms\":0.0505,\"peak\":0.133,\"mean_rms\":0.0147,\"buffers\":17,\"copies\":2021,\"copy_mb\":690.8,\"sources\":2021,\"heap_mb\":61,\"renderer_mb\":488,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":502},{\"t\":401,\"pops\":0,\"blocked\":20,\"rms\":0.059,\"peak\":0.166,\"mean_rms\":0.0145,\"buffers\":17,\"copies\":2221,\"copy_mb\":756,\"sources\":2221,\"heap_mb\":61,\"renderer_mb\":502,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":552},{\"t\":433,\"pops\":0,\"blocked\":19,\"rms\":0.059,\"peak\":0.143,\"mean_rms\":0.0148,\"buffers\":17,\"copies\":2406,\"copy_mb\":817.1,\"sources\":2406,\"heap_mb\":61,\"renderer_mb\":547,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":599},{\"t\":466,\"pops\":0,\"blocked\":20,\"rms\":0.0566,\"peak\":0.15,\"mean_rms\":0.0146,\"buffers\":17,\"copies\":2602,\"copy_mb\":881.3,\"sources\":2602,\"heap_mb\":61,\"renderer_mb\":567,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":648},{\"t\":500,\"pops\":0,\"blocked\":20,\"rms\":0.0511,\"peak\":0.132,\"mean_rms\":0.0143,\"buffers\":17,\"copies\":2796,\"copy_mb\":945.7,\"sources\":2796,\"heap_mb\":61,\"renderer_mb\":575,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":697},{\"t\":534,\"pops\":0,\"blocked\":20,\"rms\":0.0729,\"peak\":0.146,\"mean_rms\":0.0154,\"buffers\":17,\"copies\":3024,\"copy_mb\":1012.1,\"sources\":3024,\"heap_mb\":61,\"renderer_mb\":549,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":752},{\"t\":566,\"pops\":0,\"blocked\":19,\"rms\":0.05,\"peak\":0.136,\"mean_rms\":0.0159,\"buffers\":17,\"copies\":3277,\"copy_mb\":1078.2,\"sources\":3277,\"heap_mb\":61,\"renderer_mb\":552,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":806},{\"t\":599,\"pops\":0,\"blocked\":20,\"rms\":0.058,\"peak\":0.149,\"mean_rms\":0.0158,\"buffers\":17,\"copies\":3538,\"copy_mb\":1147.4,\"sources\":3538,\"heap_mb\":61,\"renderer_mb\":555,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":865},{\"t\":632,\"pops\":0,\"blocked\":19,\"rms\":0.0575,\"peak\":0.149,\"mean_rms\":0.0152,\"buffers\":17,\"copies\":3752,\"copy_mb\":1210.6,\"sources\":3752,\"heap_mb\":61,\"renderer_mb\":655,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":917}]"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 635590,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-19T07:29:44.739Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/soak43.spec.mjs",
+                            "line": 109,
+                            "column": 15
+                          }
+                        },
+                        {
+                          "type": "soak",
+                          "description": "[{\"t\":33,\"pops\":3,\"blocked\":10,\"rms\":0.1679,\"peak\":0.492,\"mean_rms\":0.0189,\"buffers\":16,\"copies\":181,\"copy_mb\":66.5,\"sources\":181,\"heap_mb\":61,\"renderer_mb\":352,\"fps\":13,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":39},{\"t\":66,\"pops\":0,\"blocked\":20,\"rms\":0.0517,\"peak\":0.131,\"mean_rms\":0.0137,\"buffers\":16,\"copies\":353,\"copy_mb\":129.3,\"sources\":353,\"heap_mb\":61,\"renderer_mb\":378,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":82},{\"t\":100,\"pops\":0,\"blocked\":20,\"rms\":0.0528,\"peak\":0.142,\"mean_rms\":0.0135,\"buffers\":16,\"copies\":521,\"copy_mb\":189.1,\"sources\":521,\"heap_mb\":61,\"renderer_mb\":407,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":126},{\"t\":134,\"pops\":0,\"blocked\":20,\"rms\":0.0559,\"peak\":0.151,\"mean_rms\":0.0137,\"buffers\":16,\"copies\":698,\"copy_mb\":250.9,\"sources\":698,\"heap_mb\":61,\"renderer_mb\":403,\"fps\":13,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":169},{\"t\":166,\"pops\":0,\"blocked\":19,\"rms\":0.055,\"peak\":0.136,\"mean_rms\":0.0146,\"buffers\":16,\"copies\":884,\"copy_mb\":311.2,\"sources\":884,\"heap_mb\":61,\"renderer_mb\":409,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":216},{\"t\":200,\"pops\":0,\"blocked\":20,\"rms\":0.0578,\"peak\":0.142,\"mean_rms\":0.0142,\"buffers\":16,\"copies\":1074,\"copy_mb\":376,\"sources\":1074,\"heap_mb\":61,\"renderer_mb\":457,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":263},{\"t\":233,\"pops\":0,\"blocked\":20,\"rms\":0.0571,\"peak\":0.148,\"mean_rms\":0.014,\"buffers\":16,\"copies\":1255,\"copy_mb\":436.4,\"sources\":1255,\"heap_mb\":61,\"renderer_mb\":437,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":310},{\"t\":267,\"pops\":0,\"blocked\":20,\"rms\":0.0737,\"peak\":0.148,\"mean_rms\":0.0148,\"buffers\":17,\"copies\":1449,\"copy_mb\":500.9,\"sources\":1449,\"heap_mb\":61,\"renderer_mb\":449,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":357},{\"t\":300,\"pops\":0,\"blocked\":20,\"rms\":0.0567,\"peak\":0.147,\"mean_rms\":0.0143,\"buffers\":17,\"copies\":1638,\"copy_mb\":563.6,\"sources\":1638,\"heap_mb\":61,\"renderer_mb\":495,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":406},{\"t\":334,\"pops\":0,\"blocked\":20,\"rms\":0.054,\"peak\":0.141,\"mean_rms\":0.0138,\"buffers\":17,\"copies\":1826,\"copy_mb\":628.3,\"sources\":1826,\"heap_mb\":61,\"renderer_mb\":477,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":455},{\"t\":367,\"pops\":0,\"blocked\":20,\"rms\":0.0505,\"peak\":0.133,\"mean_rms\":0.0147,\"buffers\":17,\"copies\":2021,\"copy_mb\":690.8,\"sources\":2021,\"heap_mb\":61,\"renderer_mb\":488,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":502},{\"t\":401,\"pops\":0,\"blocked\":20,\"rms\":0.059,\"peak\":0.166,\"mean_rms\":0.0145,\"buffers\":17,\"copies\":2221,\"copy_mb\":756,\"sources\":2221,\"heap_mb\":61,\"renderer_mb\":502,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":552},{\"t\":433,\"pops\":0,\"blocked\":19,\"rms\":0.059,\"peak\":0.143,\"mean_rms\":0.0148,\"buffers\":17,\"copies\":2406,\"copy_mb\":817.1,\"sources\":2406,\"heap_mb\":61,\"renderer_mb\":547,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":599},{\"t\":466,\"pops\":0,\"blocked\":20,\"rms\":0.0566,\"peak\":0.15,\"mean_rms\":0.0146,\"buffers\":17,\"copies\":2602,\"copy_mb\":881.3,\"sources\":2602,\"heap_mb\":61,\"renderer_mb\":567,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":648},{\"t\":500,\"pops\":0,\"blocked\":20,\"rms\":0.0511,\"peak\":0.132,\"mean_rms\":0.0143,\"buffers\":17,\"copies\":2796,\"copy_mb\":945.7,\"sources\":2796,\"heap_mb\":61,\"renderer_mb\":575,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":697},{\"t\":534,\"pops\":0,\"blocked\":20,\"rms\":0.0729,\"peak\":0.146,\"mean_rms\":0.0154,\"buffers\":17,\"copies\":3024,\"copy_mb\":1012.1,\"sources\":3024,\"heap_mb\":61,\"renderer_mb\":549,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":752},{\"t\":566,\"pops\":0,\"blocked\":19,\"rms\":0.05,\"peak\":0.136,\"mean_rms\":0.0159,\"buffers\":17,\"copies\":3277,\"copy_mb\":1078.2,\"sources\":3277,\"heap_mb\":61,\"renderer_mb\":552,\"fps\":11,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":806},{\"t\":599,\"pops\":0,\"blocked\":20,\"rms\":0.058,\"peak\":0.149,\"mean_rms\":0.0158,\"buffers\":17,\"copies\":3538,\"copy_mb\":1147.4,\"sources\":3538,\"heap_mb\":61,\"renderer_mb\":555,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":865},{\"t\":632,\"pops\":0,\"blocked\":19,\"rms\":0.0575,\"peak\":0.149,\"mean_rms\":0.0152,\"buffers\":17,\"copies\":3752,\"copy_mb\":1210.6,\"sources\":3752,\"heap_mb\":61,\"renderer_mb\":655,\"fps\":12,\"static_mb\":0,\"voices_peak\":6,\"beds\":4,\"bed_starts\":4,\"loop_copies\":0,\"sold\":917}]"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "26fbbeadab5c01ff7d56-d7223a595af548532c1e",
+              "file": "soak43.spec.mjs",
+              "line": 118,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T07:19:39.258Z",
+    "duration": 1241156.123,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

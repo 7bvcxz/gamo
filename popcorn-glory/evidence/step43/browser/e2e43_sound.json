@@ -1,0 +1,1850 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/sound43.spec.mjs",
+      "specs/sound05.spec.mjs",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "sound05.spec.mjs",
+      "file": "sound05.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2599,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:23:46.877Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-2987b295aa6bba5e35a6",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4479,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:23:49.536Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-62052ddb3d14afb6b404",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: a perfect pop, and the busy top stand, do not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.224 peak 0.827"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 30750,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:23:54.023Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.224 peak 0.827"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-597927b32320727b80f1",
+          "file": "sound05.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8967,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:24:24.781Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-4af0a10747e897c91746",
+          "file": "sound05.spec.mjs",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4093,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:24:33.761Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f9b6d4cb8f4728782c70",
+          "file": "sound05.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7144,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:24:37.871Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-597403db6bfef40d38b8",
+          "file": "sound05.spec.mjs",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3317,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:24:45.024Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f2ca6e9bc96af487b500",
+          "file": "sound05.spec.mjs",
+          "line": 168,
+          "column": 1
+        },
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3164,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:26:26.812Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-7a1782977f8c6ffbec34",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4965,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:26:30.037Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-cbd148cfd53651e42634",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: a perfect pop, and the busy top stand, do not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fresh perfect rms 0.231 peak 0.785; top stand rms 0.230 peak 0.888"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 32371,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:26:35.018Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fresh perfect rms 0.231 peak 0.785; top stand rms 0.230 peak 0.888"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-d00ac25ac32886cfa24c",
+          "file": "sound05.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9530,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:27:07.397Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-b2818d78599024cf35aa",
+          "file": "sound05.spec.mjs",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4851,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:27:16.936Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-4ab441764f33b305e57d",
+          "file": "sound05.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8143,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:27:21.804Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-73255ae4dd36dc6e19cb",
+          "file": "sound05.spec.mjs",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3889,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:27:29.954Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-3d45fceb40aed66188ee",
+          "file": "sound05.spec.mjs",
+          "line": 168,
+          "column": 1
+        },
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2714,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:29:18.396Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-3dede72a1da916dd88c2",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4587,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:29:21.171Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-300494eb8b1555f2af07",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: a perfect pop, and the busy top stand, do not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.225 peak 0.759"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 30424,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:29:25.766Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.225 peak 0.759"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-ce0301e05f5e433903e0",
+          "file": "sound05.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9440,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:29:56.200Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-8f94b5e2f95bd5cc7ae1",
+          "file": "sound05.spec.mjs",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3920,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:30:05.655Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f810a8e7bfcd6172ea13",
+          "file": "sound05.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6850,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:30:09.589Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-590f6dbef72bcce668a1",
+          "file": "sound05.spec.mjs",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3238,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:30:16.453Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-41b1b0b40c54a429fdd8",
+          "file": "sound05.spec.mjs",
+          "line": 168,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sound43.spec.mjs",
+      "file": "sound43.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "{\"one\":{\"rms\":0.04589801296569331,\"peak\":0.10389870405197144,\"mean_rms\":0.004860659537974399},\"forty\":{\"rms\":0.04827013009245632,\"peak\":0.1189427375793457,\"mean_rms\":0.011859179322273759},\"hand\":{\"rms\":0.16861777659605506,\"peak\":0.4448811411857605},\"pops\":2,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.7,\"playing\":true,\"target\":-18.7}},\"voices_peak\":5,\"played\":{\"cash\":24,\"clink\":1,\"door\":16,\"heat\":3,\"mpop\":21,\"patter\":13,\"perfect\":3,\"rise\":3,\"seal\":6,\"serve\":16,\"upgrade\":2},\"refused\":{\"cash\":6,\"clink\":23,\"door\":17,\"mpop\":34,\"patter\":5,\"seal\":2,\"serve\":1,\"upgrade\":42}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 34995,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:24:48.360Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "{\"one\":{\"rms\":0.04589801296569331,\"peak\":0.10389870405197144,\"mean_rms\":0.004860659537974399},\"forty\":{\"rms\":0.04827013009245632,\"peak\":0.1189427375793457,\"mean_rms\":0.011859179322273759},\"hand\":{\"rms\":0.16861777659605506,\"peak\":0.4448811411857605},\"pops\":2,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.7,\"playing\":true,\"target\":-18.7}},\"voices_peak\":5,\"played\":{\"cash\":24,\"clink\":1,\"door\":16,\"heat\":3,\"mpop\":21,\"patter\":13,\"perfect\":3,\"rise\":3,\"seal\":6,\"serve\":16,\"upgrade\":2},\"refused\":{\"cash\":6,\"clink\":23,\"door\":17,\"mpop\":34,\"patter\":5,\"seal\":2,\"serve\":1,\"upgrade\":42}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-d6b51d2794ef092ad689",
+          "file": "sound43.spec.mjs",
+          "line": 50,
+          "column": 1
+        },
+        {
+          "title": "a sound on the left is louder on the left, on the right louder on the right",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "pan",
+                  "description": "{\"left\":{\"left\":0.06194633324052072,\"right\":0.043484785349202054,\"energy_left\":19.228787281617205,\"energy_right\":9.5133474244291,\"frames\":43648,\"mean_rms\":0.018145224176001278},\"right\":{\"left\":0.04362625710677036,\"right\":0.06208698548530801,\"energy_left\":10.27662942375869,\"energy_right\":19.977230441545196,\"frames\":44032,\"mean_rms\":0.01853494029974853}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8241,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:25:23.361Z",
+                  "annotations": [
+                    {
+                      "type": "pan",
+                      "description": "{\"left\":{\"left\":0.06194633324052072,\"right\":0.043484785349202054,\"energy_left\":19.228787281617205,\"energy_right\":9.5133474244291,\"frames\":43648,\"mean_rms\":0.018145224176001278},\"right\":{\"left\":0.04362625710677036,\"right\":0.06208698548530801,\"energy_left\":10.27662942375869,\"energy_right\":19.977230441545196,\"frames\":44032,\"mean_rms\":0.01853494029974853}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-6aea85a3112d557e36d7",
+          "file": "sound43.spec.mjs",
+          "line": 107,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab is silent, and the factory is heard again after",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "hidden",
+                  "description": "{\"before\":{\"rms\":0.036257801057145364,\"peak\":0.08500640839338303},\"hidden\":{\"rms\":0,\"peak\":0},\"after\":{\"rms\":0.050732291868523564,\"peak\":0.13245455920696259},\"paused\":true,\"beds\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17375,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:25:31.608Z",
+                  "annotations": [
+                    {
+                      "type": "hidden",
+                      "description": "{\"before\":{\"rms\":0.036257801057145364,\"peak\":0.08500640839338303},\"hidden\":{\"rms\":0,\"peak\":0},\"after\":{\"rms\":0.050732291868523564,\"peak\":0.13245455920696259},\"paused\":true,\"beds\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-2b79a8357224ffda79c3",
+          "file": "sound43.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "calm: no beds, the hand still heard, and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "calm",
+                  "description": "{\"loud\":{\"rms\":0.03665938072609365,\"peak\":0.08237592875957489},\"calmFloor\":{\"rms\":0.023274313017687946,\"peak\":0.05582152307033539},\"calmHand\":{\"rms\":0.08406627060150056,\"peak\":0.23428770899772644},\"popped\":true,\"beds\":0,\"played\":{\"cash\":15,\"clink\":2,\"door\":11,\"heat\":2,\"mpop\":4,\"patter\":8,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":11,\"upgrade\":2}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21695,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:25:48.997Z",
+                  "annotations": [
+                    {
+                      "type": "calm",
+                      "description": "{\"loud\":{\"rms\":0.03665938072609365,\"peak\":0.08237592875957489},\"calmFloor\":{\"rms\":0.023274313017687946,\"peak\":0.05582152307033539},\"calmHand\":{\"rms\":0.08406627060150056,\"peak\":0.23428770899772644},\"popped\":true,\"beds\":0,\"played\":{\"cash\":15,\"clink\":2,\"door\":11,\"heat\":2,\"mpop\":4,\"patter\":8,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":11,\"upgrade\":2}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-193944acdfa01075cf3f",
+          "file": "sound43.spec.mjs",
+          "line": 150,
+          "column": 1
+        },
+        {
+          "title": "one sale, one cash sound",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "cash",
+                  "description": "{\"sold\":33,\"asked\":33,\"played\":22}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15769,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:26:10.699Z",
+                  "annotations": [
+                    {
+                      "type": "cash",
+                      "description": "{\"sold\":33,\"asked\":33,\"played\":22}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-f48ba3f9724a97d50684",
+          "file": "sound43.spec.mjs",
+          "line": 180,
+          "column": 1
+        },
+        {
+          "title": "the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "{\"one\":{\"rms\":0.04592979567134728,\"peak\":0.09924198687076569,\"mean_rms\":0.005177377718202184},\"forty\":{\"rms\":0.05690221224943611,\"peak\":0.14197078347206116,\"mean_rms\":0.01280677538082413},\"hand\":{\"rms\":0.16984144973886603,\"peak\":0.457186758518219},\"pops\":2,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18,\"playing\":true,\"target\":-18},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.1,\"playing\":true,\"target\":-18.1}},\"voices_peak\":5,\"played\":{\"cash\":26,\"clink\":2,\"door\":17,\"heat\":3,\"mpop\":22,\"patter\":16,\"perfect\":3,\"rise\":3,\"seal\":8,\"serve\":18,\"upgrade\":2},\"refused\":{\"cash\":7,\"clink\":22,\"door\":18,\"mpop\":36,\"patter\":4,\"seal\":2,\"serve\":1,\"upgrade\":42}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 37203,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:27:33.862Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "{\"one\":{\"rms\":0.04592979567134728,\"peak\":0.09924198687076569,\"mean_rms\":0.005177377718202184},\"forty\":{\"rms\":0.05690221224943611,\"peak\":0.14197078347206116,\"mean_rms\":0.01280677538082413},\"hand\":{\"rms\":0.16984144973886603,\"peak\":0.457186758518219},\"pops\":2,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18,\"playing\":true,\"target\":-18},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.1,\"playing\":true,\"target\":-18.1}},\"voices_peak\":5,\"played\":{\"cash\":26,\"clink\":2,\"door\":17,\"heat\":3,\"mpop\":22,\"patter\":16,\"perfect\":3,\"rise\":3,\"seal\":8,\"serve\":18,\"upgrade\":2},\"refused\":{\"cash\":7,\"clink\":22,\"door\":18,\"mpop\":36,\"patter\":4,\"seal\":2,\"serve\":1,\"upgrade\":42}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-ab563edace30805a5a35",
+          "file": "sound43.spec.mjs",
+          "line": 50,
+          "column": 1
+        },
+        {
+          "title": "a sound on the left is louder on the left, on the right louder on the right",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "pan",
+                  "description": "{\"left\":{\"left\":0.062012539331885976,\"right\":0.04353988387991665,\"energy_left\":19.430367648259992,\"energy_right\":9.786790862356392,\"frames\":44160,\"mean_rms\":0.01818818898746531},\"right\":{\"left\":0.0437826607178211,\"right\":0.06223071953739587,\"energy_left\":10.314845557266015,\"energy_right\":20.02057316702884,\"frames\":45056,\"mean_rms\":0.018347786697070143}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8917,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:28:11.074Z",
+                  "annotations": [
+                    {
+                      "type": "pan",
+                      "description": "{\"left\":{\"left\":0.062012539331885976,\"right\":0.04353988387991665,\"energy_left\":19.430367648259992,\"energy_right\":9.786790862356392,\"frames\":44160,\"mean_rms\":0.01818818898746531},\"right\":{\"left\":0.0437826607178211,\"right\":0.06223071953739587,\"energy_left\":10.314845557266015,\"energy_right\":20.02057316702884,\"frames\":45056,\"mean_rms\":0.018347786697070143}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-d57e9738645590bba8c4",
+          "file": "sound43.spec.mjs",
+          "line": 107,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab is silent, and the factory is heard again after",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "hidden",
+                  "description": "{\"before\":{\"rms\":0.031999552561556115,\"peak\":0.06162600591778755},\"hidden\":{\"rms\":0,\"peak\":0},\"after\":{\"rms\":0.04979350179370786,\"peak\":0.12500710785388947},\"paused\":true,\"beds\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17960,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:28:19.998Z",
+                  "annotations": [
+                    {
+                      "type": "hidden",
+                      "description": "{\"before\":{\"rms\":0.031999552561556115,\"peak\":0.06162600591778755},\"hidden\":{\"rms\":0,\"peak\":0},\"after\":{\"rms\":0.04979350179370786,\"peak\":0.12500710785388947},\"paused\":true,\"beds\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-c365c19d532a198224f9",
+          "file": "sound43.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "calm: no beds, the hand still heard, and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "calm",
+                  "description": "{\"loud\":{\"rms\":0.03665039772557966,\"peak\":0.08182242512702942},\"calmFloor\":{\"rms\":0.02300238091132166,\"peak\":0.05171157419681549},\"calmHand\":{\"rms\":0.08338146821401625,\"peak\":0.23933859169483185},\"popped\":true,\"beds\":0,\"played\":{\"cash\":15,\"clink\":2,\"door\":10,\"heat\":2,\"mpop\":3,\"patter\":8,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":10,\"upgrade\":2}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 22904,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:28:37.966Z",
+                  "annotations": [
+                    {
+                      "type": "calm",
+                      "description": "{\"loud\":{\"rms\":0.03665039772557966,\"peak\":0.08182242512702942},\"calmFloor\":{\"rms\":0.02300238091132166,\"peak\":0.05171157419681549},\"calmHand\":{\"rms\":0.08338146821401625,\"peak\":0.23933859169483185},\"popped\":true,\"beds\":0,\"played\":{\"cash\":15,\"clink\":2,\"door\":10,\"heat\":2,\"mpop\":3,\"patter\":8,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":10,\"upgrade\":2}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-0274a421ca7127393ef1",
+          "file": "sound43.spec.mjs",
+          "line": 150,
+          "column": 1
+        },
+        {
+          "title": "one sale, one cash sound",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "cash",
+                  "description": "{\"sold\":31,\"asked\":31,\"played\":22}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17166,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:29:00.876Z",
+                  "annotations": [
+                    {
+                      "type": "cash",
+                      "description": "{\"sold\":31,\"asked\":31,\"played\":22}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-343f60eac5f0993e85dc",
+          "file": "sound43.spec.mjs",
+          "line": 180,
+          "column": 1
+        },
+        {
+          "title": "the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "{\"one\":{\"rms\":0.045852564349789626,\"peak\":0.09938346594572067,\"mean_rms\":0.0048654460566780475},\"forty\":{\"rms\":0.04852330529817311,\"peak\":0.11899437010288239,\"mean_rms\":0.012080535898689326},\"hand\":{\"rms\":0.16627117163205246,\"peak\":0.4619779586791992},\"pops\":2,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.7,\"playing\":true,\"target\":-18.7}},\"voices_peak\":5,\"played\":{\"cash\":26,\"clink\":2,\"door\":17,\"heat\":3,\"mpop\":23,\"patter\":14,\"perfect\":3,\"rise\":3,\"seal\":6,\"serve\":17,\"upgrade\":2},\"refused\":{\"cash\":6,\"clink\":22,\"door\":17,\"mpop\":34,\"patter\":4,\"seal\":2,\"upgrade\":42}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 35929,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:30:19.708Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "{\"one\":{\"rms\":0.045852564349789626,\"peak\":0.09938346594572067,\"mean_rms\":0.0048654460566780475},\"forty\":{\"rms\":0.04852330529817311,\"peak\":0.11899437010288239,\"mean_rms\":0.012080535898689326},\"hand\":{\"rms\":0.16627117163205246,\"peak\":0.4619779586791992},\"pops\":2,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.7,\"playing\":true,\"target\":-18.7}},\"voices_peak\":5,\"played\":{\"cash\":26,\"clink\":2,\"door\":17,\"heat\":3,\"mpop\":23,\"patter\":14,\"perfect\":3,\"rise\":3,\"seal\":6,\"serve\":17,\"upgrade\":2},\"refused\":{\"cash\":6,\"clink\":22,\"door\":17,\"mpop\":34,\"patter\":4,\"seal\":2,\"upgrade\":42}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-05b500aee6aadd1b770b",
+          "file": "sound43.spec.mjs",
+          "line": 50,
+          "column": 1
+        },
+        {
+          "title": "a sound on the left is louder on the left, on the right louder on the right",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "pan",
+                  "description": "{\"left\":{\"left\":0.06205417694846678,\"right\":0.04358557330772571,\"energy_left\":19.367315183392567,\"energy_right\":9.65649931042693,\"frames\":44032,\"mean_rms\":0.018154238675287634},\"right\":{\"left\":0.04355059718237478,\"right\":0.06202348021687611,\"energy_left\":10.370201849315665,\"energy_right\":19.897375787111542,\"frames\":44160,\"mean_rms\":0.018512254080394516}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8414,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:30:55.643Z",
+                  "annotations": [
+                    {
+                      "type": "pan",
+                      "description": "{\"left\":{\"left\":0.06205417694846678,\"right\":0.04358557330772571,\"energy_left\":19.367315183392567,\"energy_right\":9.65649931042693,\"frames\":44032,\"mean_rms\":0.018154238675287634},\"right\":{\"left\":0.04355059718237478,\"right\":0.06202348021687611,\"energy_left\":10.370201849315665,\"energy_right\":19.897375787111542,\"frames\":44160,\"mean_rms\":0.018512254080394516}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-9be080c180ef42e5637e",
+          "file": "sound43.spec.mjs",
+          "line": 107,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab is silent, and the factory is heard again after",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "hidden",
+                  "description": "{\"before\":{\"rms\":0.03622500024723162,\"peak\":0.08270604908466339},\"hidden\":{\"rms\":0,\"peak\":0},\"after\":{\"rms\":0.04909950271485654,\"peak\":0.12857075035572052},\"paused\":true,\"beds\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17375,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:31:04.063Z",
+                  "annotations": [
+                    {
+                      "type": "hidden",
+                      "description": "{\"before\":{\"rms\":0.03622500024723162,\"peak\":0.08270604908466339},\"hidden\":{\"rms\":0,\"peak\":0},\"after\":{\"rms\":0.04909950271485654,\"peak\":0.12857075035572052},\"paused\":true,\"beds\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-bb8f9b2331bedc2c5529",
+          "file": "sound43.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "calm: no beds, the hand still heard, and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "calm",
+                  "description": "{\"loud\":{\"rms\":0.037661454088085994,\"peak\":0.08308384567499161},\"calmFloor\":{\"rms\":0.023184974620089092,\"peak\":0.05247721076011658},\"calmHand\":{\"rms\":0.08466816603511541,\"peak\":0.26141273975372314},\"popped\":true,\"beds\":0,\"played\":{\"cash\":16,\"clink\":1,\"door\":10,\"heat\":2,\"mpop\":2,\"patter\":8,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":10,\"upgrade\":2}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21714,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:31:21.444Z",
+                  "annotations": [
+                    {
+                      "type": "calm",
+                      "description": "{\"loud\":{\"rms\":0.037661454088085994,\"peak\":0.08308384567499161},\"calmFloor\":{\"rms\":0.023184974620089092,\"peak\":0.05247721076011658},\"calmHand\":{\"rms\":0.08466816603511541,\"peak\":0.26141273975372314},\"popped\":true,\"beds\":0,\"played\":{\"cash\":16,\"clink\":1,\"door\":10,\"heat\":2,\"mpop\":2,\"patter\":8,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":10,\"upgrade\":2}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-4616d9cbf12eae1b7d0e",
+          "file": "sound43.spec.mjs",
+          "line": 150,
+          "column": 1
+        },
+        {
+          "title": "one sale, one cash sound",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "cash",
+                  "description": "{\"sold\":32,\"asked\":32,\"played\":26}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16194,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T04:31:43.163Z",
+                  "annotations": [
+                    {
+                      "type": "cash",
+                      "description": "{\"sold\":32,\"asked\":32,\"played\":26}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-d30d13313fbb60bdb74c",
+          "file": "sound43.spec.mjs",
+          "line": 180,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T04:23:46.436Z",
+    "duration": 492996.08900000004,
+    "expected": 36,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
