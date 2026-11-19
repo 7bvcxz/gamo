@@ -1,0 +1,32 @@
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:57] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 3 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:57] "GET /popcorn-glory/?seed=11 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:57] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:57] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:57] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:57] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:59] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:25:59] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  1 [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 11 (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:28:59] "GET /popcorn-glory/?seed=22 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:28:59] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:28:59] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:28:59] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:28:59] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:29:01] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:29:01] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  2 [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 22 (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:32:02] "GET /popcorn-glory/?seed=33 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:32:02] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:32:02] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:32:02] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:32:02] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:32:03] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 15:32:03] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  3 [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 33 (3.0m)
+
+  Slow test file: [p720] › specs/sessions22.spec.mjs (9.1m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  3 passed (9.1m)

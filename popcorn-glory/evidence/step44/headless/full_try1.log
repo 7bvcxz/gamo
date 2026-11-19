@@ -1,0 +1,33 @@
+FAIL integration/test_factory.gd::test_the_bell_swings_before_the_next_customer_and_the_queue_fits
+       tier 6: places 4 and 5 do not overlap  (test_factory.gd:391)
+       tier 6: places 5 and 6 do not overlap  (test_factory.gd:391)
+       tier 6: places 6 and 7 do not overlap  (test_factory.gd:391)
+       tier 6: places 7 and 8 do not overlap  (test_factory.gd:391)
+       tier 6: places 8 and 9 do not overlap  (test_factory.gd:391)
+       tier 7: places 4 and 5 do not overlap  (test_factory.gd:391)
+       tier 7: places 5 and 6 do not overlap  (test_factory.gd:391)
+       tier 7: places 6 and 7 do not overlap  (test_factory.gd:391)
+       tier 7: places 7 and 8 do not overlap  (test_factory.gd:391)
+       tier 7: places 8 and 9 do not overlap  (test_factory.gd:391)
+       tier 7: places 9 and 10 do not overlap  (test_factory.gd:391)
+       tier 7: places 10 and 11 do not overlap  (test_factory.gd:391)
+       tier 8: places 4 and 5 do not overlap  (test_factory.gd:391)
+       tier 8: places 5 and 6 do not overlap  (test_factory.gd:391)
+       tier 8: places 6 and 7 do not overlap  (test_factory.gd:391)
+       tier 8: places 7 and 8 do not overlap  (test_factory.gd:391)
+       tier 8: places 8 and 9 do not overlap  (test_factory.gd:391)
+       tier 8: places 9 and 10 do not overlap  (test_factory.gd:391)
+       tier 8: places 10 and 11 do not overlap  (test_factory.gd:391)
+       tier 8: places 11 and 12 do not overlap  (test_factory.gd:391)
+  1 machines: ten model minutes in 288 ms, sold 431, upkeep 2, revenue 5297
+  5 machines: ten model minutes in 754 ms, sold 426, upkeep 86, revenue 5160
+  10 machines: ten model minutes in 1356 ms, sold 422, upkeep 141, revenue 5062
+  20 machines: ten model minutes in 3622 ms, sold 421, upkeep 280, revenue 4996
+  44 machines: ten model minutes in 10074 ms, sold 417, upkeep 289, revenue 4440
+  the special: on at 21400 ms, surplus gone at 396850 ms, spicy sold 5
+  no special: surplus gone at -1 ms, spicy sold 2
+  tastes: { "classic": { "sweet": 0.06666666666667, "savoury": 0.09466666666667, "plain": 0.817, "large": 0.37266666666667 }, "kid": { "sweet": 0.406, "savoury": 0.16533333333333, "plain": 0.34233333333333, "large": 0.23866666666667 }, "student": { "sweet": 0.08533333333333, "savoury": 0.31533333333333, "plain": 0.56833333333333, "large": 0.26666666666667 }, "rush": { "sweet": 0.17233333333333, "savoury": 0.192, "plain": 0.59366666666667, "large": 0.576 }, "elder": { "sweet": 0.29533333333333, "savoury": 0.194, "plain": 0.448, "large": 0.399 } }
+  hand_first: {"everywhere":986,"longest_ms":13500,"made":986,"packed":418,"pops":31,"refused":169,"sold":408,"tries":200}
+  old rule:   {"everywhere":877,"longest_ms":294000,"made":877,"packed":370,"pops":3,"refused":197,"sold":360,"tries":200}
+323 passed, 1 failed, 22846 checks, 23 files, 561.3s
+── test.sh: FAILED (exit 1, engine problems 0)

@@ -1,0 +1,9 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+hf=true seed=22 NO COCOA {"cocoa":0,"first_s":-1,"flavors":["cheese","caramel","spicy","cocoa"],"open":true,"set":true,"states":{"starved":1200}}
+hf=true seed=39 NO COCOA {"cocoa":0,"first_s":-1,"flavors":["cheese","caramel","spicy","cocoa"],"open":true,"set":true,"states":{"starved":1200}}
+hand_first=true every=1 mode=1: no cocoa in 2/40; median first 175 max 550
+hand_first=true every=1 mode=2: no cocoa in 0/40; median first 60 max 155
+hand_first=true every=2 mode=3: no cocoa in 0/40; median first 210 max 460
+hand_first=true every=1 mode=3: no cocoa in 0/40; median first 135 max 365
+hand_first=false every=1 mode=3: no cocoa in 0/40; median first 135 max 365

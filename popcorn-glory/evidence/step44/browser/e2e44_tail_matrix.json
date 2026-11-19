@@ -1,0 +1,2626 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/responsive07",
+      "specs/ui44",
+      "--project=m-hd",
+      "--project=m-landscape",
+      "--project=m-p720",
+      "--project=m-small",
+      "--project=m-tablet",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "responsive07.spec.mjs",
+      "file": "responsive07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2134,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:16.922Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-1444432be00b6ce1b722",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1962,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:19.113Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2f744804bc10eb239c43",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1870,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:21.082Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-5d8c414fc68382c4610f",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 332 CSS px, floors 218/191/476 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2077,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:22.959Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 332 CSS px, floors 218/191/476 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-11d63eb4cf619fbed17c",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3087,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:25.047Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-708679552f93b0ea7739",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2269,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:28.146Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-295b8d1a95cbb979382e",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2652,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:30.856Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-487405d238d9b7bcf3df",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2568,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:33.566Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-7798ccdb4a009d48e1b4",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2551,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:36.144Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-c9f4ea4252d815627a5a",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 342 CSS px, floors 224/195/489 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2937,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:38.714Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 342 CSS px, floors 224/195/489 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-a592137efa8d2deb60bd",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4392,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:41.673Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-072b528f6c509ad93607",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2842,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:46.078Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-f2c13cd6b73215374470",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2899,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:01.846Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2afb9e3a722eafb76db1",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2749,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:04.808Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-d40e74b5e20e60f8c9b7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2760,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:07.569Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-6473b25f6efc7130c33b",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 166 CSS px, floors 109/95/238 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2946,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:10.343Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 166 CSS px, floors 109/95/238 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-e898b002b150916a77c7",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5085,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:13.297Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-a82ef9c0b97b8e697b8a",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3257,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:18.393Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-dfc386cd4901268a6c91",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3645,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:35.269Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-ba19dd8d627f47a166d6",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3588,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:38.975Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-91b9ab428be3da2fe824",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3391,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:42.575Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-93e691da6283a3195fd0",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 266 CSS px, floors 175/153/381 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3444,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:45.980Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 266 CSS px, floors 175/153/381 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-89dfcfe30c57a23c0932",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7031,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:49.433Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2d9ff859918f70bb5b36",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4130,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:56.474Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-88aafda8a6e89bc06950",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3405,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:16.894Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-13bb3a8233e47a614ae0",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3305,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:20.362Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-56db4fe6d972b56a2bd7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3264,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:23.680Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-fcd7f88621fab0a3bda7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "ring 123 CSS px, floors 81/71/177 CSS px tall"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3567,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:26.952Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "ring 123 CSS px, floors 81/71/177 CSS px tall"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-8576ffb668d69853faf9",
+          "file": "responsive07.spec.mjs",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6428,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:30.526Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-f8d398b4b6612ccfd1f6",
+          "file": "responsive07.spec.mjs",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3727,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:36.966Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-d3f59f7271843f7d6498",
+          "file": "responsive07.spec.mjs",
+          "line": 79,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "ui44.spec.mjs",
+      "file": "ui44.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "p720 runs it",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 59,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 23,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:30.432Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "p720 runs it",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 59,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-4a3a88d0291b21844781",
+          "file": "ui44.spec.mjs",
+          "line": 58,
+          "column": 1
+        },
+        {
+          "title": "a refused press shows the full bin, a first tap brings the hold hint",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 121,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 23,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:30.460Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 121,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-d8040ca0daa084a11e90",
+          "file": "ui44.spec.mjs",
+          "line": 120,
+          "column": 1
+        },
+        {
+          "title": "a cancelled touch or a mouse that leaves ends the hold",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 149,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 23,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:30.488Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 149,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-958aa303556bd3226699",
+          "file": "ui44.spec.mjs",
+          "line": 148,
+          "column": 1
+        },
+        {
+          "title": "the motion button calms the factory and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 181,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 25,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:30.519Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 181,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-2a228c9ed1ff33f38524",
+          "file": "ui44.spec.mjs",
+          "line": 180,
+          "column": 1
+        },
+        {
+          "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "targets",
+                  "description": "{\"project\":\"m-hd\",\"viewport\":{\"width\":1920,\"height\":1080},\"scenes\":{\"fresh\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"twelve\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"overview\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"ov_line_kitchen\":80.7,\"ov_line_packing\":80.7,\"ov_line_shop\":80.7,\"ov_rate_0\":86.9,\"ov_rate_1\":86.9,\"ov_rate_2\":86.9,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"picker\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"pick_P01\":87.8,\"pick_P02\":87.8,\"pick_P04\":87.8,\"pick_P05\":87.8,\"pick_P06\":87.8,\"pick_U01\":87.8,\"pick_U02\":87.8,\"pick_U03\":87.8,\"pick_U04\":87.8,\"pick_U05\":87.8,\"pick_U07\":87.8,\"pick_bagger\":87.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"forty\":{\"k\":1,\"min\":27.8,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":68.4,\"slot_kitchen_1\":68.4,\"slot_kitchen_10\":68.4,\"slot_kitchen_11\":68.4,\"slot_kitchen_12\":68.4,\"slot_kitchen_13\":68.4,\"slot_kitchen_14\":68.4,\"slot_kitchen_15\":68.4,\"slot_kitchen_16\":68.4,\"slot_kitchen_17\":68.4,\"slot_kitchen_18\":68.4,\"slot_kitchen_19\":68.4,\"slot_kitchen_2\":68.4,\"slot_kitchen_20\":68.4,\"slot_kitchen_21\":68.4,\"slot_kitchen_22\":68.4,\"slot_kitchen_23\":68.4,\"slot_kitchen_3\":68.4,\"slot_kitchen_4\":68.4,\"slot_kitchen_5\":68.4,\"slot_kitchen_6\":68.4,\"slot_kitchen_7\":68.4,\"slot_kitchen_8\":68.4,\"slot_kitchen_9\":68.4,\"slot_packing_0\":43.3,\"slot_packing_1\":43.3,\"slot_packing_10\":43.3,\"slot_packing_11\":43.3,\"slot_packing_2\":43.3,\"slot_packing_3\":43.3,\"slot_packing_4\":43.3,\"slot_packing_5\":43.3,\"slot_packing_6\":43.3,\"slot_packing_7\":43.3,\"slot_packing_8\":43.3,\"slot_packing_9\":43.3,\"slot_shop_0\":27.8,\"slot_shop_1\":27.8,\"slot_shop_2\":27.8,\"slot_shop_3\":27.8,\"slot_shop_4\":27.8,\"slot_shop_5\":27.8,\"slot_shop_6\":27.8,\"slot_shop_7\":27.8,\"sound\":87.8,\"upgrade\":186.5}},\"forty_overview\":{\"k\":1,\"min\":27.8,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"ov_rate_0\":86.9,\"ov_rate_1\":86.9,\"ov_rate_2\":86.9,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":68.4,\"slot_kitchen_1\":68.4,\"slot_kitchen_10\":68.4,\"slot_kitchen_11\":68.4,\"slot_kitchen_12\":68.4,\"slot_kitchen_13\":68.4,\"slot_kitchen_14\":68.4,\"slot_kitchen_15\":68.4,\"slot_kitchen_16\":68.4,\"slot_kitchen_17\":68.4,\"slot_kitchen_18\":68.4,\"slot_kitchen_19\":68.4,\"slot_kitchen_2\":68.4,\"slot_kitchen_20\":68.4,\"slot_kitchen_21\":68.4,\"slot_kitchen_22\":68.4,\"slot_kitchen_23\":68.4,\"slot_kitchen_3\":68.4,\"slot_kitchen_4\":68.4,\"slot_kitchen_5\":68.4,\"slot_kitchen_6\":68.4,\"slot_kitchen_7\":68.4,\"slot_kitchen_8\":68.4,\"slot_kitchen_9\":68.4,\"slot_packing_0\":43.3,\"slot_packing_1\":43.3,\"slot_packing_10\":43.3,\"slot_packing_11\":43.3,\"slot_packing_2\":43.3,\"slot_packing_3\":43.3,\"slot_packing_4\":43.3,\"slot_packing_5\":43.3,\"slot_packing_6\":43.3,\"slot_packing_7\":43.3,\"slot_packing_8\":43.3,\"slot_packing_9\":43.3,\"slot_shop_0\":27.8,\"slot_shop_1\":27.8,\"slot_shop_2\":27.8,\"slot_shop_3\":27.8,\"slot_shop_4\":27.8,\"slot_shop_5\":27.8,\"slot_shop_6\":27.8,\"slot_shop_7\":27.8,\"sound\":87.8,\"upgrade\":186.5}}}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12504,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:23:48.942Z",
+                  "annotations": [
+                    {
+                      "type": "targets",
+                      "description": "{\"project\":\"m-hd\",\"viewport\":{\"width\":1920,\"height\":1080},\"scenes\":{\"fresh\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"twelve\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"overview\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"ov_line_kitchen\":80.7,\"ov_line_packing\":80.7,\"ov_line_shop\":80.7,\"ov_rate_0\":86.9,\"ov_rate_1\":86.9,\"ov_rate_2\":86.9,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"picker\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"pick_P01\":87.8,\"pick_P02\":87.8,\"pick_P04\":87.8,\"pick_P05\":87.8,\"pick_P06\":87.8,\"pick_U01\":87.8,\"pick_U02\":87.8,\"pick_U03\":87.8,\"pick_U04\":87.8,\"pick_U05\":87.8,\"pick_U07\":87.8,\"pick_bagger\":87.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"forty\":{\"k\":1,\"min\":27.8,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":68.4,\"slot_kitchen_1\":68.4,\"slot_kitchen_10\":68.4,\"slot_kitchen_11\":68.4,\"slot_kitchen_12\":68.4,\"slot_kitchen_13\":68.4,\"slot_kitchen_14\":68.4,\"slot_kitchen_15\":68.4,\"slot_kitchen_16\":68.4,\"slot_kitchen_17\":68.4,\"slot_kitchen_18\":68.4,\"slot_kitchen_19\":68.4,\"slot_kitchen_2\":68.4,\"slot_kitchen_20\":68.4,\"slot_kitchen_21\":68.4,\"slot_kitchen_22\":68.4,\"slot_kitchen_23\":68.4,\"slot_kitchen_3\":68.4,\"slot_kitchen_4\":68.4,\"slot_kitchen_5\":68.4,\"slot_kitchen_6\":68.4,\"slot_kitchen_7\":68.4,\"slot_kitchen_8\":68.4,\"slot_kitchen_9\":68.4,\"slot_packing_0\":43.3,\"slot_packing_1\":43.3,\"slot_packing_10\":43.3,\"slot_packing_11\":43.3,\"slot_packing_2\":43.3,\"slot_packing_3\":43.3,\"slot_packing_4\":43.3,\"slot_packing_5\":43.3,\"slot_packing_6\":43.3,\"slot_packing_7\":43.3,\"slot_packing_8\":43.3,\"slot_packing_9\":43.3,\"slot_shop_0\":27.8,\"slot_shop_1\":27.8,\"slot_shop_2\":27.8,\"slot_shop_3\":27.8,\"slot_shop_4\":27.8,\"slot_shop_5\":27.8,\"slot_shop_6\":27.8,\"slot_shop_7\":27.8,\"sound\":87.8,\"upgrade\":186.5}},\"forty_overview\":{\"k\":1,\"min\":27.8,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"ov_rate_0\":86.9,\"ov_rate_1\":86.9,\"ov_rate_2\":86.9,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":68.4,\"slot_kitchen_1\":68.4,\"slot_kitchen_10\":68.4,\"slot_kitchen_11\":68.4,\"slot_kitchen_12\":68.4,\"slot_kitchen_13\":68.4,\"slot_kitchen_14\":68.4,\"slot_kitchen_15\":68.4,\"slot_kitchen_16\":68.4,\"slot_kitchen_17\":68.4,\"slot_kitchen_18\":68.4,\"slot_kitchen_19\":68.4,\"slot_kitchen_2\":68.4,\"slot_kitchen_20\":68.4,\"slot_kitchen_21\":68.4,\"slot_kitchen_22\":68.4,\"slot_kitchen_23\":68.4,\"slot_kitchen_3\":68.4,\"slot_kitchen_4\":68.4,\"slot_kitchen_5\":68.4,\"slot_kitchen_6\":68.4,\"slot_kitchen_7\":68.4,\"slot_kitchen_8\":68.4,\"slot_kitchen_9\":68.4,\"slot_packing_0\":43.3,\"slot_packing_1\":43.3,\"slot_packing_10\":43.3,\"slot_packing_11\":43.3,\"slot_packing_2\":43.3,\"slot_packing_3\":43.3,\"slot_packing_4\":43.3,\"slot_packing_5\":43.3,\"slot_packing_6\":43.3,\"slot_packing_7\":43.3,\"slot_packing_8\":43.3,\"slot_packing_9\":43.3,\"slot_shop_0\":27.8,\"slot_shop_1\":27.8,\"slot_shop_2\":27.8,\"slot_shop_3\":27.8,\"slot_shop_4\":27.8,\"slot_shop_5\":27.8,\"slot_shop_6\":27.8,\"slot_shop_7\":27.8,\"sound\":87.8,\"upgrade\":186.5}}}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-88e494208170c4f0487b",
+          "file": "ui44.spec.mjs",
+          "line": 58,
+          "column": 1
+        },
+        {
+          "title": "a refused press shows the full bin, a first tap brings the hold hint",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 121,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 24,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:01.455Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 121,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-f93b9033fa0fe9dd0893",
+          "file": "ui44.spec.mjs",
+          "line": 120,
+          "column": 1
+        },
+        {
+          "title": "a cancelled touch or a mouse that leaves ends the hold",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 149,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 23,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:01.486Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 149,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-8589a66f0157cc037caf",
+          "file": "ui44.spec.mjs",
+          "line": 148,
+          "column": 1
+        },
+        {
+          "title": "the motion button calms the factory and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 181,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 21,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:01.514Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 181,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-21795a16c4b2f6a32a40",
+          "file": "ui44.spec.mjs",
+          "line": 180,
+          "column": 1
+        },
+        {
+          "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "targets",
+                  "description": "{\"project\":\"m-small\",\"viewport\":{\"width\":360,\"height\":640},\"scenes\":{\"fresh\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"twelve\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"overview\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"ov_line_kitchen\":34.3,\"ov_line_packing\":34.3,\"ov_line_shop\":34.3,\"ov_rate_0\":37.1,\"ov_rate_1\":37.1,\"ov_rate_2\":37.1,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"picker\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"pick_P01\":32.7,\"pick_P02\":32.7,\"pick_P04\":32.7,\"pick_P05\":32.7,\"pick_P06\":32.7,\"pick_U01\":32.7,\"pick_U02\":32.7,\"pick_U03\":32.7,\"pick_U04\":32.7,\"pick_U05\":32.7,\"pick_U07\":32.7,\"pick_bagger\":32.7,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"forty\":{\"k\":0.333,\"min\":14.8,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":27.5,\"slot_kitchen_1\":27.5,\"slot_kitchen_10\":27.5,\"slot_kitchen_11\":27.5,\"slot_kitchen_12\":27.5,\"slot_kitchen_13\":27.5,\"slot_kitchen_14\":27.5,\"slot_kitchen_15\":27.5,\"slot_kitchen_16\":27.5,\"slot_kitchen_17\":27.5,\"slot_kitchen_18\":27.5,\"slot_kitchen_19\":27.5,\"slot_kitchen_2\":27.5,\"slot_kitchen_20\":27.5,\"slot_kitchen_21\":27.5,\"slot_kitchen_22\":27.5,\"slot_kitchen_23\":27.5,\"slot_kitchen_3\":27.5,\"slot_kitchen_4\":27.5,\"slot_kitchen_5\":27.5,\"slot_kitchen_6\":27.5,\"slot_kitchen_7\":27.5,\"slot_kitchen_8\":27.5,\"slot_kitchen_9\":27.5,\"slot_packing_0\":21.1,\"slot_packing_1\":21.1,\"slot_packing_10\":21.1,\"slot_packing_11\":21.1,\"slot_packing_2\":21.1,\"slot_packing_3\":21.1,\"slot_packing_4\":21.1,\"slot_packing_5\":21.1,\"slot_packing_6\":21.1,\"slot_packing_7\":21.1,\"slot_packing_8\":21.1,\"slot_packing_9\":21.1,\"slot_shop_0\":14.8,\"slot_shop_1\":14.8,\"slot_shop_2\":14.8,\"slot_shop_3\":14.8,\"slot_shop_4\":14.8,\"slot_shop_5\":14.8,\"slot_shop_6\":14.8,\"slot_shop_7\":14.8,\"sound\":42,\"upgrade\":83.2}},\"forty_overview\":{\"k\":0.333,\"min\":14.8,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"ov_rate_0\":37.1,\"ov_rate_1\":37.1,\"ov_rate_2\":37.1,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":27.5,\"slot_kitchen_1\":27.5,\"slot_kitchen_10\":27.5,\"slot_kitchen_11\":27.5,\"slot_kitchen_12\":27.5,\"slot_kitchen_13\":27.5,\"slot_kitchen_14\":27.5,\"slot_kitchen_15\":27.5,\"slot_kitchen_16\":27.5,\"slot_kitchen_17\":27.5,\"slot_kitchen_18\":27.5,\"slot_kitchen_19\":27.5,\"slot_kitchen_2\":27.5,\"slot_kitchen_20\":27.5,\"slot_kitchen_21\":27.5,\"slot_kitchen_22\":27.5,\"slot_kitchen_23\":27.5,\"slot_kitchen_3\":27.5,\"slot_kitchen_4\":27.5,\"slot_kitchen_5\":27.5,\"slot_kitchen_6\":27.5,\"slot_kitchen_7\":27.5,\"slot_kitchen_8\":27.5,\"slot_kitchen_9\":27.5,\"slot_packing_0\":21.1,\"slot_packing_1\":21.1,\"slot_packing_10\":21.1,\"slot_packing_11\":21.1,\"slot_packing_2\":21.1,\"slot_packing_3\":21.1,\"slot_packing_4\":21.1,\"slot_packing_5\":21.1,\"slot_packing_6\":21.1,\"slot_packing_7\":21.1,\"slot_packing_8\":21.1,\"slot_packing_9\":21.1,\"slot_shop_0\":14.8,\"slot_shop_1\":14.8,\"slot_shop_2\":14.8,\"slot_shop_3\":14.8,\"slot_shop_4\":14.8,\"slot_shop_5\":14.8,\"slot_shop_6\":14.8,\"slot_shop_7\":14.8,\"sound\":42,\"upgrade\":83.2}}}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13195,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:21.677Z",
+                  "annotations": [
+                    {
+                      "type": "targets",
+                      "description": "{\"project\":\"m-small\",\"viewport\":{\"width\":360,\"height\":640},\"scenes\":{\"fresh\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"twelve\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"overview\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"ov_line_kitchen\":34.3,\"ov_line_packing\":34.3,\"ov_line_shop\":34.3,\"ov_rate_0\":37.1,\"ov_rate_1\":37.1,\"ov_rate_2\":37.1,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"picker\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"pick_P01\":32.7,\"pick_P02\":32.7,\"pick_P04\":32.7,\"pick_P05\":32.7,\"pick_P06\":32.7,\"pick_U01\":32.7,\"pick_U02\":32.7,\"pick_U03\":32.7,\"pick_U04\":32.7,\"pick_U05\":32.7,\"pick_U07\":32.7,\"pick_bagger\":32.7,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"forty\":{\"k\":0.333,\"min\":14.8,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":27.5,\"slot_kitchen_1\":27.5,\"slot_kitchen_10\":27.5,\"slot_kitchen_11\":27.5,\"slot_kitchen_12\":27.5,\"slot_kitchen_13\":27.5,\"slot_kitchen_14\":27.5,\"slot_kitchen_15\":27.5,\"slot_kitchen_16\":27.5,\"slot_kitchen_17\":27.5,\"slot_kitchen_18\":27.5,\"slot_kitchen_19\":27.5,\"slot_kitchen_2\":27.5,\"slot_kitchen_20\":27.5,\"slot_kitchen_21\":27.5,\"slot_kitchen_22\":27.5,\"slot_kitchen_23\":27.5,\"slot_kitchen_3\":27.5,\"slot_kitchen_4\":27.5,\"slot_kitchen_5\":27.5,\"slot_kitchen_6\":27.5,\"slot_kitchen_7\":27.5,\"slot_kitchen_8\":27.5,\"slot_kitchen_9\":27.5,\"slot_packing_0\":21.1,\"slot_packing_1\":21.1,\"slot_packing_10\":21.1,\"slot_packing_11\":21.1,\"slot_packing_2\":21.1,\"slot_packing_3\":21.1,\"slot_packing_4\":21.1,\"slot_packing_5\":21.1,\"slot_packing_6\":21.1,\"slot_packing_7\":21.1,\"slot_packing_8\":21.1,\"slot_packing_9\":21.1,\"slot_shop_0\":14.8,\"slot_shop_1\":14.8,\"slot_shop_2\":14.8,\"slot_shop_3\":14.8,\"slot_shop_4\":14.8,\"slot_shop_5\":14.8,\"slot_shop_6\":14.8,\"slot_shop_7\":14.8,\"sound\":42,\"upgrade\":83.2}},\"forty_overview\":{\"k\":0.333,\"min\":14.8,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"ov_rate_0\":37.1,\"ov_rate_1\":37.1,\"ov_rate_2\":37.1,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":27.5,\"slot_kitchen_1\":27.5,\"slot_kitchen_10\":27.5,\"slot_kitchen_11\":27.5,\"slot_kitchen_12\":27.5,\"slot_kitchen_13\":27.5,\"slot_kitchen_14\":27.5,\"slot_kitchen_15\":27.5,\"slot_kitchen_16\":27.5,\"slot_kitchen_17\":27.5,\"slot_kitchen_18\":27.5,\"slot_kitchen_19\":27.5,\"slot_kitchen_2\":27.5,\"slot_kitchen_20\":27.5,\"slot_kitchen_21\":27.5,\"slot_kitchen_22\":27.5,\"slot_kitchen_23\":27.5,\"slot_kitchen_3\":27.5,\"slot_kitchen_4\":27.5,\"slot_kitchen_5\":27.5,\"slot_kitchen_6\":27.5,\"slot_kitchen_7\":27.5,\"slot_kitchen_8\":27.5,\"slot_kitchen_9\":27.5,\"slot_packing_0\":21.1,\"slot_packing_1\":21.1,\"slot_packing_10\":21.1,\"slot_packing_11\":21.1,\"slot_packing_2\":21.1,\"slot_packing_3\":21.1,\"slot_packing_4\":21.1,\"slot_packing_5\":21.1,\"slot_packing_6\":21.1,\"slot_packing_7\":21.1,\"slot_packing_8\":21.1,\"slot_packing_9\":21.1,\"slot_shop_0\":14.8,\"slot_shop_1\":14.8,\"slot_shop_2\":14.8,\"slot_shop_3\":14.8,\"slot_shop_4\":14.8,\"slot_shop_5\":14.8,\"slot_shop_6\":14.8,\"slot_shop_7\":14.8,\"sound\":42,\"upgrade\":83.2}}}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-8e527c1bbd2722f260ba",
+          "file": "ui44.spec.mjs",
+          "line": 58,
+          "column": 1
+        },
+        {
+          "title": "a refused press shows the full bin, a first tap brings the hold hint",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 121,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 25,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:34.878Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 121,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-eff912ccbe5681128121",
+          "file": "ui44.spec.mjs",
+          "line": 120,
+          "column": 1
+        },
+        {
+          "title": "a cancelled touch or a mouse that leaves ends the hold",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 149,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 23,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:34.909Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 149,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-9d4e52c056ad8111dabc",
+          "file": "ui44.spec.mjs",
+          "line": 148,
+          "column": 1
+        },
+        {
+          "title": "the motion button calms the factory and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 181,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 24,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:24:34.937Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 181,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-1111258cba6ad214dc23",
+          "file": "ui44.spec.mjs",
+          "line": 180,
+          "column": 1
+        },
+        {
+          "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "targets",
+                  "description": "{\"project\":\"m-tablet\",\"viewport\":{\"width\":768,\"height\":1024},\"scenes\":{\"fresh\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"twelve\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"overview\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"ov_line_kitchen\":54.8,\"ov_line_packing\":54.8,\"ov_line_shop\":54.8,\"ov_rate_0\":59.4,\"ov_rate_1\":59.4,\"ov_rate_2\":59.4,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"picker\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"pick_P01\":52.4,\"pick_P02\":52.4,\"pick_P04\":52.4,\"pick_P05\":52.4,\"pick_P06\":52.4,\"pick_U01\":52.4,\"pick_U02\":52.4,\"pick_U03\":52.4,\"pick_U04\":52.4,\"pick_U05\":52.4,\"pick_U07\":52.4,\"pick_bagger\":52.4,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"forty\":{\"k\":0.5,\"min\":23.6,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":44,\"slot_kitchen_1\":44,\"slot_kitchen_10\":44,\"slot_kitchen_11\":44,\"slot_kitchen_12\":44,\"slot_kitchen_13\":44,\"slot_kitchen_14\":44,\"slot_kitchen_15\":44,\"slot_kitchen_16\":44,\"slot_kitchen_17\":44,\"slot_kitchen_18\":44,\"slot_kitchen_19\":44,\"slot_kitchen_2\":44,\"slot_kitchen_20\":44,\"slot_kitchen_21\":44,\"slot_kitchen_22\":44,\"slot_kitchen_23\":44,\"slot_kitchen_3\":44,\"slot_kitchen_4\":44,\"slot_kitchen_5\":44,\"slot_kitchen_6\":44,\"slot_kitchen_7\":44,\"slot_kitchen_8\":44,\"slot_kitchen_9\":44,\"slot_packing_0\":33.8,\"slot_packing_1\":33.8,\"slot_packing_10\":33.8,\"slot_packing_11\":33.8,\"slot_packing_2\":33.8,\"slot_packing_3\":33.8,\"slot_packing_4\":33.8,\"slot_packing_5\":33.8,\"slot_packing_6\":33.8,\"slot_packing_7\":33.8,\"slot_packing_8\":33.8,\"slot_packing_9\":33.8,\"slot_shop_0\":23.6,\"slot_shop_1\":23.6,\"slot_shop_2\":23.6,\"slot_shop_3\":23.6,\"slot_shop_4\":23.6,\"slot_shop_5\":23.6,\"slot_shop_6\":23.6,\"slot_shop_7\":23.6,\"sound\":67.2,\"upgrade\":133.1}},\"forty_overview\":{\"k\":0.5,\"min\":23.6,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"ov_rate_0\":59.4,\"ov_rate_1\":59.4,\"ov_rate_2\":59.4,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":44,\"slot_kitchen_1\":44,\"slot_kitchen_10\":44,\"slot_kitchen_11\":44,\"slot_kitchen_12\":44,\"slot_kitchen_13\":44,\"slot_kitchen_14\":44,\"slot_kitchen_15\":44,\"slot_kitchen_16\":44,\"slot_kitchen_17\":44,\"slot_kitchen_18\":44,\"slot_kitchen_19\":44,\"slot_kitchen_2\":44,\"slot_kitchen_20\":44,\"slot_kitchen_21\":44,\"slot_kitchen_22\":44,\"slot_kitchen_23\":44,\"slot_kitchen_3\":44,\"slot_kitchen_4\":44,\"slot_kitchen_5\":44,\"slot_kitchen_6\":44,\"slot_kitchen_7\":44,\"slot_kitchen_8\":44,\"slot_kitchen_9\":44,\"slot_packing_0\":33.8,\"slot_packing_1\":33.8,\"slot_packing_10\":33.8,\"slot_packing_11\":33.8,\"slot_packing_2\":33.8,\"slot_packing_3\":33.8,\"slot_packing_4\":33.8,\"slot_packing_5\":33.8,\"slot_packing_6\":33.8,\"slot_packing_7\":33.8,\"slot_packing_8\":33.8,\"slot_packing_9\":33.8,\"slot_shop_0\":23.6,\"slot_shop_1\":23.6,\"slot_shop_2\":23.6,\"slot_shop_3\":23.6,\"slot_shop_4\":23.6,\"slot_shop_5\":23.6,\"slot_shop_6\":23.6,\"slot_shop_7\":23.6,\"sound\":67.2,\"upgrade\":133.1}}}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15868,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:00.629Z",
+                  "annotations": [
+                    {
+                      "type": "targets",
+                      "description": "{\"project\":\"m-tablet\",\"viewport\":{\"width\":768,\"height\":1024},\"scenes\":{\"fresh\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"twelve\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"overview\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"ov_line_kitchen\":54.8,\"ov_line_packing\":54.8,\"ov_line_shop\":54.8,\"ov_rate_0\":59.4,\"ov_rate_1\":59.4,\"ov_rate_2\":59.4,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"picker\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"pick_P01\":52.4,\"pick_P02\":52.4,\"pick_P04\":52.4,\"pick_P05\":52.4,\"pick_P06\":52.4,\"pick_U01\":52.4,\"pick_U02\":52.4,\"pick_U03\":52.4,\"pick_U04\":52.4,\"pick_U05\":52.4,\"pick_U07\":52.4,\"pick_bagger\":52.4,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"forty\":{\"k\":0.5,\"min\":23.6,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":44,\"slot_kitchen_1\":44,\"slot_kitchen_10\":44,\"slot_kitchen_11\":44,\"slot_kitchen_12\":44,\"slot_kitchen_13\":44,\"slot_kitchen_14\":44,\"slot_kitchen_15\":44,\"slot_kitchen_16\":44,\"slot_kitchen_17\":44,\"slot_kitchen_18\":44,\"slot_kitchen_19\":44,\"slot_kitchen_2\":44,\"slot_kitchen_20\":44,\"slot_kitchen_21\":44,\"slot_kitchen_22\":44,\"slot_kitchen_23\":44,\"slot_kitchen_3\":44,\"slot_kitchen_4\":44,\"slot_kitchen_5\":44,\"slot_kitchen_6\":44,\"slot_kitchen_7\":44,\"slot_kitchen_8\":44,\"slot_kitchen_9\":44,\"slot_packing_0\":33.8,\"slot_packing_1\":33.8,\"slot_packing_10\":33.8,\"slot_packing_11\":33.8,\"slot_packing_2\":33.8,\"slot_packing_3\":33.8,\"slot_packing_4\":33.8,\"slot_packing_5\":33.8,\"slot_packing_6\":33.8,\"slot_packing_7\":33.8,\"slot_packing_8\":33.8,\"slot_packing_9\":33.8,\"slot_shop_0\":23.6,\"slot_shop_1\":23.6,\"slot_shop_2\":23.6,\"slot_shop_3\":23.6,\"slot_shop_4\":23.6,\"slot_shop_5\":23.6,\"slot_shop_6\":23.6,\"slot_shop_7\":23.6,\"sound\":67.2,\"upgrade\":133.1}},\"forty_overview\":{\"k\":0.5,\"min\":23.6,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"ov_rate_0\":59.4,\"ov_rate_1\":59.4,\"ov_rate_2\":59.4,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":44,\"slot_kitchen_1\":44,\"slot_kitchen_10\":44,\"slot_kitchen_11\":44,\"slot_kitchen_12\":44,\"slot_kitchen_13\":44,\"slot_kitchen_14\":44,\"slot_kitchen_15\":44,\"slot_kitchen_16\":44,\"slot_kitchen_17\":44,\"slot_kitchen_18\":44,\"slot_kitchen_19\":44,\"slot_kitchen_2\":44,\"slot_kitchen_20\":44,\"slot_kitchen_21\":44,\"slot_kitchen_22\":44,\"slot_kitchen_23\":44,\"slot_kitchen_3\":44,\"slot_kitchen_4\":44,\"slot_kitchen_5\":44,\"slot_kitchen_6\":44,\"slot_kitchen_7\":44,\"slot_kitchen_8\":44,\"slot_kitchen_9\":44,\"slot_packing_0\":33.8,\"slot_packing_1\":33.8,\"slot_packing_10\":33.8,\"slot_packing_11\":33.8,\"slot_packing_2\":33.8,\"slot_packing_3\":33.8,\"slot_packing_4\":33.8,\"slot_packing_5\":33.8,\"slot_packing_6\":33.8,\"slot_packing_7\":33.8,\"slot_packing_8\":33.8,\"slot_packing_9\":33.8,\"slot_shop_0\":23.6,\"slot_shop_1\":23.6,\"slot_shop_2\":23.6,\"slot_shop_3\":23.6,\"slot_shop_4\":23.6,\"slot_shop_5\":23.6,\"slot_shop_6\":23.6,\"slot_shop_7\":23.6,\"sound\":67.2,\"upgrade\":133.1}}}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-f07ec8151301fa31b8d5",
+          "file": "ui44.spec.mjs",
+          "line": 58,
+          "column": 1
+        },
+        {
+          "title": "a refused press shows the full bin, a first tap brings the hold hint",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 121,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:16.507Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 121,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-b2d6c05013fadd2007c0",
+          "file": "ui44.spec.mjs",
+          "line": 120,
+          "column": 1
+        },
+        {
+          "title": "a cancelled touch or a mouse that leaves ends the hold",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 149,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 23,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:16.534Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 149,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-a62d26b1b4fb27b52289",
+          "file": "ui44.spec.mjs",
+          "line": 148,
+          "column": 1
+        },
+        {
+          "title": "the motion button calms the factory and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 181,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 21,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:16.562Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 181,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-6e16199cc70a419e1e3f",
+          "file": "ui44.spec.mjs",
+          "line": 180,
+          "column": 1
+        },
+        {
+          "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "targets",
+                  "description": "{\"project\":\"m-landscape\",\"viewport\":{\"width\":844,\"height\":390},\"scenes\":{\"fresh\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"twelve\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"overview\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"ov_line_kitchen\":29.2,\"ov_line_packing\":29.2,\"ov_line_shop\":29.2,\"ov_rate_0\":31.4,\"ov_rate_1\":31.4,\"ov_rate_2\":31.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"picker\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"pick_P01\":31.7,\"pick_P02\":31.7,\"pick_P04\":31.7,\"pick_P05\":31.7,\"pick_P06\":31.7,\"pick_U01\":31.7,\"pick_U02\":31.7,\"pick_U03\":31.7,\"pick_U04\":31.7,\"pick_U05\":31.7,\"pick_U07\":31.7,\"pick_bagger\":31.7,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"forty\":{\"k\":0.333,\"min\":10.1,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":32.5,\"slot_kitchen_1\":32.5,\"slot_kitchen_10\":32.5,\"slot_kitchen_11\":32.5,\"slot_kitchen_12\":32.5,\"slot_kitchen_13\":32.5,\"slot_kitchen_14\":32.5,\"slot_kitchen_15\":32.5,\"slot_kitchen_16\":32.5,\"slot_kitchen_17\":32.5,\"slot_kitchen_18\":32.5,\"slot_kitchen_19\":32.5,\"slot_kitchen_2\":32.5,\"slot_kitchen_20\":32.5,\"slot_kitchen_21\":32.5,\"slot_kitchen_22\":32.5,\"slot_kitchen_23\":32.5,\"slot_kitchen_3\":32.5,\"slot_kitchen_4\":32.5,\"slot_kitchen_5\":32.5,\"slot_kitchen_6\":32.5,\"slot_kitchen_7\":32.5,\"slot_kitchen_8\":32.5,\"slot_kitchen_9\":32.5,\"slot_packing_0\":15.6,\"slot_packing_1\":15.6,\"slot_packing_10\":15.6,\"slot_packing_11\":15.6,\"slot_packing_2\":15.6,\"slot_packing_3\":15.6,\"slot_packing_4\":15.6,\"slot_packing_5\":15.6,\"slot_packing_6\":15.6,\"slot_packing_7\":15.6,\"slot_packing_8\":15.6,\"slot_packing_9\":15.6,\"slot_shop_0\":10.1,\"slot_shop_1\":10.1,\"slot_shop_2\":10.1,\"slot_shop_3\":10.1,\"slot_shop_4\":10.1,\"slot_shop_5\":10.1,\"slot_shop_6\":10.1,\"slot_shop_7\":10.1,\"sound\":31.7,\"upgrade\":67.3}},\"forty_overview\":{\"k\":0.333,\"min\":10.1,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"ov_rate_0\":31.4,\"ov_rate_1\":31.4,\"ov_rate_2\":31.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":32.5,\"slot_kitchen_1\":32.5,\"slot_kitchen_10\":32.5,\"slot_kitchen_11\":32.5,\"slot_kitchen_12\":32.5,\"slot_kitchen_13\":32.5,\"slot_kitchen_14\":32.5,\"slot_kitchen_15\":32.5,\"slot_kitchen_16\":32.5,\"slot_kitchen_17\":32.5,\"slot_kitchen_18\":32.5,\"slot_kitchen_19\":32.5,\"slot_kitchen_2\":32.5,\"slot_kitchen_20\":32.5,\"slot_kitchen_21\":32.5,\"slot_kitchen_22\":32.5,\"slot_kitchen_23\":32.5,\"slot_kitchen_3\":32.5,\"slot_kitchen_4\":32.5,\"slot_kitchen_5\":32.5,\"slot_kitchen_6\":32.5,\"slot_kitchen_7\":32.5,\"slot_kitchen_8\":32.5,\"slot_kitchen_9\":32.5,\"slot_packing_0\":15.6,\"slot_packing_1\":15.6,\"slot_packing_10\":15.6,\"slot_packing_11\":15.6,\"slot_packing_2\":15.6,\"slot_packing_3\":15.6,\"slot_packing_4\":15.6,\"slot_packing_5\":15.6,\"slot_packing_6\":15.6,\"slot_packing_7\":15.6,\"slot_packing_8\":15.6,\"slot_packing_9\":15.6,\"slot_shop_0\":10.1,\"slot_shop_1\":10.1,\"slot_shop_2\":10.1,\"slot_shop_3\":10.1,\"slot_shop_4\":10.1,\"slot_shop_5\":10.1,\"slot_shop_6\":10.1,\"slot_shop_7\":10.1,\"sound\":31.7,\"upgrade\":67.3}}}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15884,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:40.718Z",
+                  "annotations": [
+                    {
+                      "type": "targets",
+                      "description": "{\"project\":\"m-landscape\",\"viewport\":{\"width\":844,\"height\":390},\"scenes\":{\"fresh\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"twelve\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"overview\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"ov_line_kitchen\":29.2,\"ov_line_packing\":29.2,\"ov_line_shop\":29.2,\"ov_rate_0\":31.4,\"ov_rate_1\":31.4,\"ov_rate_2\":31.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"picker\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"pick_P01\":31.7,\"pick_P02\":31.7,\"pick_P04\":31.7,\"pick_P05\":31.7,\"pick_P06\":31.7,\"pick_U01\":31.7,\"pick_U02\":31.7,\"pick_U03\":31.7,\"pick_U04\":31.7,\"pick_U05\":31.7,\"pick_U07\":31.7,\"pick_bagger\":31.7,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"forty\":{\"k\":0.333,\"min\":10.1,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":32.5,\"slot_kitchen_1\":32.5,\"slot_kitchen_10\":32.5,\"slot_kitchen_11\":32.5,\"slot_kitchen_12\":32.5,\"slot_kitchen_13\":32.5,\"slot_kitchen_14\":32.5,\"slot_kitchen_15\":32.5,\"slot_kitchen_16\":32.5,\"slot_kitchen_17\":32.5,\"slot_kitchen_18\":32.5,\"slot_kitchen_19\":32.5,\"slot_kitchen_2\":32.5,\"slot_kitchen_20\":32.5,\"slot_kitchen_21\":32.5,\"slot_kitchen_22\":32.5,\"slot_kitchen_23\":32.5,\"slot_kitchen_3\":32.5,\"slot_kitchen_4\":32.5,\"slot_kitchen_5\":32.5,\"slot_kitchen_6\":32.5,\"slot_kitchen_7\":32.5,\"slot_kitchen_8\":32.5,\"slot_kitchen_9\":32.5,\"slot_packing_0\":15.6,\"slot_packing_1\":15.6,\"slot_packing_10\":15.6,\"slot_packing_11\":15.6,\"slot_packing_2\":15.6,\"slot_packing_3\":15.6,\"slot_packing_4\":15.6,\"slot_packing_5\":15.6,\"slot_packing_6\":15.6,\"slot_packing_7\":15.6,\"slot_packing_8\":15.6,\"slot_packing_9\":15.6,\"slot_shop_0\":10.1,\"slot_shop_1\":10.1,\"slot_shop_2\":10.1,\"slot_shop_3\":10.1,\"slot_shop_4\":10.1,\"slot_shop_5\":10.1,\"slot_shop_6\":10.1,\"slot_shop_7\":10.1,\"sound\":31.7,\"upgrade\":67.3}},\"forty_overview\":{\"k\":0.333,\"min\":10.1,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"ov_rate_0\":31.4,\"ov_rate_1\":31.4,\"ov_rate_2\":31.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":32.5,\"slot_kitchen_1\":32.5,\"slot_kitchen_10\":32.5,\"slot_kitchen_11\":32.5,\"slot_kitchen_12\":32.5,\"slot_kitchen_13\":32.5,\"slot_kitchen_14\":32.5,\"slot_kitchen_15\":32.5,\"slot_kitchen_16\":32.5,\"slot_kitchen_17\":32.5,\"slot_kitchen_18\":32.5,\"slot_kitchen_19\":32.5,\"slot_kitchen_2\":32.5,\"slot_kitchen_20\":32.5,\"slot_kitchen_21\":32.5,\"slot_kitchen_22\":32.5,\"slot_kitchen_23\":32.5,\"slot_kitchen_3\":32.5,\"slot_kitchen_4\":32.5,\"slot_kitchen_5\":32.5,\"slot_kitchen_6\":32.5,\"slot_kitchen_7\":32.5,\"slot_kitchen_8\":32.5,\"slot_kitchen_9\":32.5,\"slot_packing_0\":15.6,\"slot_packing_1\":15.6,\"slot_packing_10\":15.6,\"slot_packing_11\":15.6,\"slot_packing_2\":15.6,\"slot_packing_3\":15.6,\"slot_packing_4\":15.6,\"slot_packing_5\":15.6,\"slot_packing_6\":15.6,\"slot_packing_7\":15.6,\"slot_packing_8\":15.6,\"slot_packing_9\":15.6,\"slot_shop_0\":10.1,\"slot_shop_1\":10.1,\"slot_shop_2\":10.1,\"slot_shop_3\":10.1,\"slot_shop_4\":10.1,\"slot_shop_5\":10.1,\"slot_shop_6\":10.1,\"slot_shop_7\":10.1,\"sound\":31.7,\"upgrade\":67.3}}}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-467890da5186fbc5a2a9",
+          "file": "ui44.spec.mjs",
+          "line": 58,
+          "column": 1
+        },
+        {
+          "title": "a refused press shows the full bin, a first tap brings the hold hint",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 121,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:56.610Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 121,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-da3ffc4bd8da1feb857c",
+          "file": "ui44.spec.mjs",
+          "line": 120,
+          "column": 1
+        },
+        {
+          "title": "a cancelled touch or a mouse that leaves ends the hold",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 149,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 21,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:56.637Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 149,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-f15c4465fdd7ada08bae",
+          "file": "ui44.spec.mjs",
+          "line": 148,
+          "column": 1
+        },
+        {
+          "title": "the motion button calms the factory and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "the everyday three",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                    "line": 181,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:25:56.663Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "the everyday three",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ui44.spec.mjs",
+                        "line": 181,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-ed4485c098bf931f3c40",
+          "file": "ui44.spec.mjs",
+          "line": 180,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T15:23:16.519Z",
+    "duration": 160216.911,
+    "expected": 34,
+    "skipped": 16,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

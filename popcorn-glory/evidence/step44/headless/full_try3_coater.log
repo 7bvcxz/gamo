@@ -1,0 +1,13 @@
+  1 machines: ten model minutes in 292 ms, sold 431, upkeep 2, revenue 5296
+  5 machines: ten model minutes in 811 ms, sold 425, upkeep 87, revenue 5149
+  10 machines: ten model minutes in 1434 ms, sold 422, upkeep 144, revenue 5055
+  20 machines: ten model minutes in 3852 ms, sold 421, upkeep 280, revenue 4996
+  44 machines: ten model minutes in 9921 ms, sold 416, upkeep 287, revenue 4418
+  the special: on at 21400 ms, surplus gone at 396850 ms, spicy sold 5
+  no special: surplus gone at -1 ms, spicy sold 2
+  tastes: { "classic": { "sweet": 0.06666666666667, "savoury": 0.09466666666667, "plain": 0.817, "large": 0.37266666666667 }, "kid": { "sweet": 0.406, "savoury": 0.16533333333333, "plain": 0.34233333333333, "large": 0.23866666666667 }, "student": { "sweet": 0.08533333333333, "savoury": 0.31533333333333, "plain": 0.56833333333333, "large": 0.26666666666667 }, "rush": { "sweet": 0.17233333333333, "savoury": 0.192, "plain": 0.59366666666667, "large": 0.576 }, "elder": { "sweet": 0.29533333333333, "savoury": 0.194, "plain": 0.448, "large": 0.399 } }
+  hand_first: {"everywhere":986,"longest_ms":13500,"made":986,"packed":418,"pops":31,"refused":169,"sold":408,"tries":200}
+  old rule:   {"everywhere":877,"longest_ms":294000,"made":877,"packed":370,"pops":3,"refused":197,"sold":360,"tries":200}
+  fair: {"coated":{"caramel":22,"cheese":56,"cocoa":8,"spicy":16},"sold":227}  build order: {"coated":{"caramel":36,"cheese":80,"spicy":16},"sold":258}
+325 passed, 0 failed, 22865 checks, 23 files, 558.7s
+── test.sh: OK

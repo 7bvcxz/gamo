@@ -1,0 +1,7 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+hand_first=true every=1 mode=1: no cocoa in 0/40; median first 60 max 130
+hand_first=true every=1 mode=2: no cocoa in 0/40; median first 45 max 80
+hand_first=true every=2 mode=3: no cocoa in 0/40; median first 70 max 170
+hand_first=true every=1 mode=3: no cocoa in 0/40; median first 55 max 80
+hand_first=false every=1 mode=3: no cocoa in 0/40; median first 55 max 80

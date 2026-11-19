@@ -1,0 +1,46 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+t=0 plain0=0 plain1=0 plain=0 res=2 want=6 have=0 bin=0/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=30 plain0=0 plain1=0 plain=0 res=0 want=6 have=0 bin=0/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=60 plain0=1 plain1=1 plain=1 res=2 want=6 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=90 plain0=1 plain1=1 plain=1 res=6 want=6 have=0 bin=1/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=120 plain0=3 plain1=3 plain=3 res=6 want=8 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=150 plain0=0 plain1=0 plain=0 res=0 want=10 have=0 bin=0/24 P05/cheese/l0:run P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=180 plain0=3 plain1=3 plain=3 res=12 want=10 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=210 plain0=1 plain1=1 plain=1 res=4 want=10 have=0 bin=1/24 P05/cheese/l0:idle P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=240 plain0=3 plain1=3 plain=3 res=10 want=8 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=270 plain0=1 plain1=1 plain=1 res=0 want=12 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:run P06/cocoa/l0:starved
+t=300 plain0=0 plain1=0 plain=0 res=0 want=8 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:idle P05/spicy/l0:starved P06/cocoa/l0:starved
+t=330 plain0=0 plain1=0 plain=0 res=2 want=6 have=0 bin=2/24 P05/cheese/l0:run P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=360 plain0=1 plain1=1 plain=1 res=0 want=8 have=0 bin=1/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=390 plain0=0 plain1=0 plain=0 res=0 want=14 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=420 plain0=0 plain1=0 plain=0 res=4 want=12 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=450 plain0=0 plain1=0 plain=0 res=0 want=12 have=0 bin=3/24 P05/cheese/l0:idle P06/caramel/l0:run P05/spicy/l0:starved P06/cocoa/l0:starved
+t=480 plain0=0 plain1=0 plain=0 res=4 want=16 have=0 bin=6/24 P05/cheese/l0:idle P06/caramel/l0:starved P05/spicy/l0:idle P06/cocoa/l0:starved
+t=510 plain0=0 plain1=0 plain=0 res=2 want=14 have=0 bin=0/24 P05/cheese/l0:idle P06/caramel/l0:run P05/spicy/l0:idle P06/cocoa/l0:starved
+t=540 plain0=0 plain1=0 plain=0 res=10 want=6 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:idle P05/spicy/l0:starved P06/cocoa/l0:starved
+t=570 plain0=0 plain1=0 plain=0 res=4 want=6 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:idle P05/spicy/l0:starved P06/cocoa/l0:starved
+TRACE-END hf=true seed=22 cocoa=0 first=-1 states={"starved":1200}
+TRACE-END hf=true seed=39 cocoa=0 first=-1 states={"starved":1200}
+t=0 plain0=0 plain1=0 plain=0 res=2 want=6 have=0 bin=0/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=30 plain0=0 plain1=0 plain=0 res=0 want=6 have=0 bin=0/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=60 plain0=1 plain1=1 plain=1 res=2 want=6 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=90 plain0=1 plain1=1 plain=1 res=6 want=6 have=0 bin=1/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=120 plain0=3 plain1=3 plain=3 res=6 want=8 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=150 plain0=0 plain1=0 plain=0 res=0 want=10 have=0 bin=0/24 P05/cheese/l0:run P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=180 plain0=3 plain1=3 plain=3 res=12 want=10 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=210 plain0=1 plain1=1 plain=1 res=4 want=10 have=0 bin=1/24 P05/cheese/l0:idle P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=240 plain0=3 plain1=3 plain=3 res=10 want=8 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=270 plain0=1 plain1=1 plain=1 res=0 want=12 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:run P06/cocoa/l0:starved
+t=300 plain0=0 plain1=0 plain=0 res=0 want=8 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:idle P05/spicy/l0:starved P06/cocoa/l0:starved
+t=330 plain0=0 plain1=0 plain=0 res=2 want=6 have=0 bin=2/24 P05/cheese/l0:run P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=360 plain0=1 plain1=1 plain=1 res=0 want=8 have=0 bin=1/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=390 plain0=0 plain1=0 plain=0 res=0 want=14 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=420 plain0=0 plain1=0 plain=0 res=4 want=12 have=0 bin=3/24 P05/cheese/l0:starved P06/caramel/l0:starved P05/spicy/l0:starved P06/cocoa/l0:starved
+t=450 plain0=0 plain1=0 plain=0 res=0 want=12 have=0 bin=3/24 P05/cheese/l0:idle P06/caramel/l0:run P05/spicy/l0:starved P06/cocoa/l0:starved
+t=480 plain0=0 plain1=0 plain=0 res=4 want=16 have=0 bin=6/24 P05/cheese/l0:idle P06/caramel/l0:starved P05/spicy/l0:idle P06/cocoa/l0:starved
+t=510 plain0=0 plain1=0 plain=0 res=2 want=14 have=0 bin=0/24 P05/cheese/l0:idle P06/caramel/l0:run P05/spicy/l0:idle P06/cocoa/l0:starved
+t=540 plain0=0 plain1=0 plain=0 res=10 want=6 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:idle P05/spicy/l0:starved P06/cocoa/l0:starved
+t=570 plain0=0 plain1=0 plain=0 res=4 want=6 have=0 bin=4/24 P05/cheese/l0:starved P06/caramel/l0:idle P05/spicy/l0:starved P06/cocoa/l0:starved
+TRACE-END hf=false seed=22 cocoa=0 first=-1 states={"starved":1200}
+TRACE-END hf=false seed=39 cocoa=0 first=-1 states={"starved":1200}

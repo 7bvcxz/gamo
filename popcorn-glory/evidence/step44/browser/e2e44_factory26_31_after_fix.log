@@ -1,0 +1,118 @@
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:54] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 12 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:55] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:55] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:55] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:55] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:55] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:56] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:14:56] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   1 [p720] › specs/factory26.spec.mjs:19:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.3m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:16:13] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:16:13] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:16:13] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:16:13] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:16:13] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:16:15] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:16:15] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   2 [p720] › specs/factory31.spec.mjs:54:1 › the storefront: cashier, express window, robot lanes, router -- honest sales (1.7m)
+  -   3 [p720] › specs/factory31.spec.mjs:85:1 › a paused cashier holds its customers sales until it is resumed
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:17:58] "GET /popcorn-glory/?seed=11 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:17:58] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:17:58] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:17:58] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:17:58] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:17:59] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:17:59] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘   4 [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 11 (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:21:00] "GET /popcorn-glory/?seed=22 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:21:00] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:21:00] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:21:00] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:21:00] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:21:01] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:21:01] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘   5 [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 22 (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:24:03] "GET /popcorn-glory/?seed=33 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:24:03] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:24:03] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:24:03] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:24:03] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:24:04] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:24:04] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘   6 [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 33 (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:27:05] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:27:05] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:27:05] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:27:05] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:27:05] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:27:06] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:27:06] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   7 [phone] › specs/factory26.spec.mjs:19:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (1.4m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:28:29] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:28:29] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:28:29] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:28:29] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:28:29] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:28:30] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:28:30] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   8 [phone] › specs/factory31.spec.mjs:54:1 › the storefront: cashier, express window, robot lanes, router -- honest sales (1.9m)
+  -   9 [phone] › specs/factory31.spec.mjs:85:1 › a paused cashier holds its customers sales until it is resumed
+  -  10 [phone] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 11
+  -  11 [phone] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 22
+  -  12 [phone] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 33
+
+
+  1) [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 11 ────────────────────
+
+    Error: ENOENT: no such file or directory, open 'undefined/sessions22.json'
+
+      38 |     const all = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+      39 |     all[seed] = out;
+    > 40 |     fs.writeFileSync(file, JSON.stringify(all, null, 1));
+         |        ^
+      41 |     expect(arr[0], 'one customer waiting at the start').toBe(0);
+      42 |     expect(pop.errors).toEqual([]);
+      43 |   });
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs:40:8
+
+    Error Context: test-results/sessions22-a-real-3-minute-session-seed-11-p720/error-context.md
+
+  2) [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 22 ────────────────────
+
+    Error: ENOENT: no such file or directory, open 'undefined/sessions22.json'
+
+      38 |     const all = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+      39 |     all[seed] = out;
+    > 40 |     fs.writeFileSync(file, JSON.stringify(all, null, 1));
+         |        ^
+      41 |     expect(arr[0], 'one customer waiting at the start').toBe(0);
+      42 |     expect(pop.errors).toEqual([]);
+      43 |   });
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs:40:8
+
+    Error Context: test-results/sessions22-a-real-3-minute-session-seed-22-p720/error-context.md
+
+  3) [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 33 ────────────────────
+
+    Error: ENOENT: no such file or directory, open 'undefined/sessions22.json'
+
+      38 |     const all = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+      39 |     all[seed] = out;
+    > 40 |     fs.writeFileSync(file, JSON.stringify(all, null, 1));
+         |        ^
+      41 |     expect(arr[0], 'one customer waiting at the start').toBe(0);
+      42 |     expect(pop.errors).toEqual([]);
+      43 |   });
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs:40:8
+
+    Error Context: test-results/sessions22-a-real-3-minute-session-seed-33-p720/error-context.md
+
+  3 failed
+    [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 11 ─────────────────────
+    [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 22 ─────────────────────
+    [p720] › specs/sessions22.spec.mjs:10:3 › a real 3-minute session, seed 33 ─────────────────────
+  5 skipped
+  4 passed (15.5m)

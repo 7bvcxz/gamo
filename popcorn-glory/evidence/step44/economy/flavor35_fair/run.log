@@ -1,0 +1,25 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+paused: net 622.7/min (17217 ms)
+machines: net 574.3/min (28452 ms)
+hand_skilled: net 671.0/min (28042 ms)
+hand_average: net 665.0/min (28310 ms)
+auto_mode: net 510.8/min (52656 ms)
+auto_mode_hand: net 582.9/min (57053 ms)
+tier2_machines: net 644.4/min (27791 ms)
+low_demand_paused: net 622.7/min (17264 ms)
+low_demand_machines: net 582.5/min (27075 ms)
+low_demand_hand: net 614.7/min (27017 ms)
+high_demand_paused: net 622.7/min (17275 ms)
+high_demand_machines: net 501.7/min (32116 ms)
+high_demand_hand: net 705.6/min (29176 ms)
+high_demand_tier2: net 609.6/min (30395 ms)
+craze_machines: net 419.6/min (33026 ms)
+craze_tier2: net 582.4/min (31475 ms)
+craze_hand: net 677.2/min (30014 ms)
+surplus true: { "special_on_s": 21.0, "sold_down_min": 2.19, "spicy_sold": 7, "abandoned": 3 }
+surplus false: { "special_on_s": -1, "sold_down_min": 5.87, "spicy_sold": 7, "abandoned": 3 }
+
+real	8m38.966s
+user	8m38.804s
+sys	0m0.159s

@@ -1,0 +1,2257 @@
+{
+  "active_ms": 205137,
+  "game": "popcorn-glory",
+  "lines": [
+    {
+      "data": {
+        "customer": 1,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "classic"
+      },
+      "t": 0,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 2,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "classic"
+      },
+      "t": 5550,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 3,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "classic"
+      },
+      "t": 19100,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 4,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "classic"
+      },
+      "t": 36050,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 48033,
+      "type": "input"
+    },
+    {
+      "data": {
+        "name": "first_input"
+      },
+      "t": 48033,
+      "type": "milestone"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 48033,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 48033,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 48033,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 48033,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 5,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 48033,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 5
+      },
+      "t": 48050,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 5
+      },
+      "t": 48900,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          5
+        ],
+        "ms": 4000,
+        "pack": 6,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 48900,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "customer": 7,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "classic"
+      },
+      "t": 50150,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "pack": 6
+      },
+      "t": 52900,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 1,
+        "lane": 0,
+        "pack": 6
+      },
+      "t": 52900,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 1,
+        "pack": 6,
+        "quality": 50
+      },
+      "t": 55300,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 1,
+        "from": "sale",
+        "money": 8,
+        "pack": 6
+      },
+      "t": 55300,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "name": "first_earn"
+      },
+      "t": 55300,
+      "type": "milestone"
+    },
+    {
+      "data": {
+        "ms": 9460,
+        "start": 48033
+      },
+      "t": 57493,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 57493,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 57493,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 57493,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 57493,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 57493,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 8,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 57493,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 8
+      },
+      "t": 57500,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 8
+      },
+      "t": 58350,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          8
+        ],
+        "ms": 4000,
+        "pack": 9,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 58350,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 58380,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 58380,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 58380,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 58380,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 58380,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 10,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 58380,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 10
+      },
+      "t": 58400,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 10
+      },
+      "t": 59250,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "pack": 9
+      },
+      "t": 62350,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 2,
+        "lane": 0,
+        "pack": 9
+      },
+      "t": 62350,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          10
+        ],
+        "ms": 4000,
+        "pack": 11,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 62400,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "customer": 12,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "kid"
+      },
+      "t": 63350,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 2,
+        "pack": 9,
+        "quality": 50
+      },
+      "t": 64750,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 2,
+        "from": "sale",
+        "money": 16,
+        "pack": 9
+      },
+      "t": 64750,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "pack": 11
+      },
+      "t": 66400,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 3,
+        "lane": 0,
+        "pack": 11
+      },
+      "t": 66400,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 3,
+        "pack": 11,
+        "quality": 50
+      },
+      "t": 68800,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 3,
+        "from": "sale",
+        "money": 24,
+        "pack": 11
+      },
+      "t": 68800,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "ms": 10772,
+        "start": 58380
+      },
+      "t": 69152,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 69152,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 69152,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 69152,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 69152,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 69152,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 13,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 69152,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 13
+      },
+      "t": 69200,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 13
+      },
+      "t": 70050,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          13
+        ],
+        "ms": 4000,
+        "pack": 14,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 70050,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 70052,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 70052,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 70052,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 70052,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 70052,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 15,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 70052,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 15
+      },
+      "t": 70100,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 70932,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 70932,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 70932,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 70932,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 70932,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 16,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 70932,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 16
+      },
+      "t": 70950,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 15
+      },
+      "t": 70950,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 16
+      },
+      "t": 71800,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 71802,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 71802,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 71802,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 71802,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 71802,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 17,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 71802,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 17
+      },
+      "t": 71850,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 17
+      },
+      "t": 72700,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 72703,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 72703,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 72703,
+      "type": "release"
+    },
+    {
+      "data": {
+        "from_centre_ms": -1625,
+        "held_ms": 0,
+        "kind": "early"
+      },
+      "t": 72703,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 2,
+        "level": 0,
+        "outcome": "early"
+      },
+      "t": 72703,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "early",
+        "lot": 18,
+        "portions": 2,
+        "quality": 50
+      },
+      "t": 72703,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 18
+      },
+      "t": 72750,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 18
+      },
+      "t": 73600,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "pack": 14
+      },
+      "t": 74050,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 4,
+        "lane": 0,
+        "pack": 14
+      },
+      "t": 74050,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          15
+        ],
+        "ms": 4000,
+        "pack": 19,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 74100,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 4,
+        "pack": 14,
+        "quality": 50
+      },
+      "t": 76450,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 4,
+        "from": "sale",
+        "money": 32,
+        "pack": 14
+      },
+      "t": 76450,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "name": "first_affordable"
+      },
+      "t": 76476,
+      "type": "milestone"
+    },
+    {
+      "data": {
+        "customer": 20,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "student"
+      },
+      "t": 77550,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "pack": 19
+      },
+      "t": 78100,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 7,
+        "lane": 0,
+        "pack": 19
+      },
+      "t": 78100,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          16
+        ],
+        "ms": 4000,
+        "pack": 21,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 78150,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 7,
+        "pack": 19,
+        "quality": 50
+      },
+      "t": 80500,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 7,
+        "from": "sale",
+        "money": 40,
+        "pack": 19
+      },
+      "t": 80500,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "pack": 21
+      },
+      "t": 82150,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 12,
+        "lane": 0,
+        "pack": 21
+      },
+      "t": 82150,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          17
+        ],
+        "ms": 4000,
+        "pack": 22,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 82200,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "ms": 9632,
+        "start": 72703
+      },
+      "t": 82335,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 82335,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2450,
+        "window_end": 1850,
+        "window_start": 1400
+      },
+      "t": 82335,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 84337,
+      "type": "release"
+    },
+    {
+      "data": {
+        "full": 8,
+        "kernels": 1
+      },
+      "t": 84337,
+      "type": "crescendo"
+    },
+    {
+      "data": {
+        "from_centre_ms": 377,
+        "held_ms": 2002,
+        "kind": "near"
+      },
+      "t": 84337,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 3,
+        "level": 0,
+        "outcome": "near"
+      },
+      "t": 84337,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "near",
+        "lot": 23,
+        "portions": 3,
+        "quality": 80
+      },
+      "t": 84337,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 23
+      },
+      "t": 84350,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 12,
+        "pack": 21,
+        "quality": 50
+      },
+      "t": 84550,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 12,
+        "from": "sale",
+        "money": 48,
+        "pack": 21
+      },
+      "t": 84550,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 23
+      },
+      "t": 85200,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "pack": 22
+      },
+      "t": 86200,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 20,
+        "lane": 0,
+        "pack": 22
+      },
+      "t": 86200,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          18
+        ],
+        "ms": 4000,
+        "pack": 24,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 86250,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 20,
+        "pack": 22,
+        "quality": 50
+      },
+      "t": 88600,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 20,
+        "from": "sale",
+        "money": 56,
+        "pack": 22
+      },
+      "t": 88600,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "pack": 24
+      },
+      "t": 90250,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          23
+        ],
+        "ms": 4000,
+        "pack": 25,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 90300,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "customer": 26,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "kid"
+      },
+      "t": 90300,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 26,
+        "lane": 0,
+        "pack": 24
+      },
+      "t": 90300,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "coins": 8,
+        "customer": 26,
+        "pack": 24,
+        "quality": 50
+      },
+      "t": 92700,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 8,
+        "customer": 26,
+        "from": "sale",
+        "money": 64,
+        "pack": 24
+      },
+      "t": 92700,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "ok": true,
+        "reason": "",
+        "what": "buy"
+      },
+      "t": 94288,
+      "type": "buy"
+    },
+    {
+      "data": {
+        "cost": 30,
+        "level": 1,
+        "money": 34
+      },
+      "t": 94288,
+      "type": "upgrade"
+    },
+    {
+      "data": {
+        "name": "first_upgrade"
+      },
+      "t": 94288,
+      "type": "milestone"
+    },
+    {
+      "data": {
+        "pack": 25
+      },
+      "t": 94300,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 27,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "rush"
+      },
+      "t": 103100,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 27,
+        "lane": 0,
+        "pack": 25
+      },
+      "t": 103100,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "ms": 21755,
+        "start": 82335
+      },
+      "t": 104090,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 104090,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2500,
+        "window_end": 1900,
+        "window_start": 1400
+      },
+      "t": 104090,
+      "type": "heat_start"
+    },
+    {
+      "data": {
+        "coins": 9,
+        "customer": 27,
+        "pack": 25,
+        "quality": 80
+      },
+      "t": 105500,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 9,
+        "customer": 27,
+        "from": "sale",
+        "money": 43,
+        "pack": 25
+      },
+      "t": 105500,
+      "type": "earn"
+    },
+    {
+      "data": {},
+      "t": 105678,
+      "type": "release"
+    },
+    {
+      "data": {
+        "full": 8,
+        "kernels": 3
+      },
+      "t": 105678,
+      "type": "crescendo"
+    },
+    {
+      "data": {
+        "from_centre_ms": -62,
+        "held_ms": 1588,
+        "kind": "perfect"
+      },
+      "t": 105678,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 6,
+        "level": 1,
+        "outcome": "perfect"
+      },
+      "t": 105678,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "perfect",
+        "lot": 28,
+        "portions": 6,
+        "quality": 100
+      },
+      "t": 105678,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 28
+      },
+      "t": 105700,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 28
+      },
+      "t": 106550,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          23,
+          28
+        ],
+        "ms": 4000,
+        "pack": 29,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 106550,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "pack": 29
+      },
+      "t": 110550,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          28
+        ],
+        "ms": 4000,
+        "pack": 30,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 110600,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "ms": 10476,
+        "start": 104090
+      },
+      "t": 114566,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 114566,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2500,
+        "window_end": 1900,
+        "window_start": 1400
+      },
+      "t": 114566,
+      "type": "heat_start"
+    },
+    {
+      "data": {
+        "pack": 30
+      },
+      "t": 114600,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          28
+        ],
+        "ms": 4000,
+        "pack": 31,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 114650,
+      "type": "pack_started"
+    },
+    {
+      "data": {},
+      "t": 116163,
+      "type": "release"
+    },
+    {
+      "data": {
+        "full": 8,
+        "kernels": 5
+      },
+      "t": 116163,
+      "type": "crescendo"
+    },
+    {
+      "data": {
+        "from_centre_ms": -53,
+        "held_ms": 1597,
+        "kind": "perfect"
+      },
+      "t": 116163,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 6,
+        "level": 1,
+        "outcome": "perfect"
+      },
+      "t": 116163,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "perfect",
+        "lot": 32,
+        "portions": 6,
+        "quality": 100
+      },
+      "t": 116163,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 32
+      },
+      "t": 116200,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 32
+      },
+      "t": 117050,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "pack": 31
+      },
+      "t": 118650,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 33,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "rush"
+      },
+      "t": 118650,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 33,
+        "lane": 0,
+        "pack": 29
+      },
+      "t": 118650,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          28,
+          32
+        ],
+        "ms": 4000,
+        "pack": 34,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 118700,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 10,
+        "customer": 33,
+        "pack": 29,
+        "quality": 90
+      },
+      "t": 121050,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 10,
+        "customer": 33,
+        "from": "sale",
+        "money": 53,
+        "pack": 29
+      },
+      "t": 121050,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "pack": 34
+      },
+      "t": 122700,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          32
+        ],
+        "ms": 4000,
+        "pack": 35,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 122750,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "ms": 11898,
+        "start": 114566
+      },
+      "t": 126464,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 126464,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2500,
+        "window_end": 1900,
+        "window_start": 1400
+      },
+      "t": 126464,
+      "type": "heat_start"
+    },
+    {
+      "data": {
+        "pack": 35
+      },
+      "t": 126750,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          32
+        ],
+        "ms": 4000,
+        "pack": 36,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 126800,
+      "type": "pack_started"
+    },
+    {
+      "data": {},
+      "t": 128075,
+      "type": "release"
+    },
+    {
+      "data": {
+        "full": 8,
+        "kernels": 7
+      },
+      "t": 128075,
+      "type": "crescendo"
+    },
+    {
+      "data": {
+        "from_centre_ms": -39,
+        "held_ms": 1611,
+        "kind": "perfect"
+      },
+      "t": 128075,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 6,
+        "level": 1,
+        "outcome": "perfect"
+      },
+      "t": 128075,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "perfect",
+        "lot": 37,
+        "portions": 6,
+        "quality": 100
+      },
+      "t": 128075,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 37
+      },
+      "t": 128100,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 128846,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2500,
+        "window_end": 1900,
+        "window_start": 1400
+      },
+      "t": 128846,
+      "type": "heat_start"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 37
+      },
+      "t": 128950,
+      "type": "lot_binned"
+    },
+    {
+      "data": {},
+      "t": 130449,
+      "type": "release"
+    },
+    {
+      "data": {
+        "count": 9,
+        "extra": 3,
+        "outcome": "perfect",
+        "tier": 0
+      },
+      "t": 130449,
+      "type": "burst"
+    },
+    {
+      "data": {
+        "from_centre_ms": -47,
+        "held_ms": 1603,
+        "kind": "perfect"
+      },
+      "t": 130449,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 9,
+        "level": 1,
+        "outcome": "perfect"
+      },
+      "t": 130449,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "perfect",
+        "lot": 38,
+        "portions": 9,
+        "quality": 100
+      },
+      "t": 130449,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 38
+      },
+      "t": 130450,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "pack": 36
+      },
+      "t": 130800,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          32,
+          37
+        ],
+        "ms": 4000,
+        "pack": 39,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 130850,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 38
+      },
+      "t": 131300,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "customer": 40,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "classic"
+      },
+      "t": 133200,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 40,
+        "lane": 0,
+        "pack": 30
+      },
+      "t": 133200,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "pack": 39
+      },
+      "t": 134850,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          37
+        ],
+        "ms": 4000,
+        "pack": 41,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 134900,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 10,
+        "customer": 40,
+        "pack": 30,
+        "quality": 100
+      },
+      "t": 135600,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 10,
+        "customer": 40,
+        "from": "sale",
+        "money": 63,
+        "pack": 30
+      },
+      "t": 135600,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "pack": 41
+      },
+      "t": 138900,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          37
+        ],
+        "ms": 4000,
+        "pack": 42,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 138950,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "ms": 10756,
+        "start": 128846
+      },
+      "t": 139602,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 139602,
+      "type": "input"
+    },
+    {
+      "data": {
+        "burn_at": 2500,
+        "window_end": 1900,
+        "window_start": 1400
+      },
+      "t": 139602,
+      "type": "heat_start"
+    },
+    {
+      "data": {},
+      "t": 141218,
+      "type": "release"
+    },
+    {
+      "data": {
+        "full": 8,
+        "kernels": 2
+      },
+      "t": 141218,
+      "type": "crescendo"
+    },
+    {
+      "data": {
+        "from_centre_ms": -34,
+        "held_ms": 1616,
+        "kind": "perfect"
+      },
+      "t": 141218,
+      "type": "outcome"
+    },
+    {
+      "data": {
+        "count": 6,
+        "level": 1,
+        "outcome": "perfect"
+      },
+      "t": 141218,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "grade": "perfect",
+        "lot": 43,
+        "portions": 6,
+        "quality": 100
+      },
+      "t": 141218,
+      "type": "lot_popped"
+    },
+    {
+      "data": {
+        "lot": 43
+      },
+      "t": 141250,
+      "type": "lot_lifted"
+    },
+    {
+      "data": {
+        "line": 0,
+        "lot": 43
+      },
+      "t": 142100,
+      "type": "lot_binned"
+    },
+    {
+      "data": {
+        "pack": 42
+      },
+      "t": 142950,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          37,
+          38
+        ],
+        "ms": 4000,
+        "pack": 44,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 143000,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "pack": 44
+      },
+      "t": 147000,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 45,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "student"
+      },
+      "t": 148500,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 45,
+        "lane": 0,
+        "pack": 31
+      },
+      "t": 148500,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          38
+        ],
+        "ms": 4000,
+        "pack": 46,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 148550,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "ok": true,
+        "reason": "",
+        "what": "buy"
+      },
+      "t": 150496,
+      "type": "buy"
+    },
+    {
+      "data": {
+        "cost": 54,
+        "level": 2,
+        "money": 9
+      },
+      "t": 150496,
+      "type": "upgrade"
+    },
+    {
+      "data": {
+        "coins": 10,
+        "customer": 45,
+        "pack": 31,
+        "quality": 100
+      },
+      "t": 150900,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 10,
+        "customer": 45,
+        "from": "sale",
+        "money": 19,
+        "pack": 31
+      },
+      "t": 150900,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "pack": 46
+      },
+      "t": 152550,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 47,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "kid"
+      },
+      "t": 164950,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 47,
+        "lane": 0,
+        "pack": 34
+      },
+      "t": 164950,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          38
+        ],
+        "ms": 4000,
+        "pack": 48,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 165000,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 10,
+        "customer": 47,
+        "pack": 34,
+        "quality": 100
+      },
+      "t": 167350,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 10,
+        "customer": 47,
+        "from": "sale",
+        "money": 29,
+        "pack": 34
+      },
+      "t": 167350,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "pack": 48
+      },
+      "t": 169000,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 49,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "student"
+      },
+      "t": 176600,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 49,
+        "lane": 0,
+        "pack": 35
+      },
+      "t": 176600,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          38
+        ],
+        "ms": 4000,
+        "pack": 50,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 176650,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 10,
+        "customer": 49,
+        "pack": 35,
+        "quality": 100
+      },
+      "t": 179000,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 10,
+        "customer": 49,
+        "from": "sale",
+        "money": 39,
+        "pack": 35
+      },
+      "t": 179000,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "earned": 123,
+        "level": 2,
+        "money": 39,
+        "name": "three_minutes"
+      },
+      "t": 180011,
+      "type": "milestone"
+    },
+    {
+      "data": {
+        "pack": 50
+      },
+      "t": 180650,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "customer": 51,
+        "order": {
+          "recipe": "plain",
+          "size": 2
+        },
+        "who": "rush"
+      },
+      "t": 191150,
+      "type": "customer_arrived"
+    },
+    {
+      "data": {
+        "customer": 51,
+        "lane": 0,
+        "pack": 36
+      },
+      "t": 191150,
+      "type": "serve_started"
+    },
+    {
+      "data": {
+        "head": 0,
+        "lots": [
+          38
+        ],
+        "ms": 4000,
+        "pack": 52,
+        "recipe": "plain",
+        "size": 2
+      },
+      "t": 191200,
+      "type": "pack_started"
+    },
+    {
+      "data": {
+        "coins": 10,
+        "customer": 51,
+        "pack": 36,
+        "quality": 100
+      },
+      "t": 193550,
+      "type": "sale"
+    },
+    {
+      "data": {
+        "amount": 10,
+        "customer": 51,
+        "from": "sale",
+        "money": 49,
+        "pack": 36
+      },
+      "t": 193550,
+      "type": "earn"
+    },
+    {
+      "data": {},
+      "t": 193600,
+      "type": "contests_open"
+    },
+    {
+      "data": {
+        "id": "perfect_streak"
+      },
+      "t": 194050,
+      "type": "contest_posted"
+    },
+    {
+      "data": {
+        "pack": 52
+      },
+      "t": 195200,
+      "type": "pack_shelved"
+    },
+    {
+      "data": {
+        "ok": true,
+        "reason": "",
+        "what": "buy_sign"
+      },
+      "t": 198858,
+      "type": "buy"
+    },
+    {
+      "data": {
+        "cost": 40,
+        "money": 9,
+        "station": "sign",
+        "tier": 1
+      },
+      "t": 198858,
+      "type": "station_upgrade"
+    }
+  ],
+  "summary": {
+    "earned": 133,
+    "idle_longest_ms": 65535,
+    "idle_total_ms": 150284,
+    "inputs": 14,
+    "level": 2,
+    "milestones": {
+      "first_affordable": 76476,
+      "first_earn": 55300,
+      "first_input": 48033,
+      "first_upgrade": 94288,
+      "three_minutes": 180011
+    },
+    "money": 9,
+    "t_ms": 205137,
+    "upgrades": [
+      94288,
+      150496
+    ],
+    "variant": "factory"
+  },
+  "variant": "factory",
+  "version": "0.43.0",
+  "viewport": [
+    600,
+    1290
+  ]
+}

@@ -1,0 +1,2062 @@
+{
+ "minutes": 60,
+ "runs": {
+  "auto_mode": {
+   "abandoned": 12,
+   "coated": {
+    "caramel": 970,
+    "cheese": 1088,
+    "cocoa": 437,
+    "spicy": 274
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 14.0,
+      "ingredients_per_min": 14,
+      "net_per_min": 40,
+      "payback_min": 22.4,
+      "quality": 68,
+      "revenue_per_min": 56,
+      "served_ppm": 14.0,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 984,
+     "margin": 3017,
+     "net": 1929,
+     "net_per_min": 32.1,
+     "paid": 900,
+     "paid_back_min": 27.8,
+     "upkeep": 104
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 17.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 8,
+      "payback_min": 84.4,
+      "quality": 68,
+      "revenue_per_min": 17,
+      "served_ppm": 17.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 510,
+     "margin": 1677,
+     "net": 1154,
+     "net_per_min": 19.2,
+     "paid": 700,
+     "paid_back_min": 38.3,
+     "upkeep": 13
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 9.7,
+      "ingredients_per_min": 15,
+      "net_per_min": 28,
+      "payback_min": 37.5,
+      "quality": 68,
+      "revenue_per_min": 44,
+      "served_ppm": 9.7,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 808,
+     "margin": 2432,
+     "net": 1539,
+     "net_per_min": 25.6,
+     "paid": 1035,
+     "paid_back_min": 39.1,
+     "upkeep": 85
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 7.6,
+      "ingredients_per_min": 6,
+      "net_per_min": 13,
+      "payback_min": 62.0,
+      "quality": 68,
+      "revenue_per_min": 19,
+      "served_ppm": 7.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 222,
+     "margin": 739,
+     "net": 512,
+     "net_per_min": 8.5,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 5
+    }
+   },
+   "flavor_sold": {
+    "caramel": 278,
+    "cheese": 339,
+    "cocoa": 170,
+    "spicy": 103
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 2524,
+   "lost": {
+    "caramel": 126,
+    "cocoa": 43,
+    "spicy": 14
+   },
+   "lost_portions": 183,
+   "made": 6630,
+   "minutes": 60.0,
+   "mix_revenue": 2883,
+   "mix_sold": 102,
+   "net_per_min": 510.8,
+   "passed_by": 550,
+   "presses": 173,
+   "promos": 0,
+   "revenue": 35874,
+   "sold": 2328,
+   "wrong_sku": 0
+  },
+  "auto_mode_hand": {
+   "abandoned": 5,
+   "coated": {
+    "caramel": 1060,
+    "cheese": 1176,
+    "cocoa": 440,
+    "spicy": 311
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 14.0,
+      "ingredients_per_min": 14,
+      "net_per_min": 40,
+      "payback_min": 22.4,
+      "quality": 68,
+      "revenue_per_min": 56,
+      "served_ppm": 14.0,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 1014,
+     "margin": 3672,
+     "net": 2646,
+     "net_per_min": 44.1,
+     "paid": 900,
+     "paid_back_min": 20.1,
+     "upkeep": 12
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 17.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 8,
+      "payback_min": 84.4,
+      "quality": 68,
+      "revenue_per_min": 17,
+      "served_ppm": 17.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 512,
+     "margin": 1779,
+     "net": 1263,
+     "net_per_min": 21.1,
+     "paid": 700,
+     "paid_back_min": 30.8,
+     "upkeep": 4
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 9.7,
+      "ingredients_per_min": 15,
+      "net_per_min": 28,
+      "payback_min": 37.5,
+      "quality": 68,
+      "revenue_per_min": 44,
+      "served_ppm": 9.7,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 682,
+     "margin": 2384,
+     "net": 1693,
+     "net_per_min": 28.2,
+     "paid": 1035,
+     "paid_back_min": 40.0,
+     "upkeep": 9
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 7.6,
+      "ingredients_per_min": 6,
+      "net_per_min": 13,
+      "payback_min": 62.0,
+      "quality": 68,
+      "revenue_per_min": 19,
+      "served_ppm": 7.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 281,
+     "margin": 961,
+     "net": 678,
+     "net_per_min": 11.3,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 2
+    }
+   },
+   "flavor_sold": {
+    "caramel": 315,
+    "cheese": 360,
+    "cocoa": 163,
+    "spicy": 114
+   },
+   "hand_finish": {
+    "late": 31,
+    "near": 122,
+    "perfect": 559
+   },
+   "hand_portions": 2724,
+   "hand_sold_portions": 2643,
+   "ingredient_coins": 2489,
+   "lost": {
+    "spicy": 1
+   },
+   "lost_portions": 1,
+   "made": 7050,
+   "minutes": 60.0,
+   "mix_revenue": 3271,
+   "mix_sold": 110,
+   "net_per_min": 593.7,
+   "passed_by": 352,
+   "presses": 198,
+   "promos": 0,
+   "revenue": 40504,
+   "sold": 2536,
+   "wrong_sku": 0
+  },
+  "craze_hand": {
+   "abandoned": 5,
+   "coated": {
+    "caramel": 1744,
+    "cheese": 2156,
+    "cocoa": 712,
+    "spicy": 602
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 28.1,
+      "ingredients_per_min": 21,
+      "net_per_min": 60,
+      "payback_min": 14.9,
+      "quality": 68,
+      "revenue_per_min": 84,
+      "served_ppm": 21.1,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 1712,
+     "margin": 6312,
+     "net": 4573,
+     "net_per_min": 76.2,
+     "paid": 900,
+     "paid_back_min": 14.3,
+     "upkeep": 27
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 34.6,
+      "ingredients_per_min": 17,
+      "net_per_min": 17,
+      "payback_min": 42.2,
+      "quality": 68,
+      "revenue_per_min": 35,
+      "served_ppm": 34.6,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 1029,
+     "margin": 3208,
+     "net": 2168,
+     "net_per_min": 36.1,
+     "paid": 700,
+     "paid_back_min": 22.6,
+     "upkeep": 11
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 19.4,
+      "ingredients_per_min": 28,
+      "net_per_min": 52,
+      "payback_min": 19.8,
+      "quality": 68,
+      "revenue_per_min": 83,
+      "served_ppm": 18.4,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 1068,
+     "margin": 3772,
+     "net": 2689,
+     "net_per_min": 44.8,
+     "paid": 1035,
+     "paid_back_min": 22.6,
+     "upkeep": 15
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 15.1,
+      "ingredients_per_min": 11,
+      "net_per_min": 26,
+      "payback_min": 31.0,
+      "quality": 68,
+      "revenue_per_min": 38,
+      "served_ppm": 15.1,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 453,
+     "margin": 1569,
+     "net": 1112,
+     "net_per_min": 18.5,
+     "paid": 805,
+     "paid_back_min": 42.6,
+     "upkeep": 4
+    }
+   },
+   "flavor_sold": {
+    "caramel": 588,
+    "cheese": 759,
+    "cocoa": 256,
+    "spicy": 219
+   },
+   "hand_finish": {
+    "late": 59,
+    "near": 193,
+    "perfect": 980
+   },
+   "hand_portions": 4692,
+   "hand_sold_portions": 4584,
+   "ingredient_coins": 4262,
+   "lost": {
+    "spicy": 2
+   },
+   "lost_portions": 2,
+   "made": 7141,
+   "minutes": 60.0,
+   "mix_revenue": 2998,
+   "mix_sold": 101,
+   "net_per_min": 677.2,
+   "passed_by": 291,
+   "presses": 203,
+   "promos": 0,
+   "revenue": 47323,
+   "sold": 2601,
+   "wrong_sku": 0
+  },
+  "craze_machines": {
+   "abandoned": 17,
+   "coated": {
+    "caramel": 1078,
+    "cheese": 1492,
+    "cocoa": 508,
+    "spicy": 316
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 28.1,
+      "ingredients_per_min": 21,
+      "net_per_min": 60,
+      "payback_min": 14.9,
+      "quality": 68,
+      "revenue_per_min": 84,
+      "served_ppm": 21.1,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 1196,
+     "margin": 4003,
+     "net": 2670,
+     "net_per_min": 44.5,
+     "paid": 900,
+     "paid_back_min": 20.3,
+     "upkeep": 137
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 34.6,
+      "ingredients_per_min": 17,
+      "net_per_min": 17,
+      "payback_min": 42.2,
+      "quality": 68,
+      "revenue_per_min": 35,
+      "served_ppm": 34.6,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 711,
+     "margin": 2064,
+     "net": 1336,
+     "net_per_min": 22.3,
+     "paid": 700,
+     "paid_back_min": 34.8,
+     "upkeep": 17
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 19.4,
+      "ingredients_per_min": 28,
+      "net_per_min": 52,
+      "payback_min": 19.8,
+      "quality": 68,
+      "revenue_per_min": 83,
+      "served_ppm": 18.4,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 828,
+     "margin": 2215,
+     "net": 1312,
+     "net_per_min": 21.9,
+     "paid": 1035,
+     "paid_back_min": 47.2,
+     "upkeep": 75
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 15.1,
+      "ingredients_per_min": 11,
+      "net_per_min": 26,
+      "payback_min": 31.0,
+      "quality": 68,
+      "revenue_per_min": 38,
+      "served_ppm": 15.1,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 249,
+     "margin": 792,
+     "net": 536,
+     "net_per_min": 8.9,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 7
+    }
+   },
+   "flavor_sold": {
+    "caramel": 363,
+    "cheese": 525,
+    "cocoa": 182,
+    "spicy": 114
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 2984,
+   "lost": {
+    "caramel": 146,
+    "cocoa": 44,
+    "spicy": 16
+   },
+   "lost_portions": 206,
+   "made": 5306,
+   "minutes": 60.0,
+   "mix_revenue": 1815,
+   "mix_sold": 65,
+   "net_per_min": 417.0,
+   "passed_by": 1019,
+   "presses": 124,
+   "promos": 0,
+   "revenue": 30660,
+   "sold": 1853,
+   "wrong_sku": 0
+  },
+  "craze_tier2": {
+   "abandoned": 11,
+   "coated": {
+    "caramel": 1484,
+    "cheese": 1964,
+    "cocoa": 586,
+    "spicy": 457
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 33.1,
+      "cost": 2300,
+      "demand_ppm": 28.1,
+      "ingredients_per_min": 28,
+      "net_per_min": 82,
+      "payback_min": 28.2,
+      "quality": 77,
+      "revenue_per_min": 112,
+      "served_ppm": 28.1,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 1509,
+     "margin": 5422,
+     "net": 3794,
+     "net_per_min": 63.2,
+     "paid": 2300,
+     "paid_back_min": 38.1,
+     "upkeep": 119
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 142.9,
+      "cost": 2100,
+      "demand_ppm": 34.6,
+      "ingredients_per_min": 17,
+      "net_per_min": 34,
+      "payback_min": 61.6,
+      "quality": 77,
+      "revenue_per_min": 52,
+      "served_ppm": 34.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 956,
+     "margin": 2875,
+     "net": 1905,
+     "net_per_min": 31.8,
+     "paid": 2100,
+     "paid_back_min": -1,
+     "upkeep": 14
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 27.9,
+      "cost": 2435,
+      "demand_ppm": 19.4,
+      "ingredients_per_min": 29,
+      "net_per_min": 66,
+      "payback_min": 36.9,
+      "quality": 77,
+      "revenue_per_min": 97,
+      "served_ppm": 19.4,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 907,
+     "margin": 2816,
+     "net": 1853,
+     "net_per_min": 30.9,
+     "paid": 2435,
+     "paid_back_min": -1,
+     "upkeep": 56
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 93.8,
+      "cost": 2205,
+      "demand_ppm": 15.1,
+      "ingredients_per_min": 11,
+      "net_per_min": 34,
+      "payback_min": 65.4,
+      "quality": 77,
+      "revenue_per_min": 45,
+      "served_ppm": 15.1,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 349,
+     "margin": 1194,
+     "net": 839,
+     "net_per_min": 14.0,
+     "paid": 2205,
+     "paid_back_min": -1,
+     "upkeep": 6
+    }
+   },
+   "flavor_sold": {
+    "caramel": 504,
+    "cheese": 677,
+    "cocoa": 217,
+    "spicy": 167
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 3721,
+   "lost": {
+    "caramel": 55,
+    "cocoa": 14,
+    "spicy": 6
+   },
+   "lost_portions": 75,
+   "made": 6480,
+   "minutes": 60.0,
+   "mix_revenue": 2547,
+   "mix_sold": 88,
+   "net_per_min": 572.6,
+   "passed_by": 561,
+   "presses": 173,
+   "promos": 0,
+   "revenue": 40694,
+   "sold": 2324,
+   "wrong_sku": 0
+  },
+  "hand_average": {
+   "abandoned": 0,
+   "coated": {
+    "caramel": 1120,
+    "cheese": 1316,
+    "cocoa": 564,
+    "spicy": 299
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 14.0,
+      "ingredients_per_min": 14,
+      "net_per_min": 40,
+      "payback_min": 22.4,
+      "quality": 68,
+      "revenue_per_min": 56,
+      "served_ppm": 14.0,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 1100,
+     "margin": 3968,
+     "net": 2849,
+     "net_per_min": 47.5,
+     "paid": 900,
+     "paid_back_min": 21.4,
+     "upkeep": 19
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 17.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 8,
+      "payback_min": 84.4,
+      "quality": 68,
+      "revenue_per_min": 17,
+      "served_ppm": 17.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 631,
+     "margin": 2120,
+     "net": 1482,
+     "net_per_min": 24.7,
+     "paid": 700,
+     "paid_back_min": 30.6,
+     "upkeep": 7
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 9.7,
+      "ingredients_per_min": 15,
+      "net_per_min": 28,
+      "payback_min": 37.5,
+      "quality": 68,
+      "revenue_per_min": 44,
+      "served_ppm": 9.7,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 846,
+     "margin": 2906,
+     "net": 2049,
+     "net_per_min": 34.1,
+     "paid": 1035,
+     "paid_back_min": 31.0,
+     "upkeep": 11
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 7.6,
+      "ingredients_per_min": 6,
+      "net_per_min": 13,
+      "payback_min": 62.0,
+      "quality": 68,
+      "revenue_per_min": 19,
+      "served_ppm": 7.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 225,
+     "margin": 791,
+     "net": 564,
+     "net_per_min": 9.4,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 2
+    }
+   },
+   "flavor_sold": {
+    "caramel": 340,
+    "cheese": 411,
+    "cocoa": 207,
+    "spicy": 107
+   },
+   "hand_finish": {
+    "early": 98,
+    "late": 101,
+    "near": 279,
+    "perfect": 449
+   },
+   "hand_portions": 2912,
+   "hand_sold_portions": 2839,
+   "ingredient_coins": 2802,
+   "lost": {
+    "spicy": 1
+   },
+   "lost_portions": 1,
+   "made": 7819,
+   "minutes": 60.0,
+   "mix_revenue": 3605,
+   "mix_sold": 122,
+   "net_per_min": 665.0,
+   "passed_by": 82,
+   "presses": 233,
+   "promos": 0,
+   "revenue": 45071,
+   "sold": 2814,
+   "wrong_sku": 0
+  },
+  "hand_skilled": {
+   "abandoned": 0,
+   "coated": {
+    "caramel": 1144,
+    "cheese": 1348,
+    "cocoa": 524,
+    "spicy": 355
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 14.0,
+      "ingredients_per_min": 14,
+      "net_per_min": 40,
+      "payback_min": 22.4,
+      "quality": 68,
+      "revenue_per_min": 56,
+      "served_ppm": 14.0,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 1128,
+     "margin": 4040,
+     "net": 2897,
+     "net_per_min": 48.3,
+     "paid": 900,
+     "paid_back_min": 19.3,
+     "upkeep": 15
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 17.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 8,
+      "payback_min": 84.4,
+      "quality": 68,
+      "revenue_per_min": 17,
+      "served_ppm": 17.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 645,
+     "margin": 2215,
+     "net": 1564,
+     "net_per_min": 26.1,
+     "paid": 700,
+     "paid_back_min": 30.4,
+     "upkeep": 6
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 9.7,
+      "ingredients_per_min": 15,
+      "net_per_min": 28,
+      "payback_min": 37.5,
+      "quality": 68,
+      "revenue_per_min": 44,
+      "served_ppm": 9.7,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 786,
+     "margin": 2730,
+     "net": 1937,
+     "net_per_min": 32.3,
+     "paid": 1035,
+     "paid_back_min": 33.4,
+     "upkeep": 7
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 7.6,
+      "ingredients_per_min": 6,
+      "net_per_min": 13,
+      "payback_min": 62.0,
+      "quality": 68,
+      "revenue_per_min": 19,
+      "served_ppm": 7.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 267,
+     "margin": 926,
+     "net": 657,
+     "net_per_min": 10.9,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 2
+    }
+   },
+   "flavor_sold": {
+    "caramel": 343,
+    "cheese": 423,
+    "cocoa": 192,
+    "spicy": 129
+   },
+   "hand_finish": {
+    "late": 39,
+    "near": 133,
+    "perfect": 620
+   },
+   "hand_portions": 3012,
+   "hand_sold_portions": 2928,
+   "ingredient_coins": 2826,
+   "lost": {
+    "spicy": 1
+   },
+   "lost_portions": 1,
+   "made": 7895,
+   "minutes": 60.0,
+   "mix_revenue": 3745,
+   "mix_sold": 126,
+   "net_per_min": 671.0,
+   "passed_by": 73,
+   "presses": 236,
+   "promos": 0,
+   "revenue": 45447,
+   "sold": 2824,
+   "wrong_sku": 0
+  },
+  "high_demand_hand": {
+   "abandoned": 0,
+   "coated": {
+    "caramel": 1612,
+    "cheese": 1948,
+    "cocoa": 692,
+    "spicy": 494
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 21.1,
+      "ingredients_per_min": 21,
+      "net_per_min": 60,
+      "payback_min": 15.0,
+      "quality": 68,
+      "revenue_per_min": 84,
+      "served_ppm": 21.1,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 1584,
+     "margin": 5742,
+     "net": 4133,
+     "net_per_min": 68.9,
+     "paid": 900,
+     "paid_back_min": 14.5,
+     "upkeep": 25
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 25.9,
+      "ingredients_per_min": 13,
+      "net_per_min": 12,
+      "payback_min": 56.3,
+      "quality": 68,
+      "revenue_per_min": 26,
+      "served_ppm": 25.9,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 934,
+     "margin": 3141,
+     "net": 2197,
+     "net_per_min": 36.6,
+     "paid": 700,
+     "paid_back_min": 20.1,
+     "upkeep": 10
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 14.6,
+      "ingredients_per_min": 22,
+      "net_per_min": 41,
+      "payback_min": 25.0,
+      "quality": 68,
+      "revenue_per_min": 66,
+      "served_ppm": 14.6,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 1044,
+     "margin": 3649,
+     "net": 2590,
+     "net_per_min": 43.2,
+     "paid": 1035,
+     "paid_back_min": 18.4,
+     "upkeep": 15
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 11.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 19,
+      "payback_min": 41.3,
+      "quality": 68,
+      "revenue_per_min": 28,
+      "served_ppm": 11.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 372,
+     "margin": 1293,
+     "net": 918,
+     "net_per_min": 15.3,
+     "paid": 805,
+     "paid_back_min": 50.2,
+     "upkeep": 3
+    }
+   },
+   "flavor_sold": {
+    "caramel": 492,
+    "cheese": 617,
+    "cocoa": 249,
+    "spicy": 173
+   },
+   "hand_finish": {
+    "late": 54,
+    "near": 177,
+    "perfect": 885
+   },
+   "hand_portions": 4248,
+   "hand_sold_portions": 4159,
+   "ingredient_coins": 3934,
+   "lost": {
+    "spicy": 2
+   },
+   "lost_portions": 2,
+   "made": 7736,
+   "minutes": 60.0,
+   "mix_revenue": 5004,
+   "mix_sold": 168,
+   "net_per_min": 705.6,
+   "passed_by": 146,
+   "presses": 225,
+   "promos": 0,
+   "revenue": 48737,
+   "sold": 2752,
+   "wrong_sku": 0
+  },
+  "high_demand_machines": {
+   "abandoned": 3,
+   "coated": {
+    "caramel": 1144,
+    "cheese": 1492,
+    "cocoa": 582,
+    "spicy": 354
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 21.1,
+      "ingredients_per_min": 21,
+      "net_per_min": 60,
+      "payback_min": 15.0,
+      "quality": 68,
+      "revenue_per_min": 84,
+      "served_ppm": 21.1,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 1274,
+     "margin": 4169,
+     "net": 2749,
+     "net_per_min": 45.8,
+     "paid": 900,
+     "paid_back_min": 20.4,
+     "upkeep": 146
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 25.9,
+      "ingredients_per_min": 13,
+      "net_per_min": 12,
+      "payback_min": 56.3,
+      "quality": 68,
+      "revenue_per_min": 26,
+      "served_ppm": 25.9,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 719,
+     "margin": 2206,
+     "net": 1470,
+     "net_per_min": 24.5,
+     "paid": 700,
+     "paid_back_min": 27.8,
+     "upkeep": 17
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 14.6,
+      "ingredients_per_min": 22,
+      "net_per_min": 41,
+      "payback_min": 25.0,
+      "quality": 68,
+      "revenue_per_min": 66,
+      "served_ppm": 14.6,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 948,
+     "margin": 2605,
+     "net": 1571,
+     "net_per_min": 26.2,
+     "paid": 1035,
+     "paid_back_min": 35.7,
+     "upkeep": 86
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 11.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 19,
+      "payback_min": 41.3,
+      "quality": 68,
+      "revenue_per_min": 28,
+      "served_ppm": 11.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 279,
+     "margin": 900,
+     "net": 613,
+     "net_per_min": 10.2,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 8
+    }
+   },
+   "flavor_sold": {
+    "caramel": 370,
+    "cheese": 489,
+    "cocoa": 214,
+    "spicy": 128
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 3220,
+   "lost": {
+    "caramel": 156,
+    "cocoa": 50,
+    "spicy": 18
+   },
+   "lost_portions": 224,
+   "made": 6331,
+   "minutes": 60.0,
+   "mix_revenue": 3072,
+   "mix_sold": 110,
+   "net_per_min": 501.7,
+   "passed_by": 677,
+   "presses": 162,
+   "promos": 0,
+   "revenue": 36095,
+   "sold": 2213,
+   "wrong_sku": 0
+  },
+  "high_demand_paused": {
+   "abandoned": 0,
+   "coated": {},
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 21.1,
+      "ingredients_per_min": 21,
+      "net_per_min": 60,
+      "payback_min": 15.0,
+      "quality": 68,
+      "revenue_per_min": 84,
+      "served_ppm": 21.1,
+      "upkeep_per_min": 3
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 900,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 25.9,
+      "ingredients_per_min": 13,
+      "net_per_min": 12,
+      "payback_min": 56.3,
+      "quality": 68,
+      "revenue_per_min": 26,
+      "served_ppm": 25.9,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 700,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 14.6,
+      "ingredients_per_min": 22,
+      "net_per_min": 41,
+      "payback_min": 25.0,
+      "quality": 68,
+      "revenue_per_min": 66,
+      "served_ppm": 14.6,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 1035,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 11.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 19,
+      "payback_min": 41.3,
+      "quality": 68,
+      "revenue_per_min": 28,
+      "served_ppm": 11.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 0
+    }
+   },
+   "flavor_sold": {},
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 0,
+   "lost": {},
+   "lost_portions": 0,
+   "made": 8849,
+   "minutes": 60.0,
+   "mix_revenue": 0,
+   "mix_sold": 0,
+   "net_per_min": 622.7,
+   "passed_by": 1,
+   "presses": 282,
+   "promos": 0,
+   "revenue": 39597,
+   "sold": 3071,
+   "wrong_sku": 0
+  },
+  "high_demand_tier2": {
+   "abandoned": 3,
+   "coated": {
+    "caramel": 1370,
+    "cheese": 1701,
+    "cocoa": 690,
+    "spicy": 434
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 33.1,
+      "cost": 2300,
+      "demand_ppm": 21.1,
+      "ingredients_per_min": 21,
+      "net_per_min": 61,
+      "payback_min": 37.5,
+      "quality": 77,
+      "revenue_per_min": 84,
+      "served_ppm": 21.1,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 1410,
+     "margin": 4931,
+     "net": 3412,
+     "net_per_min": 56.9,
+     "paid": 2300,
+     "paid_back_min": 42.0,
+     "upkeep": 109
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 142.9,
+      "cost": 2100,
+      "demand_ppm": 25.9,
+      "ingredients_per_min": 13,
+      "net_per_min": 26,
+      "payback_min": 82.2,
+      "quality": 77,
+      "revenue_per_min": 39,
+      "served_ppm": 25.9,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 823,
+     "margin": 2680,
+     "net": 1845,
+     "net_per_min": 30.8,
+     "paid": 2100,
+     "paid_back_min": -1,
+     "upkeep": 12
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 27.9,
+      "cost": 2435,
+      "demand_ppm": 14.6,
+      "ingredients_per_min": 22,
+      "net_per_min": 49,
+      "payback_min": 49.2,
+      "quality": 77,
+      "revenue_per_min": 73,
+      "served_ppm": 14.6,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 1065,
+     "margin": 3271,
+     "net": 2141,
+     "net_per_min": 35.7,
+     "paid": 2435,
+     "paid_back_min": -1,
+     "upkeep": 65
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 93.8,
+      "cost": 2205,
+      "demand_ppm": 11.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 25,
+      "payback_min": 87.2,
+      "quality": 77,
+      "revenue_per_min": 34,
+      "served_ppm": 11.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 335,
+     "margin": 1118,
+     "net": 778,
+     "net_per_min": 13.0,
+     "paid": 2205,
+     "paid_back_min": -1,
+     "upkeep": 5
+    }
+   },
+   "flavor_sold": {
+    "caramel": 431,
+    "cheese": 544,
+    "cocoa": 247,
+    "spicy": 152
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 3633,
+   "lost": {
+    "caramel": 51,
+    "cocoa": 16,
+    "spicy": 6
+   },
+   "lost_portions": 73,
+   "made": 7039,
+   "minutes": 60.0,
+   "mix_revenue": 3801,
+   "mix_sold": 131,
+   "net_per_min": 609.6,
+   "passed_by": 402,
+   "presses": 192,
+   "promos": 0,
+   "revenue": 42902,
+   "sold": 2488,
+   "wrong_sku": 0
+  },
+  "low_demand_hand": {
+   "abandoned": 1,
+   "coated": {
+    "caramel": 632,
+    "cheese": 644,
+    "cocoa": 296,
+    "spicy": 164
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 7.0,
+      "ingredients_per_min": 7,
+      "net_per_min": 20,
+      "payback_min": 44.9,
+      "quality": 68,
+      "revenue_per_min": 28,
+      "served_ppm": 7.0,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 622,
+     "margin": 2244,
+     "net": 1614,
+     "net_per_min": 26.9,
+     "paid": 900,
+     "paid_back_min": 34.9,
+     "upkeep": 8
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 8.6,
+      "ingredients_per_min": 4,
+      "net_per_min": 4,
+      "payback_min": 168.8,
+      "quality": 68,
+      "revenue_per_min": 9,
+      "served_ppm": 8.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 311,
+     "margin": 1029,
+     "net": 716,
+     "net_per_min": 11.9,
+     "paid": 700,
+     "paid_back_min": 59.0,
+     "upkeep": 2
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 4.9,
+      "ingredients_per_min": 7,
+      "net_per_min": 14,
+      "payback_min": 75.1,
+      "quality": 68,
+      "revenue_per_min": 22,
+      "served_ppm": 4.9,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 444,
+     "margin": 1494,
+     "net": 1048,
+     "net_per_min": 17.5,
+     "paid": 1035,
+     "paid_back_min": 59.6,
+     "upkeep": 2
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 3.8,
+      "ingredients_per_min": 3,
+      "net_per_min": 6,
+      "payback_min": 123.9,
+      "quality": 68,
+      "revenue_per_min": 9,
+      "served_ppm": 3.8,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 123,
+     "margin": 423,
+     "net": 300,
+     "net_per_min": 5.0,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 0
+    }
+   },
+   "flavor_sold": {
+    "caramel": 195,
+    "cheese": 200,
+    "cocoa": 101,
+    "spicy": 58
+   },
+   "hand_finish": {
+    "late": 21,
+    "near": 71,
+    "perfect": 319
+   },
+   "hand_portions": 1560,
+   "hand_sold_portions": 1503,
+   "ingredient_coins": 1500,
+   "lost": {},
+   "lost_portions": 0,
+   "made": 7887,
+   "minutes": 60.0,
+   "mix_revenue": 1660,
+   "mix_sold": 56,
+   "net_per_min": 614.7,
+   "passed_by": 50,
+   "presses": 240,
+   "promos": 0,
+   "revenue": 40649,
+   "sold": 2847,
+   "wrong_sku": 0
+  },
+  "low_demand_machines": {
+   "abandoned": 1,
+   "coated": {
+    "caramel": 550,
+    "cheese": 640,
+    "cocoa": 295,
+    "spicy": 198
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 7.0,
+      "ingredients_per_min": 7,
+      "net_per_min": 20,
+      "payback_min": 44.9,
+      "quality": 68,
+      "revenue_per_min": 28,
+      "served_ppm": 7.0,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 612,
+     "margin": 1965,
+     "net": 1283,
+     "net_per_min": 21.4,
+     "paid": 900,
+     "paid_back_min": 42.7,
+     "upkeep": 70
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 8.6,
+      "ingredients_per_min": 4,
+      "net_per_min": 4,
+      "payback_min": 168.8,
+      "quality": 68,
+      "revenue_per_min": 9,
+      "served_ppm": 8.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 307,
+     "margin": 1044,
+     "net": 730,
+     "net_per_min": 12.2,
+     "paid": 700,
+     "paid_back_min": 57.7,
+     "upkeep": 7
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 4.9,
+      "ingredients_per_min": 7,
+      "net_per_min": 14,
+      "payback_min": 75.1,
+      "quality": 68,
+      "revenue_per_min": 22,
+      "served_ppm": 4.9,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 480,
+     "margin": 1320,
+     "net": 796,
+     "net_per_min": 13.3,
+     "paid": 1035,
+     "paid_back_min": -1,
+     "upkeep": 44
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 3.8,
+      "ingredients_per_min": 3,
+      "net_per_min": 6,
+      "payback_min": 123.9,
+      "quality": 68,
+      "revenue_per_min": 9,
+      "served_ppm": 3.8,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 156,
+     "margin": 514,
+     "net": 354,
+     "net_per_min": 5.9,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 4
+    }
+   },
+   "flavor_sold": {
+    "caramel": 163,
+    "cheese": 194,
+    "cocoa": 105,
+    "spicy": 75
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 1555,
+   "lost": {
+    "caramel": 74,
+    "cocoa": 25,
+    "spicy": 10
+   },
+   "lost_portions": 109,
+   "made": 7833,
+   "minutes": 60.0,
+   "mix_revenue": 1872,
+   "mix_sold": 66,
+   "net_per_min": 582.5,
+   "passed_by": 98,
+   "presses": 232,
+   "promos": 0,
+   "revenue": 39012,
+   "sold": 2795,
+   "wrong_sku": 0
+  },
+  "low_demand_paused": {
+   "abandoned": 0,
+   "coated": {},
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 7.0,
+      "ingredients_per_min": 7,
+      "net_per_min": 20,
+      "payback_min": 44.9,
+      "quality": 68,
+      "revenue_per_min": 28,
+      "served_ppm": 7.0,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 900,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 8.6,
+      "ingredients_per_min": 4,
+      "net_per_min": 4,
+      "payback_min": 168.8,
+      "quality": 68,
+      "revenue_per_min": 9,
+      "served_ppm": 8.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 700,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 4.9,
+      "ingredients_per_min": 7,
+      "net_per_min": 14,
+      "payback_min": 75.1,
+      "quality": 68,
+      "revenue_per_min": 22,
+      "served_ppm": 4.9,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 1035,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 3.8,
+      "ingredients_per_min": 3,
+      "net_per_min": 6,
+      "payback_min": 123.9,
+      "quality": 68,
+      "revenue_per_min": 9,
+      "served_ppm": 3.8,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 0
+    }
+   },
+   "flavor_sold": {},
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 0,
+   "lost": {},
+   "lost_portions": 0,
+   "made": 8849,
+   "minutes": 60.0,
+   "mix_revenue": 0,
+   "mix_sold": 0,
+   "net_per_min": 622.7,
+   "passed_by": 1,
+   "presses": 282,
+   "promos": 0,
+   "revenue": 39597,
+   "sold": 3071,
+   "wrong_sku": 0
+  },
+  "machines": {
+   "abandoned": 0,
+   "coated": {
+    "caramel": 993,
+    "cheese": 1204,
+    "cocoa": 552,
+    "spicy": 301
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 14.0,
+      "ingredients_per_min": 14,
+      "net_per_min": 40,
+      "payback_min": 22.4,
+      "quality": 68,
+      "revenue_per_min": 56,
+      "served_ppm": 14.0,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 1106,
+     "margin": 3594,
+     "net": 2361,
+     "net_per_min": 39.4,
+     "paid": 900,
+     "paid_back_min": 24.2,
+     "upkeep": 127
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 17.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 8,
+      "payback_min": 84.4,
+      "quality": 68,
+      "revenue_per_min": 17,
+      "served_ppm": 17.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 570,
+     "margin": 1861,
+     "net": 1277,
+     "net_per_min": 21.3,
+     "paid": 700,
+     "paid_back_min": 35.3,
+     "upkeep": 14
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 9.7,
+      "ingredients_per_min": 15,
+      "net_per_min": 28,
+      "payback_min": 37.5,
+      "quality": 68,
+      "revenue_per_min": 44,
+      "served_ppm": 9.7,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 900,
+     "margin": 2486,
+     "net": 1504,
+     "net_per_min": 25.1,
+     "paid": 1035,
+     "paid_back_min": 39.5,
+     "upkeep": 82
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 7.6,
+      "ingredients_per_min": 6,
+      "net_per_min": 13,
+      "payback_min": 62.0,
+      "quality": 68,
+      "revenue_per_min": 19,
+      "served_ppm": 7.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 237,
+     "margin": 760,
+     "net": 517,
+     "net_per_min": 8.6,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 6
+    }
+   },
+   "flavor_sold": {
+    "caramel": 307,
+    "cheese": 380,
+    "cocoa": 204,
+    "spicy": 112
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 2813,
+   "lost": {
+    "caramel": 135,
+    "cocoa": 48,
+    "spicy": 15
+   },
+   "lost_portions": 198,
+   "made": 7382,
+   "minutes": 60.0,
+   "mix_revenue": 2887,
+   "mix_sold": 102,
+   "net_per_min": 574.3,
+   "passed_by": 303,
+   "presses": 209,
+   "promos": 0,
+   "revenue": 39963,
+   "sold": 2590,
+   "wrong_sku": 0
+  },
+  "paused": {
+   "abandoned": 0,
+   "coated": {},
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 21.1,
+      "cost": 900,
+      "demand_ppm": 14.0,
+      "ingredients_per_min": 14,
+      "net_per_min": 40,
+      "payback_min": 22.4,
+      "quality": 68,
+      "revenue_per_min": 56,
+      "served_ppm": 14.0,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 900,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 100.0,
+      "cost": 700,
+      "demand_ppm": 17.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 8,
+      "payback_min": 84.4,
+      "quality": 68,
+      "revenue_per_min": 17,
+      "served_ppm": 17.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 700,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 18.4,
+      "cost": 1035,
+      "demand_ppm": 9.7,
+      "ingredients_per_min": 15,
+      "net_per_min": 28,
+      "payback_min": 37.5,
+      "quality": 68,
+      "revenue_per_min": 44,
+      "served_ppm": 9.7,
+      "upkeep_per_min": 2
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 1035,
+     "paid_back_min": -1,
+     "upkeep": 0
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 63.3,
+      "cost": 805,
+      "demand_ppm": 7.6,
+      "ingredients_per_min": 6,
+      "net_per_min": 13,
+      "payback_min": 62.0,
+      "quality": 68,
+      "revenue_per_min": 19,
+      "served_ppm": 7.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 0,
+     "margin": 0,
+     "net": 0,
+     "net_per_min": 0.0,
+     "paid": 805,
+     "paid_back_min": -1,
+     "upkeep": 0
+    }
+   },
+   "flavor_sold": {},
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 0,
+   "lost": {},
+   "lost_portions": 0,
+   "made": 8849,
+   "minutes": 60.0,
+   "mix_revenue": 0,
+   "mix_sold": 0,
+   "net_per_min": 622.7,
+   "passed_by": 1,
+   "presses": 282,
+   "promos": 0,
+   "revenue": 39597,
+   "sold": 3071,
+   "wrong_sku": 0
+  },
+  "tier2_machines": {
+   "abandoned": 0,
+   "coated": {
+    "caramel": 1107,
+    "cheese": 1315,
+    "cocoa": 545,
+    "spicy": 325
+   },
+   "coaters": {
+    "caramel": {
+     "estimate": {
+      "capacity_ppm": 33.1,
+      "cost": 2300,
+      "demand_ppm": 14.0,
+      "ingredients_per_min": 14,
+      "net_per_min": 41,
+      "payback_min": 56.3,
+      "quality": 77,
+      "revenue_per_min": 56,
+      "served_ppm": 14.0,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 1122,
+     "margin": 3950,
+     "net": 2741,
+     "net_per_min": 45.7,
+     "paid": 2300,
+     "paid_back_min": 51.9,
+     "upkeep": 87
+    },
+    "cheese": {
+     "estimate": {
+      "capacity_ppm": 142.9,
+      "cost": 2100,
+      "demand_ppm": 17.3,
+      "ingredients_per_min": 9,
+      "net_per_min": 17,
+      "payback_min": 123.3,
+      "quality": 77,
+      "revenue_per_min": 26,
+      "served_ppm": 17.3,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 638,
+     "margin": 2155,
+     "net": 1508,
+     "net_per_min": 25.1,
+     "paid": 2100,
+     "paid_back_min": -1,
+     "upkeep": 9
+    },
+    "cocoa": {
+     "estimate": {
+      "capacity_ppm": 27.9,
+      "cost": 2435,
+      "demand_ppm": 9.7,
+      "ingredients_per_min": 15,
+      "net_per_min": 33,
+      "payback_min": 73.8,
+      "quality": 77,
+      "revenue_per_min": 49,
+      "served_ppm": 9.7,
+      "upkeep_per_min": 1
+     },
+     "ingredients": 839,
+     "margin": 2596,
+     "net": 1706,
+     "net_per_min": 28.4,
+     "paid": 2435,
+     "paid_back_min": -1,
+     "upkeep": 51
+    },
+    "spicy": {
+     "estimate": {
+      "capacity_ppm": 93.8,
+      "cost": 2205,
+      "demand_ppm": 7.6,
+      "ingredients_per_min": 6,
+      "net_per_min": 17,
+      "payback_min": 130.9,
+      "quality": 77,
+      "revenue_per_min": 23,
+      "served_ppm": 7.6,
+      "upkeep_per_min": 0
+     },
+     "ingredients": 248,
+     "margin": 847,
+     "net": 595,
+     "net_per_min": 9.9,
+     "paid": 2205,
+     "paid_back_min": -1,
+     "upkeep": 4
+    }
+   },
+   "flavor_sold": {
+    "caramel": 331,
+    "cheese": 412,
+    "cocoa": 198,
+    "spicy": 122
+   },
+   "hand_finish": {},
+   "hand_portions": 0,
+   "hand_sold_portions": 0,
+   "ingredient_coins": 2847,
+   "lost": {
+    "caramel": 41,
+    "cocoa": 13,
+    "spicy": 4
+   },
+   "lost_portions": 58,
+   "made": 7795,
+   "minutes": 60.0,
+   "mix_revenue": 3594,
+   "mix_sold": 123,
+   "net_per_min": 644.4,
+   "passed_by": 117,
+   "presses": 226,
+   "promos": 0,
+   "revenue": 44134,
+   "sold": 2782,
+   "wrong_sku": 0
+  }
+ },
+ "surplus": {
+  "no_special": {
+   "abandoned": 3,
+   "sold_down_min": 5.87,
+   "special_on_s": -1,
+   "spicy_sold": 7
+  },
+  "special": {
+   "abandoned": 3,
+   "sold_down_min": 2.19,
+   "special_on_s": 21.0,
+   "spicy_sold": 7
+  }
+ }
+}

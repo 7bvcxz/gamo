@@ -1,0 +1,115 @@
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:13] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 6 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:13] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:13] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:13] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:13] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:13] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:15] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:15] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘  1 [p720] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (33.2s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:47] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:47] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:47] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:47] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:47] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:48] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:07:48] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  2 [p720] › specs/factory31.spec.mjs:42:1 › the storefront: cashier, express window, robot lanes, router -- honest sales (1.7m)
+  -  3 [p720] › specs/factory31.spec.mjs:72:1 › a paused cashier holds its customers sales until it is resumed
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:09:30] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:09:30] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:09:30] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:09:30] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:09:30] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:09:31] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:09:31] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  4 [phone] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for (35.3s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:10:05] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:10:05] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:10:05] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:10:05] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:10:05] "GET /popcorn-glory/game-fc8ac3407b53.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:10:07] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 14:10:07] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘  5 [phone] › specs/factory31.spec.mjs:42:1 › the storefront: cashier, express window, robot lanes, router -- honest sales (31.1s)
+  -  6 [phone] › specs/factory31.spec.mjs:72:1 › a paused cashier holds its customers sales until it is resumed
+
+
+  1) [p720] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for 
+
+    Error: kiosk built
+
+    kiosk built
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      25 |     await pop.tap(slot);
+      26 |     await pop.tap('upgrade');
+    > 27 |     await expect.poll(async () => (await pop.state()).run.machines.some((m) => m.type === type), { message: `${type} built` }).toBe(true);
+         |                                                                                                                                ^
+      28 |   }
+      29 |   // Step 28: a kettle holds five lots of kernels; the hopper (M01) buys more and keeps it cooking.
+      30 |   await pop.tap('slot_kitchen_1');
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory26.spec.mjs:27:128
+
+    Error Context: test-results/factory26-a-cooker-a-bagge-c22a2-ng-with-real-goods-paid-for-p720/error-context.md
+
+  2) [phone] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for 
+
+    Error: kiosk built
+
+    kiosk built
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      25 |     await pop.tap(slot);
+      26 |     await pop.tap('upgrade');
+    > 27 |     await expect.poll(async () => (await pop.state()).run.machines.some((m) => m.type === type), { message: `${type} built` }).toBe(true);
+         |                                                                                                                                ^
+      28 |   }
+      29 |   // Step 28: a kettle holds five lots of kernels; the hopper (M01) buys more and keeps it cooking.
+      30 |   await pop.tap('slot_kitchen_1');
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory26.spec.mjs:27:128
+
+    Error Context: test-results/factory26-a-cooker-a-bagge-c22a2-ng-with-real-goods-paid-for-phone/error-context.md
+
+  3) [phone] › specs/factory31.spec.mjs:42:1 › the storefront: cashier, express window, robot lanes, router -- honest sales 
+
+    Error: kiosk in the shop picker
+
+    expect(received).toBeTruthy()
+
+    Received: undefined
+
+      47 |   await pop.tap('slot_shop_0');
+      48 |   const rects = (await pop.state()).rects;
+    > 49 |   for (const id of ['kiosk', 'S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S08']) expect(rects[`pick_${id}`], `${id} in the shop picker`).toBeTruthy();
+         |                                                                                                                                        ^
+      50 |   await pop.shot('factory31_picker');
+      51 |   await build(pop, 'shop', [[0, 'S03'], [1, 'S05'], [2, 'S08'], [3, 'S04']]);
+      52 |   let s = await pop.state();
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/factory31.spec.mjs:49:136
+
+    Error Context: test-results/factory31-the-storefront-c-b08c4-anes-router----honest-sales-phone/error-context.md
+
+  3 failed
+    [p720] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for 
+    [phone] › specs/factory26.spec.mjs:8:1 › a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for 
+    [phone] › specs/factory31.spec.mjs:42:1 › the storefront: cashier, express window, robot lanes, router -- honest sales 
+  2 skipped
+  1 passed (3.4m)

@@ -1,0 +1,35 @@
+{"t":0.3,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":22.6,"issued":22.6,"cmd":"note","args":{"text":"Popcorn shop. Top: 3 customers wanting popcorn buckets at a counter. Middle: some kitchen/conveyor. Bottom: popcorn machine with a circular gauge (red/yellow/blue) and a dial pointer - looks like a timing/heat meter. Locked slots on right. Bottom card: upgrade for 30 coins, +4 -> +6. 0 coins. I think I press/hold the popcorn machine to cook, maybe release in the yellow zone. Trying a tap on the machine first."}}
+{"t":24.4,"issued":23.6,"cmd":"tap","args":{"x":260,"y":860},"shot":"002.png"}
+{"t":33.9,"issued":33.1,"cmd":"tap","args":{"x":260,"y":860},"shot":"003.png"}
+{"t":34.8,"issued":33.9,"cmd":"tap","args":{"x":260,"y":860},"shot":"004.png"}
+{"t":44.7,"issued":44.7,"cmd":"note","args":{"text":"Coins went 0 -> 8 after 3 taps. Popcorn floats up to a machine that fills a bucket, customers buy. Upgrade card bottom has a yellow progress bar filling toward 30. The ring gauge didn't seem to move. Going to tap a bunch more to reach 30."}}
+{"t":45.6,"issued":44.8,"cmd":"tap","args":{"x":260,"y":860},"shot":"005.png"}
+{"t":46.5,"issued":45.7,"cmd":"tap","args":{"x":260,"y":860},"shot":"006.png"}
+{"t":47.3,"issued":46.5,"cmd":"tap","args":{"x":260,"y":860},"shot":"007.png"}
+{"t":48.2,"issued":47.4,"cmd":"tap","args":{"x":260,"y":860},"shot":"008.png"}
+{"t":49.1,"issued":48.3,"cmd":"tap","args":{"x":260,"y":860},"shot":"009.png"}
+{"t":57.9,"issued":57.9,"cmd":"note","args":{"text":"24 coins. Popcorn piling up in the middle hopper - production faster than serving? The ring around the machine still a mystery; maybe holding heats it toward yellow. Trying a 2 second hold."}}
+{"t":60.7,"issued":57.9,"cmd":"hold","args":{"x":260,"y":860,"s":2},"shot":"010.png","held_ms":2073}
+{"t":69.8,"issued":69.8,"cmd":"note","args":{"text":"Holding moved a needle around the ring clockwise; I let go when it was in the red near 10 o'clock and got +8 (48 coins). One of the dots at the bottom lit up gold. Upgrade card now bright with red arrow - buying it."}}
+{"t":70.7,"issued":69.8,"cmd":"tap","args":{"x":300,"y":1180},"shot":"011.png"}
+{"t":79.6,"issued":79.6,"cmd":"note","args":{"text":"Upgrade bought: machine got an awning, coin confetti. Next upgrade 54. Customers gone for now. Now testing the ring: 2s overshot into red, so yellow should be a bit shorter. Trying 1.6s hold."}}
+{"t":82,"issued":79.7,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"012.png","held_ms":1648}
+{"t":90.1,"issued":90.1,"cmd":"note","args":{"text":"1.6s landed the needle right in the yellow! 3 gold dots now (was 1) - perfect gives more dots? Customer got popcorn with hearts. 43 coins. Repeating 1.6s to see if I can fill the dot row."}}
+{"t":92.5,"issued":90.1,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"013.png","held_ms":1653}
+{"t":102,"issued":102,"cmd":"note","args":{"text":"Yellow again, 5 dots. But coins stuck at 43 - no customers at the counter, filled buckets waiting on the belt. So serving depends on customers arriving. Going for a few more perfects to fill the 8 dots."}}
+{"t":104.4,"issued":102.1,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"014.png","held_ms":1659}
+{"t":106.8,"issued":104.4,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"015.png","held_ms":1664}
+{"t":115.1,"issued":115.1,"cmd":"note","args":{"text":"Filled the 8 dots and got a big popcorn burst - dots reset. That felt good! 53 coins, 1 short of the 54 upgrade. Lots of buckets queued but no customers. The little board top-left now shows several gold dots - maybe it tracks something. One more hold then upgrade."}}
+{"t":117.5,"issued":115.2,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"016.png","held_ms":1671}
+{"t":126,"issued":126,"cmd":"note","args":{"text":"63 coins - went up 10 even though I saw no customer. Buckets stacking two-high on the belt. Buying the 54 upgrade (cart on wheels)."}}
+{"t":126.9,"issued":126.1,"cmd":"tap","args":{"x":300,"y":1180},"shot":"017.png"}
+{"t":136.3,"issued":136.3,"cmd":"note","args":{"text":"Cart has wheels now, next upgrade 97. Customer paid +10. The middle panel's bucket icon got a green dot - maybe something to tap there. Curious, tapping it."}}
+{"t":137.2,"issued":136.3,"cmd":"tap","args":{"x":48,"y":393},"shot":"018.png"}
+{"t":146.1,"issued":146.1,"cmd":"note","args":{"text":"Opened a details panel for the packing station: time 4.0 -> 3.0, capacity 15 -> 20, costs 250. The bucket stack has a red 'no' sign - shelf full, 11/8? So the shop counter is my bottleneck, not cooking. Let me check the counter's icon top-left."}}
+{"t":147,"issued":146.1,"cmd":"tap","args":{"x":48,"y":145},"shot":"019.png"}
+{"t":155,"issued":155,"cmd":"note","args":{"text":"Counter panel: 40 coins, customers 4.0 -> 5.5, time 15 -> 11. This is what I need since buckets pile up. 29 coins, waiting a few seconds for sales then buying."}}
+{"t":161.4,"issued":155.1,"cmd":"wait","args":{"s":6},"shot":"020.png"}
+{"t":170.1,"issued":170.1,"cmd":"note","args":{"text":"39, one coin short again! Customers are slow. Waiting 4 more seconds then trying to buy the counter upgrade."}}
+{"t":174.4,"issued":170.1,"cmd":"wait","args":{"s":4},"shot":"021.png"}
+{"t":175.3,"issued":174.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"022.png"}

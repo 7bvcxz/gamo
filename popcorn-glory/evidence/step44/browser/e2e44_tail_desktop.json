@@ -1,0 +1,3302 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/factory26",
+      "specs/factory28",
+      "specs/factory29",
+      "specs/factory30",
+      "specs/factory31",
+      "specs/factory32",
+      "specs/factory33",
+      "specs/flavors34",
+      "specs/input07",
+      "specs/motion42",
+      "specs/news37",
+      "specs/perf07",
+      "specs/play180",
+      "specs/play_stand",
+      "specs/progression07",
+      "specs/release12",
+      "specs/render_probe",
+      "specs/scorecard09",
+      "specs/sessions22",
+      "specs/sound05",
+      "specs/sound43",
+      "specs/stall09",
+      "specs/stand10",
+      "specs/stub03",
+      "specs/ui44",
+      "--project=desktop",
+      "--grep-invert",
+      "ten minutes at forty-four",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "factory26.spec.mjs",
+      "file": "factory26.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 75621,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:30:59.095Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b05b72a1afae14fcf874-8d16b19e71c5b4d5e2c5",
+          "file": "factory26.spec.mjs",
+          "line": 19,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory28.spec.mjs",
+      "file": "factory28.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "eight kitchen devices: built from the picker, each doing its own job with real inputs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 28879,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:32:14.791Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a901f6e85127aa53cebb-13a3ea13869a8a7d9088",
+          "file": "factory28.spec.mjs",
+          "line": 8,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory29.spec.mjs",
+      "file": "factory29.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "kitchen",
+                  "description": "{\"rotary\":49,\"auto_lots\":58,\"premium_lots\":22,\"premium_sold\":37,\"sorted\":16,\"dispatch_held_ms\":171400,\"vent_saves\":0,\"upkeep\":66,\"kernels\":106}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 100835,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:32:43.682Z",
+                  "annotations": [
+                    {
+                      "type": "kitchen",
+                      "description": "{\"rotary\":49,\"auto_lots\":58,\"premium_lots\":22,\"premium_sold\":37,\"sorted\":16,\"dispatch_held_ms\":171400,\"vent_saves\":0,\"upkeep\":66,\"kernels\":106}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1b7500ce3822b749e1b6-3f0e51d12c89e508b06b",
+          "file": "factory29.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "without vents five kettles overheat; with them the kitchen keeps cooking",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 200000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 35299,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:34:24.522Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1b7500ce3822b749e1b6-0b0ea698c5bcdcd37722",
+          "file": "factory29.spec.mjs",
+          "line": 89,
+          "column": 1
+        },
+        {
+          "title": "a minute of a busy advanced factory: frame rate and kept memory",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"fps\":[19.800019792542216,19.423132954942865,19.214141615265262,18.90547263681592,18.58554240091469,18.527547537786447],\"median\":19.214141615265262,\"heap0\":22284023,\"heap1\":30889615,\"kept_mb\":8.605592,\"draw_calls\":[787,908,942,921,985,933],\"objects\":[1221,1361,1381,1362,1431,1371],\"load\":[9.6,8.72]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 96113,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:34:59.828Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"fps\":[19.800019792542216,19.423132954942865,19.214141615265262,18.90547263681592,18.58554240091469,18.527547537786447],\"median\":19.214141615265262,\"heap0\":22284023,\"heap1\":30889615,\"kept_mb\":8.605592,\"draw_calls\":[787,908,942,921,985,933],\"objects\":[1221,1361,1381,1362,1431,1371],\"load\":[9.6,8.72]}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1b7500ce3822b749e1b6-9ff61b9c9c0377aa5e35",
+          "file": "factory29.spec.mjs",
+          "line": 108,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory30.spec.mjs",
+      "file": "factory30.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the packing floor: cups, the weigher, the sealer, honest SKUs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "packing",
+                  "description": "{\"cups_sold\":14,\"small\":27,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":69,\"upkeep\":34}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 70864,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:36:35.952Z",
+                  "annotations": [
+                    {
+                      "type": "packing",
+                      "description": "{\"cups_sold\":14,\"small\":27,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":69,\"upkeep\":34}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-eaae1eee6dc5cfd273bb",
+          "file": "factory30.spec.mjs",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "the dispenser sells large bags at tier 1; an empty floor stops and pays nothing",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 200000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 69678,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:37:46.825Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-6043b0f3c7b7ce363296",
+          "file": "factory30.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "frame rate with several packers working at once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 200000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"fps\":[21.5,20.6,19.8,20.2,19,18],\"median\":20.242914968591585,\"packers_running\":[3,2,2,2,2,3],\"draw_calls\":[654,708,720,786,825,892],\"objects\":[1049,1106,1149,1189,1237,1317],\"load\":9.88}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 61054,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:38:56.515Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"fps\":[21.5,20.6,19.8,20.2,19,18],\"median\":20.242914968591585,\"packers_running\":[3,2,2,2,2,3],\"draw_calls\":[654,708,720,786,825,892],\"objects\":[1049,1106,1149,1189,1237,1317],\"load\":9.88}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b61c5d8e50df827e77ab-94f48e248b62ed6f7a76",
+          "file": "factory30.spec.mjs",
+          "line": 97,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory31.spec.mjs",
+      "file": "factory31.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the storefront: cashier, express window, robot lanes, router -- honest sales",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 260000,
+              "annotations": [
+                {
+                  "type": "shop",
+                  "description": "{\"sold\":107,\"cashier\":56,\"express\":48,\"routed\":1,\"express_jumped\":12,\"lanes\":4,\"lost\":46,\"upkeep\":68,\"revenue\":1244}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 100133,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:39:57.583Z",
+                  "annotations": [
+                    {
+                      "type": "shop",
+                      "description": "{\"sold\":107,\"cashier\":56,\"express\":48,\"routed\":1,\"express_jumped\":12,\"lanes\":4,\"lost\":46,\"upkeep\":68,\"revenue\":1244}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-15132cf45de97304dcb5",
+          "file": "factory31.spec.mjs",
+          "line": 54,
+          "column": 1
+        },
+        {
+          "title": "a paused cashier holds its customers sales until it is resumed",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 200000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 56917,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:41:37.723Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "05553613ee74e663a2bc-6b1659681beb1a77f12d",
+          "file": "factory31.spec.mjs",
+          "line": 85,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory32.spec.mjs",
+      "file": "factory32.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "support machines on their floors, the upkeep overview, pause and resume everything",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 69984,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:42:34.657Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "54abf32eaa8901206fd9-874ba99e24067a40f81f",
+          "file": "factory32.spec.mjs",
+          "line": 34,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "factory33.spec.mjs",
+      "file": "factory33.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 900000,
+              "annotations": [
+                {
+                  "type": "layout",
+                  "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                },
+                {
+                  "type": "ran",
+                  "description": "{\"ran\":38,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                },
+                {
+                  "type": "lines",
+                  "description": "{\"at_pause\":11,\"before_kitchen_pause\":9,\"moved\":4,\"line_portions\":[1,0,2]}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"before\":307689,\"hidden\":307781,\"after\":310375}"
+                },
+                {
+                  "type": "perf",
+                  "description": "{\"machines\":44,\"fps\":[13.261343187012788,14.146939542866816,14.083184672451123,13.879892652364655,14.258555133079849,13.780883950444915],\"median\":14.083184672451123,\"heap0\":61545878,\"heap1\":80988212,\"kept_mb\":19.442334,\"draw_calls\":[1183,1152,1148,1218,1148,1189],\"objects\":[1410,1350,1374,1452,1363,1393],\"nodes\":[440,438,438,439,438,440],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":217,\"floors\":0,\"goods\":256,\"machines\":541},\"cargo\":{\"made\":327,\"peak\":11,\"reused\":730,\"skipped\":0},\"pool\":{\"bag\":6,\"lot\":1},\"actor_nodes\":57,\"load\":[7.82,7.94]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 257472,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:43:44.651Z",
+                  "annotations": [
+                    {
+                      "type": "layout",
+                      "description": "{\"smallest_place_px\":21,\"window\":[1280,800]}"
+                    },
+                    {
+                      "type": "ran",
+                      "description": "{\"ran\":38,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"]}"
+                    },
+                    {
+                      "type": "lines",
+                      "description": "{\"at_pause\":11,\"before_kitchen_pause\":9,\"moved\":4,\"line_portions\":[1,0,2]}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"before\":307689,\"hidden\":307781,\"after\":310375}"
+                    },
+                    {
+                      "type": "perf",
+                      "description": "{\"machines\":44,\"fps\":[13.261343187012788,14.146939542866816,14.083184672451123,13.879892652364655,14.258555133079849,13.780883950444915],\"median\":14.083184672451123,\"heap0\":61545878,\"heap1\":80988212,\"kept_mb\":19.442334,\"draw_calls\":[1183,1152,1148,1218,1148,1189],\"objects\":[1410,1350,1374,1452,1363,1393],\"nodes\":[440,438,438,439,438,440],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":217,\"floors\":0,\"goods\":256,\"machines\":541},\"cargo\":{\"made\":327,\"peak\":11,\"reused\":730,\"skipped\":0},\"pool\":{\"bag\":6,\"lot\":1},\"actor_nodes\":57,\"load\":[7.82,7.94]}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6a1d68b01fe1ef0138d9-938fd3c426879e727695",
+          "file": "factory33.spec.mjs",
+          "line": 105,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "flavors34.spec.mjs",
+      "file": "flavors34.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the flavors sheet draws five distinct flavors on this screen",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "flavor pixels",
+                  "description": "{\"counts\":{\"plain\":1901,\"cheese\":1389,\"spicy\":1439,\"caramel\":1249,\"cocoa\":1056},\"scale\":1}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2908,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:48:02.136Z",
+                  "annotations": [
+                    {
+                      "type": "flavor pixels",
+                      "description": "{\"counts\":{\"plain\":1901,\"cheese\":1389,\"spicy\":1439,\"caramel\":1249,\"cocoa\":1056},\"scale\":1}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-08f72e17c3d7cbaeeb88",
+          "file": "flavors34.spec.mjs",
+          "line": 27,
+          "column": 1
+        },
+        {
+          "title": "five flavors are coated, packed, asked for and sold in the browser",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "flavor trade",
+                  "description": "{\"sold\":{\"caramel\":19,\"cheese\":27,\"spicy\":8},\"revenue\":{\"caramel\":349,\"cheese\":365,\"spicy\":129},\"coated\":{\"caramel\":67,\"cheese\":92,\"spicy\":19},\"ingredients\":136,\"minutes\":12.5725,\"sold_total\":212,\"seen_coating\":[\"caramel\",\"cheese\",\"spicy\"],\"asked\":{\"caramel\":20,\"cheese\":27,\"cocoa\":13,\"duo\":12,\"plain\":161,\"spicy\":13},\"news\":[\"cheese_fans\",\"spicy_dare\"]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 155292,
+                  "error": {
+                    "message": "Error: cocoa sold\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m1\u001b[39m\nReceived:    \u001b[31m0\u001b[39m",
+                    "stack": "Error: cocoa sold\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m1\u001b[39m\nReceived:    \u001b[31m0\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/flavors34.spec.mjs:139:39",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/flavors34.spec.mjs",
+                      "column": 39,
+                      "line": 139
+                    },
+                    "snippet": "  137 |   testInfo.annotations.push({ type: 'flavor trade', description: JSON.stringify({ sold, revenue: s.run.stats.flavor_revenue, coated: s.run.stats.coated, ingredients: s.run.stats.ingredient_coins, minutes: s.run.flow_ms / 60000, sold_total: s.run.stats.sold, seen_coating: [...seen], asked: s.run.stats.asked_recipe, news: (s.run.news?.log || []).map((x) => x.id) }) });\n  138 |   for (const f of ['cheese', 'spicy', 'caramel', 'cocoa']) {\n> 139 |     expect(sold[f] || 0, `${f} sold`).toBeGreaterThanOrEqual(1);\n      |                                       ^\n  140 |     // Coated by its machine (a batch is 1-12 s: a snapshot every 5 s of play can miss it running).\n  141 |     expect((s.run.stats.coated || {})[f] || 0, `${f} was coated from plain portions`).toBeGreaterThanOrEqual(4);\n  142 |   }"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/flavors34.spec.mjs",
+                        "column": 39,
+                        "line": 139
+                      },
+                      "message": "Error: cocoa sold\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32m1\u001b[39m\nReceived:    \u001b[31m0\u001b[39m\n\n  137 |   testInfo.annotations.push({ type: 'flavor trade', description: JSON.stringify({ sold, revenue: s.run.stats.flavor_revenue, coated: s.run.stats.coated, ingredients: s.run.stats.ingredient_coins, minutes: s.run.flow_ms / 60000, sold_total: s.run.stats.sold, seen_coating: [...seen], asked: s.run.stats.asked_recipe, news: (s.run.news?.log || []).map((x) => x.id) }) });\n  138 |   for (const f of ['cheese', 'spicy', 'caramel', 'cocoa']) {\n> 139 |     expect(sold[f] || 0, `${f} sold`).toBeGreaterThanOrEqual(1);\n      |                                       ^\n  140 |     // Coated by its machine (a batch is 1-12 s: a snapshot every 5 s of play can miss it running).\n  141 |     expect((s.run.stats.coated || {})[f] || 0, `${f} was coated from plain portions`).toBeGreaterThanOrEqual(4);\n  142 |   }\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/flavors34.spec.mjs:139:39"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:48:05.051Z",
+                  "annotations": [
+                    {
+                      "type": "flavor trade",
+                      "description": "{\"sold\":{\"caramel\":19,\"cheese\":27,\"spicy\":8},\"revenue\":{\"caramel\":349,\"cheese\":365,\"spicy\":129},\"coated\":{\"caramel\":67,\"cheese\":92,\"spicy\":19},\"ingredients\":136,\"minutes\":12.5725,\"sold_total\":212,\"seen_coating\":[\"caramel\",\"cheese\",\"spicy\"],\"asked\":{\"caramel\":20,\"cheese\":27,\"cocoa\":13,\"duo\":12,\"plain\":161,\"spicy\":13},\"news\":[\"cheese_fans\",\"spicy_dare\"]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/flavors34-five-flavors-are-87c30-for-and-sold-in-the-browser-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/flavors34.spec.mjs",
+                    "column": 39,
+                    "line": 139
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "cfd44f9d150370b3103b-bf75decb1493a52102be",
+          "file": "flavors34.spec.mjs",
+          "line": 98,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "input07.spec.mjs",
+      "file": "input07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "mouse",
+          "file": "input07.spec.mjs",
+          "line": 15,
+          "column": 6,
+          "specs": [
+            {
+              "title": "slide off the upgrade before letting go: no purchase",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7909,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-19T14:50:40.685Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-cd87cfe01e9ea40b7c94",
+              "file": "input07.spec.mjs",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "a double click buys once",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6822,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-19T14:50:48.651Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-731c4c66620b5f369706",
+              "file": "input07.spec.mjs",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "the keyboard plays: space presses, escape goes back",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3797,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-19T14:50:55.483Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-86d72c6d2d3644d0b8e0",
+              "file": "input07.spec.mjs",
+              "line": 51,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "touch",
+          "file": "input07.spec.mjs",
+          "line": 65,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a cancelled touch never locks B",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "touch paths on touch projects",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 66,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-19T14:50:59.292Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "touch paths on touch projects",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 66,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-4f74e226199fb2fdd799",
+              "file": "input07.spec.mjs",
+              "line": 68,
+              "column": 3
+            },
+            {
+              "title": "dragging on the game never scrolls the page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "touch paths on touch projects",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 66,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-19T14:50:59.303Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "touch paths on touch projects",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 66,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-eca60f402402dbc40e08",
+              "file": "input07.spec.mjs",
+              "line": 82,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "motion42.spec.mjs",
+      "file": "motion42.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "arc",
+                  "description": "{\"glow_at\":[10.3873333333334,7.99030952380953,3.1259],\"tier\":\"solo\"}"
+                },
+                {
+                  "type": "celebrate",
+                  "description": "{\"climb\":[0.0494444444444444,0.205098765432099,0.353246913580247,0.501395061728395,0.649543209876543,0.795740740740741,0.943888888888889,1,1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14565,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:21:33.257Z",
+                  "annotations": [
+                    {
+                      "type": "arc",
+                      "description": "{\"glow_at\":[10.3873333333334,7.99030952380953,3.1259],\"tier\":\"solo\"}"
+                    },
+                    {
+                      "type": "celebrate",
+                      "description": "{\"climb\":[0.0494444444444444,0.205098765432099,0.353246913580247,0.501395061728395,0.649543209876543,0.795740740740741,0.943888888888889,1,1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-one-batch-lights--38227-ration-never-moves-the-ring-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-d1cc7d51bfe770ad7d11",
+          "file": "motion42.spec.mjs",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "crescendo",
+                  "description": "{\"samples\":[{\"t\":9,\"running\":29,\"alive\":17,\"given\":{\"ambient\":99,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":11.5},{\"t\":19,\"running\":26,\"alive\":34,\"given\":{\"ambient\":118,\"lot\":31,\"sparkle\":43},\"low\":true,\"fps\":11.4},{\"t\":29,\"running\":29,\"alive\":21,\"given\":{\"ambient\":149,\"lot\":36,\"sparkle\":56},\"low\":true,\"fps\":11},{\"t\":39,\"running\":25,\"alive\":13,\"given\":{\"ambient\":176,\"lot\":42,\"sparkle\":71},\"low\":true,\"fps\":11.6}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":101,\"belts\":6,\"render\":{\"draw_calls\":1217,\"objects\":1503,\"fps\":11,\"nodes\":406},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":104,\"open\":3,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 49131,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:21:47.884Z",
+                  "annotations": [
+                    {
+                      "type": "crescendo",
+                      "description": "{\"samples\":[{\"t\":9,\"running\":29,\"alive\":17,\"given\":{\"ambient\":99,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":11.5},{\"t\":19,\"running\":26,\"alive\":34,\"given\":{\"ambient\":118,\"lot\":31,\"sparkle\":43},\"low\":true,\"fps\":11.4},{\"t\":29,\"running\":29,\"alive\":21,\"given\":{\"ambient\":149,\"lot\":36,\"sparkle\":56},\"low\":true,\"fps\":11},{\"t\":39,\"running\":25,\"alive\":13,\"given\":{\"ambient\":176,\"lot\":42,\"sparkle\":71},\"low\":true,\"fps\":11.6}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":101,\"belts\":6,\"render\":{\"draw_calls\":1217,\"objects\":1503,\"fps\":11,\"nodes\":406},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":104,\"open\":3,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-forty-four-machin-a5c97-h-a-resize-and-a-hidden-tab-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-f9cbb8c6e57301cb1c2e",
+          "file": "motion42.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "low effects",
+                  "description": "{\"low\":true,\"reduced\":false,\"given\":48,\"secs\":13.729,\"phase\":[[44.88,44.88,44.88,29.22,0,44.88],[431.93,406.91,431.93,358.01,314.22,431.93]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":25}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19503,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:22:37.026Z",
+                  "annotations": [
+                    {
+                      "type": "low effects",
+                      "description": "{\"low\":true,\"reduced\":false,\"given\":48,\"secs\":13.729,\"phase\":[[44.88,44.88,44.88,29.22,0,44.88],[431.93,406.91,431.93,358.01,314.22,431.93]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":25}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-low-effects-small-9f1da-ill-travels-kitchen-to-shop-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-104f6724140f1d8e9eed",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        },
+        {
+          "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "reduced motion",
+                  "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.654,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":25}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19389,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:22:56.535Z",
+                  "annotations": [
+                    {
+                      "type": "reduced motion",
+                      "description": "{\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.654,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":25}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/motion42-reduced-motion-sm-b92b9-ill-travels-kitchen-to-shop-desktop/video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "786c7c8d231c47ec94bd-7526b30c6748d5c747fa",
+          "file": "motion42.spec.mjs",
+          "line": 145,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "news37.spec.mjs",
+      "file": "news37.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the news: quiet at opening, a craze that brings real customers, readable, never in the way",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "still",
+                  "description": "{\"badge\":215,\"strip\":1015,\"unread\":1,\"marks\":1}"
+                },
+                {
+                  "type": "hidden",
+                  "description": "{\"left0\":113250,\"leftHidden\":113150}"
+                },
+                {
+                  "type": "craze",
+                  "description": "{\"row\":{\"asked\":12,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":13},\"afterAsked\":3,\"flavor_sold\":{\"caramel\":13}}"
+                },
+                {
+                  "type": "reload",
+                  "description": "{\"before\":79850,\"after\":78200,\"wall\":2193}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 122336,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:50:59.314Z",
+                  "annotations": [
+                    {
+                      "type": "still",
+                      "description": "{\"badge\":215,\"strip\":1015,\"unread\":1,\"marks\":1}"
+                    },
+                    {
+                      "type": "hidden",
+                      "description": "{\"left0\":113250,\"leftHidden\":113150}"
+                    },
+                    {
+                      "type": "craze",
+                      "description": "{\"row\":{\"asked\":12,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":13},\"afterAsked\":3,\"flavor_sold\":{\"caramel\":13}}"
+                    },
+                    {
+                      "type": "reload",
+                      "description": "{\"before\":79850,\"after\":78200,\"wall\":2193}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0f3b38cbbffaf0f0048a-fd0e0321cc8d6ff98a7c",
+          "file": "news37.spec.mjs",
+          "line": 64,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "perf07.spec.mjs",
+      "file": "perf07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "load, heap over a minute, worst burst, sleep and wake",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"load_ms\":1265,\"heap_start\":10652183,\"heap_after_60s\":12589059,\"burst\":{\"fps\":50.29585798816568,\"draw_calls\":117,\"primitives\":4305,\"fx_peak\":152,\"fx_cap\":400},\"sleep\":{\"before\":3153,\"hidden_5s\":3173,\"after_wake\":4085},\"load_avg\":11.23}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 70814,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:53:01.661Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"load_ms\":1265,\"heap_start\":10652183,\"heap_after_60s\":12589059,\"burst\":{\"fps\":50.29585798816568,\"draw_calls\":117,\"primitives\":4305,\"fx_peak\":152,\"fx_cap\":400},\"sleep\":{\"before\":3153,\"hidden_5s\":3173,\"after_wake\":4085},\"load_avg\":11.23}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-ad609c016ac86464b1bc",
+          "file": "perf07.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "stand: peak load for a minute, hidden tab, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"worst\":{\"draw_calls\":179,\"primitives\":5345,\"fx\":44},\"fps\":[47.01273261508325,49.207755123736575,48.05334903321119,48.673884979918355,44.32624114307975,46.88747008967094],\"median_fps\":48.05334903321119,\"heap_start\":12303751,\"heap_after_60s\":19718227,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":23},\"helper_batches\":41,\"sound_played\":{\"clink\":1,\"coin\":63,\"ding\":23,\"fanfare\":1,\"pop_1\":41,\"pop_2\":23,\"sizzle\":23,\"upgrade\":7},\"load_avg\":11.75,\"hidden\":{\"helper_before\":41,\"helper_after_5s_hidden\":41},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 72154,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:54:12.484Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"worst\":{\"draw_calls\":179,\"primitives\":5345,\"fx\":44},\"fps\":[47.01273261508325,49.207755123736575,48.05334903321119,48.673884979918355,44.32624114307975,46.88747008967094],\"median_fps\":48.05334903321119,\"heap_start\":12303751,\"heap_after_60s\":19718227,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":23},\"helper_batches\":41,\"sound_played\":{\"clink\":1,\"coin\":63,\"ding\":23,\"fanfare\":1,\"pop_1\":41,\"pop_2\":23,\"sizzle\":23,\"upgrade\":7},\"load_avg\":11.75,\"hidden\":{\"helper_before\":41,\"helper_after_5s_hidden\":41},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-583e0b25393363690b06",
+          "file": "perf07.spec.mjs",
+          "line": 70,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "play_stand.spec.mjs",
+      "file": "play_stand.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "stand: 12 real minutes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 960000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 721735,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T14:55:24.652Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e2e11fbfbf01bec095a3-0dd879f29e423c8b2cb7",
+          "file": "play_stand.spec.mjs",
+          "line": 17,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "play180.spec.mjs",
+      "file": "play180.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "click: three real minutes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 420000,
+              "annotations": [
+                {
+                  "type": "result",
+                  "description": "{\"marks\":{\"first_action\":{\"clock_ms\":1295,\"level\":0,\"money\":1,\"earned\":1,\"fps\":59.52971527205951,\"fps_samples\":[59.03187723585092,59.52971527205951,60.89039727329415],\"fx_peak\":5,\"draw_calls\":57,\"primitives\":1423,\"load_avg\":13.2},\"5s\":{\"clock_ms\":5219,\"level\":0,\"money\":3,\"earned\":3,\"fps\":59.31784478497281,\"fps_samples\":[59.148265006470105,59.31784478497281,60.53388906573973],\"fx_peak\":9,\"draw_calls\":57,\"primitives\":1447,\"load_avg\":13.43},\"first_upgrade\":{\"clock_ms\":17665,\"level\":1,\"money\":0,\"earned\":24,\"fps\":58.85286783042394,\"fps_samples\":[58.82939477758663,58.85286783042394,60.58800157771529],\"fx_peak\":40,\"draw_calls\":69,\"primitives\":1689,\"load_avg\":12.2},\"60s\":{\"clock_ms\":60114,\"level\":4,\"money\":105,\"earned\":357,\"fps\":56.28517819399409,\"fps_samples\":[55.37974679365962,56.28517819399409,57.27829353424344],\"fx_peak\":85,\"draw_calls\":96,\"primitives\":2582,\"load_avg\":13.22},\"180s\":{\"clock_ms\":181139,\"level\":9,\"money\":100,\"earned\":4131,\"fps\":53.10778913244541,\"fps_samples\":[53.04518664047151,53.10778913244541,54.65023844269563],\"fx_peak\":120,\"draw_calls\":128,\"primitives\":3245,\"load_avg\":13.92}},\"level\":9,\"inputs\":380}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 185167,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:07:26.398Z",
+                  "annotations": [
+                    {
+                      "type": "result",
+                      "description": "{\"marks\":{\"first_action\":{\"clock_ms\":1295,\"level\":0,\"money\":1,\"earned\":1,\"fps\":59.52971527205951,\"fps_samples\":[59.03187723585092,59.52971527205951,60.89039727329415],\"fx_peak\":5,\"draw_calls\":57,\"primitives\":1423,\"load_avg\":13.2},\"5s\":{\"clock_ms\":5219,\"level\":0,\"money\":3,\"earned\":3,\"fps\":59.31784478497281,\"fps_samples\":[59.148265006470105,59.31784478497281,60.53388906573973],\"fx_peak\":9,\"draw_calls\":57,\"primitives\":1447,\"load_avg\":13.43},\"first_upgrade\":{\"clock_ms\":17665,\"level\":1,\"money\":0,\"earned\":24,\"fps\":58.85286783042394,\"fps_samples\":[58.82939477758663,58.85286783042394,60.58800157771529],\"fx_peak\":40,\"draw_calls\":69,\"primitives\":1689,\"load_avg\":12.2},\"60s\":{\"clock_ms\":60114,\"level\":4,\"money\":105,\"earned\":357,\"fps\":56.28517819399409,\"fps_samples\":[55.37974679365962,56.28517819399409,57.27829353424344],\"fx_peak\":85,\"draw_calls\":96,\"primitives\":2582,\"load_avg\":13.22},\"180s\":{\"clock_ms\":181139,\"level\":9,\"money\":100,\"earned\":4131,\"fps\":53.10778913244541,\"fps_samples\":[53.04518664047151,53.10778913244541,54.65023844269563],\"fx_peak\":120,\"draw_calls\":128,\"primitives\":3245,\"load_avg\":13.92}},\"level\":9,\"inputs\":380}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2d00cc6e22c48223072a-b927c383ddade14e55ff",
+          "file": "play180.spec.mjs",
+          "line": 26,
+          "column": 3
+        },
+        {
+          "title": "perfect: three real minutes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 420000,
+              "annotations": [
+                {
+                  "type": "result",
+                  "description": "{\"marks\":{\"first_action\":{\"clock_ms\":2859,\"level\":0,\"money\":10,\"earned\":10,\"fps\":57.84959104122495,\"fps_samples\":[56.96326852373294,57.84959104122495,58.185404339250496],\"fx_peak\":22,\"draw_calls\":63,\"primitives\":1683,\"load_avg\":13.05},\"5s\":{\"clock_ms\":6084,\"level\":0,\"money\":10,\"earned\":10,\"fps\":58.59568976298787,\"fps_samples\":[57.98260526265842,58.59568976298787,60.134069423244604],\"fx_peak\":22,\"draw_calls\":66,\"primitives\":1823,\"load_avg\":12.08},\"first_upgrade\":{\"clock_ms\":13877,\"level\":1,\"money\":0,\"earned\":30,\"fps\":56.21856200951344,\"fps_samples\":[52.537668556783366,56.21856200951344,59.701492537313435],\"fx_peak\":49,\"draw_calls\":75,\"primitives\":1923,\"load_avg\":11.42},\"60s\":{\"clock_ms\":61194,\"level\":5,\"money\":329,\"earned\":1000,\"fps\":53.8760849942372,\"fps_samples\":[52.216748768472904,53.8760849942372,54.45544554455446],\"fx_peak\":99,\"draw_calls\":112,\"primitives\":2895,\"load_avg\":14.62},\"180s\":{\"clock_ms\":182935,\"level\":11,\"money\":16605,\"earned\":40668,\"fps\":50.08839128811,\"fps_samples\":[49.72650422675286,50.08839128811,51.525961167090564],\"fx_peak\":102,\"draw_calls\":144,\"primitives\":3673,\"load_avg\":13.82}},\"level\":11,\"inputs\":75}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 186957,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:10:31.575Z",
+                  "annotations": [
+                    {
+                      "type": "result",
+                      "description": "{\"marks\":{\"first_action\":{\"clock_ms\":2859,\"level\":0,\"money\":10,\"earned\":10,\"fps\":57.84959104122495,\"fps_samples\":[56.96326852373294,57.84959104122495,58.185404339250496],\"fx_peak\":22,\"draw_calls\":63,\"primitives\":1683,\"load_avg\":13.05},\"5s\":{\"clock_ms\":6084,\"level\":0,\"money\":10,\"earned\":10,\"fps\":58.59568976298787,\"fps_samples\":[57.98260526265842,58.59568976298787,60.134069423244604],\"fx_peak\":22,\"draw_calls\":66,\"primitives\":1823,\"load_avg\":12.08},\"first_upgrade\":{\"clock_ms\":13877,\"level\":1,\"money\":0,\"earned\":30,\"fps\":56.21856200951344,\"fps_samples\":[52.537668556783366,56.21856200951344,59.701492537313435],\"fx_peak\":49,\"draw_calls\":75,\"primitives\":1923,\"load_avg\":11.42},\"60s\":{\"clock_ms\":61194,\"level\":5,\"money\":329,\"earned\":1000,\"fps\":53.8760849942372,\"fps_samples\":[52.216748768472904,53.8760849942372,54.45544554455446],\"fx_peak\":99,\"draw_calls\":112,\"primitives\":2895,\"load_avg\":14.62},\"180s\":{\"clock_ms\":182935,\"level\":11,\"money\":16605,\"earned\":40668,\"fps\":50.08839128811,\"fps_samples\":[49.72650422675286,50.08839128811,51.525961167090564],\"fx_peak\":102,\"draw_calls\":144,\"primitives\":3673,\"load_avg\":13.82}},\"level\":11,\"inputs\":75}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2d00cc6e22c48223072a-a62bd633603d818ecc59",
+          "file": "play180.spec.mjs",
+          "line": 26,
+          "column": 3
+        },
+        {
+          "title": "explosion: three real minutes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 420000,
+              "annotations": [
+                {
+                  "type": "result",
+                  "description": "{\"marks\":{\"first_action\":{\"clock_ms\":1300,\"level\":0,\"money\":0,\"earned\":0,\"fps\":58.33498123616079,\"fps_samples\":[57.05853418593212,58.33498123616079,58.935171345243205],\"fx_peak\":0,\"draw_calls\":73,\"primitives\":2243,\"load_avg\":14.24},\"5s\":{\"clock_ms\":5266,\"level\":0,\"money\":0,\"earned\":0,\"fps\":58.68894861710545,\"fps_samples\":[57.90734822075689,58.68894861710545,59.83246913207873],\"fx_peak\":0,\"draw_calls\":75,\"primitives\":2247,\"load_avg\":14.24},\"first_upgrade\":{\"clock_ms\":17871,\"level\":1,\"money\":5,\"earned\":30,\"fps\":57.72292998013445,\"fps_samples\":[56.71641791044776,57.72292998013445,58.24859317032291],\"fx_peak\":40,\"draw_calls\":86,\"primitives\":2535,\"load_avg\":14.49},\"60s\":{\"clock_ms\":60363,\"level\":4,\"money\":45,\"earned\":712,\"fps\":53.77950406411003,\"fps_samples\":[52.589799553452366,53.77950406411003,54.742709276840195],\"fx_peak\":122,\"draw_calls\":113,\"primitives\":3386,\"load_avg\":13.78},\"180s\":{\"clock_ms\":181393,\"level\":9,\"money\":240,\"earned\":73757,\"fps\":48.99020196895035,\"fps_samples\":[48.630408920034284,48.99020196895035,51.76704828272773],\"fx_peak\":226,\"draw_calls\":146,\"primitives\":4085,\"load_avg\":10.68}},\"level\":9,\"inputs\":371}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 185412,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:13:38.542Z",
+                  "annotations": [
+                    {
+                      "type": "result",
+                      "description": "{\"marks\":{\"first_action\":{\"clock_ms\":1300,\"level\":0,\"money\":0,\"earned\":0,\"fps\":58.33498123616079,\"fps_samples\":[57.05853418593212,58.33498123616079,58.935171345243205],\"fx_peak\":0,\"draw_calls\":73,\"primitives\":2243,\"load_avg\":14.24},\"5s\":{\"clock_ms\":5266,\"level\":0,\"money\":0,\"earned\":0,\"fps\":58.68894861710545,\"fps_samples\":[57.90734822075689,58.68894861710545,59.83246913207873],\"fx_peak\":0,\"draw_calls\":75,\"primitives\":2247,\"load_avg\":14.24},\"first_upgrade\":{\"clock_ms\":17871,\"level\":1,\"money\":5,\"earned\":30,\"fps\":57.72292998013445,\"fps_samples\":[56.71641791044776,57.72292998013445,58.24859317032291],\"fx_peak\":40,\"draw_calls\":86,\"primitives\":2535,\"load_avg\":14.49},\"60s\":{\"clock_ms\":60363,\"level\":4,\"money\":45,\"earned\":712,\"fps\":53.77950406411003,\"fps_samples\":[52.589799553452366,53.77950406411003,54.742709276840195],\"fx_peak\":122,\"draw_calls\":113,\"primitives\":3386,\"load_avg\":13.78},\"180s\":{\"clock_ms\":181393,\"level\":9,\"money\":240,\"earned\":73757,\"fps\":48.99020196895035,\"fps_samples\":[48.630408920034284,48.99020196895035,51.76704828272773],\"fx_peak\":226,\"draw_calls\":146,\"primitives\":4085,\"load_avg\":10.68}},\"level\":9,\"inputs\":371}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2d00cc6e22c48223072a-6022b8ff00ae8d96c028",
+          "file": "play180.spec.mjs",
+          "line": 26,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "progression07.spec.mjs",
+      "file": "progression07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "FAST-FORWARD: milestones in order through 3:00",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "mode",
+                  "description": "fast-forward with dev_advance (not real-time play)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8329,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:16:43.972Z",
+                  "annotations": [
+                    {
+                      "type": "mode",
+                      "description": "fast-forward with dev_advance (not real-time play)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-0509d79799fd4e58c534",
+          "file": "progression07.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "ten restarts in a row: each from nothing, no errors",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17843,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:16:52.311Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-04f9076e03a747dd8407",
+          "file": "progression07.spec.mjs",
+          "line": 24,
+          "column": 1
+        },
+        {
+          "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2737,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:10.162Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-5a280aed4d36eb4c3165",
+          "file": "progression07.spec.mjs",
+          "line": 37,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "release12.spec.mjs",
+      "file": "release12.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "stand: saved across a reload, written when hidden, two taps to restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "device",
+                  "description": "desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4000,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:12.915Z",
+                  "annotations": [
+                    {
+                      "type": "device",
+                      "description": "desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-f16c93c03b321600db90",
+          "file": "release12.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "plays on offline once loaded; follows reduce motion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 56,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 25,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:16.922Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 56,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-118a1eda2730846dab58",
+          "file": "release12.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "first load on a slow connection (recorded)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "measured on the published URL",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 77,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:16.955Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "measured on the published URL",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 77,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-542426bf00c07c575630",
+          "file": "release12.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 93,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 21,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:16.983Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 93,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-a32d2b878b01c24612a2",
+          "file": "release12.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 101,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 20,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:17.009Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 101,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-c075b2e40a7c4ec098ac",
+          "file": "release12.spec.mjs",
+          "line": 100,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "render_probe.spec.mjs",
+      "file": "render_probe.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "render cost by level",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 400000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 36880,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "{\"base\":\"http://127.0.0.1:18530/popcorn-glory/\",\"version\":\"0.44.0\",\"load_ms_median\":914,\"load_ms\":[868,914,1196],\"js_heap\":167000000,\"load_avg\":10.43,\"rows\":[{\"id\":\"click\",\"level\":0,\"fps\":[58.6,59.7,59.7],\"draw_calls\":56,\"objects\":75,\"primitives\":1421,\"nodes\":44,\"static_mem\":0},{\"id\":\"click\",\"level\":11,\"fps\":[51,51.7,48.3],\"draw_calls\":138,\"objects\":179,\"primitives\":3487,\"nodes\":44,\"static_mem\":0},{\"id\":\"perfect\",\"level\":0,\"fps\":[58.7,59.1,58.6],\"draw_calls\":62,\"objects\":91,\"primitives\":1655,\"nodes\":44,\"static_mem\":0},{\"id\":\"perfect\",\"level\":14,\"fps\":[51.7,51.6,51.2],\"draw_calls\":109,\"objects\":157,\"primitives\":3505,\"nodes\":44,\"static_mem\":0},{\"id\":\"explosion\",\"level\":0,\"fps\":[59.5,57.8,57.9],\"draw_calls\":72,\"objects\":93,\"primitives\":2241,\"nodes\":44,\"static_mem\":0},{\"id\":\"explosion\",\"level\":11,\"fps\":[50.8,49.5,50.3],\"draw_calls\":154,\"objects\":206,\"primitives\":4325,\"nodes\":44,\"static_mem\":0}]}\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:17.038Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f40d6984d11c8f713a11-13568f5a31f7d5e567ea",
+          "file": "render_probe.spec.mjs",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "scorecard09.spec.mjs",
+      "file": "scorecard09.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 357,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:53.933Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "66d656215a84dd817e54-6fa02f404731a6747a24",
+          "file": "scorecard09.spec.mjs",
+          "line": 7,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sessions22.spec.mjs",
+      "file": "sessions22.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "a real 3-minute session, seed 11",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs",
+                    "line": 11,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:54.302Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs",
+                        "line": 11,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "582f240659d339c0ef04-6f147ef79e823d843789",
+          "file": "sessions22.spec.mjs",
+          "line": 10,
+          "column": 3
+        },
+        {
+          "title": "a real 3-minute session, seed 22",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs",
+                    "line": 11,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:54.330Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs",
+                        "line": 11,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "582f240659d339c0ef04-6d96783fa20b8c15c818",
+          "file": "sessions22.spec.mjs",
+          "line": 10,
+          "column": 3
+        },
+        {
+          "title": "a real 3-minute session, seed 33",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs",
+                    "line": 11,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 22,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:54.358Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/sessions22.spec.mjs",
+                        "line": 11,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "582f240659d339c0ef04-167e990be0a4d7f8f95f",
+          "file": "sessions22.spec.mjs",
+          "line": 10,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "sound05.spec.mjs",
+      "file": "sound05.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2464,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:54.390Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-3dede72a1da916dd88c2",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4479,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:17:56.861Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-300494eb8b1555f2af07",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: a perfect pop, and the busy top stand, do not clip",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.223 peak 0.759"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 29721,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:18:01.350Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "fresh perfect rms 0.223 peak 0.759; top stand rms 0.223 peak 0.759"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-ce0301e05f5e433903e0",
+          "file": "sound05.spec.mjs",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9246,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:18:31.083Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-8f94b5e2f95bd5cc7ae1",
+          "file": "sound05.spec.mjs",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3677,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:18:40.349Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f810a8e7bfcd6172ea13",
+          "file": "sound05.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6398,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:18:44.043Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-590f6dbef72bcce668a1",
+          "file": "sound05.spec.mjs",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3114,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:18:50.449Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-41b1b0b40c54a429fdd8",
+          "file": "sound05.spec.mjs",
+          "line": 168,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sound43.spec.mjs",
+      "file": "sound43.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "mix",
+                  "description": "{\"one\":{\"rms\":0.045947335706709655,\"peak\":0.10156918317079544,\"mean_rms\":0.004882132161270117},\"forty\":{\"rms\":0.04854166748141655,\"peak\":0.1289655566215515,\"mean_rms\":0.012051323705458299},\"hand\":{\"rms\":0.17330050127520238,\"peak\":0.4651283025741577},\"pops\":3,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.1,\"playing\":true,\"target\":-18.1}},\"voices_peak\":6,\"played\":{\"bloom\":1,\"cash\":29,\"clink\":1,\"door\":18,\"heat\":4,\"mpop\":16,\"patter\":18,\"perfect\":6,\"rise\":4,\"seal\":8,\"serve\":20,\"upgrade\":2},\"refused\":{\"cash\":5,\"clink\":23,\"door\":18,\"mpop\":31,\"patter\":4,\"perfect\":1,\"seal\":2,\"upgrade\":42}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 37953,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:18:53.581Z",
+                  "annotations": [
+                    {
+                      "type": "mix",
+                      "description": "{\"one\":{\"rms\":0.045947335706709655,\"peak\":0.10156918317079544,\"mean_rms\":0.004882132161270117},\"forty\":{\"rms\":0.04854166748141655,\"peak\":0.1289655566215515,\"mean_rms\":0.012051323705458299},\"hand\":{\"rms\":0.17330050127520238,\"peak\":0.4651283025741577},\"pops\":3,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.1,\"playing\":true,\"target\":-18.1}},\"voices_peak\":6,\"played\":{\"bloom\":1,\"cash\":29,\"clink\":1,\"door\":18,\"heat\":4,\"mpop\":16,\"patter\":18,\"perfect\":6,\"rise\":4,\"seal\":8,\"serve\":20,\"upgrade\":2},\"refused\":{\"cash\":5,\"clink\":23,\"door\":18,\"mpop\":31,\"patter\":4,\"perfect\":1,\"seal\":2,\"upgrade\":42}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-05b500aee6aadd1b770b",
+          "file": "sound43.spec.mjs",
+          "line": 50,
+          "column": 1
+        },
+        {
+          "title": "a sound on the left is louder on the left, on the right louder on the right",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "pan",
+                  "description": "{\"left\":{\"left\":0.06212772037803695,\"right\":0.04366028729270314,\"energy_left\":19.324237717383305,\"energy_right\":9.600134817166667,\"frames\":44160,\"mean_rms\":0.018096827347298474},\"right\":{\"left\":0.04353785340691517,\"right\":0.062011046748168284,\"energy_left\":10.351046502027934,\"energy_right\":19.8747474226838,\"frames\":44544,\"mean_rms\":0.018419560092966546}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8315,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:19:31.540Z",
+                  "annotations": [
+                    {
+                      "type": "pan",
+                      "description": "{\"left\":{\"left\":0.06212772037803695,\"right\":0.04366028729270314,\"energy_left\":19.324237717383305,\"energy_right\":9.600134817166667,\"frames\":44160,\"mean_rms\":0.018096827347298474},\"right\":{\"left\":0.04353785340691517,\"right\":0.062011046748168284,\"energy_left\":10.351046502027934,\"energy_right\":19.8747474226838,\"frames\":44544,\"mean_rms\":0.018419560092966546}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-9be080c180ef42e5637e",
+          "file": "sound43.spec.mjs",
+          "line": 107,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab is silent, and the factory is heard again after",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "hidden",
+                  "description": "{\"before\":{\"rms\":0.03550462761672329,\"peak\":0.06873172521591187},\"hidden\":{\"rms\":0.0000049167318919981636,\"peak\":0},\"after\":{\"rms\":0.05044872038805041,\"peak\":0.12266062200069427},\"paused\":true,\"beds\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17256,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:19:39.860Z",
+                  "annotations": [
+                    {
+                      "type": "hidden",
+                      "description": "{\"before\":{\"rms\":0.03550462761672329,\"peak\":0.06873172521591187},\"hidden\":{\"rms\":0.0000049167318919981636,\"peak\":0},\"after\":{\"rms\":0.05044872038805041,\"peak\":0.12266062200069427},\"paused\":true,\"beds\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-bb8f9b2331bedc2c5529",
+          "file": "sound43.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "calm: no beds, the hand still heard, and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "calm",
+                  "description": "{\"loud\":{\"rms\":0.033413951201087345,\"peak\":0.06138467788696289},\"calmFloor\":{\"rms\":0.02320882960029684,\"peak\":0.05314697325229645},\"calmHand\":{\"rms\":0.08300125358027571,\"peak\":0.21094852685928345},\"popped\":true,\"beds\":0,\"played\":{\"cash\":14,\"clink\":2,\"door\":10,\"heat\":2,\"mpop\":2,\"patter\":7,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":10,\"upgrade\":2}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21265,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:19:57.122Z",
+                  "annotations": [
+                    {
+                      "type": "calm",
+                      "description": "{\"loud\":{\"rms\":0.033413951201087345,\"peak\":0.06138467788696289},\"calmFloor\":{\"rms\":0.02320882960029684,\"peak\":0.05314697325229645},\"calmHand\":{\"rms\":0.08300125358027571,\"peak\":0.21094852685928345},\"popped\":true,\"beds\":0,\"played\":{\"cash\":14,\"clink\":2,\"door\":10,\"heat\":2,\"mpop\":2,\"patter\":7,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":10,\"upgrade\":2}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-4616d9cbf12eae1b7d0e",
+          "file": "sound43.spec.mjs",
+          "line": 150,
+          "column": 1
+        },
+        {
+          "title": "one sale, one cash sound",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "cash",
+                  "description": "{\"sold\":33,\"asked\":33,\"played\":25}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16072,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:20:18.394Z",
+                  "annotations": [
+                    {
+                      "type": "cash",
+                      "description": "{\"sold\":33,\"asked\":33,\"played\":25}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f515a3b188155d926e1d-d30d13313fbb60bdb74c",
+          "file": "sound43.spec.mjs",
+          "line": 180,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stall09.spec.mjs",
+      "file": "stall09.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "hold",
+                  "description": "finger 1553 ms, game judged 1582 ms (perfect)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3114,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:20:34.480Z",
+                  "annotations": [
+                    {
+                      "type": "hold",
+                      "description": "finger 1553 ms, game judged 1582 ms (perfect)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0b0b470e3b71983625b5-4a8a7f2cae264e936874",
+          "file": "stall09.spec.mjs",
+          "line": 9,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stand10.spec.mjs",
+      "file": "stand10.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10518,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:20:37.607Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-4067d5125f596a1e238b",
+          "file": "stand10.spec.mjs",
+          "line": 17,
+          "column": 1
+        },
+        {
+          "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2058,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:20:48.137Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-b33b4b4420e0e7d8ccb6",
+          "file": "stand10.spec.mjs",
+          "line": 71,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stub03.spec.mjs",
+      "file": "stub03.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the stub: press, upgrade, restart, back",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "load",
+                  "description": "1245 ms to the first drawn frame"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3822,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:20:50.213Z",
+                  "annotations": [
+                    {
+                      "type": "load",
+                      "description": "1245 ms to the first drawn frame"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-9cc368fb65ddf8fe379a",
+          "file": "stub03.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "a direct link opens the stub, and the browser back button returns",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1675,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:20:54.046Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-6282b18a75866d3dbed9",
+          "file": "stub03.spec.mjs",
+          "line": 49,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab stops the play clock",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5815,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:20:55.728Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-789f80fb9e55f8e385f5",
+          "file": "stub03.spec.mjs",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "three minutes shows the clock and is logged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1626,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:21:01.552Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-0dba40c8632a20f4f7da",
+          "file": "stub03.spec.mjs",
+          "line": 75,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "ui44.spec.mjs",
+      "file": "ui44.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "targets",
+                  "description": "{\"project\":\"desktop\",\"viewport\":{\"width\":1280,\"height\":800},\"scenes\":{\"fresh\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"twelve\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"overview\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"ov_line_kitchen\":59.8,\"ov_line_packing\":59.8,\"ov_line_shop\":59.8,\"ov_rate_0\":64.4,\"ov_rate_1\":64.4,\"ov_rate_2\":64.4,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"picker\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"pick_P01\":65,\"pick_P02\":65,\"pick_P04\":65,\"pick_P05\":65,\"pick_P06\":65,\"pick_U01\":65,\"pick_U02\":65,\"pick_U03\":65,\"pick_U04\":65,\"pick_U05\":65,\"pick_U07\":65,\"pick_bagger\":65,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"forty\":{\"k\":1,\"min\":20.6,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":43.3,\"slot_kitchen_1\":43.3,\"slot_kitchen_10\":43.3,\"slot_kitchen_11\":43.3,\"slot_kitchen_12\":43.3,\"slot_kitchen_13\":43.3,\"slot_kitchen_14\":43.3,\"slot_kitchen_15\":43.3,\"slot_kitchen_16\":43.3,\"slot_kitchen_17\":43.3,\"slot_kitchen_18\":43.3,\"slot_kitchen_19\":43.3,\"slot_kitchen_2\":43.3,\"slot_kitchen_20\":43.3,\"slot_kitchen_21\":43.3,\"slot_kitchen_22\":43.3,\"slot_kitchen_23\":43.3,\"slot_kitchen_3\":43.3,\"slot_kitchen_4\":43.3,\"slot_kitchen_5\":43.3,\"slot_kitchen_6\":43.3,\"slot_kitchen_7\":43.3,\"slot_kitchen_8\":43.3,\"slot_kitchen_9\":43.3,\"slot_packing_0\":32.1,\"slot_packing_1\":32.1,\"slot_packing_10\":32.1,\"slot_packing_11\":32.1,\"slot_packing_2\":32.1,\"slot_packing_3\":32.1,\"slot_packing_4\":32.1,\"slot_packing_5\":32.1,\"slot_packing_6\":32.1,\"slot_packing_7\":32.1,\"slot_packing_8\":32.1,\"slot_packing_9\":32.1,\"slot_shop_0\":20.6,\"slot_shop_1\":20.6,\"slot_shop_2\":20.6,\"slot_shop_3\":20.6,\"slot_shop_4\":20.6,\"slot_shop_5\":20.6,\"slot_shop_6\":20.6,\"slot_shop_7\":20.6,\"sound\":65,\"upgrade\":138.1}},\"forty_overview\":{\"k\":1,\"min\":20.6,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"ov_rate_0\":64.4,\"ov_rate_1\":64.4,\"ov_rate_2\":64.4,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":43.3,\"slot_kitchen_1\":43.3,\"slot_kitchen_10\":43.3,\"slot_kitchen_11\":43.3,\"slot_kitchen_12\":43.3,\"slot_kitchen_13\":43.3,\"slot_kitchen_14\":43.3,\"slot_kitchen_15\":43.3,\"slot_kitchen_16\":43.3,\"slot_kitchen_17\":43.3,\"slot_kitchen_18\":43.3,\"slot_kitchen_19\":43.3,\"slot_kitchen_2\":43.3,\"slot_kitchen_20\":43.3,\"slot_kitchen_21\":43.3,\"slot_kitchen_22\":43.3,\"slot_kitchen_23\":43.3,\"slot_kitchen_3\":43.3,\"slot_kitchen_4\":43.3,\"slot_kitchen_5\":43.3,\"slot_kitchen_6\":43.3,\"slot_kitchen_7\":43.3,\"slot_kitchen_8\":43.3,\"slot_kitchen_9\":43.3,\"slot_packing_0\":32.1,\"slot_packing_1\":32.1,\"slot_packing_10\":32.1,\"slot_packing_11\":32.1,\"slot_packing_2\":32.1,\"slot_packing_3\":32.1,\"slot_packing_4\":32.1,\"slot_packing_5\":32.1,\"slot_packing_6\":32.1,\"slot_packing_7\":32.1,\"slot_packing_8\":32.1,\"slot_packing_9\":32.1,\"slot_shop_0\":20.6,\"slot_shop_1\":20.6,\"slot_shop_2\":20.6,\"slot_shop_3\":20.6,\"slot_shop_4\":20.6,\"slot_shop_5\":20.6,\"slot_shop_6\":20.6,\"slot_shop_7\":20.6,\"sound\":65,\"upgrade\":138.1}}}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9947,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:21:03.195Z",
+                  "annotations": [
+                    {
+                      "type": "targets",
+                      "description": "{\"project\":\"desktop\",\"viewport\":{\"width\":1280,\"height\":800},\"scenes\":{\"fresh\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"twelve\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"overview\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"ov_line_kitchen\":59.8,\"ov_line_packing\":59.8,\"ov_line_shop\":59.8,\"ov_rate_0\":64.4,\"ov_rate_1\":64.4,\"ov_rate_2\":64.4,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"picker\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"pick_P01\":65,\"pick_P02\":65,\"pick_P04\":65,\"pick_P05\":65,\"pick_P06\":65,\"pick_U01\":65,\"pick_U02\":65,\"pick_U03\":65,\"pick_U04\":65,\"pick_U05\":65,\"pick_U07\":65,\"pick_bagger\":65,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"forty\":{\"k\":1,\"min\":20.6,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":43.3,\"slot_kitchen_1\":43.3,\"slot_kitchen_10\":43.3,\"slot_kitchen_11\":43.3,\"slot_kitchen_12\":43.3,\"slot_kitchen_13\":43.3,\"slot_kitchen_14\":43.3,\"slot_kitchen_15\":43.3,\"slot_kitchen_16\":43.3,\"slot_kitchen_17\":43.3,\"slot_kitchen_18\":43.3,\"slot_kitchen_19\":43.3,\"slot_kitchen_2\":43.3,\"slot_kitchen_20\":43.3,\"slot_kitchen_21\":43.3,\"slot_kitchen_22\":43.3,\"slot_kitchen_23\":43.3,\"slot_kitchen_3\":43.3,\"slot_kitchen_4\":43.3,\"slot_kitchen_5\":43.3,\"slot_kitchen_6\":43.3,\"slot_kitchen_7\":43.3,\"slot_kitchen_8\":43.3,\"slot_kitchen_9\":43.3,\"slot_packing_0\":32.1,\"slot_packing_1\":32.1,\"slot_packing_10\":32.1,\"slot_packing_11\":32.1,\"slot_packing_2\":32.1,\"slot_packing_3\":32.1,\"slot_packing_4\":32.1,\"slot_packing_5\":32.1,\"slot_packing_6\":32.1,\"slot_packing_7\":32.1,\"slot_packing_8\":32.1,\"slot_packing_9\":32.1,\"slot_shop_0\":20.6,\"slot_shop_1\":20.6,\"slot_shop_2\":20.6,\"slot_shop_3\":20.6,\"slot_shop_4\":20.6,\"slot_shop_5\":20.6,\"slot_shop_6\":20.6,\"slot_shop_7\":20.6,\"sound\":65,\"upgrade\":138.1}},\"forty_overview\":{\"k\":1,\"min\":20.6,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"ov_rate_0\":64.4,\"ov_rate_1\":64.4,\"ov_rate_2\":64.4,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":43.3,\"slot_kitchen_1\":43.3,\"slot_kitchen_10\":43.3,\"slot_kitchen_11\":43.3,\"slot_kitchen_12\":43.3,\"slot_kitchen_13\":43.3,\"slot_kitchen_14\":43.3,\"slot_kitchen_15\":43.3,\"slot_kitchen_16\":43.3,\"slot_kitchen_17\":43.3,\"slot_kitchen_18\":43.3,\"slot_kitchen_19\":43.3,\"slot_kitchen_2\":43.3,\"slot_kitchen_20\":43.3,\"slot_kitchen_21\":43.3,\"slot_kitchen_22\":43.3,\"slot_kitchen_23\":43.3,\"slot_kitchen_3\":43.3,\"slot_kitchen_4\":43.3,\"slot_kitchen_5\":43.3,\"slot_kitchen_6\":43.3,\"slot_kitchen_7\":43.3,\"slot_kitchen_8\":43.3,\"slot_kitchen_9\":43.3,\"slot_packing_0\":32.1,\"slot_packing_1\":32.1,\"slot_packing_10\":32.1,\"slot_packing_11\":32.1,\"slot_packing_2\":32.1,\"slot_packing_3\":32.1,\"slot_packing_4\":32.1,\"slot_packing_5\":32.1,\"slot_packing_6\":32.1,\"slot_packing_7\":32.1,\"slot_packing_8\":32.1,\"slot_packing_9\":32.1,\"slot_shop_0\":20.6,\"slot_shop_1\":20.6,\"slot_shop_2\":20.6,\"slot_shop_3\":20.6,\"slot_shop_4\":20.6,\"slot_shop_5\":20.6,\"slot_shop_6\":20.6,\"slot_shop_7\":20.6,\"sound\":65,\"upgrade\":138.1}}}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-e59ff66c09973a0b50ee",
+          "file": "ui44.spec.mjs",
+          "line": 58,
+          "column": 1
+        },
+        {
+          "title": "a refused press shows the full bin, a first tap brings the hold hint",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8526,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:21:13.148Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-5b89f61c0f7f23ce6e0d",
+          "file": "ui44.spec.mjs",
+          "line": 120,
+          "column": 1
+        },
+        {
+          "title": "a cancelled touch or a mouse that leaves ends the hold",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6393,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:21:21.680Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-0e8d0f404e3f8813834d",
+          "file": "ui44.spec.mjs",
+          "line": 148,
+          "column": 1
+        },
+        {
+          "title": "the motion button calms the factory and the choice survives a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4851,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T15:21:28.078Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5dfcba0e08fdbac1221e-261f94e5a30a27a4da2d",
+          "file": "ui44.spec.mjs",
+          "line": 180,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T14:30:58.635Z",
+    "duration": 3137365.39,
+    "expected": 56,
+    "skipped": 9,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

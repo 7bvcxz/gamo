@@ -1,0 +1,29 @@
+{
+  "run": "before_A",
+  "url_variant": "factory",
+  "version": "0.43.0",
+  "seconds": 181,
+  "commands": 35,
+  "taps": 13,
+  "holds": 6,
+  "drags": 0,
+  "waits": 2,
+  "notes": 13,
+  "looks": 1,
+  "first_action_s": 23.6,
+  "game_inputs": 14,
+  "first_earn_s": 31,
+  "first_upgrade_s": 70,
+  "upgrades": 2,
+  "level": 2,
+  "earned": 133,
+  "game_clock_rate": 1,
+  "longest_gap_between_commands_s": 22.3,
+  "page_errors": 0,
+  "outcomes": {
+    "early": 8,
+    "near": 1,
+    "perfect": 5
+  },
+  "refused": 0
+}

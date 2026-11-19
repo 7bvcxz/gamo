@@ -1,0 +1,58 @@
+extends SceneTree
+const Factory := preload("res://variants/factory/factory_rules.gd")
+
+func _run(seed: int, hand_first: bool, pop_every: int, mode: int = 0) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed * 7 + mode
+	var f: PopRules = Factory.new(null, seed)
+	f.hand_first = hand_first
+	f.sign_tier = 6
+	f.packer_tier = 3
+	f.money = 200000
+	f.stats["packed"] = maxi(1, int(f.stats["packed"]))
+	f.stats["sold"] = maxi(1, int(f.stats["sold"]))
+	for t in ["cooker", "cooker", "M01", "M12"]:
+		f.execute({"type": "build", "machine": t, "floor": "kitchen"})
+	var ids := []
+	for t in ["P05", "P06", "P05", "P06"]:
+		var r: Dictionary = f.execute({"type": "build", "machine": t, "floor": "packing"})
+		ids.append(f.machines[f.machines.size() - 1]["id"])
+	f.execute({"type": "set_flavor", "id": ids[2], "flavor": "spicy"})
+	var ok: Dictionary = f.execute({"type": "set_flavor", "id": ids[3], "flavor": "cocoa"})
+	var first_cocoa := -1
+	var states := {}
+	for i in 120:
+		if i % pop_every == 0 and not bool(f.heating) and f.glass.is_empty() and int(f.cooldown_left) <= 0:
+			if bool(f.execute({"type": "press"})["ok"]):
+				var w0 := int(f.window_start())
+				var w1 := int(f.run.window[1]) if false else w0 + 400
+				var ms := w0 + 10
+				if mode == 1: ms = int(w0 * 0.6)
+				elif mode == 2: ms = w0 + 100
+				elif mode == 3: ms = int(w0 * rng.randf_range(0.5, 1.4))
+				f.advance(ms)
+				f.execute({"type": "release"})
+		for k in 10:
+			f.advance(500)
+			for m: Dictionary in f.machines:
+				if m["id"] == ids[3]:
+					states[String(m["state"])] = int(states.get(String(m["state"]), 0)) + 1
+		var c: Dictionary = f.stats.get("coated", {})
+		if first_cocoa < 0 and int(c.get("cocoa", 0)) > 0:
+			first_cocoa = i * 5
+	return {"cocoa": int((f.stats.get("coated", {}) as Dictionary).get("cocoa", 0)), "first_s": first_cocoa, "states": states, "flavors": f.machines.filter(func(m): return String(m["type"]) in ["P05","P06"]).map(func(m): return m.get("flavor","")), "open": f.flavor_open("cocoa"), "set": ok.get("ok")}
+
+func _init() -> void:
+	for combo in [[true,1,1],[true,1,2],[true,2,3],[true,1,3],[false,1,3]]:
+		var hf: bool = combo[0]
+		var zero := 0
+		var firsts := []
+		for seed in range(1, 41):
+			var r := _run(seed, hf, combo[1], combo[2])
+			if r["cocoa"] == 0:
+				zero += 1
+				print("hf=%s seed=%d NO COCOA %s" % [hf, seed, JSON.stringify(r)])
+			firsts.append(r["first_s"])
+		firsts.sort()
+		print("hand_first=%s every=%d mode=%d: no cocoa in %d/40; median first %s max %s" % [hf, combo[1], combo[2], zero, firsts[20], firsts[39]])
+	quit(0)

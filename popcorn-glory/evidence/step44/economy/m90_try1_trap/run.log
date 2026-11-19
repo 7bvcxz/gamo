@@ -1,0 +1,6 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+average/balanced/3901: book 17853, spent 18310, machines 22 (running peak 16), kinds 15, sign 5 station 3 kettle 6, dead 11.4 min (longest 2.9), no buy 8.0, contests 21 (prizes 835 fees 285)  [36213 ms]
+   milestones { "first_sale": 0.19, "first_crowd_rush": 3.61, "first_contest_win": 5.78, "first_full_queue": 12.01, "first_packing_line": 13.68, "first_auto_cooker": 19.95, "built_10": 28.73, "first_flavor_line": 42.83, "running_10": 47.17, "three_floors": 59.93, "built_20": 63.21 }
+average/balanced/3902: book 28449, spent 28360, machines 31 (running peak 25), kinds 24, sign 6 station 3 kettle 6, dead 0.1 min (longest 0.1), no buy 7.5, contests 22 (prizes 2060 fees 365)  [32020 ms]
+   milestones { "first_sale": 0.18, "first_crowd_rush": 4.31, "first_contest_win": 5.78, "first_full_queue": 13.17, "first_packing_line": 13.59, "first_auto_cooker": 20.27, "first_flavor_line": 25.73, "built_10": 31.19, "running_10": 38.3, "three_floors": 39.83, "built_20": 55.1, "running_20": 75.25 }

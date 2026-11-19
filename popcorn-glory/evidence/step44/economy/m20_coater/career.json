@@ -1,0 +1,79 @@
+{
+ "_doc": "AUTOMATIC SIMULATION on the game's own rules (tools/sim/career39.gd) -- simulated hands and purchase policies, not players and not fun.",
+ "economy_md5": "c6cc60a0e65c6de2301052bee1dbbcbd",
+ "minutes": 20,
+ "runs": {
+  "average/balanced/3901": {
+   "abandoned": 0,
+   "asked_recipe": {
+    "plain": 316
+   },
+   "book": 2921,
+   "bursts": 0,
+   "contest_results": [
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 15,
+     "tier": 1
+    },
+    {
+     "fee": 15,
+     "id": "rush_hour",
+     "prize": 160,
+     "tier": 3
+    },
+    {
+     "fee": 5,
+     "id": "perfect_streak",
+     "prize": 0,
+     "tier": 0
+    },
+    {
+     "fee": 20,
+     "id": "lean_packing",
+     "prize": 120,
+     "tier": 2
+    }
+   ],
+   "contests_entered": 5,
+   "dead_longest_min": 0.1,
+   "dead_min": 0.1,
+   "fees": 50,
+   "flavor_revenue": {},
+   "flavor_sold": {},
+   "kettle": 4,
+   "kinds": 4,
+   "lines": {
+    "kitchen": 1,
+    "packing": 1,
+    "shop": 1
+   },
+   "machines": 4,
+   "max_money": 0,
+   "milestones": {
+    "first_auto_cooker": 19.95,
+    "first_contest_win": 5.78,
+    "first_crowd_rush": 3.61,
+    "first_full_queue": 12.01,
+    "first_packing_line": 13.68,
+    "first_sale": 0.19
+   },
+   "money": 150,
+   "news_started": 5,
+   "no_buy_longest_min": 2.9,
+   "passed_by": 16,
+   "peak_running": 3,
+   "popularity": 100.0,
+   "presses": 109,
+   "prizes": 295,
+   "refill_coins": 0,
+   "refills": 0,
+   "sign": 4,
+   "sold": 309,
+   "spent": 3016,
+   "station": 1,
+   "unpaid_ms": 0
+  }
+ }
+}
