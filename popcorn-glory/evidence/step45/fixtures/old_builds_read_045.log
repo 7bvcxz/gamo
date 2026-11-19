@@ -1,0 +1,4 @@
+wrote factory 38703 bytes (machines 44, money 1073702389), stand 481 bytes
+0.43.0 reads factory_0.45.json: ACCEPTED machines 44, money 1073702389, conserved true, after 60 s conserved true
+0.43.0 reads stand_0.45.json: ACCEPTED level 3, money 777
+0.12.2 reads stand_0.45.json: ACCEPTED level 3, money 777

@@ -1,0 +1,5 @@
+ 21:35:12 up 85 days,  5:16,  1 user,  load average: 1.06, 1.27, 2.77
+               total        used        free      shared  buff/cache   available
+Mem:           58017       36609        2658         813       20759       21408
+Swap:           8191        8190           1
+ 21:44:41 up 85 days,  5:25,  1 user,  load average: 2.57, 2.00, 2.37

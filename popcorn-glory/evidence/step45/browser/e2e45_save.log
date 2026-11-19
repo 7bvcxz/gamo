@@ -1,0 +1,226 @@
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:00] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 18 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:01] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:01] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:01] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:01] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:01] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:02] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:02] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:03] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:03] "GET /popcorn-glory/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:03] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:03] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 304 -
+  ✓   1 [p720] › specs/save45.spec.mjs:45:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (5.0s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:06] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:06] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:06] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:06] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:06] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:07] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:46:07] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘   2 [p720] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:06] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:06] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:06] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:06] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:06] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:07] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:07] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   3 [p720] › specs/save45.spec.mjs:99:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.0s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:09] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:09] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:09] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:09] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:09] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:10] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:10] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:12] "GET /popcorn-glory/saves.html HTTP/1.1" 200 -
+  ✓   4 [p720] › specs/save45.spec.mjs:121:1 › a broken save is set aside, the backup comes back, and the saves page shows both (3.5s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:12] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:12] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:12] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:12] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:12] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:14] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:14] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:15] "GET /popcorn-glory/saves.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:15] "GET /popcorn-glory/saves.html HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:15] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   5 [p720] › specs/save45.spec.mjs:152:1 › the saves page exports and imports, and the factory comes back from the file (4.5s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:17] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:17] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:17] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:17] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:17] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:18] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:18] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓   6 [p720] › specs/save45.spec.mjs:181:1 › restart takes two taps and the old factory waits in the backup (4.4s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:22] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:22] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:22] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:22] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:22] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:23] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:23] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:25] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:25] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   7 [phone] › specs/save45.spec.mjs:45:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (5.9s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:28] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:28] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:28] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:28] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:28] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:29] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:49:29] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘   8 [phone] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:28] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:28] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:28] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:28] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:28] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:29] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:29] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓   9 [phone] › specs/save45.spec.mjs:99:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.5s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:32] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:32] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:32] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:32] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:32] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:33] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:33] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:35] "GET /popcorn-glory/saves.html HTTP/1.1" 200 -
+  ✓  10 [phone] › specs/save45.spec.mjs:121:1 › a broken save is set aside, the backup comes back, and the saves page shows both (4.2s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:36] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:36] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:36] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:36] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:36] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:37] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:37] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:38] "GET /popcorn-glory/saves.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:39] "GET /popcorn-glory/saves.html HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:39] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  11 [phone] › specs/save45.spec.mjs:152:1 › the saves page exports and imports, and the factory comes back from the file (5.1s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:41] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:41] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:41] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:41] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:41] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:42] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:42] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  12 [phone] › specs/save45.spec.mjs:181:1 › restart takes two taps and the old factory waits in the backup (5.1s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:46] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:46] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:46] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:46] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:46] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:48] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:48] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:49] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:49] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  13 [desktop] › specs/save45.spec.mjs:45:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (5.4s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:52] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:52] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:52] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:52] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:52] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:53] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:52:53] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  14 [desktop] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there (3.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:52] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:52] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:52] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:52] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:52] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:53] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:53] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  15 [desktop] › specs/save45.spec.mjs:99:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.1s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:55] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:55] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:55] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:55] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:55] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:57] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:57] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:59] "GET /popcorn-glory/saves.html HTTP/1.1" 200 -
+  ✓  16 [desktop] › specs/save45.spec.mjs:121:1 › a broken save is set aside, the backup comes back, and the saves page shows both (3.8s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:59] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:59] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:59] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:59] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:55:59] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:00] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:00] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:02] "GET /popcorn-glory/saves.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:02] "GET /popcorn-glory/saves.html HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:02] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  17 [desktop] › specs/save45.spec.mjs:152:1 › the saves page exports and imports, and the factory comes back from the file (4.8s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:04] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:04] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:04] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:04] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:04] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:05] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:05] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  18 [desktop] › specs/save45.spec.mjs:181:1 › restart takes two taps and the old factory waits in the backup (4.5s)
+
+
+  1) [p720] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: browserContext.newPage: Target page, context or browser has been closed
+
+      78 |   const cdp = await pop.cdp();
+      79 |   await cdp.send('Page.crash').catch(() => {});   // no unload, no last save
+    > 80 |   const page2 = await pop.page.context().newPage();
+         |                                          ^
+      81 |   await page2.addInitScript(INIT);
+      82 |   // What the killed page left in storage, read before the game opens and saves again.
+      83 |   await page2.goto('./saves.html');
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/save45.spec.mjs:80:42
+
+    Error Context: test-results/save45-a-killed-renderer-l-2f914-d-twice-every-machine-there-p720/error-context.md
+
+  2) [phone] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: browserContext.newPage: Protocol error (Target.createTarget): browserContextId
+
+      78 |   const cdp = await pop.cdp();
+      79 |   await cdp.send('Page.crash').catch(() => {});   // no unload, no last save
+    > 80 |   const page2 = await pop.page.context().newPage();
+         |                                          ^
+      81 |   await page2.addInitScript(INIT);
+      82 |   // What the killed page left in storage, read before the game opens and saves again.
+      83 |   await page2.goto('./saves.html');
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/save45.spec.mjs:80:42
+
+    Error Context: test-results/save45-a-killed-renderer-l-2f914-d-twice-every-machine-there-phone/error-context.md
+
+  3) [desktop] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: browserContext.newPage: Protocol error (Target.createTarget): browserContextId
+
+      78 |   const cdp = await pop.cdp();
+      79 |   await cdp.send('Page.crash').catch(() => {});   // no unload, no last save
+    > 80 |   const page2 = await pop.page.context().newPage();
+         |                                          ^
+      81 |   await page2.addInitScript(INIT);
+      82 |   // What the killed page left in storage, read before the game opens and saves again.
+      83 |   await page2.goto('./saves.html');
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/save45.spec.mjs:80:42
+
+    Error Context: test-results/save45-a-killed-renderer-l-2f914-d-twice-every-machine-there-desktop/error-context.md
+
+  3 failed
+    [p720] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 
+    [phone] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 
+    [desktop] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 
+  15 passed (10.1m)

@@ -1,0 +1,33 @@
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:27] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:28] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:28] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:28] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:28] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:28] "GET /popcorn-glory/game-edce2807bb86.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:29] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 21:56:29] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  1 [desktop] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there (3.0m)
+
+
+  1) [desktop] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: page.waitForTimeout: Target page, context or browser has been closed
+
+      83 |   const cdp = await pop.cdp();
+      84 |   await cdp.send('Page.crash').catch(() => {});   // no unload, no last save
+    > 85 |   await pop.page.waitForTimeout(500);
+         |                  ^
+      86 |   // What the killed page left in storage, read before the game opens and saves again.
+      87 |   await page2.goto('./saves.html');
+      88 |   const left = JSON.parse(await store(page2, 'factory.v1'));
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/save45.spec.mjs:85:18
+
+    Error Context: test-results/save45-a-killed-renderer-l-2f914-d-twice-every-machine-there-desktop/error-context.md
+
+  1 failed
+    [desktop] › specs/save45.spec.mjs:74:1 › a killed renderer loses seconds, never goods: nothing sold twice, every machine there 

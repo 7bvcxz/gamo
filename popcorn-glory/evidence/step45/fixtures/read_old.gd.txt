@@ -1,0 +1,21 @@
+extends SceneTree
+## What this checkout's app/main.gd _load_saved does with a save text (schema 1, game, exp, rules, from_save).
+func _init() -> void:
+	var path := OS.get_environment("IN")
+	var id := OS.get_environment("EXP")
+	var text := FileAccess.get_file_as_string(path)
+	var json := JSON.new()
+	var doc: Variant = json.data if json.parse(text) == OK else null
+	var rules: PopRules = PopRegistry.make_rules(id, null)
+	var ok := typeof(doc) == TYPE_DICTIONARY and int(doc.get("schema", -1)) == 1 and String(doc.get("game", "")) == "popcorn-glory" \
+		and String(doc.get("exp", "")) == id and typeof(doc.get("rules")) == TYPE_DICTIONARY and bool(rules.call("from_save", doc["rules"]))
+	var ver := String(ProjectSettings.get_setting("application/config/version"))
+	var extra := ""
+	if ok and id == "factory":
+		extra = " machines %d, money %d, conserved %s" % [rules.machines.size(), rules.money, str(int(rules.portions_everywhere()) == int(rules.stats["made_portions"]))]
+		rules.advance(60000)
+		extra += ", after 60 s conserved %s" % str(int(rules.portions_everywhere()) == int(rules.stats["made_portions"]))
+	elif ok:
+		extra = " level %d, money %d" % [rules.level, rules.money]
+	print("%s reads %s: %s%s" % [ver, path.get_file(), "ACCEPTED" if ok else "REFUSED", extra])
+	quit(0)
