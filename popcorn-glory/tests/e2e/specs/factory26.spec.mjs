@@ -5,6 +5,17 @@
 // paid from the wallet (money = revenue - purchases - upkeep), every portion accounted for.
 import { test, expect } from '../lib/pop.mjs';
 
+// Step 44: the picker's icons grew to a finger's size and now cover the card over the shop floor;
+// a shop place under an open card is closed first, as a player would (the floor's badge).
+const overlap = (a, b) => a && b && a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+async function closeCardOver(pop, rect) {
+  const s = await pop.state();
+  if (s.rects.detail && s.view.selected >= 0 && overlap(rect, s.rects.detail)) {
+    await pop.tap(['badge_top', 'badge_mid', 'badge_low'][s.view.selected]);
+    await expect.poll(async () => !!(await pop.state()).rects.detail).toBe(false);
+  }
+}
+
 test('a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for', async ({ pop }) => {
   test.setTimeout(150_000);
   await pop.open('./#factory');
@@ -22,6 +33,7 @@ test('a cooker, a bagger and a kiosk: built from the screen, working with real g
   s = await pop.state();
   expect(s.run.open.cooker && s.run.open.bagger && s.run.open.kiosk, 'all three machines open').toBe(true);
   for (const [slot, type] of [['slot_kitchen_0', 'cooker'], ['slot_packing_0', 'bagger'], ['slot_shop_0', 'kiosk']]) {
+    await closeCardOver(pop, (await pop.state()).rects[slot]);
     await pop.tap(slot);
     await pop.tap('upgrade');
     await expect.poll(async () => (await pop.state()).run.machines.some((m) => m.type === type), { message: `${type} built` }).toBe(true);

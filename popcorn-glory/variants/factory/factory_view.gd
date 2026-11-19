@@ -22,6 +22,21 @@ const LOW := 2
 ## (root AGENTS: help after 20 seconds of wandering, not forever).
 const HINT_BURST_MS := 6000
 const HINT_IDLE_MS := 20000
+## Step 44: a newcomer who taps (an early release) before any Perfect sees the hint once right
+## after: the dot runs round the ring to the gold and the finger stays down -- "keep holding,
+## to there". The blind player of 0.43.0 tapped for 36 s (taps earn too) and only found the
+## hold by chance. At most COACH_TIMES times, and never once a Perfect has been made.
+## Step 44: the few moments a screen reader hears (PopWeb.announce), never drawn.
+const ANNOUNCE := {"news_start": "새 소식이 나왔어요", "contest_end": "대회가 끝났어요", "line_built": "새 줄을 놓았어요",
+	"station_upgrade": "강화했어요", "overheat": "주방이 너무 뜨거워요", "machine_built": "기계를 놓았어요"}
+const ANNOUNCE_GAP_MS := 4000
+const CANVAS_LABEL := "팝콘 공장. 아래 냄비를 누르고 있다가 바늘이 금색에 오면 떼세요. 스페이스나 엔터로도 됩니다. 1, 2, 3은 층을 엽니다."
+var announced: Array[String] = []   ## (for the tests)
+var _announced_at := -100000
+const COACH_MS := 2600
+const COACH_TIMES := 3
+var coach_shown := 0
+var _coach_from := -1
 
 var selected := -1               ## the floor whose detail is open, -1 none
 ## Step 26: a chosen machine (by id) or an empty place ({floor, k}); the card and the detail follow it.
@@ -69,6 +84,12 @@ var bell_node := Node2D.new()      ## Step 21: swings just before the next custo
 ## the hint used to redraw the whole ring layer every frame for as long as nobody
 ## touched the factory; 0.19.0's meter and knob made each redraw heavier).
 var hint_node := Node2D.new()
+## Step 44: a press refused because the glass waits (the bin is full) shows *why*: amber
+## arrows up the lift to the bin and the bin outlined, for 1.6 s (a still a moment after the
+## press shows it). It replaced three puffs of smoke that two blind players read as burning.
+var full_cue := Node2D.new()
+var _full_until := 0
+var full_cues := 0               ## refused presses shown (for the tests)
 var hint_dot := Node2D.new()
 var hint_gold := Node2D.new()
 var hint_finger := Node2D.new()
@@ -80,6 +101,8 @@ var overview := false          ## Step 32: the upkeep overview is open
 var _overview_t := 0.0
 var _low_wallet := false
 var ov_machine := -1           ## Step 33: the machine picked in the overview (its diagnostics)
+var _ov_flash_line := ""       ## Step 44: a rate pressed on a full floor rings that floor's next line
+var _ov_flash_until := 0
 var _heat_node: Node2D = null   ## Step 29: the kitchen's thermometer beside its places
 var _heat_shown := -1.0
 var _kernel_flights: Array = []
@@ -137,6 +160,7 @@ const BELT_SPEED := 30.0          ## chevrons a second, in px at a 720-wide scre
 func setup(p_rules: PopRules) -> void:
 	super(p_rules)
 	selected = -1
+	PopWeb.label_canvas(CANVAS_LABEL)   # Step 44: what a screen reader says for the canvas
 	# A new run (restart, a new factory): no journey of the old one may linger.
 	for a in actor_layer.get_children():
 		a.queue_free()
@@ -212,6 +236,10 @@ func setup(p_rules: PopRules) -> void:
 		hint_gold.draw.connect(func() -> void: _draw_hint_gold(hint_gold))
 		hint_finger.draw.connect(func() -> void: _draw_hint_finger(hint_finger))
 		hint_node.visible = false
+		full_cue.name = "FullCue"
+		add_child(full_cue)
+		full_cue.draw.connect(func() -> void: _draw_full_cue(full_cue))
+		full_cue.visible = false
 		cue_node.name = "BottleneckCue"
 		add_child(cue_node)
 		cue_node.draw.connect(func() -> void: _draw_cue(cue_node))
@@ -442,6 +470,8 @@ func extra_rects() -> Dictionary:
 				out["ov_line_%s" % f] = L["lines"][f]
 		for id: int in L["machines"]:
 			out["ovm_%d" % id] = L["machines"][id]
+		for i in 3:
+			out["ov_rate_%d" % i] = _rate_hit(L, i)   # Step 44: a rate goes to its floor
 	# Step 26: every machine place, and the chosen machine's two buttons.
 	for f: String in FLOOR_NAME:
 		for k in (int(rules.slots(f)) if rules else 0):
@@ -527,6 +557,15 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 
+## Step 44: the spoon too lets go when the window loses focus (play_view does the kettle).
+func _notification(what: int) -> void:
+	if (what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT) and _spooning:
+		_spooning = false
+		command.emit("finish_release", {"type": "finish_release"})
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_cooking = false
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	var k := event as InputEventKey
 	if k == null or not k.pressed or k.echo:
@@ -558,6 +597,8 @@ func toggle_floor(i: int) -> void:
 func _hint_visible() -> bool:
 	if rules == null or bool(_r()["heating"]):
 		return false
+	if _coach_from >= 0 and now_ms - _coach_from < COACH_MS:
+		return true
 	var idle := now_ms - maxi(last_input_ms, 0)
 	if last_input_ms < 0:
 		return idle >= HINT_RING_MS
@@ -662,13 +703,14 @@ func _step_hint() -> void:
 		for n: Node2D in [hint_dot, hint_gold, hint_finger]:
 			n.queue_redraw()
 	var burn := float(w[2])
-	var loop := fmod(_t, 2.4) / 2.4
+	var coaching := _coach_from >= 0 and now_ms - _coach_from < COACH_MS
+	var loop := fmod(_t, 2.4) / 2.4 if not coaching else clampf(float(now_ms - _coach_from) / 2400.0, 0.0, 1.0)
 	var gold_mid := (float(w[0]) + float(w[1])) / 2.0
 	var heat := gold_mid * clampf(loop / 0.8, 0.0, 1.0)
 	var a := -PI / 2 + TAU * heat / burn
 	hint_dot.position = machine_centre() + Vector2(cos(a), sin(a)) * ring_radius()
 	hint_gold.visible = loop > 0.8
-	hint_finger.visible = last_input_ms < 0 and now_ms >= HINT_HAND_MS
+	hint_finger.visible = coaching or (last_input_ms < 0 and now_ms >= HINT_HAND_MS)
 
 
 func _draw_hint_gold(ci: CanvasItem) -> void:
@@ -699,6 +741,14 @@ func on_events(events: Array[Dictionary]) -> void:
 		_slot_cache.clear()   # Step 33: a line bought or a machine built moves the places
 	var rest: Array[Dictionary] = []
 	for e: Dictionary in events:
+		if ANNOUNCE.has(String(e["type"])) and now_ms - _announced_at >= ANNOUNCE_GAP_MS:
+			_announced_at = now_ms
+			announced.append(String(ANNOUNCE[String(e["type"])]))
+			PopWeb.announce(String(ANNOUNCE[String(e["type"])]))
+		if String(e["type"]) == "outcome" and String(e["data"].get("kind", "")) == "early" and coach_shown < COACH_TIMES \
+				and int((rules.get("outcomes") as Dictionary).get("perfect", 0)) == 0:
+			coach_shown += 1
+			_coach_from = now_ms
 		if String(e["type"]) == "earn":
 			# A sale: the coin and the +N at the counter, where the pack met the customer.
 			# (Step 38: a contest's prize at its chip.)
@@ -1722,6 +1772,14 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 		h = minf(d.size.x * 0.55, d.size.y * (0.3 - top * 0.3))
 		a = Vector2(d.get_center().x, d.position.y + d.size.y * (0.42 + top * 0.5))
 		b = Vector2(d.get_center().x, d.position.y + d.size.y * 0.94)
+	elif d.size.y >= d.size.x * 0.6:
+		# Step 44: a squarish card (the landscape layout's right column): the numbers keep the
+		# top rows and the two forms stand below them -- centred, the carts covered the numbers.
+		var nb := clampf(d.size.x * 0.1, 18.0, 30.0) * 4.7
+		var zh := d.size.y - nb
+		h = minf(zh * 0.6, d.size.x * 0.32)
+		a = Vector2(d.position.x + d.size.x * 0.25, d.end.y - zh * 0.1)
+		b = Vector2(d.position.x + d.size.x * 0.75, d.end.y - zh * 0.1)
 	else:
 		h = minf(d.size.y * 0.7, d.size.x * 0.32)
 		a = Vector2(d.position.x + d.size.x * 0.25, d.get_center().y + h * 0.4)
@@ -1850,9 +1908,55 @@ func _press() -> void:
 		squash(0.0, 6.0)
 		_sound("thud", 1.4, -12.0)
 		_redraw_once = true
-		if not reduced_motion:
-			fx.smoke(machine_top(), 3, machine_size() / 900.0, rng)
+		_full_until = now_ms + 1600
+		full_cues += 1
+		full_cue.visible = true
+		full_cue.queue_redraw()
 	super()
+
+
+## The lift's path from the hand's kettle to the bin (the way its lot will go), and the bin.
+func _full_path() -> PackedVector2Array:
+	var tube_x := tube_rect().get_center().x
+	var top := machine_top()
+	var bin := _bin_top()
+	return PackedVector2Array([top, Vector2(tube_x, top.y), Vector2(tube_x, bin.y - 40), bin])
+
+
+func full_bin_rect() -> Rect2:
+	var hs := packing_rect().size.y * 0.46
+	var b := _bin_top()
+	return Rect2(b - Vector2(hs * 0.55, hs * 0.42), Vector2(hs * 1.1, hs * 1.05))
+
+
+func _draw_full_cue(ci: CanvasItem) -> void:
+	var col := PopTokens.WARN
+	var w := maxf(3.0, machine_size() * 0.012)
+	var path := _full_path()
+	var len_total := 0.0
+	for i in path.size() - 1:
+		len_total += path[i].distance_to(path[i + 1])
+	# Chevrons every so often along the way up, pointing where the lot will go.
+	var step := maxf(40.0, len_total / 7.0)
+	var d := step * 0.5
+	var acc := 0.0
+	for i in path.size() - 1:
+		var a := path[i]
+		var b := path[i + 1]
+		var seg := a.distance_to(b)
+		var dir := (b - a).normalized()
+		while d <= acc + seg:
+			var at := a + dir * (d - acc)
+			var n := Vector2(-dir.y, dir.x)
+			var sz := w * 3.2
+			ci.draw_polyline(PackedVector2Array([at - dir * sz + n * sz, at, at - dir * sz - n * sz]), Color(col, 0.95), w, true)
+			d += step
+		acc += seg
+	# The bin outlined: here is what is full.
+	var r := full_bin_rect()
+	var rp := PopMachineArt.round_rect_points(r, 10)
+	rp.append(rp[0])
+	ci.draw_polyline(rp, col, w, true)
 
 
 ## Money appears at the counter, when the pack reaches the customer -- not at the kettle.
@@ -2490,7 +2594,8 @@ func debug_state() -> Dictionary:
 		"ov_machine": ov_machine, "selected": selected, "sel_machine": sel_machine, "sel_slot": sel_slot,
 		"news_open": news_open, "ticker": int(_ticker.get("n", -1)), "ticker_end": bool(_ticker.get("end", false)), "news_marks": _news_marks().size(),
 		"news_tab": news_tab, "contest_info": _contest_info, "cancel_armed": _cancel_armed > 0.0, "contest_chip": _chip_visible(), "cticker": int((_cticker.get("row", {}) as Dictionary).get("seq", -1)),
-		"motion": motion_debug()}
+		"motion": motion_debug(), "overview": overview, "full_cues": full_cues, "full_cue": full_cue.visible, "coach_shown": coach_shown,
+		"hint": hint_node.visible, "announced": announced.duplicate(), "focus_releases": focus_releases, "ov_flash": _ov_flash_line}
 
 
 # -- Step 20: the packing station ---------------------------------------------
@@ -2765,6 +2870,9 @@ func _step_bell() -> void:
 	var r := floor_rect(TOP)
 	# Under the awning's right end (clear of the news paper in the corner).
 	var at := Vector2(r.end.x - 108, r.position.y + 14 + r.size.y * 0.12 + _head_px() * 0.4)
+	# Step 44: and left of the shop's places (their 2x2 block reaches up under the awning).
+	if int(rules.slots("shop")) > 0:
+		at.x = minf(at.x, slot_rect("shop", int(rules.slots("shop")) - 1).position.x - _head_px() * 0.9)
 	if bell_node.position != at:
 		bell_node.position = at
 		bell_node.queue_redraw()
@@ -2846,6 +2954,13 @@ const CUE_FLOOR := {"production": LOW, "packaging": MID, "demand": TOP, "service
 func _step_cues() -> void:
 	if rules == null:
 		return
+	if full_cue.visible and now_ms >= _full_until:
+		full_cue.visible = false
+	elif full_cue.visible and not reduced_motion:
+		full_cue.modulate.a = 0.55 + 0.45 * absf(sin(_clock * 5.0))
+	if _ov_flash_line != "" and now_ms >= _ov_flash_until:
+		_ov_flash_line = ""
+		detail_layer.queue_redraw()
 	var b := String(rules.bottleneck())
 	var ck := "%s|%s" % [b, size]   # (and on a resize: drawn before the layout, it was drawn at nothing)
 	if ck != _cue_key:
@@ -2958,7 +3073,7 @@ func _slot_rect(floor: String, k: int) -> Rect2:
 			# news button (top right), right of the lanes.
 			var r := floor_rect(TOP)
 			var hp := _head_px()
-			var w := hp * 1.6
+			var w := maxf(hp * 1.6, 48.0)   # Step 44: at least 48 (was hp * 1.6: 17 css px on a 360 px phone)
 			var bottom := counter_rect().position.y
 			var h := w * 1.2
 			if dense("shop"):
@@ -2970,8 +3085,15 @@ func _slot_rect(floor: String, k: int) -> Rect2:
 				var row := k / per
 				var col := k % per
 				return Rect2(Vector2(r.end.x - hp * 1.2 - (col + 1) * w * 1.08, bottom - h - row * (h + 4.0)), Vector2(w, h))
-			var x := r.end.x - hp * 1.2 - (k + 1) * w * 1.08
-			return Rect2(Vector2(x, bottom - h), Vector2(w, h))
+			# Step 44: one line's four places as a 2x2 block under the news button (as the dense
+			# shop stacks its lines) -- a row of four at a finger's size took the queue's room.
+			# The block stands left of the news button, so it has the floor's height.
+			var top0 := r.position.y + 8.0
+			h = minf(h, (bottom - top0 - 4.0) / 2.0)
+			w = minf(w, h / 1.2)
+			var right := minf(r.end.x - hp * 1.2, news_rect().position.x - 6.0)
+			var x := right - (k % 2 + 1) * w * 1.08
+			return Rect2(Vector2(x, bottom - h - (k / 2) * (h + 4.0)), Vector2(w, h))
 	return Rect2()
 
 
@@ -2983,6 +3105,47 @@ func _machine_buttons() -> Dictionary:
 	var s := clampf(r.size.x * 0.42, 28.0, 44.0)
 	return {"pause": Rect2(Vector2(r.position.x - s * 0.2, r.end.y - s * 0.6), Vector2(s, s)),
 		"sell": Rect2(Vector2(r.end.x - s * 0.8, r.end.y - s * 0.6), Vector2(s, s))}
+
+
+## Step 44: the overview's rates are a way in, not only a reading. A rate (the one ringed
+## red is the bottleneck) takes the player to its floor with its first free place open, so
+## the picker -- whose machines that help the bottleneck carry a green tick -- is one tap
+## away. A full floor keeps the card open and rings its next line's button instead.
+const STAGE_FLOOR := ["kitchen", "packing", "shop"]
+
+
+## A rate's column -- the rate and the money row under it -- is its press (a finger's size).
+func _rate_hit(L: Dictionary, i: int) -> Rect2:
+	var r: Rect2 = L["rates"][i]
+	var m: Rect2 = L["money"][i]
+	return Rect2(r.position, Vector2(r.size.x, m.end.y - r.position.y))
+
+
+func go_to_stage(i: int) -> void:
+	var f := String(STAGE_FLOOR[clampi(i, 0, 2)])
+	var free := -1
+	if rules.station_open(String(MACHINE_OF[f])):
+		for k in int(rules.slots(f)):
+			if rules.machine_at(f, k).is_empty():
+				free = k
+				break
+	if free < 0:
+		_ov_flash_line = f
+		_ov_flash_until = now_ms + 1600
+		_sound("thud" if int(rules.line_cost(f)) < 0 else "clink", 1.2, -12.0)
+		detail_layer.queue_redraw()
+		return
+	overview = false
+	ov_machine = -1
+	news_open = false
+	selected = int(FLOOR_INDEX[f])
+	sel_machine = -1
+	sel_slot = {"floor": f, "k": free}
+	command.emit("select_machine", {"type": "select_machine", "id": -1})
+	_floors_key = ""
+	_redraw_once = true
+	detail_layer.queue_redraw()
+	_sound("clink", 1.2, -12.0)
 
 
 func _clear_machine_selection() -> void:
@@ -3019,6 +3182,10 @@ func _machine_press(p: Vector2) -> bool:
 			if (L["machines"][id] as Rect2).has_point(p):
 				ov_machine = -1 if ov_machine == id else id
 				detail_layer.queue_redraw()
+				return true
+		for i in 3:
+			if _rate_hit(L, i).has_point(p):
+				go_to_stage(i)
 				return true
 		if _pause_all_rect().has_point(p):
 			var any_on := (rules.get("machines") as Array).any(func(x: Dictionary) -> bool: return String(x["state"]) != "paused")
@@ -3543,7 +3710,8 @@ func _floor_choices(floor: String) -> Array:
 
 func _picker_rects(d: Rect2) -> Array:
 	# Step 29: up to fifteen kitchen machines -- a grid in the panel's free part (right of
-	# the numbers on a wide panel, below them on a tall one), as big as fits (<= 52 px).
+	# the numbers on a wide panel, below them on a tall one), as big as fits (<= 84 px; Step 44:
+	# 52 was 26 css px on a 390 px phone with half the card empty).
 	var out: Array = []
 	var choices := _floor_choices(String(sel_slot.get("floor", "kitchen")))
 	var n := choices.size()
@@ -3557,7 +3725,7 @@ func _picker_rects(d: Rect2) -> Array:
 	var cols := n
 	for rows in range(1, 6):
 		var c := ceili(float(n) / rows)
-		var sz := minf(52.0, minf(area.size.x / c, area.size.y / rows))
+		var sz := minf(84.0, minf(area.size.x / c, area.size.y / rows))
 		if sz > best:
 			best = sz
 			cols = c
@@ -3757,7 +3925,7 @@ func _draw_heat_gauge() -> void:
 ## Step 32: the overview's button -- a coin with a clock hand, bottom-left of the kitchen.
 func overview_button_rect() -> Rect2:
 	var low := floor_rect(LOW)
-	var s := clampf(_head_px() * 1.6, 34.0, 52.0)
+	var s := clampf(_head_px() * 2.4, 50.0, 64.0)   # Step 44: was 34-52 (22 css px on a phone)
 	return Rect2(Vector2(low.position.x + 12, low.end.y - s - 12), Vector2(s, s))
 
 
@@ -3907,6 +4075,10 @@ func _draw_overview(ci: CanvasItem, d: Rect2) -> void:
 		PopFactoryArt.machine_icon(ci, chip.grow(-6), String(MACHINE_OF[f]), 0)
 		var lc := int(rules.line_cost(f))
 		var b: Rect2 = L["lines"][f]
+		if _ov_flash_line == f and now_ms < _ov_flash_until:
+			var fp := PopMachineArt.round_rect_points(b.grow(4), 10)
+			fp.append(fp[0])
+			ci.draw_polyline(fp, PopTokens.WARN, 3.0, true)   # Step 44: this floor is full -- its next line
 		if lc >= 0:
 			var ready: bool = rules.floor_full(f) and rules.money >= lc
 			PopMachineArt._round_rect(ci, b, 8, PopPalette.GOLD if ready else Color(PopPalette.INK, 0.12))

@@ -63,6 +63,7 @@ func _spoon_ms(f: PopRules, fl: String, grade: String) -> int:
 
 func _factory(mode: String, scale: float, tier: int) -> Dictionary:
 	var f: PopRules = Factory.new(null, 20261117)
+	f.coater_fair = OS.get_environment("COATER_FAIR") != "0"   # Step 44 A/B
 	if scale != 1.0:
 		for fl: String in ["cheese", "spicy", "caramel", "cocoa"]:
 			var r: Dictionary = f.flavor(fl)

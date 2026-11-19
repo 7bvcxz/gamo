@@ -6,6 +6,17 @@
 // (desktop) a paused cashier holds its customers' sales until it is resumed.
 import { test, expect } from '../lib/pop.mjs';
 
+// Step 44: the picker's icons grew to a finger's size and now cover the card over the shop floor;
+// a shop place under an open card is closed first, as a player would (the floor's badge).
+const overlap = (a, b) => a && b && a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+async function closeCardOver(pop, rect) {
+  const s = await pop.state();
+  if (s.rects.detail && s.view.selected >= 0 && overlap(rect, s.rects.detail)) {
+    await pop.tap(['badge_top', 'badge_mid', 'badge_low'][s.view.selected]);
+    await expect.poll(async () => !!(await pop.state()).rects.detail).toBe(false);
+  }
+}
+
 async function opened(pop) {
   await pop.open('./#factory');
   const s = await pop.state();
@@ -23,6 +34,7 @@ async function opened(pop) {
 async function build(pop, floor, list) {
   for (const [slot, type] of list) {
     const n = (await pop.state()).run.machines.length;
+    await closeCardOver(pop, (await pop.state()).rects[`slot_${floor}_${slot}`]);
     await pop.tap(`slot_${floor}_${slot}`);
     await expect.poll(async () => !!(await pop.state()).rects[`pick_${type}`], { message: `${type} in the picker` }).toBe(true);
     await pop.tap(`pick_${type}`);
@@ -44,6 +56,7 @@ test('the storefront: cashier, express window, robot lanes, router -- honest sal
   await opened(pop);
   await build(pop, 'kitchen', [[0, 'cooker'], [1, 'cooker'], [2, 'M01'], [3, 'M08']]);
   await build(pop, 'packing', [[0, 'bagger'], [1, 'bagger']]);
+  await closeCardOver(pop, (await pop.state()).rects.slot_shop_0);
   await pop.tap('slot_shop_0');
   const rects = (await pop.state()).rects;
   for (const id of ['kiosk', 'S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S08']) expect(rects[`pick_${id}`], `${id} in the shop picker`).toBeTruthy();

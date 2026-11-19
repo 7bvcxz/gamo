@@ -30,6 +30,21 @@ static func prefers_reduced_motion() -> bool:
 	return v != null and int(v) == 1
 
 
+## Step 44: for a screen reader. The canvas is one opaque picture to it (Godot's web build
+## has no accessibility tree), so the page gets a label saying what the game is and how its
+## one input works, and a polite live region the game sends a few big moments to. Nothing
+## of this is drawn: the screen stays wordless (root AGENTS).
+static func label_canvas(text: String) -> void:
+	eval("(function(t){var c=document.querySelector('canvas');if(c){c.setAttribute('role','application');c.setAttribute('aria-label',t);}})(%s)" % JSON.stringify(text))
+
+
+static func announce(text: String) -> void:
+	eval("(function(t){var d=document.getElementById('popcorn-live');if(!d){d=document.createElement('div');d.id='popcorn-live';"
+		+ "d.setAttribute('role','status');d.setAttribute('aria-live','polite');"
+		+ "d.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';"
+		+ "document.body.appendChild(d);}d.textContent=t;})(%s)" % JSON.stringify(text))
+
+
 static func location_hash() -> String:
 	var v: Variant = eval("location.hash")
 	return String(v) if v != null else ""

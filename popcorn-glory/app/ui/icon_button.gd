@@ -45,6 +45,19 @@ func _draw() -> void:
 			else:
 				draw_line(c + Vector2(k * 0.4, -k * 0.4), c + Vector2(k * 1.05, k * 0.4), PopPalette.RED, k * 0.2)
 				draw_line(c + Vector2(k * 0.4, k * 0.4), c + Vector2(k * 1.05, -k * 0.4), PopPalette.RED, k * 0.2)
+		"motion", "still":
+			# Step 44: a four-point sparkle; full motion has its trail of arcs, calm has none
+			# and a resting bar under it (the same hush as the sound's calm).
+			var sp := c + Vector2(k * 0.25, -k * 0.1)
+			var a := k * 0.75
+			var b := k * 0.22
+			draw_colored_polygon(PackedVector2Array([sp + Vector2(0, -a), sp + Vector2(b, -b), sp + Vector2(a, 0), sp + Vector2(b, b),
+				sp + Vector2(0, a), sp + Vector2(-b, b), sp + Vector2(-a, 0), sp + Vector2(-b, -b)]), PopPalette.INK)
+			if icon == "motion":
+				draw_arc(sp, k * 1.05, PI * 0.62, PI * 1.02, 10, PopPalette.INK, k * 0.14)
+				draw_arc(sp, k * 1.35, PI * 0.68, PI * 0.96, 10, PopPalette.INK, k * 0.12)
+			else:
+				draw_line(c + Vector2(-k * 0.7, k * 1.05), c + Vector2(k * 1.05, k * 1.05), PopPalette.INK, k * 0.16)
 		"log":
 			# A sheet with lines and a down arrow: save the log.
 			draw_rect(Rect2(c + Vector2(-k * 0.7, -k * 0.95), Vector2(k * 1.4, k * 1.6)), PopPalette.INK, false, k * 0.14)

@@ -80,14 +80,26 @@ func _ready() -> void:
 			session.record(clock.now_ms, "denied", {"card": which, "money": rules.money, "offer": offer if offer != "" else "kettle"})
 			audio.play("thud", 1.25, -8.0))
 	frame.sound_pressed.connect(toggle_sound)
+	frame.motion_pressed.connect(toggle_motion)
 	frame.log_pressed.connect(download_log)
 	audio = PopAudio.new()
 	audio.name = "Audio"
 	add_child(audio)
 	route = PopRoute.parse(PopWeb.location_hash(), PopWeb.location_search(), OS.get_cmdline_user_args())
 	# ?motion=reduce forces it, ?motion=full overrides the system's setting.
-	reduced_motion = String(route["motion"]) == "reduce" or (String(route["motion"]) != "full" and PopWeb.prefers_reduced_motion())
-	low_effects = String(route.get("fx", "")) == "low"
+	# Step 44: then the player's own choice (the motion button), then the system's setting.
+	var saved_motion := PopSaveStore.read("motion").strip_edges()
+	if String(route["motion"]) == "reduce":
+		reduced_motion = true
+	elif String(route["motion"]) == "full":
+		reduced_motion = false
+	elif saved_motion in ["calm", "full"]:
+		reduced_motion = saved_motion == "calm"
+	else:
+		reduced_motion = PopWeb.prefers_reduced_motion()
+	# Calm motion is also the low effects (the fewest pieces); ?fx=low asks for those alone.
+	low_effects = String(route.get("fx", "")) == "low" or reduced_motion
+	frame.set_motion(reduced_motion)
 	frame.dev = bool(route["dev"])
 	frame.trial = bool(route["trial"])
 	burst = bool(route["burst"])
@@ -175,6 +187,21 @@ func toggle_sound() -> void:
 	audio.next_level()
 	frame.set_sound(audio.level_name())
 	PopSaveStore.write("sound", audio.level_name())
+
+
+## Step 44: full motion <-> calm (reduced motion and the low effects), kept like the sound.
+func toggle_motion() -> void:
+	reduced_motion = not reduced_motion
+	low_effects = reduced_motion or String(route.get("fx", "")) == "low"
+	frame.set_motion(reduced_motion)
+	PopSaveStore.write("motion", "calm" if reduced_motion else "full")
+	if screen == "play" and frame.play != null:
+		frame.play.reduced_motion = reduced_motion
+		if "low_effects" in frame.play:
+			frame.play.set("low_effects", low_effects)
+		frame.play.queue_redraw()
+	if audio:
+		audio.play("clink", 1.1 if reduced_motion else 1.3, -12.0)
 
 
 func restart() -> void:
@@ -276,6 +303,19 @@ func dev_build(plan: Array, sign: int, packer: int) -> Dictionary:
 	rules.money = maxi(before, 3000)
 	_flush()
 	return {"ok": true, "built": built, "machines": rules.machines.size()}
+
+
+## Step 44 (tests): fills the factory's raw bin with plain lots, counted as made (the
+## conservation check still holds), so the hand's next lot waits in the glass.
+func dev_fill_bin() -> Dictionary:
+	if rules == null or not rules.has_method("bin_cap"):
+		return {"ok": false}
+	var room: int = int(rules.bin_cap()) - int(rules.bin_portions()) - int(rules.lift_portions()) - int(rules.coating_portions())
+	if room > 0:
+		(rules.get("bin") as Array).append({"id": rules._new_id(), "recipe": "plain", "quality": 80, "portions": room})
+		rules.stats["made_portions"] = int(rules.stats["made_portions"]) + room
+	_flush()
+	return {"ok": true, "added": maxi(0, room)}
 
 
 func dev_level(level: int) -> void:
@@ -438,6 +478,7 @@ func _start(id: String) -> void:
 	view.command.connect(on_command)
 	frame.accent = entry["color"]
 	frame.has_auto = rules.has_method("auto_offer")
+	frame.show_motion = id == "factory"
 	frame.wide = bool(entry.get("wide", false))
 	frame.set_play(view)
 	view.setup(rules)
@@ -524,7 +565,7 @@ func _rects() -> Dictionary:
 	var named: Dictionary = {}
 	if screen == "play":
 		named = {"play": frame.play, "upgrade": frame.upgrade_button, "back": frame.back_button,
-			"restart": frame.restart_button, "money": frame.money_view, "sound": frame.sound_button}
+			"restart": frame.restart_button, "money": frame.money_view, "sound": frame.sound_button, "motion": frame.motion_button}
 	else:
 		for t: Dictionary in chooser.tiles:
 			named["tile_" + String(t["id"])] = t["button"]
@@ -533,6 +574,8 @@ func _rects() -> Dictionary:
 		named["auto"] = frame.auto_button
 	for key: String in named.keys():
 		var c: Control = named[key]
+		if key == "motion" and not c.visible:
+			continue
 		var r := xf * c.get_global_rect()
 		out[key] = [r.position.x, r.position.y, r.size.x, r.size.y]
 	# What the experiment's own picture lets you tap (the stand's shakers).

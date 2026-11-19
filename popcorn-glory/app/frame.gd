@@ -16,12 +16,21 @@ signal auto_pressed
 ## A card tapped while it cannot be paid for (the stand): the app logs it and makes a low 'no'.
 signal denied(which: String)
 signal sound_pressed
+## Step 44: the motion button -- full movement, or calm (reduced motion and low effects).
+signal motion_pressed
 ## Dev mode only (?dev=1): download this run's local log as JSON.
 signal log_pressed
 
 var back_button := PopIconButton.new()
 var restart_button := PopIconButton.new()
 var sound_button := PopIconButton.new()
+var motion_button := PopIconButton.new()
+## Step 44: only the factory shows it (the experiments A/B/C keep the bar they were compared with).
+var show_motion := false:
+	set(v):
+		show_motion = v
+		motion_button.visible = v
+		_layout()
 var log_button := PopIconButton.new()
 var money_view := PopMoneyView.new()
 var upgrade_button := PopUpgradeButton.new()
@@ -57,11 +66,14 @@ func _init() -> void:
 	log_button.icon = "log"
 	log_button.visible = false
 	sound_button.icon = "sound"
+	motion_button.name = "Motion"
+	motion_button.icon = "motion"
+	motion_button.visible = false
 	money_view.name = "Money"
 	upgrade_button.name = "Upgrade"
 	auto_button.name = "Auto"
 	auto_button.visible = false
-	for c: Control in [money_view, upgrade_button, auto_button, back_button, restart_button, sound_button, log_button]:
+	for c: Control in [money_view, upgrade_button, auto_button, back_button, restart_button, sound_button, motion_button, log_button]:
 		add_child(c)
 	back_button.pressed.connect(func() -> void: back_pressed.emit())
 	restart_button.pressed.connect(_on_restart)
@@ -72,7 +84,14 @@ func _init() -> void:
 	upgrade_button.denied.connect(_on_denied.bind(upgrade_button))
 	auto_button.denied.connect(_on_denied.bind(auto_button))
 	sound_button.pressed.connect(func() -> void: sound_pressed.emit())
+	motion_button.pressed.connect(func() -> void: motion_pressed.emit())
 	log_button.pressed.connect(func() -> void: log_pressed.emit())
+
+
+## Step 44: calm motion shows a still sparkle; full motion a sparkle with its trail.
+func set_motion(calm: bool) -> void:
+	motion_button.icon = "still" if calm else "motion"
+	motion_button.queue_redraw()
 
 
 ## loud | soft | calm | off
@@ -120,11 +139,13 @@ func _layout() -> void:
 	restart_button.size = Vector2(84, 84)
 	sound_button.position = Vector2(x0 + col - 200, 28)
 	sound_button.size = Vector2(84, 84)
+	motion_button.position = Vector2(x0 + col - 292, 28)
+	motion_button.size = Vector2(84, 84)
 	log_button.position = Vector2(x0 + 24, 160)
 	log_button.size = Vector2(72, 72)
 	log_button.visible = dev
 	money_view.position = Vector2(x0 + 120, 34)
-	money_view.size = Vector2(col - 330, 76)
+	money_view.size = Vector2(col - (422 if show_motion else 330), 76)
 	var bh := clampf(h * 0.13, 120.0, 170.0)
 	upgrade_button.size = Vector2(minf(col - 80, 520.0), bh)
 	upgrade_button.position = Vector2((w - upgrade_button.size.x) / 2, h - bh - 48)
@@ -146,6 +167,8 @@ func _layout_wide(w: float, h: float) -> void:
 	restart_button.size = Vector2(80, 80)
 	sound_button.position = Vector2(w - 194, 20)
 	sound_button.size = Vector2(80, 80)
+	motion_button.position = Vector2(w - 284, 20)
+	motion_button.size = Vector2(80, 80)
 	log_button.position = Vector2(24, 120)
 	log_button.size = Vector2(72, 72)
 	log_button.visible = dev

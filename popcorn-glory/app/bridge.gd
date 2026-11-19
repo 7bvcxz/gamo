@@ -76,6 +76,9 @@ func query(name: String, arg: Variant) -> Variant:
 			# Step 42: a later factory for the motion tests: {plan: [[type, floor]...], sign, packer}.
 			var a: Dictionary = arg if typeof(arg) == TYPE_DICTIONARY else {}
 			return _app.call("dev_build", a.get("plan", []), int(a.get("sign", 6)), int(a.get("packer", 3)))
+		"dev_fill_bin":
+			# Step 44: the raw bin made full (counted as made), so the hand's next lot waits.
+			return _app.call("dev_fill_bin")
 		"dev_level":
 			# A picture of a later machine for render checks -- not a play
 			# (the play tests never call it).

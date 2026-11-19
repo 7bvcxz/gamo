@@ -99,9 +99,27 @@ func _gui_input(event: InputEvent) -> void:
 
 ## Space / Enter: the same action from the keyboard.
 func key(down: bool) -> void:
+	_key_held = down
 	if down:
 		_press()
 	else:
+		_release()
+
+
+var _key_held := false
+var focus_releases := 0   ## (for the tests)
+
+
+## Step 44: a hold whose finger or key the page can no longer see -- the window lost focus
+## (an alt-tab, a phone's notification shade) -- ends as a release then, instead of heating on
+## until it burns because the key-up or touch-end went to another window.
+func _notification(what: int) -> void:
+	if what != NOTIFICATION_APPLICATION_FOCUS_OUT and what != NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		return
+	if _held or _key_held:
+		_held = false
+		_key_held = false
+		focus_releases += 1
 		_release()
 
 

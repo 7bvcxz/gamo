@@ -1376,6 +1376,7 @@ func _coater_step(m: Dictionary, dt: int) -> void:
 		var f := _auto_pick(m) if String(m.get("flavor", "")) == AUTO else coater_flavor(m)
 		if f == "" or not flavor_open(f) or not recipe_problems(f).is_empty() or not _flavor_wanted(f):
 			m["state"] = "idle"
+			m.erase("coat_wait_ms")
 			return
 		# Step 35: a bigger drum (tier 1-2) coats what is short, from the recipe's batch up to its
 		# size -- a full drum of portions nobody wants held the bin's room and stopped the kettles
@@ -1387,6 +1388,7 @@ func _coater_step(m: Dictionary, dt: int) -> void:
 		if avail < batch:
 			m["state"] = "starved"
 			stats["coater_starved_ms"] = int(stats.get("coater_starved_ms", 0)) + dt
+			m["coat_wait_ms"] = int(m.get("coat_wait_ms", 0)) + dt
 			return
 		var cost := ingredient_cost(f, batch)
 		if money < cost:
@@ -1403,6 +1405,7 @@ func _coater_step(m: Dictionary, dt: int) -> void:
 		var ms := coat_ms(m, f, batch)
 		m["held"] = {"id": _new_id(), "recipe": f, "quality": taken["quality"], "portions": batch, "left_ms": ms, "ms": ms, "line": line, "lots": taken["lots"]}
 		m["state"] = "run"
+		m.erase("coat_wait_ms")
 		_emit("coat_started", {"machine": m["id"], "flavor": f, "portions": batch, "ms": ms, "cost": cost, "lot": m["held"]["id"]})
 		return
 	if int(finishing.get("machine", -1)) == int(m["id"]):
@@ -2361,9 +2364,43 @@ func _pay(m: Dictionary, dt: int) -> bool:
 	return true
 
 
+## Step 44: a coater starved of plain for a long time goes first. Coaters take the bin's plain in
+## build order, so in a plain-poor factory the coater built last could get no batch at all:
+## flavors34 saw the cocoa coater starved for 12.5 minutes while caramel coated 67, and 2 of 40
+## seeds of the same factory starved it all ten minutes headless (the 0.43.0 rules too). A coater
+## that has waited STARVE_FIRST_MS (`coat_wait_ms`, saved with the machine) takes its turn at the
+## first coater's place in the order, the longest-waiting first; every other coater keeps the
+## build order. (Full fairness -- always the longest wait first -- cost a plain-poor factory 40%
+## of its sales: the order is part of the economy; only a coater that would never run is helped.)
+const STARVE_FIRST_MS := 60000
+var coater_fair := true   ## Step 44 (not saved): false is the old build order, for the A/B test
+
+
+func _coater_turns() -> Array:
+	var coaters: Array = []
+	var aged: Array = []
+	for m: Dictionary in machines:
+		if String(m["type"]) in ["P05", "P06"]:
+			if coater_fair and int(m.get("coat_wait_ms", 0)) >= STARVE_FIRST_MS:
+				aged.append(m)
+			else:
+				coaters.append(m)
+	if aged.is_empty():
+		return coaters
+	aged.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a["coat_wait_ms"]) > int(b["coat_wait_ms"]))
+	return aged + coaters
+
+
 func _machines_step(dt: int) -> void:
 	_heat_step(dt)
-	for m: Dictionary in machines:
+	var turns := _coater_turns()
+	var turn := 0
+	for each: Dictionary in machines:
+		var m := each
+		if String(m["type"]) in ["P05", "P06"]:
+			m = turns[turn]
+			turn += 1
 		if String(m["state"]) == "paused":
 			continue
 		match String(m["type"]):
@@ -2391,12 +2428,45 @@ func _machines_step(dt: int) -> void:
 				_device_step(m, dt)
 
 
+## Step 44: the room the hand's waiting lot needs before it can pour (0 when the glass is
+## empty) -- the bin keeps it for the hand. Without it the machines' small lots took every
+## gap the packers made and a big factory's glass could wait for minutes: at 44 machines the
+## hand was refused 19 presses in 20 (Step 43's soak). The same portions are packed either
+## way; the hand only stops being starved by its own machines.
+var hand_first := true   ## Step 44 (not saved): false is the old rule, for the A/B test
+
+
+func _bin_draining() -> bool:
+	if not packing.is_empty():
+		return true   # the station is filling a pack
+	for m: Dictionary in machines:
+		if String(m["type"]) in ["bagger", "P01"] and String(m.get("state", "")) == "run":
+			return true
+	return false
+
+
+func hand_reserve() -> int:
+	if glass.is_empty() or not hand_first:
+		return 0
+	# Only while something is packing from the bin (the room is coming). When every packer is
+	# starved -- the bin holds lots no order can use -- the machines may fill again: a reserve
+	# then stopped the very production the orders waited for (career 90 min, seed 3901: 11 dead
+	# minutes, bin 20, queue 7, nothing packed).
+	if not _bin_draining():
+		return 0
+	var want := int(glass["portions"])
+	var full_bin := bin_cap()
+	if want > full_bin:
+		return 1   # it pours a part into any room (Step 24)
+	return mini(want, maxi(1, full_bin / 2))
+
+
 ## A cooker finishes a lot every cycle; the lot goes up when the bin has room for it,
 ## else the cooker holds it (blocked, no upkeep).
 func _cooker_step(m: Dictionary, dt: int) -> void:
 	if not (m["held"] as Dictionary).is_empty():
 		var lot: Dictionary = m["held"]
-		var room := bin_cap() - bin_portions() - lift_portions() - coating_portions()
+		var room := bin_cap() - bin_portions() - lift_portions() - coating_portions() - hand_reserve()
 		if room < int(lot["portions"]):
 			m["state"] = "blocked"
 			stats["auto_blocked_ms"] = int(stats["auto_blocked_ms"]) + dt
