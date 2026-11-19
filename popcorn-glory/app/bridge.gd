@@ -81,6 +81,15 @@ func query(name: String, arg: Variant) -> Variant:
 			# (the play tests never call it).
 			_app.call("dev_level", int(arg))
 			return {"ok": true}
+		"dev_sound":
+			# Step 43: one sound of the grammar, at a place across the screen (x 0..1; none: centred).
+			var sa: Dictionary = arg if typeof(arg) == TYPE_DICTIONARY else {}
+			var au: PopAudio = _app.get("audio")
+			if sa.has("x"):
+				au.play_at(String(sa.get("name", "")), float(sa["x"]), float(sa.get("pitch", 1.0)), float(sa.get("db", 0.0)))
+			else:
+				au.play(String(sa.get("name", "")), float(sa.get("pitch", 1.0)), float(sa.get("db", 0.0)))
+			return {"ok": true}
 		"dev_render_info":
 			return {"ok": true,
 				"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),

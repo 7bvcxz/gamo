@@ -94,6 +94,10 @@ func _ready() -> void:
 	seed = int(route.get("seed", -1))
 	scene = String(route.get("scene", ""))
 	audio.set_muted(not bool(route["sound"]))
+	if bool(route["sound"]):
+		# Step 43: the player's own choice (the speaker button) is kept; the address wins.
+		var lv := String(route.get("sound_level", ""))
+		audio.set_level_name(lv if lv != "" else PopSaveStore.read("sound").strip_edges())
 	frame.set_sound(audio.level_name())
 	if not economy.errors.is_empty():
 		push_error("economy.json: %s" % [economy.errors])
@@ -102,6 +106,7 @@ func _ready() -> void:
 		if hidden:
 			save_now()   # a phone may kill a hidden tab: write first
 		clock.set_pause("hidden", hidden)
+		audio.set_paused(hidden)   # Step 43: a hidden tab is silent (the beds stop, nothing piles up)
 		_has_last = false)   # the time away is not a hitch
 	bridge.attach(self)
 	get_viewport().size_changed.connect(_fit)
@@ -169,6 +174,7 @@ func download_log() -> void:
 func toggle_sound() -> void:
 	audio.next_level()
 	frame.set_sound(audio.level_name())
+	PopSaveStore.write("sound", audio.level_name())
 
 
 func restart() -> void:
@@ -421,6 +427,7 @@ func _start(id: String) -> void:
 	if bool(entry.get("burst_route", false)) and "burst_mode" in rules:
 		rules.set("burst_mode", burst)
 	clock.set_pause("hidden", web.hidden())
+	audio.set_paused(web.hidden())
 	var view_script: GDScript = load(String(entry["view"]))
 	var view: PopPlayView = view_script.new()
 	view.reduced_motion = reduced_motion
@@ -507,7 +514,7 @@ func state() -> Dictionary:
 		out["clock_ms"] = clock.now_ms
 		out["paused"] = clock.pause_reasons()
 		out["fx"] = {"alive": frame.play.fx.alive, "peak": frame.play.fx.peak, "cap": PopFx.CAP}
-	out["sound"] = {"muted": audio.muted, "level": audio.level_name(), "played": audio.played.duplicate()}
+	out["sound"] = audio.debug()
 	return out
 
 

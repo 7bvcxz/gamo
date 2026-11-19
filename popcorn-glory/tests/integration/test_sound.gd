@@ -16,6 +16,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	app.audio.set_muted(false)
+	PopSaveStore.clear("sound")   # the speaker button's choice is kept (Step 43): not between tests
 	app.queue_free()
 	await tree.process_frame
 
@@ -68,7 +69,7 @@ func test_an_upgrade_chimes() -> void:
 	assert_eq(_played("upgrade"), 1, "upgrade chime")
 
 
-func test_the_sound_button_steps_loud_soft_off() -> void:
+func test_the_sound_button_steps_loud_soft_calm_off() -> void:
 	app.open("click")
 	await tree.process_frame
 	var bus := AudioServer.get_bus_index(&"SFX")
@@ -78,6 +79,12 @@ func test_the_sound_button_steps_loud_soft_off() -> void:
 	assert_false(AudioServer.is_bus_mute(bus), "soft is not muted")
 	assert_near(AudioServer.get_bus_volume_db(bus), -12.0, 0.01, "-12 dB")
 	assert_eq(app.frame.sound_button.icon, "soft", "one wave")
+	app.toggle_sound()
+	# Step 43: calm, the reduced-audio option -- effects a little lower, the beds off.
+	assert_false(AudioServer.is_bus_mute(bus), "calm is not muted")
+	assert_true(AudioServer.is_bus_mute(AudioServer.get_bus_index(&"Ambient")), "calm: no beds")
+	assert_eq(app.frame.sound_button.icon, "calm", "the hush")
+	assert_eq(PopSaveStore.read("sound"), "calm", "the choice is kept")
 	app.toggle_sound()
 	assert_true(AudioServer.is_bus_mute(bus), "off")
 	assert_eq(app.frame.sound_button.icon, "mute", "the cross")
@@ -112,12 +119,12 @@ func test_holding_keeps_one_sizzle_stream() -> void:
 	await tree.process_frame
 	app.on_command("press", {"type": "press"})
 	await tree.process_frame
-	var first: AudioStream = app.audio._loop.stream
+	var first: AudioStream = app.audio._loops[0].stream
 	for i in 20:
 		await tree.process_frame
 	assert_eq(_played("sizzle"), 1, "started once for one hold, not once a frame")
-	assert_true(app.audio._loop.stream == first, "the same stream the whole hold")
-	assert_true(app.audio._loop.playing, "still sizzling")
+	assert_true(app.audio._loops[0].stream == first, "the same stream the whole hold")
+	assert_true(app.audio._loops[0].playing, "still sizzling")
 	app.on_command("release", {"type": "release"})
 	await tree.process_frame
 	app.dev_advance(2000)
@@ -125,4 +132,4 @@ func test_holding_keeps_one_sizzle_stream() -> void:
 	for i in 5:
 		await tree.process_frame
 	assert_eq(_played("sizzle"), 2, "the next hold starts it once more")
-	assert_true(app.audio._loop.stream == first, "and reuses the same copy")
+	assert_true(app.audio._loops[0].stream == first, "and reuses the same copy")

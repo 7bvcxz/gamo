@@ -75,9 +75,9 @@ func _init() -> void:
 	log_button.pressed.connect(func() -> void: log_pressed.emit())
 
 
-## loud | soft | off
+## loud | soft | calm | off
 func set_sound(level_name: String) -> void:
-	sound_button.icon = {"loud": "sound", "soft": "soft", "off": "mute"}.get(level_name, "sound")
+	sound_button.icon = {"loud": "sound", "soft": "soft", "calm": "calm", "off": "mute"}.get(level_name, "sound")
 	sound_button.queue_redraw()
 
 

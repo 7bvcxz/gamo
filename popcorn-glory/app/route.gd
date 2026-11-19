@@ -6,7 +6,7 @@ extends RefCounted
 ## (`godot --path popcorn-glory -- --exp stub --dev`).
 
 static func parse(hash: String, search: String, args: PackedStringArray) -> Dictionary:
-	var out := {"exp": "", "dev": false, "sound": true, "motion": "", "trial": false, "burst": false, "seed": -1, "scene": "", "fx": ""}
+	var out := {"exp": "", "dev": false, "sound": true, "sound_level": "", "motion": "", "trial": false, "burst": false, "seed": -1, "scene": "", "fx": ""}
 	var h := hash.trim_prefix("#").strip_edges()
 	if h != "":
 		out["exp"] = h.uri_decode()
@@ -19,6 +19,8 @@ static func parse(hash: String, search: String, args: PackedStringArray) -> Dict
 				out["dev"] = v != "0"
 			"sound":
 				out["sound"] = v != "off" and v != "0"
+				if v in ["loud", "soft", "calm"]:
+					out["sound_level"] = v   # Step 43: ?sound=calm, the reduced-audio option
 			"motion":
 				out["motion"] = v
 			"trial":

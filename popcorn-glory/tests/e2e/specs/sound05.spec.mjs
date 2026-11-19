@@ -134,7 +134,7 @@ test('C: kernels clink and the eruption booms', async ({ pop }) => {
   expect((await pop.state()).sound.played.boom ?? 0).toBeGreaterThan(0);
 });
 
-test('the speaker button steps loud -> soft -> off, and back on', async ({ pop }) => {
+test('the speaker button steps loud -> soft -> calm -> off, and back on', async ({ pop }) => {
   await pop.open('./#click');
   await pop.tap('play');
   await pop.page.waitForTimeout(300);
@@ -144,6 +144,12 @@ test('the speaker button steps loud -> soft -> off, and back on', async ({ pop }
   await pop.tap('play');
   const s = await soft(500);
   expect(s.rms, `soft rms ${s.rms.toFixed(4)}`).toBeGreaterThan(0.002);
+  await pop.tap('sound');   // Step 43: calm (the reduced-audio option): the press is still heard
+  await expect.poll(async () => (await pop.state()).sound.level).toBe('calm');
+  const calm = await listen(pop.page);
+  await pop.tap('play');
+  const c = await calm(500);
+  expect(c.rms, `calm rms ${c.rms.toFixed(4)}`).toBeGreaterThan(0.002);
   await pop.tap('sound');
   await expect.poll(async () => (await pop.state()).sound.muted).toBe(true);
   await pop.page.waitForTimeout(600);

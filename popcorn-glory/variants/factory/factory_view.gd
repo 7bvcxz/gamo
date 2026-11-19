@@ -51,6 +51,9 @@ var detail_layer := Node2D.new()   ## above everything: the open floor's detail
 const Actor := preload("res://variants/factory/actor.gd")
 var actor_layer := Node2D.new()
 var customers := {}       ## customer id -> actor
+var _sound_t := 0.0       ## Step 43: the soundscape's next update
+var _kitchen_run := 0     ## Step 43: kitchen machines running (the hum)
+var _arrivals: Array[float] = []   ## Step 43: when customers came in (the view's clock), for the murmur
 var cargo := {}           ## lot or pack id -> actor
 var leaving: Array = []   ## customers walking out
 ## What the pictures did, for the tests (G-13): {id, kind, what, t}.
@@ -703,14 +706,18 @@ func on_events(events: Array[Dictionary]) -> void:
 			fx.coin(at, machine_size() / 900.0)
 			_gain(int(e["data"].get("amount", 0)))
 			_gains[-1]["at"] = at
-			_sound("coin", 1.0, -6.0)
+			if String(e["data"].get("from", "")) == "contest":
+				_sound("coin", 1.0, -6.0)
+			else:
+				# Step 43: the sale's own sound, once per sale, where the bag met the customer.
+				_sound_at("cash", at, 1.0 + rng.randf_range(-0.03, 0.03), -4.0)
 		elif String(e["type"]) in ["auto_lot", "machine_assisted", "machine_upgraded", "machine_sold", "machine_paused", "kernels_loaded", "overheat"]:
 			_machine_event(e)
 		elif String(e["type"]) in ["finish_start", "finished", "coat_lost", "paid_back", "promo_on"]:
 			_spoon_event(e)   # Step 35
 		elif String(e["type"]) in ["news_start", "news_end"]:   # Step 37: the ticker slides out of the icon
 			_ticker = {"n": int(e["data"].get("n", -1)), "t": 0.0, "end": String(e["type"]) == "news_end"}
-			_sound("ding", 1.5 if String(e["type"]) == "news_start" else 1.1, -14.0)
+			_sound("news", 1.0 if String(e["type"]) == "news_start" else 0.8, -8.0 if String(e["type"]) == "news_start" else -16.0)
 			if String(e["type"]) == "news_start":
 				# Step 42: a rush of customers (an arrivals event) surges in -- the shop lights up.
 				var nrow := _news_row(int(e["data"].get("n", -1)))
@@ -722,12 +729,12 @@ func on_events(events: Array[Dictionary]) -> void:
 			_cticker = {"kind": "end", "t": 0.0, "row": (e["data"] as Dictionary).duplicate()}
 			_cancel_armed = 0.0
 			if int(e["data"].get("tier", 0)) > 0:
-				_sound("fanfare", 1.0 + 0.1 * int(e["data"]["tier"]), -8.0)
+				_sound("win", 1.0 + 0.06 * int(e["data"]["tier"]), -4.0)   # Step 43: a deserved prize, its own band
 				_celebrate("contest")   # Step 42: a prize -- the light climbs the factory
 			else:
-				_sound("ding", 0.9, -14.0)
+				_sound("news", 0.75, -14.0)
 		elif String(e["type"]) == "contest_start":
-			_sound("ding", 1.7, -12.0)
+			_sound("news", 1.2, -12.0)
 		elif String(e["type"]) == "station_upgrade":
 			# Each floor's own flourish (Step 24): the station sparkles where it
 			# stands with a rising chime and a clink of its new heads; the sign
@@ -741,7 +748,7 @@ func on_events(events: Array[Dictionary]) -> void:
 				if not reduced_motion:
 					fx.sparkle(slot_rect(String(FLOOR_OF_TYPE[st_name]), int(e["data"].get("slot", 0))).get_center(), machine_size() / 900.0, rng, motion.sparkles(6), 100.0)
 			elif st_name == "sign":
-				_sound("fanfare", 1.0 + 0.04 * tier, -6.0)
+				_sound("reveal", 1.0 + 0.03 * tier, -4.0)   # Step 43: the sign's reveal
 				_celebrate("sign")
 				if not reduced_motion:
 					fx.burst(_sign_rect().get_center(), 10 + tier * 2, machine_size() / 900.0, rng, PopPalette.GOLD, 0.8, 1.0)
@@ -2155,7 +2162,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				a.set_meta("trip", "coat")   # Step 42: its own record (it once ended as a "bag" with a lot's id)
 				cargo[-lid if String(e["type"]) == "coat_started" else lid] = a
 				_log(-lid if String(e["type"]) == "coat_started" else lid, "coat", "start")
-				_sound("pop_1", 0.8 if String(e["type"]) == "coat_started" else 1.6, -20.0)
+				_sound_at("coat", c_at, 0.9 if String(e["type"]) == "coat_started" else 1.15, -12.0)
 			"pack_started":
 				# Step 20: an empty open bag indexes in under its head; its fill follows the model's clock.
 				var pid := int(d["pack"])
@@ -2251,6 +2258,7 @@ func _flow_events(events: Array[Dictionary]) -> void:
 			"handed_over":
 				# Step 31: the bag is theirs; they carry it to the auto cashier's drawer and pay there.
 				_end_cargo(int(d["pack"]), "bag")
+				_sound_at("serve", _counter_point(), 1.0, -12.0)   # Step 43: the counter's bell
 				var hcid := int(d["customer"])
 				if customers.has(hcid):
 					var hc: Node2D = customers[hcid]
@@ -2292,7 +2300,8 @@ func _flow_events(events: Array[Dictionary]) -> void:
 					_line_up_payers()
 				_log(pid, "bag", "sold")
 			"customer_arrived":
-				_sound("ding", 1.7, -16.0)
+				_sound_at("door", _door(), 1.0, -16.0)   # Step 43: the shop door's little bell
+				_arrivals.append(_clock)
 				_arrived[int(d["customer"])] = d.get("order", {})
 				_who[int(d["customer"])] = String(d.get("who", "classic"))
 				if _who.size() > 96:
@@ -2649,7 +2658,7 @@ func _step_station(delta: float) -> void:
 				f["landed"] = int(f["landed"]) + 1
 				bag.fill = int(f["landed"])
 				bag.queue_redraw()
-				_sound("pop_1", 1.5 + 0.1 * float(f["landed"]), -16.0)
+				_sound_at("patter", bag.position, 1.0 + 0.05 * float(f["landed"]), -12.0)
 			else:
 				still.append(puff)
 		f["puffs"] = still
@@ -2659,7 +2668,7 @@ func _step_station(delta: float) -> void:
 			f["sealed"] = true
 			bag.open = false
 			bag.queue_redraw()
-			_sound("clink", 1.25, -10.0)
+			_sound_at("seal", bag.position, 1.0, -8.0)   # Step 43: when the head presses it shut
 	var idle := String(rules.packer_state()) != "run" and not reduced_motion
 	for i in n:
 		var bob := sin(_clock * 2.2 + i) * 2.5 if idle else 0.0
@@ -3457,7 +3466,7 @@ func _machine_event(e: Dictionary) -> void:
 				var n := motion.allow("lot", motion.lot_pieces())
 				if n > 0:
 					fx.burst(at, n, s, rng, PopPalette.CREAM if String(d.get("grade", "")) != "perfect" else PopPalette.GOLD, 0.35, 0.75)
-			_sound("pop_1", 1.3, -18.0)
+			_sound_at("mpop", at, rng.randf_range(0.9, 1.12), -12.0)   # Step 43: a machine's own, duller pop
 		"overheat":   # Step 29: the kitchen too hot -- a hiss, steam from every kettle
 			_sound("hiss", 0.8, -10.0)
 			if not reduced_motion:
@@ -4263,7 +4272,7 @@ func _spoon_event(e: Dictionary) -> void:
 	var d: Dictionary = e["data"]
 	match String(e["type"]):
 		"finish_start":
-			_sound("pop_1", 0.6, -14.0)
+			_sound("coat", 0.8, -10.0)
 			spoon_layer.queue_redraw()
 		"finished":
 			_spoon_fx = {"machine": int(d["machine"]), "grade": String(d["grade"]), "quality": int(d["quality"]), "t": 0.0}
@@ -4529,10 +4538,13 @@ func _step_motion_fx(delta: float) -> void:
 		_emit_t = 0.5
 		_emitters.clear()
 		var run := 0
+		_kitchen_run = 0
 		for m: Dictionary in rules.get("machines"):
 			if String(m["state"]) != "run":
 				continue
 			run += 1
+			if String(m["floor"]) == "kitchen":
+				_kitchen_run += 1
 			if String(m["type"]) in ["cooker", "M16", "P05", "P06"] and _fx_visible(slot_rect(String(m["floor"]), int(m["slot"])).get_center()):
 				_emitters.append(int(m["id"]))
 		motion.running = run
@@ -4563,6 +4575,71 @@ func _step_motion_fx(delta: float) -> void:
 				fx.sparkle(Vector2(r.get_center().x, r.position.y + r.size.y * 0.45), s * 0.55, rng, 1, 40.0)
 			else:
 				fx.steam(Vector2(r.get_center().x, r.position.y + r.size.y * 0.12), s * maxf(1.0, r.size.x / 60.0), rng)
+	_step_soundscape(delta)
+
+
+## Step 43: the beds follow what runs, five times a second (design/SOUND.md).
+func _step_soundscape(delta: float) -> void:
+	if audio == null:
+		return
+	_sound_t -= delta
+	if _sound_t > 0.0:
+		return
+	_sound_t = 0.2
+	var belts := 0
+	for b: Dictionary in _belts:
+		if bool(b["moving"]):
+			belts += 1
+	# The shop's crowd: who is in it, and how many came in the last twelve seconds (a busy
+	# shop serves fast, so the people present undercount it).
+	while not _arrivals.is_empty() and _arrivals[0] < _clock - 12.0:
+		_arrivals.pop_front()
+	var people := customers.size() + int(round(float(_arrivals.size()) * 0.5))
+	var t := PopSoundscape.targets(_kitchen_run, belts, motion.running, people)
+	for k: String in t:
+		audio.bed(k, float(t[k]))
+
+
+## Where on the screen a point of the scene is, 0 left .. 1 right (for panning).
+func _pan_x(p: Vector2) -> float:
+	var w := get_viewport_rect().size.x
+	return clampf((get_global_transform() * p).x / maxf(1.0, w), 0.0, 1.0) if w > 0.0 else 0.5
+
+
+func _sound_at(name: String, p: Vector2, pitch: float = 1.0, volume_db: float = 0.0) -> void:
+	if audio != null:
+		audio.play_at(name, _pan_x(p), pitch, volume_db)
+
+
+## Step 43: the hand's kettle in the factory speaks the factory's grammar.
+func _outcome_cue(outcome: String) -> void:
+	match outcome:
+		"perfect":
+			_sound("perfect", 1.0 + rng.randf_range(-0.015, 0.015))
+		"near":
+			_sound("perfect", 0.89, -7.0)
+		_:
+			super(outcome)
+
+
+func _heat_cue(heating: bool, frac: float) -> void:
+	audio.holding = heating
+	audio.loop("heat", heating, 0.9 + 0.25 * frac, -2.0, 0)
+	# The anticipation: a soft pad rising with the heat (the needle's sound, no marker of the gold).
+	audio.loop("rise", heating, 0.75 + 0.75 * frac, -20.0 + 12.0 * frac, 1)
+
+
+func _burst_cue(tier: int, chain_x: float = -1.0) -> void:
+	if chain_x > -1.0:
+		_sound("perfect", 1.1 + chain_x * 0.6, -5.0)
+		return
+	match tier if not reduced_motion else 0:
+		0:
+			_sound("bloom", 1.0, -3.0)
+		1:
+			_sound("bloom", 0.92, -4.0)
+		_:
+			_sound("fountain", 1.0, -2.0)
 
 
 ## Whether an effect at `p` would be seen: inside the scene and not under the open card.

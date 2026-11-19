@@ -29,6 +29,7 @@ func test_every_sound_loads() -> void:
 
 func test_the_sfx_bus_is_declared() -> void:
 	assert_true(AudioServer.get_bus_index(&"SFX") >= 0, "SFX bus from default_bus_layout.tres")
+	assert_true(AudioServer.get_bus_index(&"Ambient") >= 0, "Ambient bus (Step 43: the factory's beds) from default_bus_layout.tres")
 
 
 func test_export_keeps_what_the_game_reads_and_leaves_the_rest() -> void:

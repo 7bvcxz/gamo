@@ -55,6 +55,7 @@ func on_events(events: Array[Dictionary]) -> void:
 				var n := int(d.get("count", 1))
 				var s := machine_size() / 900.0
 				var shown := mini(n, 18) if not reduced_motion else 1
+				_outcome_cue(String(d.get("outcome", "")))
 				match String(d.get("outcome", "")):
 					"perfect":
 						fx.burst(machine_top(), shown + 6, s, rng, PopPalette.GOLD, 1.0, 1.25)
@@ -62,8 +63,6 @@ func on_events(events: Array[Dictionary]) -> void:
 							fx.sparkle(machine_top(), s, rng, 5, 140.0)
 						_flash = 1.0
 						_flash_col = PopPalette.GOLD
-						_sound("ding")
-						_sound("pop_2", 1.1)
 					"near":
 						# So close: silver popcorn, a small sparkle, the chime lower.
 						fx.burst(machine_top(), shown, s, rng, Color(0.86, 0.9, 0.98), 0.9, 1.05)
@@ -71,18 +70,14 @@ func on_events(events: Array[Dictionary]) -> void:
 							fx.sparkle(machine_top(), s, rng, 2, 90.0)
 						_flash = 0.5
 						_flash_col = Color(0.8, 0.85, 0.95)
-						_sound("ding", 0.84, -6.0)
 					"early":
 						fx.burst(machine_top(), maxi(1, shown / 2), s, rng, PopPalette.CREAM, 0.6, 0.7)
 						fx.kernels(machine_top(), 10, s, rng)
-						_sound("thud")
 					"late":
 						fx.burst(machine_top(), shown, s, rng, Color(0.85, 0.62, 0.36), 0.8, 0.9)
-						_sound("pop_1", 0.85)
 					"burnt":
 						fx.burst(machine_top(), maxi(1, shown / 3), s, rng, Color(0.35, 0.27, 0.22), 0.5, 0.6)
 						fx.smoke(machine_top(), 10, s, rng)
-						_sound("hiss")
 						_flash = 0.6
 						_flash_col = Color(0.3, 0.3, 0.3)
 			"earn":
@@ -102,8 +97,49 @@ func _process(delta: float) -> void:
 		var st := _r()
 		var heating := bool(st["heating"])
 		var w: Array = st["window"]
-		audio.loop("sizzle", heating, 0.8 + 0.5 * clampf(float(st["heat_ms"]) / float(w[2]), 0.0, 1.0))
+		_heat_cue(heating, clampf(float(st["heat_ms"]) / float(w[2]), 0.0, 1.0))
 	super(delta)
+
+
+## The sound of each outcome (Step 43: hooks, so the factory speaks its own grammar
+## while the B experiment keeps the sounds it was compared with).
+func _outcome_cue(outcome: String) -> void:
+	match outcome:
+		"perfect":
+			_sound("ding")
+			_sound("pop_2", 1.1)
+		"near":
+			_sound("ding", 0.84, -6.0)
+		"early":
+			_sound("thud")
+		"late":
+			_sound("pop_1", 0.85)
+		"burnt":
+			_sound("hiss")
+
+
+## The sizzle while heating rises in pitch with the heat (`frac` 0..1 of the way to burnt).
+func _heat_cue(heating: bool, frac: float) -> void:
+	audio.loop("sizzle", heating, 0.8 + 0.5 * frac)
+
+
+## The crescendo's sounds: a big pop (0), a chain of three (1), a fountain (2); `chain_x` is one
+## pop of the chain (its place), -1 the burst itself.
+func _burst_cue(tier: int, chain_x: float = -1.0) -> void:
+	if chain_x > -1.0:
+		_sound("pop_2", 1.1 + chain_x, -8.0)
+		return
+	if reduced_motion:
+		_sound("crackle", 1.1, -8.0)
+		return
+	match tier:
+		0:
+			_sound("crackle", 1.0, -6.0)
+		1:
+			_sound("crackle", 0.95, -5.0)
+		_:
+			_sound("boom", 1.15, -9.0)
+			_sound("crackle", 1.05, -6.0)
 
 
 func _shake() -> Vector2:
@@ -286,24 +322,20 @@ func _on_burst(tier: int) -> void:
 	_jump = 1.0
 	var s := machine_size() / 900.0
 	var top := machine_top()
+	_burst_cue(tier)
 	if reduced_motion:
 		fx.burst(top, 3, s, rng, PopPalette.GOLD, 0.6, 1.0, 1.3)
-		_sound("crackle", 1.1, -8.0)
 		return
 	match tier:
 		0:
 			fx.burst(top, 30, s, rng, PopPalette.GOLD.lerp(PopPalette.CREAM, 0.4), 1.15, 1.35, 1.3)
 			fx.sparkle(top, s, rng, 8, 180.0)
-			_sound("crackle", 1.0, -6.0)
 		1:
 			for i in 3:
 				_chain.append({"t": 0.16 * float(i), "x": [-0.22, 0.22, 0.0][i]})
-			_sound("crackle", 0.95, -5.0)
 		_:
 			_fountain = 1.3
 			fx.rain(size.x * 0.08, size.x * 0.92, 10.0, 30, s, rng, PopPalette.GOLD.lerp(PopPalette.CREAM, 0.3))
-			_sound("boom", 1.15, -9.0)
-			_sound("crackle", 1.05, -6.0)
 
 
 func _step_bursts(delta: float) -> void:
@@ -319,7 +351,7 @@ func _step_bursts(delta: float) -> void:
 		if float(c["t"]) <= 0.0:
 			fx.burst(top + Vector2(float(c["x"]) * machine_size(), 0), 18, s, rng, PopPalette.GOLD.lerp(PopPalette.CREAM, 0.35), 0.8, 1.25, 1.2)
 			fx.sparkle(top + Vector2(float(c["x"]) * machine_size(), -40), s, rng, 3, 90.0)
-			_sound("pop_2", 1.1 + float(c["x"]), -8.0)
+			_burst_cue(-1, float(c["x"]))
 		else:
 			keep.append(c)
 	_chain = keep
