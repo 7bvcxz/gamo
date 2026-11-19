@@ -86,9 +86,14 @@ So there is no passive money while away, no time-warped upkeep for forty machine
 contest that ends while the player is gone. `e2e/factory33` (a hidden tab adds < 1.5 s) and
 `e2e/save45` (a reload keeps the clock and the money) check it.
 
-A killed renderer (no unload, no last save) loses at most one save interval (5 s) of play.
-Nothing is sold twice, because the save is a whole snapshot taken at one moment
-(`e2e/save45`, CDP `Page.crash`).
+A killed browser (every process SIGKILLed: no unload, no last save) loses the play since the
+last save that reached the disk. Measured: 7.2 s, from clock 38,778 at the kill to 31,574 in
+the surviving save, while the game saves every 5 s. Chromium commits localStorage to disk a
+little after `setItem`, so the 36.5 s save was still in memory and was lost. Nothing is sold
+twice, because the save is a whole snapshot taken at one moment (sold 14 at the kill, 12 in
+the save and in the restored game). The test is `e2e/save45`: a throwaway persistent
+Chromium, killed, then relaunched on the same profile. CDP `Page.crash` was tried first; it
+takes the whole Playwright context with it, so it measured the harness.
 
 ## Recovery: web/saves.html
 

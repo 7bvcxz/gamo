@@ -152,13 +152,15 @@ func _layout() -> void:
 	log_button.position = Vector2(x0 + 24, 160)
 	log_button.size = Vector2(72, 72)
 	log_button.visible = dev
-	recover_button.position = Vector2(x0 + 24, 244 if dev else 160)
-	recover_button.size = Vector2(72, 72)
 	money_view.position = Vector2(x0 + 120, 34)
 	money_view.size = Vector2(col - (422 if show_motion else 330), 76)
 	var bh := clampf(h * 0.13, 120.0, 170.0)
 	upgrade_button.size = Vector2(minf(col - 80, 520.0), bh)
 	upgrade_button.position = Vector2((w - upgrade_button.size.x) / 2, h - bh - 48)
+	# Step 45: the set-aside icon in the gutter left of the upgrade (the top-left corner of
+	# the play area is the shop floor's badge; the first place covered it).
+	recover_button.size = Vector2(72, 72)
+	recover_button.position = Vector2(maxf(4.0, upgrade_button.position.x - 84), upgrade_button.position.y + (bh - 72) * 0.5)
 	var play_bottom := upgrade_button.position.y - 16
 	if has_auto:
 		auto_button.size = Vector2(upgrade_button.size.x, bh * 0.72)
@@ -182,7 +184,7 @@ func _layout_wide(w: float, h: float) -> void:
 	log_button.position = Vector2(24, 120)
 	log_button.size = Vector2(72, 72)
 	log_button.visible = dev
-	recover_button.position = Vector2(24, 204 if dev else 120)
+	recover_button.position = Vector2(116, 24)   # Step 45: in the top bar, beside back
 	recover_button.size = Vector2(72, 72)
 	money_view.position = Vector2(w * 0.5 - 200, 26)
 	money_view.size = Vector2(400, 72)

@@ -5,6 +5,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
+import { execSync } from 'node:child_process';
+import { chromium } from '@playwright/test';
 import { test, expect, INIT, wrap } from '../lib/pop.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -71,29 +74,49 @@ test('a reload and a trip to the stand keep the factory, and the stand keeps its
   for (const id of ['click', 'perfect', 'explosion']) expect(await store(pop.page, `${id}.v1`), `${id} keeps nothing`).toBeNull();
 });
 
-test('a killed renderer loses seconds, never goods: nothing sold twice, every machine there', async ({ pop }, testInfo) => {
-  const a = await factory(pop);
-  await pop.page.waitForTimeout(7000);   // real play: the save every 5 s of it
-  const b = await pop.state();
-  const cdp = await pop.cdp();
-  await cdp.send('Page.crash').catch(() => {});   // no unload, no last save
-  const page2 = await pop.page.context().newPage();
-  await page2.addInitScript(INIT);
-  // What the killed page left in storage, read before the game opens and saves again.
-  await page2.goto('./saves.html');
-  const left = JSON.parse(await store(page2, 'factory.v1'));
-  const pop2 = wrap(page2, testInfo);
-  await pop2.open('./#factory');
-  const c = await pop2.state();
-  testInfo.annotations.push({ type: 'crash', description: JSON.stringify({ built_clock: a.clock_ms, before_crash_clock: b.clock_ms, saved_clock: left.active_ms, sold: [b.run.stats.sold, left.rules.stats.sold, c.run.stats.sold] }) });
+// Process termination: a throwaway Chromium with its own profile on disk, every one of its
+// processes killed with SIGKILL (no unload, no pagehide, no last save), then a new Chromium on
+// the same profile. CDP Page.crash was tried first and takes the whole Playwright context with
+// it (no page can open after it), so it measured the harness, not the save.
+test('a killed browser loses seconds, never goods: nothing sold twice, every machine there', async ({ pop }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'one browser kill is enough; the save path is the same on every screen');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'pop45-kill-'));
+  const base = testInfo.project.use.baseURL;
+  const launch = () => chromium.launchPersistentContext(dir, { baseURL: base, viewport: { width: 1280, height: 800 } });
+  let ctx = await launch();
+  let page = ctx.pages()[0] || await ctx.newPage();
+  await page.addInitScript(INIT);
+  let p1 = wrap(page, testInfo);
+  const a = await factory(p1);
+  await page.waitForTimeout(7000);   // real play: the save every 5 s of it
+  const b = await p1.state();
+  // Every process of this browser (it alone has this profile directory on its command line).
+  const pids = execSync(`pgrep -f -- "--user-data-dir=${dir}" || true`).toString().split(/\s+/).filter(Boolean).map(Number);
+  expect(pids.length, 'found the browser to kill').toBeGreaterThan(0);
+  for (const pid of pids) { try { process.kill(pid, 'SIGKILL'); } catch (e) { /* already gone */ } }
+  await ctx.close().catch(() => {});
+  ctx = await launch();
+  page = ctx.pages()[0] || await ctx.newPage();
+  await page.addInitScript(INIT);
+  // What the killed browser left on disk, read before the game opens and saves again.
+  await page.goto('./saves.html');
+  const leftText = await store(page, 'factory.v1');
+  const left = leftText ? JSON.parse(leftText) : null;
+  const p2 = wrap(page, testInfo);
+  await p2.open('./#factory');
+  const c = await p2.state();
+  testInfo.annotations.push({ type: 'kill', description: JSON.stringify({ pids: pids.length, built_clock: a.clock_ms, before_kill_clock: b.clock_ms,
+    saved_clock: left && left.active_ms, sold: [b.run.stats.sold, left && left.rules.stats.sold, c.run.stats.sold], from: c.save.from }) });
+  expect(left, 'a save survived the kill').not.toBeNull();
   expect(c.save.from, 'picked up from the save').toBe('main');
   expect(summary(c).machines, 'every paid machine').toBe(summary(a).machines);
-  expect(left.active_ms, 'at most one save interval lost').toBeGreaterThan(b.clock_ms - 6000);
+  expect(left.active_ms, 'at most a little more than one save interval lost').toBeGreaterThan(b.clock_ms - 8000);
   expect(left.active_ms).toBeLessThanOrEqual(b.clock_ms + 1500);
   expect(left.rules.stats.sold, 'no sale counted that the saved factory did not make').toBeLessThanOrEqual(b.run.stats.sold + 2);
   expect(c.run.portions_everywhere, 'every portion somewhere').toBe(c.run.stats.made_portions);
-  expect(pop2.errors).toEqual([]);
-  await page2.close();
+  expect(p1.errors.concat(p2.errors)).toEqual([]);
+  await ctx.close();
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 test("old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory", async ({ pop }) => {
@@ -130,6 +153,12 @@ test('a broken save is set aside, the backup comes back, and the saves page show
   expect(await store(pop.page, 'factory.v1.rejected'), 'set aside whole').toBe(broken);
   expect(s.rects.recover, 'the set-aside icon').toBeTruthy();
   expect(Math.min(s.rects.recover[2], s.rects.recover[3]), 'a finger-sized target').toBeGreaterThanOrEqual(24);
+  // It covers nothing else a finger can press (its first place covered the shop floor's badge).
+  const ov = (a, b) => a[0] < b[0] + b[2] - 0.5 && b[0] < a[0] + a[2] - 0.5 && a[1] < b[1] + b[3] - 0.5 && b[1] < a[1] + a[3] - 0.5;
+  for (const [k, r] of Object.entries(s.rects)) {
+    if (k === 'recover' || k === 'play' || !Array.isArray(r) || r.length !== 4 || k.startsWith('floor_')) continue;
+    expect(ov(s.rects.recover, r), `the set-aside icon does not cover ${k}`).toBe(false);
+  }
   await pop.shot('save45_recover_icon');
   // The saves page.
   const page = pop.page;
