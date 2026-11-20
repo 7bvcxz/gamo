@@ -352,6 +352,9 @@ var _last_us := 0
 var _has_last := false
 
 
+var prof := {}
+
+
 func _process(delta: float) -> void:
 	if screen != "play" or rules == null:
 		_has_last = false
@@ -361,9 +364,15 @@ func _process(delta: float) -> void:
 	_last_us = now_us
 	_has_last = true
 	var added := clock.step(wall if wall - delta > HITCH_S else delta)
+	var t0 := Time.get_ticks_usec()
 	if added > 0:
 		rules.advance(added)
+	var t1 := Time.get_ticks_usec()
 	_flush()
+	var t2 := Time.get_ticks_usec()
+	# Step 46: the model's and the flush's share of a frame (ms, moving average; dev render info).
+	prof["sim"] = float(prof.get("sim", 0.0)) * 0.95 + float(t1 - t0) / 1000.0 * 0.05
+	prof["flush"] = float(prof.get("flush", 0.0)) * 0.95 + float(t2 - t1) / 1000.0 * 0.05
 	if _saves() and clock.now_ms - _saved_at_ms >= SAVE_EVERY_MS:
 		save_now()
 

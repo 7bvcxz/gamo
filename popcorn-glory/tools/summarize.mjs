@@ -19,6 +19,8 @@ const report = {
   stages: { headless, deploy: deploy + (deployWhy ? ` (${deployWhy})` : ''), browser: browser + (browserWhy ? ` (${browserWhy})` : '') },
   headless_summary: (fs.existsSync(path.join(out, 'headless.log')) ? fs.readFileSync(path.join(out, 'headless.log'), 'utf8').match(/\d+ passed, \d+ failed[^\n]*/)?.[0] : null) ?? null,
   browser_checks: [],
+  // Step 46: the run itself (tools/run_info.mjs): mode, specs played and left out with why, load.
+  run: (() => { try { return JSON.parse(fs.readFileSync(path.join(out, 'run_info.json'), 'utf8')); } catch { return null; } })(),
 };
 const json = path.join(out, 'e2e.json');
 if (fs.existsSync(json) && browser !== 'SKIPPED') {
@@ -46,6 +48,12 @@ report.browser_totals = { passed: count('PASSED') + count('PASSED (on retry)'), 
 fs.writeFileSync(path.join(out, 'report.json'), JSON.stringify(report, null, 2));
 let md = `# Popcorn test report (AUTOMATED)\n\n- git ${report.sha}${report.dirty ? ' (uncommitted changes)' : ''} · build ${report.build?.version ?? '?'} ${report.build?.pack ?? ''}\n- ${report.when}\n`;
 md += `- target: ${report.target}\n- headless: **${headless}** ${report.headless_summary ? `(${report.headless_summary})` : ''}\n- deploy: **${report.stages.deploy}**\n- browser: **${report.stages.browser}** — passed ${report.browser_totals.passed} (on retry ${report.browser_totals.passed_on_retry}), failed ${report.browser_totals.failed}, skipped ${report.browser_totals.skipped}\n\n`;
+if (report.run) {
+  md += `- mode: **${report.run.mode}**, ${report.run.specs_run.length} specs · load ${report.run.load.start} → ${report.run.load.end} · free memory ${report.run.mem_available_mb.start} → ${report.run.mem_available_mb.end} MB\n`;
+  const left = Object.entries(report.run.not_run);
+  if (left.length) md += `- not run (SKIPPED, with why): ${left.map(([f, w]) => `${f} — ${w}`).join('; ')}\n`;
+  md += '\n';
+}
 md += '| spec | check | project | status | cause / notes |\n|---|---|---|---|---|\n';
 for (const c of report.browser_checks) md += `| ${c.spec} | ${c.title} | ${c.project} | ${c.status} | ${(c.cause ?? c.error ?? (c.first_try_error ? `first try: ${c.first_try_error}` : '') + c.notes.join('; ')).replace(/\n/g, ' ').replace(/\|/g, '/').slice(0, 220)} |\n`;
 fs.writeFileSync(path.join(out, 'report.md'), md);

@@ -1,0 +1,205 @@
+{
+  "total_ms": 4113,
+  "top": [
+    [
+      "wasm-function[2238] @096b756e",
+      1109,
+      27
+    ],
+    [
+      "getParameter @",
+      886,
+      21.6
+    ],
+    [
+      "wasm-function[403] @096b756e",
+      195,
+      4.7
+    ],
+    [
+      "(program) @",
+      161,
+      3.9
+    ],
+    [
+      "wasm-function[7252] @096b756e",
+      127,
+      3.1
+    ],
+    [
+      "wasm-function[340] @096b756e",
+      92,
+      2.2
+    ],
+    [
+      "checkFramebufferStatus @",
+      75,
+      1.8
+    ],
+    [
+      "wasm-function[6031] @096b756e",
+      62,
+      1.5
+    ],
+    [
+      "wasm-function[430] @096b756e",
+      61,
+      1.5
+    ],
+    [
+      "wasm-function[420] @096b756e",
+      61,
+      1.5
+    ],
+    [
+      "wasm-function[341] @096b756e",
+      59,
+      1.4
+    ],
+    [
+      "wasm-function[337] @096b756e",
+      58,
+      1.4
+    ],
+    [
+      "wasm-function[2143] @096b756e",
+      51,
+      1.2
+    ],
+    [
+      "wasm-function[11849] @096b756e",
+      48,
+      1.2
+    ],
+    [
+      "wasm-function[799] @096b756e",
+      41,
+      1
+    ],
+    [
+      "wasm-function[34480] @096b756e",
+      38,
+      0.9
+    ],
+    [
+      "createVertexArray @",
+      32,
+      0.8
+    ],
+    [
+      "wasm-to-js @",
+      27,
+      0.7
+    ],
+    [
+      "deleteVertexArray @",
+      27,
+      0.7
+    ],
+    [
+      "wasm-function[941] @096b756e",
+      25,
+      0.6
+    ],
+    [
+      "bufferData @",
+      24,
+      0.6
+    ],
+    [
+      "createBuffer @",
+      21,
+      0.5
+    ],
+    [
+      "_positionWorklet.port.onmessage @engine-7eda98958eb0.js",
+      21,
+      0.5
+    ],
+    [
+      "wasm-function[627] @096b756e",
+      20,
+      0.5
+    ],
+    [
+      "deleteBuffer @",
+      20,
+      0.5
+    ],
+    [
+      "wasm-function[408] @096b756e",
+      17,
+      0.4
+    ],
+    [
+      "enableVertexAttribArray @",
+      16,
+      0.4
+    ],
+    [
+      "wasm-function[489] @096b756e",
+      16,
+      0.4
+    ],
+    [
+      "wasm-function[17278] @096b756e",
+      16,
+      0.4
+    ],
+    [
+      "wasm-function[371] @096b756e",
+      16,
+      0.4
+    ],
+    [
+      "send @engine-7eda98958eb0.js",
+      15,
+      0.4
+    ],
+    [
+      "bindBuffer @",
+      14,
+      0.3
+    ],
+    [
+      "wasm-function[4676] @096b756e",
+      14,
+      0.3
+    ],
+    [
+      "bindVertexArray @",
+      14,
+      0.3
+    ],
+    [
+      "wasm-function[1000] @096b756e",
+      14,
+      0.3
+    ],
+    [
+      "wasm-function[9313] @096b756e",
+      13,
+      0.3
+    ],
+    [
+      "wasm-function[33443] @096b756e",
+      13,
+      0.3
+    ],
+    [
+      "wasm-function[378] @096b756e",
+      13,
+      0.3
+    ],
+    [
+      "vertexAttribPointer @",
+      12,
+      0.3
+    ],
+    [
+      "wasm-function[10510] @096b756e",
+      12,
+      0.3
+    ]
+  ]
+}

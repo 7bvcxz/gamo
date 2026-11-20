@@ -1,9 +1,11 @@
 # Popcorn & Glory only. The path filter means a change outside popcorn-glory/ never starts
 # this workflow, and this workflow never touches another game.
 #
-# Import, the editor load check, and the headless unit + integration tests on every change.
-# The browser suite (popcorn-glory/tools/test_all.sh) is run on the development machine:
-# it needs the shared engine in docs/ and is minutes long.
+# Import, the editor load check, and the headless unit + integration tests on every change,
+# and once a week on a schedule (Step 46: a suite nobody runs rots -- AGENTS.md). The log is
+# kept as an artifact. The browser suite (popcorn-glory/tools/test_all.sh: --focused, full,
+# --slow, --perf, --public) runs on the development machine: it needs the shared engine in
+# docs/ and the full run is hours long.
 name: popcorn-glory
 
 on:
@@ -13,6 +15,8 @@ on:
   pull_request:
     paths: ['popcorn-glory/**', '.github/workflows/popcorn-glory.yml']
   workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * 1'   # Mondays 03:17 UTC
 
 concurrency:
   group: popcorn-glory-${{ github.ref }}
@@ -24,7 +28,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30   # (Step 46: the headless suite is about 11 minutes here)
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,4 +52,12 @@ jobs:
       - run: echo "$HOME/godot" >> "$GITHUB_PATH"
       - run: godot --version
       - name: Import, load check, unit + integration
-        run: popcorn-glory/tools/check.sh
+        run: popcorn-glory/tools/check.sh 2>&1 | tee popcorn-check.log; exit ${PIPESTATUS[0]}
+        shell: bash
+      - name: Keep the log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: popcorn-check-${{ github.sha }}
+          path: popcorn-check.log
+          retention-days: 14

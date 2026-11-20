@@ -1,0 +1,114 @@
+{
+  "base": "http://127.0.0.1:18531/popcorn-glory/",
+  "when": "2026-11-19T23:57:42.613Z",
+  "rows": [
+    {
+      "hidden": "(none)",
+      "fps": 12.1,
+      "draw": 1093,
+      "objects": 1303
+    },
+    {
+      "hidden": "machine_layer",
+      "fps": 11.5,
+      "draw": 1034,
+      "objects": 1232
+    },
+    {
+      "hidden": "actor_layer",
+      "fps": 11.8,
+      "draw": 1024,
+      "objects": 1205
+    },
+    {
+      "hidden": "goods_layer",
+      "fps": 13.6,
+      "draw": 689,
+      "objects": 889
+    },
+    {
+      "hidden": "floor_layer",
+      "fps": 11.7,
+      "draw": 957,
+      "objects": 1148
+    },
+    {
+      "hidden": "detail_layer",
+      "fps": 11.7,
+      "draw": 1231,
+      "objects": 1489
+    },
+    {
+      "hidden": "customer_node",
+      "fps": 11.4,
+      "draw": 1118,
+      "objects": 1333
+    },
+    {
+      "hidden": "belt_layer",
+      "fps": 11.3,
+      "draw": 1111,
+      "objects": 1333
+    },
+    {
+      "hidden": "light_layer",
+      "fps": 10.7,
+      "draw": 1135,
+      "objects": 1360
+    },
+    {
+      "hidden": "news_node",
+      "fps": 11.5,
+      "draw": 1135,
+      "objects": 1342
+    },
+    {
+      "hidden": "status_node",
+      "fps": 11.5,
+      "draw": 1128,
+      "objects": 1351
+    },
+    {
+      "hidden": "cue_node",
+      "fps": 11.9,
+      "draw": 1135,
+      "objects": 1365
+    },
+    {
+      "hidden": "spoon_layer",
+      "fps": 11.6,
+      "draw": 1152,
+      "objects": 1378
+    },
+    {
+      "hidden": "stats_node",
+      "fps": 11.3,
+      "draw": 1151,
+      "objects": 1365
+    },
+    {
+      "hidden": "under_layer",
+      "fps": 12.4,
+      "draw": 1127,
+      "objects": 1345
+    },
+    {
+      "hidden": "over_layer",
+      "fps": 14.6,
+      "draw": 1110,
+      "objects": 1319
+    },
+    {
+      "hidden": "machine_node",
+      "fps": 11.9,
+      "draw": 1146,
+      "objects": 1365
+    },
+    {
+      "hidden": "(none, again)",
+      "fps": 10.7,
+      "draw": 1169,
+      "objects": 1403
+    }
+  ]
+}

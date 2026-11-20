@@ -1,0 +1,71 @@
+{
+  "url": "https://7bvcxz.github.io/gamo/popcorn-glory/?dev=1#factory",
+  "device": "Samsung S23 (SM-S911N), Chrome on Android, over DevTools",
+  "when": "2026-11-19T23:46:38.049Z",
+  "load_to_ready_ms": 5535,
+  "rows": [
+    {
+      "scene": "fresh factory",
+      "machines": 0,
+      "window": [
+        2115,
+        840
+      ],
+      "fps": {
+        "min": 44.42689305417981,
+        "p10": 45.54906423798061,
+        "median": 59.68367650314955,
+        "p90": 59.97001499250375,
+        "all": [
+          44.4,
+          45.5,
+          46.4,
+          56.7,
+          57,
+          59.7,
+          59.8,
+          60,
+          60,
+          60.3
+        ]
+      },
+      "draw_calls": 524,
+      "objects": 892,
+      "nodes": 78,
+      "heap_mb": 23.1,
+      "version": "0.45.0"
+    },
+    {
+      "scene": "44 machines",
+      "machines": 44,
+      "window": [
+        2115,
+        840
+      ],
+      "fps": {
+        "min": 9.967379490488746,
+        "p10": 9.99000999000999,
+        "median": 10.404842983337653,
+        "p90": 10.82251082657267,
+        "all": [
+          10,
+          10,
+          10.2,
+          10.2,
+          10.3,
+          10.4,
+          10.8,
+          10.8,
+          10.8,
+          11.2
+        ]
+      },
+      "draw_calls": 1389,
+      "objects": 1696,
+      "nodes": 407,
+      "heap_mb": 23.1,
+      "version": "0.45.0"
+    }
+  ],
+  "build_ok": true
+}

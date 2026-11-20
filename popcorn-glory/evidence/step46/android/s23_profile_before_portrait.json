@@ -1,0 +1,56 @@
+{
+  "base": "http://127.0.0.1:18531/popcorn-glory/",
+  "when": "2026-11-19T23:55:21.139Z",
+  "rows": [
+    {
+      "machines": 1,
+      "fps": 41.9,
+      "frame_ms": 23.9,
+      "process_ms": 49.4,
+      "app": {
+        "flush": 0.14,
+        "sim": 0.2
+      },
+      "view": {
+        "actors": 0.99,
+        "base": 3.24,
+        "inventory_key": 0.09,
+        "machine_motion": 0.04,
+        "machine_nodes": 0.12,
+        "misc": 0.01,
+        "overview": 0.01,
+        "spoons_news_fx": 1.21,
+        "station_bell_hint_cues": 1.98,
+        "structure_key": 0.1
+      },
+      "draw_calls": 702,
+      "objects": 1256,
+      "nodes": 151
+    },
+    {
+      "machines": 44,
+      "fps": 11.7,
+      "frame_ms": 85.8,
+      "process_ms": 119.9,
+      "app": {
+        "flush": 2,
+        "sim": 4.18
+      },
+      "view": {
+        "actors": 0.13,
+        "base": 7.3,
+        "inventory_key": 0.27,
+        "machine_motion": 0.35,
+        "machine_nodes": 2.44,
+        "misc": 0,
+        "overview": 0.11,
+        "spoons_news_fx": 2.5,
+        "station_bell_hint_cues": 4.62,
+        "structure_key": 0.16
+      },
+      "draw_calls": 1189,
+      "objects": 1442,
+      "nodes": 407
+    }
+  ]
+}

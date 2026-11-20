@@ -1,0 +1,260 @@
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:07] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 15 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:07] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:07] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:07] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:07] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:07] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:08] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:27:08] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘   1 [p720] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.5m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:40] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:40] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:40] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:40] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   2 [p720] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:43] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:43] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:43] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:43] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:43] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:45] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:45] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓   3 [p720] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (15.7s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:59] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:59] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:59] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:59] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:28:59] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:29:00] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:29:00] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘   4 [p720] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (1.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:02] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:02] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:02] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:02] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:02] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:03] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:03] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   5 [p720] › specs/negative46.spec.mjs:100:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (7.3s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:09] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:09] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:09] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:09] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:09] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:10] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:30:10] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘   6 [phone] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.6m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:44] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:44] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:44] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:44] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   7 [phone] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:48] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:48] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:48] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:48] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:48] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:49] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:31:49] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓   8 [phone] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (18.3s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:32:06] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:32:06] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:32:06] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:32:06] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:32:06] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:32:07] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:32:07] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘   9 [phone] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (1.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:09] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:09] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:09] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:09] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:09] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:10] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:10] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  10 [phone] › specs/negative46.spec.mjs:100:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (7.6s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:17] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:17] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:17] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:17] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:17] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:18] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:33:18] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  11 [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.5m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:50] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:50] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:50] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:50] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  12 [desktop] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:53] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:53] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:53] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:53] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:53] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:54] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:34:54] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  13 [desktop] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (19.3s)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:35:12] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:35:12] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:35:12] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:35:12] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:35:12] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:35:14] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:35:14] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  14 [desktop] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (1.0m)
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:36:15] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:36:15] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:36:15] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:36:15] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:36:15] "GET /popcorn-glory/game-868b603e35f4.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:36:16] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [19/Nov/2026 23:36:16] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  15 [desktop] › specs/negative46.spec.mjs:100:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (7.4s)
+
+
+  1) [p720] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+
+    Error: the kitchen: the kettle up
+
+    the kitchen: the kettle up
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      91 |   await pop.tap('floor_low');
+      92 |   await pop.tap('upgrade');
+    > 93 |   await expect.poll(async () => (await pop.state()).run.level, { message: 'the kitchen: the kettle up' }).toBeGreaterThan(st0.run.level);
+         |                                                                                                           ^
+      94 |   s = await pop.state();
+      95 |   testInfo.annotations.push({ type: 'stations', description: JSON.stringify({ sign: [st0.run.sign_tier, s.run.sign_tier], packer: [st0.run.packer_tier, s.run.packer_tier], kettle: [st0.run.level, s.run.level] }) });
+      96 |
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:93:107
+
+    Error Context: test-results/journey46-a-novice-journey-85c5a-er-a-contest-resume-restart-p720/error-context.md
+
+  2) [p720] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was 
+
+    Error: a pack on the station
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      82 |     s = await pop.state();
+      83 |   } while (!(s.run.packing.length > 0 && s.run.serves.length > 0) && Date.now() - t0 < 60_000);
+    > 84 |   expect(s.run.packing.length > 0, 'a pack on the station').toBe(true);
+         |                                                             ^
+      85 |   await pop.page.reload();   // (the hide/unload path saves this moment)
+      86 |   await pop.ready();
+      87 |   const r = await pop.state();
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs:84:61
+
+    Error Context: test-results/negative46-a-reload-in-the-13c44-and-every-coin-where-it-was-p720/error-context.md
+
+  3) [phone] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+
+    Error: the kitchen: the kettle up
+
+    the kitchen: the kettle up
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      91 |   await pop.tap('floor_low');
+      92 |   await pop.tap('upgrade');
+    > 93 |   await expect.poll(async () => (await pop.state()).run.level, { message: 'the kitchen: the kettle up' }).toBeGreaterThan(st0.run.level);
+         |                                                                                                           ^
+      94 |   s = await pop.state();
+      95 |   testInfo.annotations.push({ type: 'stations', description: JSON.stringify({ sign: [st0.run.sign_tier, s.run.sign_tier], packer: [st0.run.packer_tier, s.run.packer_tier], kettle: [st0.run.level, s.run.level] }) });
+      96 |
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:93:107
+
+    Error Context: test-results/journey46-a-novice-journey-85c5a-er-a-contest-resume-restart-phone/error-context.md
+
+  4) [phone] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was 
+
+    Error: a pack on the station
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      82 |     s = await pop.state();
+      83 |   } while (!(s.run.packing.length > 0 && s.run.serves.length > 0) && Date.now() - t0 < 60_000);
+    > 84 |   expect(s.run.packing.length > 0, 'a pack on the station').toBe(true);
+         |                                                             ^
+      85 |   await pop.page.reload();   // (the hide/unload path saves this moment)
+      86 |   await pop.ready();
+      87 |   const r = await pop.state();
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs:84:61
+
+    Error Context: test-results/negative46-a-reload-in-the-13c44-and-every-coin-where-it-was-phone/error-context.md
+
+  5) [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+
+    Error: the kitchen: the kettle up
+
+    the kitchen: the kettle up
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      91 |   await pop.tap('floor_low');
+      92 |   await pop.tap('upgrade');
+    > 93 |   await expect.poll(async () => (await pop.state()).run.level, { message: 'the kitchen: the kettle up' }).toBeGreaterThan(st0.run.level);
+         |                                                                                                           ^
+      94 |   s = await pop.state();
+      95 |   testInfo.annotations.push({ type: 'stations', description: JSON.stringify({ sign: [st0.run.sign_tier, s.run.sign_tier], packer: [st0.run.packer_tier, s.run.packer_tier], kettle: [st0.run.level, s.run.level] }) });
+      96 |
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:93:107
+
+    Error Context: test-results/journey46-a-novice-journey-85c5a-er-a-contest-resume-restart-desktop/error-context.md
+
+  6) [desktop] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was 
+
+    Error: a pack on the station
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      82 |     s = await pop.state();
+      83 |   } while (!(s.run.packing.length > 0 && s.run.serves.length > 0) && Date.now() - t0 < 60_000);
+    > 84 |   expect(s.run.packing.length > 0, 'a pack on the station').toBe(true);
+         |                                                             ^
+      85 |   await pop.page.reload();   // (the hide/unload path saves this moment)
+      86 |   await pop.ready();
+      87 |   const r = await pop.state();
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs:84:61
+
+    Error Context: test-results/negative46-a-reload-in-the-13c44-and-every-coin-where-it-was-desktop/error-context.md
+
+  6 failed
+    [p720] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+    [p720] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was 
+    [phone] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+    [phone] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was 
+    [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+    [desktop] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was 
+  9 passed (9.3m)

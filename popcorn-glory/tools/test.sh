@@ -22,7 +22,11 @@ trap 'rm -f "$LOG"' EXIT
 
 args=(--headless --path "$HERE" --script res://tests/framework/runner.gd -- --suite "$SUITE")
 [[ -n "$FILTER" ]] && args+=(--filter "$FILTER")
-timeout -s KILL "${POPCORN_TEST_TIMEOUT:-600}" "$GODOT" "${args[@]}" >"$LOG" 2>&1
+# The whole suite under one kill switch. Step 46: 600 s was the limit until the suite itself
+# took 540-560 s here -- on CI's slower runner it crossed 600 from Step 43 on and every push
+# went red with "Killed" (exit 137), a harness limit, not a failing test. 1800 s now; a hung
+# test still ends.
+timeout -s KILL "${POPCORN_TEST_TIMEOUT:-1800}" "$GODOT" "${args[@]}" >"$LOG" 2>&1
 code=$?
 
 grep -E '^(ok|FAIL|  )|passed,|^FAIL' "$LOG" | grep -v '^ok' || true

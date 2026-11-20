@@ -1,0 +1,42 @@
+{
+  "device": "S23 Chrome 157, landscape (2115x840 game window)",
+  "when": "2026-11-19T23:51:47.323Z",
+  "rows": [
+    {
+      "machines": 1,
+      "fps": 37.7,
+      "main_busy": 1,
+      "script_share": 0.98,
+      "draw_calls": 902,
+      "objects": 1538,
+      "godot_fps": 38
+    },
+    {
+      "machines": 12,
+      "fps": 20.1,
+      "main_busy": 1,
+      "script_share": 0.97,
+      "draw_calls": 882,
+      "objects": 1247,
+      "godot_fps": 20
+    },
+    {
+      "machines": 20,
+      "fps": 17.5,
+      "main_busy": 1,
+      "script_share": 0.97,
+      "draw_calls": 1046,
+      "objects": 1550,
+      "godot_fps": 18
+    },
+    {
+      "machines": 44,
+      "fps": 10.6,
+      "main_busy": 1,
+      "script_share": 0.98,
+      "draw_calls": 1365,
+      "objects": 1672,
+      "godot_fps": 12
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "base": "http://127.0.0.1:18531/popcorn-glory/",
+  "when": "2026-11-20T00:02:36.376Z",
+  "rows": [
+    {
+      "actor_bakes": true,
+      "freed": false,
+      "fps": 11.1,
+      "bakes_made_10s": 25,
+      "bakes_live": 64,
+      "viewports": 89,
+      "draw": 1133,
+      "objects": 1346
+    },
+    {
+      "actor_bakes": false,
+      "freed": true,
+      "fps": 11.5,
+      "bakes_made_10s": 0,
+      "bakes_live": 0,
+      "viewports": 25,
+      "draw": 1197,
+      "objects": 1424
+    },
+    {
+      "actor_bakes": true,
+      "freed": false,
+      "fps": 11.2,
+      "bakes_made_10s": 26,
+      "bakes_live": 31,
+      "viewports": 56,
+      "draw": 1129,
+      "objects": 1341
+    }
+  ]
+}

@@ -1,0 +1,684 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/journey46.spec.mjs",
+      "specs/negative46.spec.mjs",
+      "--project=p720",
+      "--project=phone",
+      "--project=desktop",
+      "--retries=0",
+      "-g",
+      "journey|middle of a pack",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "journey46.spec.mjs",
+      "file": "journey46.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "by_hand",
+                  "description": "{\"first_sale_ms\":10162,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                },
+                {
+                  "type": "stations",
+                  "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 104786,
+                  "error": {
+                    "message": "Error: the paper open\n\nthe paper open\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: the paper open\n\nthe paper open\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:132:100",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs",
+                      "column": 100,
+                      "line": 132
+                    },
+                    "snippet": "  130 |   expect(nr.ok, `the news event starts (${nr.reason || ''})`).toBe(true);\n  131 |   await pop.tap('news');\n> 132 |   await expect.poll(async () => (await pop.state()).view.news_open, { message: 'the paper open' }).toBe(true);\n      |                                                                                                    ^\n  133 |   await pop.shot('journey46_paper');\n  134 |   await pop.call('dev_advance', 1000);\n  135 |   const cr = await hook(pop, 'dev_contest', 'perfect_streak');"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs",
+                        "column": 100,
+                        "line": 132
+                      },
+                      "message": "Error: the paper open\n\nthe paper open\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  130 |   expect(nr.ok, `the news event starts (${nr.reason || ''})`).toBe(true);\n  131 |   await pop.tap('news');\n> 132 |   await expect.poll(async () => (await pop.state()).view.news_open, { message: 'the paper open' }).toBe(true);\n      |                                                                                                    ^\n  133 |   await pop.shot('journey46_paper');\n  134 |   await pop.call('dev_advance', 1000);\n  135 |   const cr = await hook(pop, 'dev_contest', 'perfect_streak');\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:132:100"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T23:37:50.339Z",
+                  "annotations": [
+                    {
+                      "type": "by_hand",
+                      "description": "{\"first_sale_ms\":10162,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                    },
+                    {
+                      "type": "stations",
+                      "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/journey46-a-novice-journey-85c5a-er-a-contest-resume-restart-p720/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs",
+                    "column": 100,
+                    "line": 132
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "697a59dfe81e71ad7571-7d6bef197825d59a37e9",
+          "file": "journey46.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "by_hand",
+                  "description": "{\"first_sale_ms\":10349,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                },
+                {
+                  "type": "stations",
+                  "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 108823,
+                  "error": {
+                    "message": "Error: the paper open\n\nthe paper open\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: the paper open\n\nthe paper open\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:132:100",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs",
+                      "column": 100,
+                      "line": 132
+                    },
+                    "snippet": "  130 |   expect(nr.ok, `the news event starts (${nr.reason || ''})`).toBe(true);\n  131 |   await pop.tap('news');\n> 132 |   await expect.poll(async () => (await pop.state()).view.news_open, { message: 'the paper open' }).toBe(true);\n      |                                                                                                    ^\n  133 |   await pop.shot('journey46_paper');\n  134 |   await pop.call('dev_advance', 1000);\n  135 |   const cr = await hook(pop, 'dev_contest', 'perfect_streak');"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs",
+                        "column": 100,
+                        "line": 132
+                      },
+                      "message": "Error: the paper open\n\nthe paper open\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  130 |   expect(nr.ok, `the news event starts (${nr.reason || ''})`).toBe(true);\n  131 |   await pop.tap('news');\n> 132 |   await expect.poll(async () => (await pop.state()).view.news_open, { message: 'the paper open' }).toBe(true);\n      |                                                                                                    ^\n  133 |   await pop.shot('journey46_paper');\n  134 |   await pop.call('dev_advance', 1000);\n  135 |   const cr = await hook(pop, 'dev_contest', 'perfect_streak');\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:132:100"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T23:40:09.157Z",
+                  "annotations": [
+                    {
+                      "type": "by_hand",
+                      "description": "{\"first_sale_ms\":10349,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                    },
+                    {
+                      "type": "stations",
+                      "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/journey46-a-novice-journey-85c5a-er-a-contest-resume-restart-phone/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs",
+                    "column": 100,
+                    "line": 132
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "697a59dfe81e71ad7571-5c16ddb0867f9f084650",
+          "file": "journey46.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "by_hand",
+                  "description": "{\"first_sale_ms\":10084,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                },
+                {
+                  "type": "stations",
+                  "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                },
+                {
+                  "type": "hooks",
+                  "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 100208,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T23:43:01.207Z",
+                  "annotations": [
+                    {
+                      "type": "by_hand",
+                      "description": "{\"first_sale_ms\":10084,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                    },
+                    {
+                      "type": "stations",
+                      "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                    },
+                    {
+                      "type": "hooks",
+                      "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "697a59dfe81e71ad7571-1701ae3d15d55519fc1a",
+          "file": "journey46.spec.mjs",
+          "line": 55,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "negative46.spec.mjs",
+      "file": "negative46.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "a reload in the middle of a pack: every portion and every coin where it was",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "mid_pack",
+                  "description": "{\"before\":{\"sold\":42,\"money\":400343,\"made\":116,\"lift\":4,\"serves\":1},\"after\":{\"sold\":40,\"money\":400324,\"made\":108,\"from\":\"main\"}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 33266,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T23:39:35.503Z",
+                  "annotations": [
+                    {
+                      "type": "mid_pack",
+                      "description": "{\"before\":{\"sold\":42,\"money\":400343,\"made\":116,\"lift\":4,\"serves\":1},\"after\":{\"sold\":40,\"money\":400324,\"made\":108,\"from\":\"main\"}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a92366fbd2543bcf049d-fd757013a0e8adfc730d",
+          "file": "negative46.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "a reload in the middle of a pack: every portion and every coin where it was",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 62455,
+                  "error": {
+                    "message": "Error: goods on the lift and a serve on its way\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+                    "stack": "Error: goods on the lift and a serve on its way\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs:85:97",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs",
+                      "column": 97,
+                      "line": 85
+                    },
+                    "snippet": "  83 |     s = await pop.state();\n  84 |   } while (!(s.run.lift > 0 && s.run.bin_portions > 0 && s.run.serves.length > 0) && Date.now() - t0 < 60_000);\n> 85 |   expect(s.run.lift > 0 && s.run.serves.length > 0, 'goods on the lift and a serve on its way').toBe(true);\n     |                                                                                                 ^\n  86 |   await pop.page.reload();   // (the hide/unload path saves this moment)\n  87 |   await pop.ready();\n  88 |   const r = await pop.state();"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs",
+                        "column": 97,
+                        "line": 85
+                      },
+                      "message": "Error: goods on the lift and a serve on its way\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\n  83 |     s = await pop.state();\n  84 |   } while (!(s.run.lift > 0 && s.run.bin_portions > 0 && s.run.serves.length > 0) && Date.now() - t0 < 60_000);\n> 85 |   expect(s.run.lift > 0 && s.run.serves.length > 0, 'goods on the lift and a serve on its way').toBe(true);\n     |                                                                                                 ^\n  86 |   await pop.page.reload();   // (the hide/unload path saves this moment)\n  87 |   await pop.ready();\n  88 |   const r = await pop.state();\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs:85:97"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T23:41:58.351Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/negative46-a-reload-in-the-13c44-and-every-coin-where-it-was-phone/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/negative46.spec.mjs",
+                    "column": 97,
+                    "line": 85
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a92366fbd2543bcf049d-96f3c4fae8c9b6e9a47b",
+          "file": "negative46.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "a reload in the middle of a pack: every portion and every coin where it was",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "mid_pack",
+                  "description": "{\"before\":{\"sold\":53,\"money\":400447,\"made\":145,\"lift\":4,\"serves\":1},\"after\":{\"sold\":54,\"money\":400456,\"made\":145,\"from\":\"main\"}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 43420,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-19T23:44:41.477Z",
+                  "annotations": [
+                    {
+                      "type": "mid_pack",
+                      "description": "{\"before\":{\"sold\":53,\"money\":400447,\"made\":145,\"lift\":4,\"serves\":1},\"after\":{\"sold\":54,\"money\":400456,\"made\":145,\"from\":\"main\"}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a92366fbd2543bcf049d-42dd0693a7e6d64791e4",
+          "file": "negative46.spec.mjs",
+          "line": 73,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-19T23:37:49.885Z",
+    "duration": 455107.23199999996,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

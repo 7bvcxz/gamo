@@ -1,6 +1,8 @@
 class_name PopBridge
 extends RefCounted
 
+const ACTOR := preload("res://variants/factory/actor.gd")   # Step 46: its bake counters (dev render info)
+
 ## The page's view of the game: `window.popcorn`.
 ##   popcorn.version, popcorn.ready
 ##   popcorn.state()          -> the app's state (screen, run, rects in window pixels)
@@ -93,6 +95,21 @@ func query(name: String, arg: Variant) -> Variant:
 			else:
 				au.play(String(sa.get("name", "")), float(sa.get("pitch", 1.0)), float(sa.get("db", 0.0)))
 			return {"ok": true}
+		"dev_bake":   # Step 46: the customers' baked textures on or off (the measurement)
+			ACTOR.bake_enabled = bool((arg as Dictionary).get("actors", true)) if typeof(arg) == TYPE_DICTIONARY else true
+			if typeof(arg) == TYPE_DICTIONARY and bool((arg as Dictionary).get("free", false)):
+				for k: String in (ACTOR._baked as Dictionary).keys():
+					((ACTOR._baked as Dictionary)[k]["vp"] as Node).queue_free()
+				(ACTOR._baked as Dictionary).clear()
+			return {"ok": true, "actors": ACTOR.bake_enabled}
+		"dev_hide":   # Step 46: hide one of the play view's layers (what it costs to draw and render)
+			var play: Node = _app.get("frame").play if _app.get("frame") != null else null
+			var a: Dictionary = arg if typeof(arg) == TYPE_DICTIONARY else {}
+			var nm := String(a.get("name", ""))
+			if play == null or not nm in play or not (play.get(nm) is CanvasItem):
+				return {"ok": false, "error": "no layer " + nm}
+			(play.get(nm) as CanvasItem).visible = not bool(a.get("hidden", true))
+			return {"ok": true}
 		"dev_render_info":
 			return {"ok": true,
 				"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
@@ -100,7 +117,13 @@ func query(name: String, arg: Variant) -> Variant:
 				"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 				"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 				"static_mem": int(Performance.get_monitor(Performance.MEMORY_STATIC)),
-				"fps": Engine.get_frames_per_second()}
+				"fps": Engine.get_frames_per_second(),
+				# Step 46: where the frame goes -- Godot's process step, the model, the flush, the view.
+				"process_ms": snappedf(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, 0.01),
+				"actor_bakes_made": int(ACTOR.bakes_made), "actor_bakes_live": (ACTOR._baked as Dictionary).size(),
+				"viewports": _app.get_tree().root.find_children("*", "SubViewport", true, false).size(),
+				"app_prof": (_app.get("prof") as Dictionary).duplicate(),
+				"view_prof": (_app.get("frame").play.get("prof") as Dictionary).duplicate() if _app.get("frame") != null and _app.get("frame").play != null and "prof" in _app.get("frame").play else {}}
 	return null
 
 

@@ -616,11 +616,23 @@ func _needs_redraw() -> bool:
 
 
 var _redraw_once := true
+## Step 46: where a frame's script time goes (ms, moving average) -- read by the dev bridge's
+## render info. Measuring costs two clock reads a section; nothing else changes.
+var prof := {}
+var _pt := 0
+
+
+func _p(key: String) -> void:
+	var now := Time.get_ticks_usec()
+	prof[key] = float(prof.get(key, 0.0)) * 0.95 + float(now - _pt) / 1000.0 * 0.05
+	_pt = now
 
 
 func _process(delta: float) -> void:
+	_pt = Time.get_ticks_usec()
 	_slot_cache.clear()
 	super(delta)
+	_p("base")
 	_redraw_once = false
 	# On a landscape screen the right column shows the kitchen's detail until a floor is chosen.
 	if _wide_default and is_wide() and size.x > 0.0:
@@ -629,6 +641,7 @@ func _process(delta: float) -> void:
 			selected = LOW
 	# Step 33: three keys -- the floors' structure, the goods, the open panel -- and each
 	# machine its own (_step_machine_nodes).
+	_p("misc")
 	var key := "%s|%d|%d|%s" % [size, selected, rules.level if rules else 0, _structure_key()]
 	if key != _floors_key:
 		_floors_key = key
@@ -637,6 +650,7 @@ func _process(delta: float) -> void:
 		customer_node.queue_redraw()
 		detail_layer.queue_redraw()
 		_redraw_once = true
+	_p("structure_key")
 	var gkey := _inventory_key()
 	if gkey != _goods_key:
 		_goods_key = gkey
@@ -644,24 +658,31 @@ func _process(delta: float) -> void:
 		if selected >= 0 and not overview:
 			detail_layer.queue_redraw()
 		_redraw_once = true
+	_p("inventory_key")
 	_overview_t += delta
 	if _overview_t >= 0.5:   # the overview's numbers (and the wallet's warning) twice a second
 		_overview_t = 0.0
 		_low_wallet = bool(rules.upkeep_overview()["low_wallet"]) if rules else false
 		if overview:
 			detail_layer.queue_redraw()
+	_p("overview")
 	_step_machine_nodes()
+	_p("machine_nodes")
 	_process_glass()
 	_step_actors(delta)
+	_p("actors")
 	_clock += delta
 	_step_station(delta)
 	_step_bell()
 	_step_hint()
 	_step_cues()
+	_p("station_bell_hint_cues")
 	_step_machine_motion(delta)
+	_p("machine_motion")
 	_step_spoons(delta)
 	_step_news(delta)
 	_step_motion_fx(delta)
+	_p("spoons_news_fx")
 
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and

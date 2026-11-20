@@ -81,6 +81,8 @@ func step(delta: float) -> void:
 ## draws that one texture; the order bubble and the bag they carry stay drawn shapes. Until
 ## the texture has rendered (two frames) the actor draws the shapes.
 static var _baked := {}         ## key -> {"vp": SubViewport, "frame": int}
+static var bakes_made := 0      ## Step 46: how many person textures were drawn (each a SubViewport)
+static var bake_enabled := true ## Step 46: a dev switch for the measurement (false: the shapes)
 static var _holder: Node = null
 var _bake_key := ""
 var _bake_wait := false
@@ -97,7 +99,7 @@ func _screen_k() -> float:
 
 
 func _person_texture() -> Texture2D:
-	if not is_inside_tree() or look.is_empty():
+	if not is_inside_tree() or look.is_empty() or not bake_enabled:
 		return null
 	var k := _screen_k()
 	var key := "%d|%s|%s|%.1f|%.2f" % [model_id, who, mood, size_px, k]
@@ -129,6 +131,7 @@ func _person_texture() -> Texture2D:
 		vp.add_child(n)
 		_holder.add_child(vp)
 		_baked[key] = {"vp": vp, "frame": Engine.get_frames_drawn()}
+		bakes_made += 1
 		if _baked.size() > 64:   # people come and go: the oldest looks are let go
 			var old: String = _baked.keys()[0]
 			(_baked[old]["vp"] as Node).queue_free()
