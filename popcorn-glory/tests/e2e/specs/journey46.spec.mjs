@@ -138,10 +138,14 @@ test('a novice journey: first sale, three stations, every category, the card, th
   s = await pop.state();
   if (s.view.news_tab !== 'contests') await pop.tap('news_tab_contests');
   await expect.poll(async () => !!(await pop.state()).rects.contest_enter_perfect_streak, { message: 'its Enter button' }).toBe(true);
-  const fee0 = (await pop.state()).run.money;
+  const fees0 = (await pop.state()).run.stats.contest_fees || 0;
   await pop.tap('contest_enter_perfect_streak');
   await expect.poll(async () => (await pop.state()).run.contests.entry?.id ?? '', { message: 'entered by a tap' }).toBe('perfect_streak');
-  expect((await pop.state()).run.money, 'the fee paid').toBeLessThan(fee0);
+  // The fee, from the fee counter: the factory keeps selling while the paper is open, so the
+  // wallet alone can be higher after the tap (Step 46 full run, desktop: 54962 -> 54975).
+  const entry = (await pop.state()).run.contests.entry;
+  expect((await pop.state()).run.stats.contest_fees || 0, 'the fee paid').toBe(fees0 + (entry.fee ?? 0));
+  expect(entry.fee ?? 0, 'a fee to pay').toBeGreaterThan(0);
   if ((await pop.state()).view.news_open) await pop.tap('detail');
 
   // 6. Resume after a reload, then two taps restart.

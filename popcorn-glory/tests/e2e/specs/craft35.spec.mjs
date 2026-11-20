@@ -137,7 +137,10 @@ test('the spoon finishes a batch by hand; the machine, the mix and the payback s
   await pop.hold(`spoon_${spoon.id}`, Math.round(gold[0] + (gold[1] - gold[0]) * 0.25));
   await pop.page.waitForTimeout(450);
   const still = decodePng(await pop.page.screenshot());
-  s = await pop.state();
+  // Under load (the Step 46 full run, load ~12) the release can land after the 450 ms still:
+  // wait for the grade itself, a few seconds at most, before reading it.
+  const graded0 = () => { const a = s.run.stats.hand_finish || {}; return Object.keys(a).some((g) => (a[g] || 0) > (before[g] || 0)); };
+  for (let i = 0; i < 25; i++) { s = await pop.state(); if (graded0()) break; await pop.page.waitForTimeout(200); }
   const after = s.run.stats.hand_finish || {};
   const graded = Object.keys(after).find((g) => (after[g] || 0) > (before[g] || 0));
   testInfo.annotations.push({ type: 'spoon', description: JSON.stringify({ flavor: fl, gold, graded, hand_finish: after, hand_portions: s.run.stats.hand_portions }) });
