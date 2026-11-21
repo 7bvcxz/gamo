@@ -32,9 +32,23 @@ func test_the_save_store_uses_only_this_games_names() -> void:
 	for line: String in text.split("\n"):
 		if line.contains("user://"):
 			assert_true(line.strip_edges().begins_with("#") or line.contains("const FILE_PREFIX"), "user:// only in comments and the prefix: %s" % line.strip_edges())
+	# Step 46: localStorage is touched only inside the page-side helper (its three functions
+	# take the key as an argument), and every call of that helper names the prefix.
+	var helper_lines := 0
+	var calls := 0
 	for line: String in text.split("\n"):
-		if line.contains("localStorage.") and not line.strip_edges().begins_with("#"):
-			assert_true(line.contains("KEY_PREFIX + name"), "every localStorage call uses the prefix: %s" % line.strip_edges())
+		var l := line.strip_edges()
+		if l.begins_with("#"):
+			continue
+		if l.contains("localStorage."):
+			helper_lines += 1
+			assert_true(l.begins_with("\"read: function (k)") or l.begins_with("\"write: function (k, v)") or l.begins_with("\"remove: function (k)"),
+				"localStorage only inside the store's helper: %s" % l)
+		if l.contains("_store()."):
+			calls += 1
+			assert_true(l.contains("(KEY_PREFIX + name"), "every call of the store uses the prefix: %s" % l)
+	assert_eq(helper_lines, 3, "the helper's read, write and remove")
+	assert_eq(calls, 3, "read, write and clear go through it")
 
 
 func test_no_autoloads() -> void:

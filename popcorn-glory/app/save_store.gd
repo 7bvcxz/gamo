@@ -16,6 +16,22 @@ extends RefCounted
 const KEY_PREFIX := "popcorn-glory."
 const FILE_PREFIX := "user://popcorn_glory_"
 
+## Step 46: the page's store, as a JS object the save is passed to as an argument. Until 0.46
+## the whole save was pasted into the source of a `JavaScriptBridge.eval` every 5 s -- each
+## save a new script for the browser to compile and keep, and at 44 machines the page's heap
+## grew ~60 MB in four minutes with the sound off (evidence/step46/perf/).
+static var _js: Variant = null
+
+
+static func _store() -> Variant:
+	if _js == null:
+		JavaScriptBridge.eval("window.__popcornStore = window.__popcornStore || {" +
+			"read: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }," +
+			"write: function (k, v) { try { localStorage.setItem(k, v); return 1; } catch (e) { return 0; } }," +
+			"remove: function (k) { try { localStorage.removeItem(k); } catch (e) {} return 1; } };", true)
+		_js = JavaScriptBridge.get_interface("__popcornStore")
+	return _js
+
 
 static func _web() -> bool:
 	return OS.has_feature("web")
@@ -23,7 +39,7 @@ static func _web() -> bool:
 
 static func read(name: String) -> String:
 	if _web():
-		var v: Variant = JavaScriptBridge.eval("(function(){try{return localStorage.getItem(%s)}catch(e){return null}})()" % JSON.stringify(KEY_PREFIX + name), true)
+		var v: Variant = _store().read(KEY_PREFIX + name)
 		return String(v) if typeof(v) == TYPE_STRING else ""
 	var path := FILE_PREFIX + name + ".json"
 	return FileAccess.get_file_as_string(path) if FileAccess.file_exists(path) else ""
@@ -33,7 +49,7 @@ static func write(name: String, text: String) -> bool:
 	if _web():
 		# 1/0, not true/false: a JS boolean from eval does not compare equal to
 		# GDScript's true (app/web.gd prefers_reduced_motion, Step 12).
-		var ok: Variant = JavaScriptBridge.eval("(function(){try{localStorage.setItem(%s,%s);return 1}catch(e){return 0}})()" % [JSON.stringify(KEY_PREFIX + name), JSON.stringify(text)], true)
+		var ok: Variant = _store().write(KEY_PREFIX + name, text)
 		return ok != null and int(ok) == 1
 	# Step 45: whole or not at all -- the text goes to a side file, then takes the
 	# save's name in one rename (a killed process leaves the old save, not half of
@@ -53,7 +69,7 @@ static func write(name: String, text: String) -> bool:
 
 static func clear(name: String) -> void:
 	if _web():
-		JavaScriptBridge.eval("(function(){try{localStorage.removeItem(%s)}catch(e){}})()" % JSON.stringify(KEY_PREFIX + name), true)
+		_store().remove(KEY_PREFIX + name)
 		return
 	var path := FILE_PREFIX + name + ".json"
 	if FileAccess.file_exists(path):

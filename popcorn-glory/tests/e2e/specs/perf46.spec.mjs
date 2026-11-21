@@ -73,8 +73,11 @@ test('the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, pro
   const build = { version: version.version, pack: version.pack, pack_bytes: version.packSize, engine: version.engine, wasm_bytes: wasmBytes, load_to_first_frame_ms: loadMs };
   // 1, 5, 10, 20, 44 working machines (each on a fresh page: nothing carried over).
   for (const n of [1, 5, 10, 20, 44]) {
-    await pop.page.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('popcorn-glory.factory')) localStorage.removeItem(k); });
+    // A fresh factory on a fresh page. (Clearing localStorage before the navigation did not
+    // work: the leaving page saves its factory on unload, and the rows piled up 1, 6, 15, 32.)
     await pop.open('./#factory');
+    await pop.call('dev_restart');
+    expect((await pop.state()).run.machines.length, 'a fresh factory').toBe(0);
     await pop.call('dev_money', 1e9);
     expect((await pop.call('dev_build', { plan: PLAN.slice(0, n), sign: 8, packer: 3 })).ok).toBe(true);
     for (let i = 0; i < 6; i++) { await popIfFree(pop); await pop.call('dev_advance', 5000); }   // warm: goods on every floor

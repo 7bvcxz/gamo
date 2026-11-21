@@ -17,6 +17,7 @@ func _actor() -> GDScript:
 var _app: Node
 var _callbacks: Array[JavaScriptObject] = []
 var e2e := false
+var _p: Variant = null   ## window.popcorn, kept: its _put takes each answer (Step 46)
 
 
 func attach(app: Node) -> void:
@@ -28,7 +29,9 @@ func attach(app: Node) -> void:
 	var p: Variant = JavaScriptBridge.get_interface("window").popcorn
 	p._state = _keep(JavaScriptBridge.create_callback(func(_a: Array) -> void: _out(_app.call("state"))))
 	p._call = _keep(JavaScriptBridge.create_callback(func(a: Array) -> void: _out(query(String(a[0]), JSON.parse_string(String(a[1]))))))
+	_p = p
 	JavaScriptBridge.eval("""
+		window.popcorn._put = (s) => { window.popcorn._out = s; };
 		window.popcorn.state = () => { window.popcorn._state(); return JSON.parse(window.popcorn._out); };
 		window.popcorn.call = (name, arg) => { window.popcorn._call(name, JSON.stringify(arg === undefined ? null : arg)); return JSON.parse(window.popcorn._out); };
 	""", true)
@@ -137,7 +140,9 @@ func _keep(cb: JavaScriptObject) -> JavaScriptObject:
 	return cb
 
 
-## Through eval: setting a property on a JavaScriptObject from GDScript is sent
-## to JS as a method call named "set" and fails.
+## Through a JS function: setting a property on a JavaScriptObject from GDScript is
+## sent to JS as a method call named "set" and fails. Step 46: the answer goes as the
+## function's argument -- pasted into eval source (until 0.46) each answer was a new script
+## the page compiled and kept, and a test asking the state every few seconds grew the heap.
 func _out(value: Variant) -> void:
-	JavaScriptBridge.eval("window.popcorn._out = %s;" % JSON.stringify(JSON.stringify(value)), true)
+	_p._put(JSON.stringify(value))

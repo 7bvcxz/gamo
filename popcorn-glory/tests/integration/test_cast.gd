@@ -87,7 +87,8 @@ func test_a_crowded_shop_moves_without_jumps_and_keeps_clear_of_the_tube_and_but
 	assert_true(v.news_node.z_index > v.actor_layer.z_index and v.news_node.get_index() > v.actor_layer.get_index(), "the news paper is drawn over the people")
 	var closest := 1e9
 	var last := {}
-	var worst_step := 0.0
+	var worst_step := 0.0   # per frame, or per tenth of a second when the frame was longer
+	var worst_raw := 0.0
 	var worst_rot := 0.0
 	var sy_lo := 9.0
 	var sy_hi := 0.0
@@ -104,7 +105,13 @@ func test_a_crowded_shop_moves_without_jumps_and_keeps_clear_of_the_tube_and_but
 	for f in 1100:
 		# the game's minutes pass 120 ms a frame; the last 200 frames at 4 ms (the people settle)
 		app.dev_advance(120 if f < 900 else 4)
+		var t_frame := Time.get_ticks_usec()
 		await tree.process_frame
+		# The people move by the frame's own delta (a walk, never faster). On a slow machine a
+		# headless frame reaches the engine's cap (~0.133 s): a walk step there is ~28 px
+		# (CI, Step 46). So a step is judged per tenth of a second when the frame was longer.
+		var frame_s := clampf(float(Time.get_ticks_usec() - t_frame) / 1e6, 0.0, 8.0 / 60.0)
+		var per_tenth := minf(1.0, 0.1 / maxf(frame_s, 1e-6))
 		var people: Array = v.cast_debug()["people"]
 		people_max = maxi(people_max, people.size())
 		var now := {}
@@ -113,7 +120,8 @@ func test_a_crowded_shop_moves_without_jumps_and_keeps_clear_of_the_tube_and_but
 			var at := Vector2(float(p["x"]), float(p["y"]))
 			now[key] = at
 			if last.has(key):
-				worst_step = maxf(worst_step, at.distance_to(last[key]))
+				worst_raw = maxf(worst_raw, at.distance_to(last[key]))
+				worst_step = maxf(worst_step, at.distance_to(last[key]) * per_tenth)
 			worst_rot = maxf(worst_rot, absf(float(p["rot"])))
 			sy_lo = minf(sy_lo, float(p["sy"]))
 			sy_hi = maxf(sy_hi, float(p["sy"]))
@@ -146,11 +154,11 @@ func test_a_crowded_shop_moves_without_jumps_and_keeps_clear_of_the_tube_and_but
 	for m: String in ["thanks", "happy", "delight"]:
 		exits += int(v.cast_stats.get(m, 0))
 	var sold := int(app.rules.stats["sold"]) - sold0
-	var report := {"closest_heads": closest / hp, "people_max": people_max, "worst_step": worst_step, "head": hp, "worst_rot": worst_rot, "sy": [sy_lo, sy_hi],
+	var report := {"closest_heads": closest / hp, "people_max": people_max, "worst_step": worst_step, "worst_raw": worst_raw, "head": hp, "worst_rot": worst_rot, "sy": [sy_lo, sy_hi],
 		"motions": seen_motion.keys(), "stats": v.cast_stats, "sold": sold}
 	print("cast41: ", JSON.stringify(report))
 	assert_true(people_max >= 6, "a crowded shop (%d people at once)" % people_max)
-	assert_true(worst_step < hp * 1.2, "nobody jumps: the largest step in a frame %.1f px (head %.1f)" % [worst_step, hp])
+	assert_true(worst_step < hp * 1.2, "nobody jumps: the largest step in a frame (or a tenth of a second) %.1f px, raw %.1f (head %.1f)" % [worst_step, worst_raw, hp])
 	assert_true(worst_rot <= 0.1, "the lean stays a lean (%.3f rad)" % worst_rot)
 	assert_true(sy_lo >= 0.8 and sy_hi <= 1.25, "the breath and the hops stay small %s" % [[sy_lo, sy_hi]])
 	assert_eq(feet_off, 0, "standing feet stay inside the shop")
