@@ -1,0 +1,24 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:07] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 2 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:08] "GET /popcorn-glory/?sound=off&motion=reduce HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:08] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:08] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:08] "GET /popcorn-glory/game-9b307aed1bd5.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:08] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:09] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:09] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"tag":"new","project":"phone","version":"0.46.1","bin":35,"shelf":6,"queue":0}
+  ✓  1 [phone] › specs/zz_look46.spec.mjs:6:1 › the factory scene for the eye (9.0s)
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:17] "GET /popcorn-glory/?sound=off&motion=reduce HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:17] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:17] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:17] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:17] "GET /popcorn-glory/game-9b307aed1bd5.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:18] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 19:16:18] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"tag":"new","project":"desktop","version":"0.46.1","bin":36,"shelf":7,"queue":0}
+  ✓  2 [desktop] › specs/zz_look46.spec.mjs:6:1 › the factory scene for the eye (8.5s)
+
+  2 passed (18.4s)

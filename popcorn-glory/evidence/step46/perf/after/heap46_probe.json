@@ -1,0 +1,156 @@
+{
+  "when": "2026-11-21T17:31:56.423Z",
+  "minutes": 4,
+  "out": [
+    {
+      "variant": "normal",
+      "pops": 21,
+      "rows": [
+        {
+          "t": 3,
+          "heap": 10.3,
+          "sold": 1,
+          "played": 9,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 32,
+          "heap": 21.8,
+          "sold": 33,
+          "played": 118,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 64,
+          "heap": 27.6,
+          "sold": 75,
+          "played": 220,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 94,
+          "heap": 36.3,
+          "sold": 113,
+          "played": 315,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 121,
+          "heap": 49.4,
+          "sold": 148,
+          "played": 410,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 153,
+          "heap": 69,
+          "sold": 193,
+          "played": 527,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 183,
+          "heap": 69,
+          "sold": 235,
+          "played": 646,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 212,
+          "heap": 69,
+          "sold": 277,
+          "played": 765,
+          "loop_copies": 0,
+          "dom": 17
+        }
+      ],
+      "growth": 58.7
+    },
+    {
+      "variant": "sound_off",
+      "pops": 20,
+      "rows": [
+        {
+          "t": 3,
+          "heap": 11.1,
+          "sold": 1,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 31,
+          "heap": 21.6,
+          "sold": 33,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 61,
+          "heap": 27.5,
+          "sold": 70,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 91,
+          "heap": 36.2,
+          "sold": 110,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 123,
+          "heap": 49.2,
+          "sold": 150,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 156,
+          "heap": 68.8,
+          "sold": 198,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 183,
+          "heap": 68.8,
+          "sold": 235,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 213,
+          "heap": 68.9,
+          "sold": 277,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        },
+        {
+          "t": 240,
+          "heap": 98.1,
+          "sold": 317,
+          "played": 0,
+          "loop_copies": 0,
+          "dom": 17
+        }
+      ],
+      "growth": 87
+    }
+  ]
+}

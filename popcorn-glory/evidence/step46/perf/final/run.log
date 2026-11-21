@@ -1,0 +1,384 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:56] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 2 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:56] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:56] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:56] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:56] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:56] "GET /popcorn-glory/game-9b307aed1bd5.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:57] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:57] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:59] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:03:59] "HEAD /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  1 [phone] › specs/perf46.spec.mjs:60:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged (2.6m)
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:33] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:33] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:33] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:33] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:33] "GET /popcorn-glory/game-9b307aed1bd5.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:34] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:34] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:35] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 22:06:35] "HEAD /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  2 [desktop] › specs/perf46.spec.mjs:60:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged (7.7m)
+
+  Slow test file: [desktop] › specs/perf46.spec.mjs (7.7m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  2 passed (10.4m)
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/perf46.spec.mjs",
+      "--project=desktop",
+      "--project=phone",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "perf46.spec.mjs",
+      "file": "perf46.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 1500000,
+              "annotations": [
+                {
+                  "type": "perf46",
+                  "description": "{\"build\":{\"version\":\"0.46.1\",\"pack\":\"game-9b307aed1bd5.pck\",\"pack_bytes\":1002016,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2254},\"rows\":[{\"scene\":\"1 machines\",\"fps\":19.91238549243931,\"p10\":17.9175791291708,\"draw\":539,\"obj\":1072,\"heap\":11,\"voices\":9,\"load\":8.55},{\"scene\":\"5 machines\",\"fps\":18.903591675245103,\"p10\":17.58327635376941,\"draw\":543,\"obj\":986,\"heap\":12.9,\"voices\":10,\"load\":11.64},{\"scene\":\"10 machines\",\"fps\":18.66221393839368,\"p10\":16.53696498054475,\"draw\":545,\"obj\":857,\"heap\":14.4,\"voices\":10,\"load\":12.45},{\"scene\":\"20 machines\",\"fps\":16.621040278480436,\"p10\":15.368360396497787,\"draw\":626,\"obj\":1040,\"heap\":16.7,\"voices\":10,\"load\":12.82},{\"scene\":\"44 machines\",\"fps\":14.118975908684076,\"p10\":12.581050999322903,\"draw\":720,\"obj\":933,\"heap\":17.4,\"voices\":10,\"load\":13.13},{\"scene\":\"44, bin filled\",\"fps\":14.160294531576643,\"p10\":14.000373348273959,\"draw\":736,\"obj\":975,\"heap\":17.4,\"voices\":10,\"load\":13.62},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":13.413816220912206,\"p10\":12.905787759204145,\"draw\":707,\"obj\":920,\"heap\":17.4,\"voices\":10,\"load\":14.15}]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 156369,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T22:03:56.654Z",
+                  "annotations": [
+                    {
+                      "type": "perf46",
+                      "description": "{\"build\":{\"version\":\"0.46.1\",\"pack\":\"game-9b307aed1bd5.pck\",\"pack_bytes\":1002016,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2254},\"rows\":[{\"scene\":\"1 machines\",\"fps\":19.91238549243931,\"p10\":17.9175791291708,\"draw\":539,\"obj\":1072,\"heap\":11,\"voices\":9,\"load\":8.55},{\"scene\":\"5 machines\",\"fps\":18.903591675245103,\"p10\":17.58327635376941,\"draw\":543,\"obj\":986,\"heap\":12.9,\"voices\":10,\"load\":11.64},{\"scene\":\"10 machines\",\"fps\":18.66221393839368,\"p10\":16.53696498054475,\"draw\":545,\"obj\":857,\"heap\":14.4,\"voices\":10,\"load\":12.45},{\"scene\":\"20 machines\",\"fps\":16.621040278480436,\"p10\":15.368360396497787,\"draw\":626,\"obj\":1040,\"heap\":16.7,\"voices\":10,\"load\":12.82},{\"scene\":\"44 machines\",\"fps\":14.118975908684076,\"p10\":12.581050999322903,\"draw\":720,\"obj\":933,\"heap\":17.4,\"voices\":10,\"load\":13.13},{\"scene\":\"44, bin filled\",\"fps\":14.160294531576643,\"p10\":14.000373348273959,\"draw\":736,\"obj\":975,\"heap\":17.4,\"voices\":10,\"load\":13.62},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":13.413816220912206,\"p10\":12.905787759204145,\"draw\":707,\"obj\":920,\"heap\":17.4,\"voices\":10,\"load\":14.15}]}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "50a46d618c4aed30f498-12dfed7c636a5c8a3064",
+          "file": "perf46.spec.mjs",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 1500000,
+              "annotations": [
+                {
+                  "type": "perf46",
+                  "description": "{\"build\":{\"version\":\"0.46.1\",\"pack\":\"game-9b307aed1bd5.pck\",\"pack_bytes\":1002016,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2059},\"rows\":[{\"scene\":\"1 machines\",\"fps\":21.528525304053705,\"p10\":19.579050416054823,\"draw\":726,\"obj\":1349,\"heap\":11.5,\"voices\":9,\"load\":12.07},{\"scene\":\"5 machines\",\"fps\":20.91254752851711,\"p10\":18.514909377832232,\"draw\":733,\"obj\":1259,\"heap\":12.9,\"voices\":9,\"load\":12.73},{\"scene\":\"10 machines\",\"fps\":20.140021102753817,\"p10\":18.888557517850096,\"draw\":684,\"obj\":1087,\"heap\":14.3,\"voices\":10,\"load\":13.12},{\"scene\":\"20 machines\",\"fps\":18.119397285035284,\"p10\":16.863406417666223,\"draw\":798,\"obj\":1291,\"heap\":16.6,\"voices\":10,\"load\":12.63},{\"scene\":\"44 machines\",\"fps\":15.080113100848257,\"p10\":13.714733539757173,\"draw\":936,\"obj\":1244,\"heap\":17.4,\"voices\":10,\"load\":10.7},{\"scene\":\"44, bin filled\",\"fps\":15.152950095445016,\"p10\":14.612761811982464,\"draw\":910,\"obj\":1211,\"heap\":17.4,\"voices\":10,\"load\":10.55},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":14.543339142600576,\"p10\":13.977635790732895,\"draw\":922,\"obj\":1229,\"heap\":20,\"voices\":10,\"load\":10.94},{\"scene\":\"44, prolonged start\",\"fps\":14.814814814814815,\"p10\":14.457831325301205,\"draw\":953,\"obj\":1277,\"heap\":19.9,\"voices\":10,\"load\":11.35},{\"scene\":\"44, prolonged after 5 min\",\"fps\":13.34604385128694,\"p10\":12.72264630805769,\"draw\":911,\"obj\":1214,\"heap\":29.6,\"voices\":10,\"load\":6.2}]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 463833,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T22:06:33.391Z",
+                  "annotations": [
+                    {
+                      "type": "perf46",
+                      "description": "{\"build\":{\"version\":\"0.46.1\",\"pack\":\"game-9b307aed1bd5.pck\",\"pack_bytes\":1002016,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2059},\"rows\":[{\"scene\":\"1 machines\",\"fps\":21.528525304053705,\"p10\":19.579050416054823,\"draw\":726,\"obj\":1349,\"heap\":11.5,\"voices\":9,\"load\":12.07},{\"scene\":\"5 machines\",\"fps\":20.91254752851711,\"p10\":18.514909377832232,\"draw\":733,\"obj\":1259,\"heap\":12.9,\"voices\":9,\"load\":12.73},{\"scene\":\"10 machines\",\"fps\":20.140021102753817,\"p10\":18.888557517850096,\"draw\":684,\"obj\":1087,\"heap\":14.3,\"voices\":10,\"load\":13.12},{\"scene\":\"20 machines\",\"fps\":18.119397285035284,\"p10\":16.863406417666223,\"draw\":798,\"obj\":1291,\"heap\":16.6,\"voices\":10,\"load\":12.63},{\"scene\":\"44 machines\",\"fps\":15.080113100848257,\"p10\":13.714733539757173,\"draw\":936,\"obj\":1244,\"heap\":17.4,\"voices\":10,\"load\":10.7},{\"scene\":\"44, bin filled\",\"fps\":15.152950095445016,\"p10\":14.612761811982464,\"draw\":910,\"obj\":1211,\"heap\":17.4,\"voices\":10,\"load\":10.55},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":14.543339142600576,\"p10\":13.977635790732895,\"draw\":922,\"obj\":1229,\"heap\":20,\"voices\":10,\"load\":10.94},{\"scene\":\"44, prolonged start\",\"fps\":14.814814814814815,\"p10\":14.457831325301205,\"draw\":953,\"obj\":1277,\"heap\":19.9,\"voices\":10,\"load\":11.35},{\"scene\":\"44, prolonged after 5 min\",\"fps\":13.34604385128694,\"p10\":12.72264630805769,\"draw\":911,\"obj\":1214,\"heap\":29.6,\"voices\":10,\"load\":6.2}]}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "50a46d618c4aed30f498-2f5a050ef4f09489cfe1",
+          "file": "perf46.spec.mjs",
+          "line": 60,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T22:03:56.215Z",
+    "duration": 621125.493,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
+exit 0

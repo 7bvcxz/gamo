@@ -1,0 +1,15 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:28] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:28] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:28] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:28] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:28] "GET /popcorn-glory/game-bfa5a8466d6e.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:28] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:29] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:35:29] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"hooked":270,"frames":95,"top":[["@Control@40:Over",1],["@Control@40:Under",1],["Frame:Money",0.55],["Actors:actor.gd|classic",0.48],["Actors:Node2D",0.39],["@Control@40:Goods",0.34],["Goods:GoodsPictures",0.34],["Frame:Upgrade",0.32],["Upgrade:Face",0.32],["@Control@40:StageNumbers",0.27],["@Node2D@70:Over",0.07],["Machines:@Node2D@70",0.07],["Actors:actor.gd|rush",0.06],["UI:Frame",0.06],["Actors:actor.gd|kid",0.05],["Light:Glow0",0.05],["@Control@40:PackerStatus",0.04],["Actors:actor.gd|student",0.04],["Light:Glow1",0.04],["@Node2D@113:Over",0.03],["@Node2D@122:Over",0.03],["@Node2D@126:Over",0.03],["@Node2D@135:Over",0.03],["@Node2D@57:Over",0.03],["@Node2D@73:Over",0.03],["@Node2D@98:Over",0.03],["Light:Glow2",0.03],["Machines:@Node2D@113",0.03],["Machines:@Node2D@122",0.03],["Machines:@Node2D@126",0.03],["Machines:@Node2D@135",0.03],["Machines:@Node2D@57",0.03],["Machines:@Node2D@73",0.03],["Machines:@Node2D@98",0.03],["@Control@40:News",0.02],["@Node2D@114:Over",0.02],["@Node2D@115:Over",0.02],["@Node2D@140:Over",0.02],["@Node2D@147:Over",0.02],["@Node2D@69:Over",0.02]]}
+  ✓  1 [desktop] › specs/zz_draws46.spec.mjs:5:1 › redraws per frame (20.3s)
+
+  1 passed (20.9s)

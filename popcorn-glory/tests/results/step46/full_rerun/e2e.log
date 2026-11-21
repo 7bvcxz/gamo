@@ -1,0 +1,26 @@
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:25] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 2 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:25] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:25] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:25] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:25] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:25] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:27] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:24:27] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:12] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:12] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  1 [desktop] › specs/craft35.spec.mjs:84:1 › the spoon finishes a batch by hand; the machine, the mix and the payback stay honest (1.8m)
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:15] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:15] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:15] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:15] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:15] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:16] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:26:16] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:27:51] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:27:51] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  2 [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+
+  2 passed (3.5m)

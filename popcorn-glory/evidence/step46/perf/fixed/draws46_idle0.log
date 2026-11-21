@@ -1,0 +1,15 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:25] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:25] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:25] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:25] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:25] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:25] "GET /popcorn-glory/game-46889a08a3fb.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:26] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:26:26] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+{"hooked":60,"frames":155,"top":[["Over:Ring",1],["UI:Frame",0.04],["@Control@30:BottleneckCue",0.01],["Hint:@Node2D@32",0.01]]}
+  ✓  1 [desktop] › specs/zz_draws46.spec.mjs:5:1 › redraws per frame (20.2s)
+
+  1 passed (20.7s)

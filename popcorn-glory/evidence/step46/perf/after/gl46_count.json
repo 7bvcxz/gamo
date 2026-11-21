@@ -1,0 +1,175 @@
+{
+  "when": "2026-11-21T17:54:04.697Z",
+  "kinds": [
+    "createBuffer",
+    "createVertexArray",
+    "fenceSync",
+    "createTexture",
+    "createFramebuffer",
+    "createRenderbuffer",
+    "createQuery",
+    "createSampler"
+  ],
+  "rows": [
+    {
+      "scene": "0 machines, idle",
+      "frames": 217,
+      "per_frame": {
+        "createBuffer": 1.9,
+        "createVertexArray": 1.1,
+        "fenceSync": 2,
+        "createTexture": 0,
+        "createFramebuffer": 0,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 5,
+      "draw_calls": 482
+    },
+    {
+      "scene": "44 machines",
+      "frames": 112,
+      "per_frame": {
+        "createBuffer": 534.1,
+        "createVertexArray": 290.4,
+        "fenceSync": 2.2,
+        "createTexture": 1.2,
+        "createFramebuffer": 0.6,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 828.4,
+      "draw_calls": 1239
+    },
+    {
+      "scene": "44, machine_layer hidden",
+      "frames": 104,
+      "per_frame": {
+        "createBuffer": 609.2,
+        "createVertexArray": 328.4,
+        "fenceSync": 2.2,
+        "createTexture": 1.1,
+        "createFramebuffer": 0.5,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 941.5,
+      "draw_calls": 1047
+    },
+    {
+      "scene": "44, actor_layer hidden",
+      "frames": 103,
+      "per_frame": {
+        "createBuffer": 714.9,
+        "createVertexArray": 381,
+        "fenceSync": 2,
+        "createTexture": 0,
+        "createFramebuffer": 0,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 1097.9,
+      "draw_calls": 1170
+    },
+    {
+      "scene": "44, goods_layer hidden",
+      "frames": 112,
+      "per_frame": {
+        "createBuffer": 387.1,
+        "createVertexArray": 210.3,
+        "fenceSync": 2.2,
+        "createTexture": 1.1,
+        "createFramebuffer": 0.6,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 601.2,
+      "draw_calls": 824
+    },
+    {
+      "scene": "44, floor_layer hidden",
+      "frames": 108,
+      "per_frame": {
+        "createBuffer": 776.4,
+        "createVertexArray": 413.8,
+        "fenceSync": 2.2,
+        "createTexture": 1.1,
+        "createFramebuffer": 0.6,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 1194.1,
+      "draw_calls": 1074
+    },
+    {
+      "scene": "44, detail_layer hidden",
+      "frames": 103,
+      "per_frame": {
+        "createBuffer": 719.9,
+        "createVertexArray": 384.3,
+        "fenceSync": 2.2,
+        "createTexture": 1.2,
+        "createFramebuffer": 0.6,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 1108.2,
+      "draw_calls": 1191
+    },
+    {
+      "scene": "44, customer_node hidden",
+      "frames": 96,
+      "per_frame": {
+        "createBuffer": 887,
+        "createVertexArray": 472.3,
+        "fenceSync": 2.2,
+        "createTexture": 1.4,
+        "createFramebuffer": 0.7,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 1363.7,
+      "draw_calls": 1346
+    },
+    {
+      "scene": "44, belt_layer hidden",
+      "frames": 96,
+      "per_frame": {
+        "createBuffer": 788.9,
+        "createVertexArray": 420.6,
+        "fenceSync": 2.2,
+        "createTexture": 1.3,
+        "createFramebuffer": 0.6,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 1213.7,
+      "draw_calls": 1352
+    },
+    {
+      "scene": "44, bakes off and freed",
+      "frames": 98,
+      "per_frame": {
+        "createBuffer": 797,
+        "createVertexArray": 424.5,
+        "fenceSync": 2,
+        "createTexture": 0,
+        "createFramebuffer": 0,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 1223.5,
+      "draw_calls": 1368
+    }
+  ]
+}

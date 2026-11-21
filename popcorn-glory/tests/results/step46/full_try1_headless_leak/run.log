@@ -1,0 +1,5 @@
+headless: FAILED
+deploy: SKIPPED
+browser: SKIPPED no fresh deploy
+report: /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/results/step46/full/report.md — browser passed 0, failed 0, skipped 0
+exit 1

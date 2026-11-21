@@ -1,0 +1,22 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:44] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:45] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:45] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:45] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:45] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:45] "GET /popcorn-glory/game-9b95d7f5a3b2.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:46] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:23:46] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"variant":"normal","pops":21,"rows":[{"t":3,"heap":10.3,"sold":1,"played":9,"loop_copies":0,"dom":17},{"t":32,"heap":21.8,"sold":33,"played":118,"loop_copies":0,"dom":17},{"t":64,"heap":27.6,"sold":75,"played":220,"loop_copies":0,"dom":17},{"t":94,"heap":36.3,"sold":113,"played":315,"loop_copies":0,"dom":17},{"t":121,"heap":49.4,"sold":148,"played":410,"loop_copies":0,"dom":17},{"t":153,"heap":69,"sold":193,"played":527,"loop_copies":0,"dom":17},{"t":183,"heap":69,"sold":235,"played":646,"loop_copies":0,"dom":17},{"t":212,"heap":69,"sold":277,"played":765,"loop_copies":0,"dom":17}],"growth":58.7}
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:27:49] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:27:49] "GET /popcorn-glory/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:27:50] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:27:50] "GET /popcorn-glory/game-9b95d7f5a3b2.pck HTTP/1.1" 304 -
+{"variant":"sound_off","pops":20,"rows":[{"t":3,"heap":11.1,"sold":1,"played":0,"loop_copies":0,"dom":17},{"t":31,"heap":21.6,"sold":33,"played":0,"loop_copies":0,"dom":17},{"t":61,"heap":27.5,"sold":70,"played":0,"loop_copies":0,"dom":17},{"t":91,"heap":36.2,"sold":110,"played":0,"loop_copies":0,"dom":17},{"t":123,"heap":49.2,"sold":150,"played":0,"loop_copies":0,"dom":17},{"t":156,"heap":68.8,"sold":198,"played":0,"loop_copies":0,"dom":17},{"t":183,"heap":68.8,"sold":235,"played":0,"loop_copies":0,"dom":17},{"t":213,"heap":68.9,"sold":277,"played":0,"loop_copies":0,"dom":17},{"t":240,"heap":98.1,"sold":317,"played":0,"loop_copies":0,"dom":17}],"growth":87}
+  ✓  1 [desktop] › specs/zz_heap46_probe.spec.mjs:7:1 › heap probe (8.2m)
+
+  Slow test file: [desktop] › specs/zz_heap46_probe.spec.mjs (8.2m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 passed (8.2m)

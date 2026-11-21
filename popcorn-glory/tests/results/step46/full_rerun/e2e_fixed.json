@@ -1,0 +1,830 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/craft35.spec.mjs",
+      "specs/journey46.spec.mjs",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "craft35.spec.mjs",
+      "file": "craft35.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the spoon finishes a batch by hand; the machine, the mix and the payback stay honest",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "spoon",
+                  "description": "{\"flavor\":\"cocoa\",\"gold\":[900,1300],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}"
+                },
+                {
+                  "type": "flourish",
+                  "description": "{\"goldPx\":3617,\"goldPre\":3264,\"turned\":645,\"area\":[448.5599975585934,301.07031860351617,145.0800476074218,160.2316589355468]}"
+                },
+                {
+                  "type": "craft trade",
+                  "description": "{\"hand_sold_portions\":4,\"mix_sold\":2,\"lost\":{\"caramel\":3,\"cocoa\":1},\"lost_portions\":4,\"flavor_sold\":{\"caramel\":8,\"cheese\":11,\"cocoa\":6},\"coater\":{\"batches\":11,\"can_finish\":false,\"flavor\":\"auto\",\"held\":\"\",\"id\":6,\"ingredients\":52,\"left_ms\":0,\"line\":0,\"margin\":143,\"mode\":\"auto\",\"ms\":0,\"net\":86,\"paid\":900,\"paid_back_ms\":-1,\"quality\":0,\"since_ms\":241150,\"state\":\"starved\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":4.4725}"
+                },
+                {
+                  "type": "hand bags",
+                  "description": "{\"hand_rows\":[[\"cocoa\",2,1,92],[\"cocoa\",2,2,100],[\"cocoa\",2,1,84]],\"machine_best\":85,\"all_hand_q100\":1}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 105602,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:28:09.756Z",
+                  "annotations": [
+                    {
+                      "type": "spoon",
+                      "description": "{\"flavor\":\"cocoa\",\"gold\":[900,1300],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}"
+                    },
+                    {
+                      "type": "flourish",
+                      "description": "{\"goldPx\":3617,\"goldPre\":3264,\"turned\":645,\"area\":[448.5599975585934,301.07031860351617,145.0800476074218,160.2316589355468]}"
+                    },
+                    {
+                      "type": "craft trade",
+                      "description": "{\"hand_sold_portions\":4,\"mix_sold\":2,\"lost\":{\"caramel\":3,\"cocoa\":1},\"lost_portions\":4,\"flavor_sold\":{\"caramel\":8,\"cheese\":11,\"cocoa\":6},\"coater\":{\"batches\":11,\"can_finish\":false,\"flavor\":\"auto\",\"held\":\"\",\"id\":6,\"ingredients\":52,\"left_ms\":0,\"line\":0,\"margin\":143,\"mode\":\"auto\",\"ms\":0,\"net\":86,\"paid\":900,\"paid_back_ms\":-1,\"quality\":0,\"since_ms\":241150,\"state\":\"starved\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":4.4725}"
+                    },
+                    {
+                      "type": "hand bags",
+                      "description": "{\"hand_rows\":[[\"cocoa\",2,1,92],[\"cocoa\",2,2,100],[\"cocoa\",2,1,84]],\"machine_best\":85,\"all_hand_q100\":1}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cde5f025230c64fb519b-46a71177c60c467e1612",
+          "file": "craft35.spec.mjs",
+          "line": 84,
+          "column": 1
+        },
+        {
+          "title": "the spoon finishes a batch by hand; the machine, the mix and the payback stay honest",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "spoon",
+                  "description": "{\"flavor\":\"caramel\",\"gold\":[1100,1450],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}"
+                },
+                {
+                  "type": "flourish",
+                  "description": "{\"goldPx\":4658,\"goldPre\":3720,\"turned\":1290,\"area\":[485.9400024414065,378.80126953125017,157.1700439453125,228.5417175292968]}"
+                },
+                {
+                  "type": "craft trade",
+                  "description": "{\"hand_sold_portions\":4,\"mix_sold\":3,\"lost\":{\"caramel\":4},\"lost_portions\":4,\"flavor_sold\":{\"caramel\":9,\"cheese\":10,\"cocoa\":5},\"coater\":{\"batches\":12,\"can_finish\":false,\"flavor\":\"auto\",\"held\":\"\",\"id\":6,\"ingredients\":56,\"left_ms\":0,\"line\":0,\"margin\":153,\"mode\":\"auto\",\"ms\":0,\"net\":92,\"paid\":900,\"paid_back_ms\":-1,\"quality\":0,\"since_ms\":192750,\"state\":\"starved\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":3.7491666666666665}"
+                },
+                {
+                  "type": "hand bags",
+                  "description": "{\"hand_rows\":[[\"caramel\",2,1,88],[\"duo\",4,2,84],[\"caramel\",2,1,84]],\"machine_best\":85,\"all_hand_q100\":0}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 111325,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:31:42.285Z",
+                  "annotations": [
+                    {
+                      "type": "spoon",
+                      "description": "{\"flavor\":\"caramel\",\"gold\":[1100,1450],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}"
+                    },
+                    {
+                      "type": "flourish",
+                      "description": "{\"goldPx\":4658,\"goldPre\":3720,\"turned\":1290,\"area\":[485.9400024414065,378.80126953125017,157.1700439453125,228.5417175292968]}"
+                    },
+                    {
+                      "type": "craft trade",
+                      "description": "{\"hand_sold_portions\":4,\"mix_sold\":3,\"lost\":{\"caramel\":4},\"lost_portions\":4,\"flavor_sold\":{\"caramel\":9,\"cheese\":10,\"cocoa\":5},\"coater\":{\"batches\":12,\"can_finish\":false,\"flavor\":\"auto\",\"held\":\"\",\"id\":6,\"ingredients\":56,\"left_ms\":0,\"line\":0,\"margin\":153,\"mode\":\"auto\",\"ms\":0,\"net\":92,\"paid\":900,\"paid_back_ms\":-1,\"quality\":0,\"since_ms\":192750,\"state\":\"starved\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":3.7491666666666665}"
+                    },
+                    {
+                      "type": "hand bags",
+                      "description": "{\"hand_rows\":[[\"caramel\",2,1,88],[\"duo\",4,2,84],[\"caramel\",2,1,84]],\"machine_best\":85,\"all_hand_q100\":0}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cde5f025230c64fb519b-47965ada98f254aa517d",
+          "file": "craft35.spec.mjs",
+          "line": 84,
+          "column": 1
+        },
+        {
+          "title": "the spoon finishes a batch by hand; the machine, the mix and the payback stay honest",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "spoon",
+                  "description": "{\"flavor\":\"cocoa\",\"gold\":[900,1300],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}"
+                },
+                {
+                  "type": "flourish",
+                  "description": "{\"goldPx\":2946,\"goldPre\":2206,\"turned\":1091,\"area\":[477.9150390625,221.80137939453132,170.032470703125,121.63201904296861]}"
+                },
+                {
+                  "type": "craft trade",
+                  "description": "{\"hand_sold_portions\":4,\"mix_sold\":1,\"lost\":{\"caramel\":3,\"cocoa\":1},\"lost_portions\":4,\"flavor_sold\":{\"caramel\":7,\"cheese\":18,\"cocoa\":7},\"coater\":{\"batches\":11,\"can_finish\":false,\"flavor\":\"auto\",\"held\":\"\",\"id\":6,\"ingredients\":56,\"left_ms\":0,\"line\":0,\"margin\":150,\"mode\":\"auto\",\"ms\":0,\"net\":89,\"paid\":900,\"paid_back_ms\":-1,\"quality\":0,\"since_ms\":375400,\"state\":\"starved\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":6.6925}"
+                },
+                {
+                  "type": "hand bags",
+                  "description": "{\"hand_rows\":[[\"cocoa\",2,2,100],[\"cocoa\",2,2,100]],\"machine_best\":60,\"all_hand_q100\":2}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 131879,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:35:22.274Z",
+                  "annotations": [
+                    {
+                      "type": "spoon",
+                      "description": "{\"flavor\":\"cocoa\",\"gold\":[900,1300],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}"
+                    },
+                    {
+                      "type": "flourish",
+                      "description": "{\"goldPx\":2946,\"goldPre\":2206,\"turned\":1091,\"area\":[477.9150390625,221.80137939453132,170.032470703125,121.63201904296861]}"
+                    },
+                    {
+                      "type": "craft trade",
+                      "description": "{\"hand_sold_portions\":4,\"mix_sold\":1,\"lost\":{\"caramel\":3,\"cocoa\":1},\"lost_portions\":4,\"flavor_sold\":{\"caramel\":7,\"cheese\":18,\"cocoa\":7},\"coater\":{\"batches\":11,\"can_finish\":false,\"flavor\":\"auto\",\"held\":\"\",\"id\":6,\"ingredients\":56,\"left_ms\":0,\"line\":0,\"margin\":150,\"mode\":\"auto\",\"ms\":0,\"net\":89,\"paid\":900,\"paid_back_ms\":-1,\"quality\":0,\"since_ms\":375400,\"state\":\"starved\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":6.6925}"
+                    },
+                    {
+                      "type": "hand bags",
+                      "description": "{\"hand_rows\":[[\"cocoa\",2,2,100],[\"cocoa\",2,2,100]],\"machine_best\":60,\"all_hand_q100\":2}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cde5f025230c64fb519b-5ac0b1a7ea560d4774c6",
+          "file": "craft35.spec.mjs",
+          "line": 84,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "journey46.spec.mjs",
+      "file": "journey46.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "by_hand",
+                  "description": "{\"first_sale_ms\":10130,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                },
+                {
+                  "type": "stations",
+                  "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                },
+                {
+                  "type": "hooks",
+                  "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 106367,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:29:55.419Z",
+                  "annotations": [
+                    {
+                      "type": "by_hand",
+                      "description": "{\"first_sale_ms\":10130,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                    },
+                    {
+                      "type": "stations",
+                      "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                    },
+                    {
+                      "type": "hooks",
+                      "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "697a59dfe81e71ad7571-7d6bef197825d59a37e9",
+          "file": "journey46.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "by_hand",
+                  "description": "{\"first_sale_ms\":10350,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                },
+                {
+                  "type": "stations",
+                  "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                },
+                {
+                  "type": "hooks",
+                  "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 108223,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:33:33.691Z",
+                  "annotations": [
+                    {
+                      "type": "by_hand",
+                      "description": "{\"first_sale_ms\":10350,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                    },
+                    {
+                      "type": "stations",
+                      "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                    },
+                    {
+                      "type": "hooks",
+                      "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "697a59dfe81e71ad7571-5c16ddb0867f9f084650",
+          "file": "journey46.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "by_hand",
+                  "description": "{\"first_sale_ms\":10091,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                },
+                {
+                  "type": "stations",
+                  "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                },
+                {
+                  "type": "hooks",
+                  "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 101377,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:37:34.228Z",
+                  "annotations": [
+                    {
+                      "type": "by_hand",
+                      "description": "{\"first_sale_ms\":10091,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}"
+                    },
+                    {
+                      "type": "stations",
+                      "description": "{\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+                    },
+                    {
+                      "type": "hooks",
+                      "description": "[\"dev_money\",\"dev_news\",\"dev_contest\"]"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "697a59dfe81e71ad7571-1701ae3d15d55519fc1a",
+          "file": "journey46.spec.mjs",
+          "line": 55,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-20T03:28:09.298Z",
+    "duration": 666381.401,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

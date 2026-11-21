@@ -1,0 +1,18 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:23] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:23] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:23] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:23] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:23] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:23] "GET /popcorn-glory/game-ae21e0f5501e.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:25] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:16:25] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"scene":"0 machines, idle","frames":228,"per_frame":{"createBuffer":1.1,"createVertexArray":0.7,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":3.8,"draw_calls":482,"atlas":true,"fx_alive":0}
+{"scene":"44 machines","frames":122,"per_frame":{"createBuffer":148.9,"createVertexArray":86.6,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":239.4,"draw_calls":1033,"atlas":true,"fx_alive":24}
+{"scene":"44, over_layer hidden","frames":136,"per_frame":{"createBuffer":88.1,"createVertexArray":48.1,"fenceSync":2.1,"createTexture":0.8,"createFramebuffer":0.4,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":139.7,"draw_calls":936,"atlas":true,"fx_alive":4}
+{"scene":"44, bakes off and freed","frames":111,"per_frame":{"createBuffer":142.9,"createVertexArray":83.8,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":228.7,"draw_calls":1056,"atlas":true,"fx_alive":14}
+  ✓  1 [desktop] › specs/zz_gl46_count.spec.mjs:10:1 › gl objects per frame (51.1s)
+
+  1 passed (51.6s)

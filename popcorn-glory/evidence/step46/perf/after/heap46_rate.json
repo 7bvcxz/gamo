@@ -1,0 +1,66 @@
+{
+  "when": "2026-11-21T17:51:57.975Z",
+  "seconds": 150,
+  "rows": [
+    {
+      "variant": "0 machines",
+      "fps": 28.3,
+      "draw_calls": 485,
+      "viewports": 2,
+      "heap_mb": [
+        9.6,
+        10.2
+      ],
+      "mb_per_min": 0.2,
+      "mb_per_1k_frames": 0.1
+    },
+    {
+      "variant": "44 machines",
+      "fps": 10.4,
+      "draw_calls": 1059,
+      "viewports": 78,
+      "heap_mb": [
+        13.6,
+        68.8
+      ],
+      "mb_per_min": 22,
+      "mb_per_1k_frames": 35.2
+    },
+    {
+      "variant": "44, bakes off and freed",
+      "fps": 14.5,
+      "draw_calls": 1108,
+      "viewports": 25,
+      "heap_mb": [
+        91.8,
+        135.9
+      ],
+      "mb_per_min": 17.6,
+      "mb_per_1k_frames": 20.2
+    },
+    {
+      "variant": "44, goods layer hidden",
+      "fps": 15,
+      "draw_calls": 902,
+      "viewports": 25,
+      "heap_mb": [
+        194.5,
+        194.5
+      ],
+      "mb_per_min": 0,
+      "mb_per_1k_frames": 0
+    },
+    {
+      "variant": "44, in the background tab (no frames)",
+      "fps": 13.4,
+      "draw_calls": 1109,
+      "viewports": 25,
+      "heap_mb": [
+        194.6,
+        194.5
+      ],
+      "mb_per_min": 0,
+      "mb_per_1k_frames": 0
+    }
+  ]
+}

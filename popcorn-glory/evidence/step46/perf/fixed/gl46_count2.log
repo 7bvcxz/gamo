@@ -1,0 +1,26 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:14] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:15] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:15] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:15] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:15] "GET /popcorn-glory/game-e94d37290282.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:15] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:16] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:13:16] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"scene":"0 machines, idle","frames":230,"per_frame":{"createBuffer":1.1,"createVertexArray":0.7,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":3.8,"draw_calls":482}
+{"scene":"44 machines","frames":122,"per_frame":{"createBuffer":150.9,"createVertexArray":87.6,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":242.4,"draw_calls":993}
+{"scene":"44, over_layer hidden","frames":137,"per_frame":{"createBuffer":89.2,"createVertexArray":48.7,"fenceSync":2.1,"createTexture":0.9,"createFramebuffer":0.4,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":141.3,"draw_calls":953}
+{"scene":"44, under_layer hidden","frames":119,"per_frame":{"createBuffer":135.6,"createVertexArray":80,"fenceSync":2.2,"createTexture":1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":219.3,"draw_calls":1019}
+{"scene":"44, detail_layer hidden","frames":119,"per_frame":{"createBuffer":147.3,"createVertexArray":86.4,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":237.5,"draw_calls":845}
+{"scene":"44, goods_layer hidden","frames":121,"per_frame":{"createBuffer":115.6,"createVertexArray":69.2,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":188.6,"draw_calls":822}
+{"scene":"44, stats_node hidden","frames":112,"per_frame":{"createBuffer":144.3,"createVertexArray":84.6,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":232.8,"draw_calls":984}
+{"scene":"44, actor_layer hidden","frames":117,"per_frame":{"createBuffer":113.6,"createVertexArray":67.6,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":183.2,"draw_calls":878}
+{"scene":"44, machine_layer hidden","frames":115,"per_frame":{"createBuffer":138.2,"createVertexArray":81.1,"fenceSync":2.2,"createTexture":1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":222.9,"draw_calls":871}
+{"scene":"44, belt_layer hidden","frames":111,"per_frame":{"createBuffer":153.8,"createVertexArray":90.1,"fenceSync":2.2,"createTexture":1.2,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":247.9,"draw_calls":981}
+{"scene":"44, floor_layer hidden","frames":124,"per_frame":{"createBuffer":140.8,"createVertexArray":82.9,"fenceSync":2.2,"createTexture":1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":227.4,"draw_calls":754}
+{"scene":"44, bakes off and freed","frames":110,"per_frame":{"createBuffer":145.9,"createVertexArray":85.2,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":233.1,"draw_calls":1013}
+  ✓  1 [desktop] › specs/zz_gl46_count.spec.mjs:10:1 › gl objects per frame (2.2m)
+
+  1 passed (2.2m)

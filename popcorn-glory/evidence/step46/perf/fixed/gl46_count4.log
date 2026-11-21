@@ -1,0 +1,23 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:23] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:24] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:24] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:24] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:24] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:24] "GET /popcorn-glory/game-46889a08a3fb.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:25] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:24:25] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"scene":"0 machines, idle","frames":205,"per_frame":{"createBuffer":38.8,"createVertexArray":26.5,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":67.4,"draw_calls":482,"atlas":true,"fx_alive":0}
+{"scene":"44 machines","frames":115,"per_frame":{"createBuffer":154.9,"createVertexArray":89.8,"fenceSync":2.2,"createTexture":1.2,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":248.6,"draw_calls":993,"atlas":true,"fx_alive":18}
+{"scene":"44, over_layer hidden","frames":128,"per_frame":{"createBuffer":93.3,"createVertexArray":50.9,"fenceSync":2.1,"createTexture":0.9,"createFramebuffer":0.4,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":147.7,"draw_calls":953,"atlas":true,"fx_alive":4}
+{"scene":"44, detail_layer hidden","frames":113,"per_frame":{"createBuffer":142,"createVertexArray":83.6,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":229.4,"draw_calls":881,"atlas":true,"fx_alive":15}
+{"scene":"44, goods_layer hidden","frames":110,"per_frame":{"createBuffer":121.1,"createVertexArray":72.3,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":197.2,"draw_calls":814,"atlas":true,"fx_alive":14}
+{"scene":"44, actor_layer hidden","frames":108,"per_frame":{"createBuffer":123.2,"createVertexArray":72.6,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":197.8,"draw_calls":861,"atlas":true,"fx_alive":7}
+{"scene":"44, machine_layer hidden","frames":104,"per_frame":{"createBuffer":162.2,"createVertexArray":94.3,"fenceSync":2.2,"createTexture":1.2,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":260.5,"draw_calls":891,"atlas":true,"fx_alive":8}
+{"scene":"44, floor_layer hidden","frames":113,"per_frame":{"createBuffer":146.7,"createVertexArray":86.2,"fenceSync":2.2,"createTexture":1.2,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":236.9,"draw_calls":790,"atlas":true,"fx_alive":14}
+{"scene":"44, bakes off and freed","frames":100,"per_frame":{"createBuffer":150.4,"createVertexArray":88.1,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":240.5,"draw_calls":1048,"atlas":true,"fx_alive":14}
+  ✓  1 [desktop] › specs/zz_gl46_count.spec.mjs:10:1 › gl objects per frame (1.7m)
+
+  1 passed (1.7m)

@@ -1,0 +1,66 @@
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:09] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 6 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:09] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:09] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:09] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:09] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:09] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:11] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:28:11] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:53] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:53] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  1 [p720] › specs/craft35.spec.mjs:84:1 › the spoon finishes a batch by hand; the machine, the mix and the payback stay honest (1.8m)
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:55] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:55] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:55] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:55] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:55] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:56] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:29:56] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:36] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:37] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  2 [p720] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.8m)
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:42] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:42] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:42] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:42] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:42] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:43] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:31:43] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:30] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:31] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  3 [phone] › specs/craft35.spec.mjs:84:1 › the spoon finishes a batch by hand; the machine, the mix and the payback stay honest (1.9m)
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:33] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:33] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:33] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:33] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:33] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:34] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:33:34] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:17] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:18] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  4 [phone] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.8m)
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:22] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:22] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:22] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:22] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:22] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:23] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:35:23] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:32] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:32] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  5 [desktop] › specs/craft35.spec.mjs:84:1 › the spoon finishes a batch by hand; the machine, the mix and the payback stay honest (2.2m)
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:34] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:34] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:34] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:34] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:34] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:35] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:37:35] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:12] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:12] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  6 [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+
+  6 passed (11.1m)

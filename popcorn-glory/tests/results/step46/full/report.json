@@ -1,0 +1,3443 @@
+{
+  "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
+  "sha": "cd675c17f9d6",
+  "dirty": false,
+  "build": {
+    "version": "0.46.0",
+    "pack": "game-dae01447f63a.pck",
+    "packSize": 991440,
+    "engine": "engine-7eda98958eb0",
+    "godot": "4.7.stable.official.5b4e0cb0f",
+    "source": "cd675c17f9d6"
+  },
+  "target": "local docs/ (http://127.0.0.1)",
+  "when": "2026-11-20T03:23:50.026Z",
+  "stages": {
+    "headless": "PASSED",
+    "deploy": "PASSED",
+    "browser": "FAILED"
+  },
+  "headless_summary": "346 passed, 0 failed, 24066 checks, 27 files, 686.1s",
+  "browser_checks": [
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the artboard preview draws on this screen",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1855
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the chooser does not list the artboard",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1378
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the artboard preview draws on this screen",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2295
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the chooser does not list the artboard",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1705
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the artboard preview draws on this screen",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1835
+    },
+    {
+      "spec": "art15.spec.mjs",
+      "title": "the chooser does not list the artboard",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1326
+    },
+    {
+      "spec": "art40.spec.mjs",
+      "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "art: {\"kettle\":{\"sat\":0.32,\"lumStd\":54.98,\"skyShare\":0.086,\"vivid\":0.328},\"wall\":{\"sat\":0.338,\"lumStd\":7.49,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.235,\"lumStd\":43.22,\"skyShare\":0.611,\"vivid\":0},\"tiles\":{\"sat\":0.031,\"lumStd\":5.79,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":367,\"objects\":653,\"primitives\":10169,\"nodes\":75,\"static_mem\":0,\"fps\":33}}"
+      ],
+      "ms": 5453
+    },
+    {
+      "spec": "art40.spec.mjs",
+      "title": "the upgrade card: a silhouette out of reach, the next machine in its colours once affordable",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "card: {\"poor\":{\"sat\":0.055,\"lumStd\":31.4,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.733,\"lumStd\":38.49,\"skyShare\":0.014,\"vivid\":0.878}}"
+      ],
+      "ms": 4791
+    },
+    {
+      "spec": "art40.spec.mjs",
+      "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "art: {\"kettle\":{\"sat\":0.327,\"lumStd\":55.64,\"skyShare\":0.083,\"vivid\":0.337},\"wall\":{\"sat\":0.345,\"lumStd\":7.3,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.229,\"lumStd\":43.89,\"skyShare\":0.605,\"vivid\":0.005},\"tiles\":{\"sat\":0.031,\"lumStd\":5.65,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":359,\"objects\":645,\"primitives\":10153,\"nodes\":75,\"static_mem\":0,\"fps\":26}}"
+      ],
+      "ms": 6441
+    },
+    {
+      "spec": "art40.spec.mjs",
+      "title": "the upgrade card: a silhouette out of reach, the next machine in its colours once affordable",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "card: {\"poor\":{\"sat\":0.055,\"lumStd\":31.23,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.73,\"lumStd\":37.12,\"skyShare\":0.014,\"vivid\":0.874}}"
+      ],
+      "ms": 5485
+    },
+    {
+      "spec": "art40.spec.mjs",
+      "title": "the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "art: {\"kettle\":{\"sat\":0.324,\"lumStd\":54.77,\"skyShare\":0.083,\"vivid\":0.329},\"wall\":{\"sat\":0.331,\"lumStd\":7.32,\"skyShare\":0,\"vivid\":0},\"shop_window\":{\"sat\":0.218,\"lumStd\":36.92,\"skyShare\":0.655,\"vivid\":0},\"tiles\":{\"sat\":0.031,\"lumStd\":5.94,\"skyShare\":0,\"vivid\":0},\"render\":{\"draw_calls\":472,\"objects\":826,\"primitives\":13315,\"nodes\":75,\"static_mem\":0,\"fps\":29}}"
+      ],
+      "ms": 5807
+    },
+    {
+      "spec": "art40.spec.mjs",
+      "title": "the upgrade card: a silhouette out of reach, the next machine in its colours once affordable",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "card: {\"poor\":{\"sat\":0.052,\"lumStd\":31.47,\"skyShare\":0,\"vivid\":0},\"rich\":{\"sat\":0.729,\"lumStd\":38.82,\"skyShare\":0.014,\"vivid\":0.872}}"
+      ],
+      "ms": 4970
+    },
+    {
+      "spec": "art41.spec.mjs",
+      "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "cast: {\"worst_iou\":0.507,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":150,\"news\":241,\"pack_rate\":0,\"perfect\":107,\"pop_rate\":0,\"queue\":118,\"sales\":0,\"sign_up\":156,\"stock\":250,\"trophy\":0,\"upkeep\":25},\"mean\":{\"heat\":[184,85,45],\"news\":[158,111,81],\"pack_rate\":[242,118,89],\"perfect\":[190,147,56],\"pop_rate\":[185,147,91],\"queue\":[130,152,169],\"sales\":[225,179,75],\"sign_up\":[157,92,71],\"stock\":[116,55,38],\"trophy\":[210,156,36],\"upkeep\":[209,175,92]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\",\"delight\"]}"
+      ],
+      "ms": 16809
+    },
+    {
+      "spec": "art41.spec.mjs",
+      "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "shop: {\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":1,\"hits\":[]},\"30m\":{\"minute\":31.4,\"most\":14,\"looks\":13,\"stats\":{\"delight\":12,\"happy\":51,\"receive\":110,\"thanks\":47},\"hits\":[]},\"render\":{\"draw_calls\":906,\"objects\":1419,\"fps\":21}}"
+      ],
+      "ms": 143540
+    },
+    {
+      "spec": "art41.spec.mjs",
+      "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "cast: {\"worst_iou\":0.531,\"pair\":\"heat~upkeep\",\"ink\":{\"heat\":183,\"news\":281,\"pack_rate\":0,\"perfect\":126,\"pop_rate\":0,\"queue\":137,\"sales\":0,\"sign_up\":159,\"stock\":312,\"trophy\":0,\"upkeep\":28},\"mean\":{\"heat\":[182,85,44],\"news\":[155,106,75],\"pack_rate\":[243,118,89],\"perfect\":[189,146,55],\"pop_rate\":[185,147,91],\"queue\":[129,153,170],\"sales\":[224,178,72],\"sign_up\":[171,111,91],\"stock\":[111,53,37],\"trophy\":[208,155,38],\"upkeep\":[210,177,95]},\"feet_drift\":0,\"lean\":0.091,\"motions\":[\"idle\",\"walk\",\"receive\"]}"
+      ],
+      "ms": 18734
+    },
+    {
+      "spec": "art41.spec.mjs",
+      "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "shop: {\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":0,\"hits\":[]},\"30m\":{\"minute\":31.5,\"most\":13,\"looks\":14,\"stats\":{\"delight\":9,\"happy\":47,\"receive\":110,\"thanks\":54},\"hits\":[]},\"render\":{\"draw_calls\":840,\"objects\":1339,\"fps\":17}}"
+      ],
+      "ms": 153166
+    },
+    {
+      "spec": "art41.spec.mjs",
+      "title": "the cast sheet: an icon set told apart by shape and colour, and walkers whose feet stay put",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "cast: {\"worst_iou\":0.553,\"pair\":\"news~queue\",\"ink\":{\"heat\":71,\"news\":157,\"pack_rate\":0,\"perfect\":48,\"pop_rate\":0,\"queue\":53,\"sales\":0,\"sign_up\":82,\"stock\":111,\"trophy\":0,\"upkeep\":17},\"mean\":{\"heat\":[184,86,44],\"news\":[131,94,68],\"pack_rate\":[244,118,89],\"perfect\":[192,148,56],\"pop_rate\":[185,147,91],\"queue\":[129,152,169],\"sales\":[224,178,73],\"sign_up\":[169,114,94],\"stock\":[120,57,39],\"trophy\":[209,156,38],\"upkeep\":[209,171,84]},\"feet_drift\":0,\"lean\":0.089,\"motions\":[\"idle\",\"receive\",\"delight\",\"walk\"]}"
+      ],
+      "ms": 17085
+    },
+    {
+      "spec": "art41.spec.mjs",
+      "title": "the shop at 0 m, 3 m and a 30-minute rush: people of many looks, clear of the tube and the buttons",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "shop: {\"0m\":{\"people\":1,\"hits\":[]},\"3m\":{\"minute\":3.5,\"sign\":2,\"people\":0,\"hits\":[]},\"30m\":{\"minute\":31.3,\"most\":13,\"looks\":14,\"stats\":{\"delight\":16,\"happy\":45,\"receive\":109,\"thanks\":48},\"hits\":[]},\"render\":{\"draw_calls\":765,\"objects\":1215,\"fps\":19}}"
+      ],
+      "ms": 140840
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10858
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "without ?burst=1 the stand has no crescendo",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10302
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "the fountain is heard and does not clip",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures the sound",
+      "notes": [],
+      "ms": 32
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11459
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "without ?burst=1 the stand has no crescendo",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10740
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "the fountain is heard and does not clip",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures the sound",
+      "notes": [],
+      "ms": 25
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10752
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "without ?burst=1 the stand has no crescendo",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10160
+    },
+    {
+      "spec": "burst14.spec.mjs",
+      "title": "the fountain is heard and does not clip",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mix: fountain rms 0.223 peak 0.759"
+      ],
+      "ms": 17565
+    },
+    {
+      "spec": "career39.spec.mjs",
+      "title": "real clock: a fresh factory's first three minutes against the sim",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "real3min: {\"firstSale\":9255,\"marks\":{\"60\":{\"money\":10,\"sign\":1,\"sold\":5,\"spent\":40},\"120\":{\"money\":70,\"sign\":1,\"sold\":11,\"spent\":40},\"180\":{\"money\":40,\"sign\":2,\"sold\":18,\"spent\":140}},\"pops\":18,\"ratio\":0.9999,\"revenue\":180,\"sim\":{\"revenue_3min\":170,\"sign_at_3\":2},\"load\":13.79}"
+      ],
+      "ms": 182082
+    },
+    {
+      "spec": "career39.spec.mjs",
+      "title": "a rich factory: the sign's new tiers draw more, and a twelve-digit wallet fits the counter",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "sign: [{\"tier\":6,\"warm\":0,\"px\":8784},{\"tier\":7,\"warm\":661,\"px\":8784},{\"tier\":8,\"warm\":1306,\"px\":8784}]",
+        "money: {\"rect\":[120,34,298,76],\"outside_one\":88,\"outside_seven\":88}"
+      ],
+      "ms": 31933
+    },
+    {
+      "spec": "career39.spec.mjs",
+      "title": "real clock: a fresh factory's first three minutes against the sim",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "p720 is the portrait touch run; three real minutes each",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "career39.spec.mjs",
+      "title": "a rich factory: the sign's new tiers draw more, and a twelve-digit wallet fits the counter",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "sign: [{\"tier\":6,\"warm\":0,\"px\":17680},{\"tier\":7,\"warm\":967,\"px\":17680},{\"tier\":8,\"warm\":1630,\"px\":17680}]",
+        "money: {\"rect\":[65,18.4184856414795,161.4166717529295,41.1707305908203],\"outside_one\":2256,\"outside_seven\":1213}"
+      ],
+      "ms": 36335
+    },
+    {
+      "spec": "career39.spec.mjs",
+      "title": "real clock: a fresh factory's first three minutes against the sim",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "real3min: {\"firstSale\":9405,\"marks\":{\"60\":{\"money\":10,\"sign\":1,\"sold\":5,\"spent\":40},\"120\":{\"money\":70,\"sign\":1,\"sold\":11,\"spent\":40},\"180\":{\"money\":40,\"sign\":2,\"sold\":18,\"spent\":140}},\"pops\":18,\"ratio\":1.0001,\"revenue\":180,\"sim\":{\"revenue_3min\":170,\"sign_at_3\":2},\"load\":8.84}"
+      ],
+      "ms": 182190
+    },
+    {
+      "spec": "career39.spec.mjs",
+      "title": "a rich factory: the sign's new tiers draw more, and a twelve-digit wallet fits the counter",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "sign: [{\"tier\":6,\"warm\":0,\"px\":5143},{\"tier\":7,\"warm\":312,\"px\":5143},{\"tier\":8,\"warm\":592,\"px\":5143}]",
+        "money: {\"rect\":[477.5,21.125,325,58.5],\"outside_one\":0,\"outside_seven\":0}"
+      ],
+      "ms": 31397
+    },
+    {
+      "spec": "catalog27.spec.mjs",
+      "title": "the machine catalog sheet draws on this screen",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2551
+    },
+    {
+      "spec": "catalog27.spec.mjs",
+      "title": "the machine catalog sheet draws on this screen",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2993
+    },
+    {
+      "spec": "catalog27.spec.mjs",
+      "title": "the machine catalog sheet draws on this screen",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2497
+    },
+    {
+      "spec": "contests38.spec.mjs",
+      "title": "contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "dot: {\"dot\":191,\"posted\":[\"perfect_streak\"]}",
+        "live: {\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}",
+        "hidden: {\"left0\":134600,\"leftHidden\":134550}",
+        "result: {\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":388100,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":22,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":208100,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}",
+        "reload: {\"before\":{\"seq\":3,\"left\":208450,\"score\":6},\"after\":{\"seq\":3,\"left\":207300,\"score\":6},\"wall\":1727}"
+      ],
+      "ms": 113857
+    },
+    {
+      "spec": "contests38.spec.mjs",
+      "title": "contests: an advanced factory enters lean packing and its score comes from the counters",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "lean: {\"score\":0.8,\"packs\":137,\"tier\":3,\"prize\":240,\"overfill\":3,\"lost\":0}"
+      ],
+      "ms": 140320
+    },
+    {
+      "spec": "contests38.spec.mjs",
+      "title": "contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "dot: {\"dot\":221,\"posted\":[\"perfect_streak\"]}",
+        "live: {\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}",
+        "hidden: {\"left0\":135900,\"leftHidden\":135850}",
+        "result: {\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":389650,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":21,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":209650,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}",
+        "reload: {\"before\":{\"seq\":3,\"left\":207650,\"score\":6},\"after\":{\"seq\":3,\"left\":206150,\"score\":7},\"wall\":2067}"
+      ],
+      "ms": 127359
+    },
+    {
+      "spec": "contests38.spec.mjs",
+      "title": "contests: an advanced factory enters lean packing and its score comes from the counters",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "lean: {\"score\":1.1,\"packs\":135,\"tier\":2,\"prize\":120,\"overfill\":5,\"lost\":0}"
+      ],
+      "ms": 152691
+    },
+    {
+      "spec": "contests38.spec.mjs",
+      "title": "contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "dot: {\"dot\":137,\"posted\":[\"perfect_streak\"]}",
+        "live: {\"pops\":4,\"score\":4,\"cur\":4,\"tiers\":[3,5,8],\"outcomes\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":20}}",
+        "hidden: {\"left0\":134950,\"leftHidden\":134900}",
+        "result: {\"about\":\"Pop the kettle by hand. Count the perfect pops in a row.\",\"best_before\":0,\"end\":388450,\"fee\":5,\"flavor\":\"\",\"how\":\"done\",\"id\":\"perfect_streak\",\"kind\":\"streak\",\"lower\":false,\"min_packs\":0,\"ms\":180000,\"name\":\"Perfect Pop streak\",\"packs\":22,\"prize\":15,\"prizes\":[15,30,60],\"score\":4,\"seq\":1,\"start\":208450,\"tier\":1,\"tiers\":[3,5,8],\"trophy\":1,\"window_ms\":480000}",
+        "reload: {\"before\":{\"seq\":3,\"left\":208850,\"score\":6},\"after\":{\"seq\":3,\"left\":207500,\"score\":6},\"wall\":1890}"
+      ],
+      "ms": 113456
+    },
+    {
+      "spec": "contests38.spec.mjs",
+      "title": "contests: an advanced factory enters lean packing and its score comes from the counters",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "lean: {\"score\":1.6,\"packs\":136,\"tier\":2,\"prize\":120,\"overfill\":7,\"lost\":0}"
+      ],
+      "ms": 136016
+    },
+    {
+      "spec": "craft35.spec.mjs",
+      "title": "the spoon finishes a batch by hand; the machine, the mix and the payback stay honest",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "spoon: {\"flavor\":\"cocoa\",\"gold\":[900,1300],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}",
+        "flourish: {\"goldPx\":3589,\"goldPre\":3265,\"turned\":598,\"area\":[448.5599975585934,301.07031860351617,145.0800476074218,160.2316589355468]}",
+        "craft trade: {\"hand_sold_portions\":4,\"mix_sold\":3,\"lost\":{\"caramel\":3,\"cocoa\":1},\"lost_portions\":4,\"flavor_sold\":{\"caramel\":8,\"cheese\":12,\"cocoa\":6},\"coater\":{\"batches\":11,\"can_finish\":true,\"flavor\":\"auto\",\"held\":\"cocoa\",\"id\":6,\"ingredients\":58,\"left_ms\":5550,\"line\":0,\"margin\":146,\"mode\":\"auto\",\"ms\":11000,\"net\":83,\"paid\":900,\"paid_back_ms\":-1,\"quality\":90,\"since_ms\":300600,\"state\":\"run\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":5.460833333333333}",
+        "hand bags: {\"hand_rows\":[[\"cocoa\",2,1,92],[\"cocoa\",2,2,100],[\"cocoa\",2,1,84]],\"machine_best\":85,\"all_hand_q100\":1}"
+      ],
+      "ms": 110536
+    },
+    {
+      "spec": "craft35.spec.mjs",
+      "title": "the spoon finishes a batch by hand; the machine, the mix and the payback stay honest",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "spoon: {\"flavor\":\"caramel\",\"gold\":[1100,1450],\"graded\":\"perfect\",\"hand_finish\":{\"perfect\":1},\"hand_portions\":4}",
+        "flourish: {\"goldPx\":4474,\"goldPre\":4141,\"turned\":1120,\"area\":[485.9400024414065,378.80126953125017,157.1700439453125,228.5417175292968]}",
+        "craft trade: {\"hand_sold_portions\":4,\"mix_sold\":1,\"lost\":{\"caramel\":2,\"cocoa\":1},\"lost_portions\":3,\"flavor_sold\":{\"caramel\":9,\"cheese\":9,\"cocoa\":5},\"coater\":{\"batches\":10,\"can_finish\":true,\"flavor\":\"auto\",\"held\":\"cocoa\",\"id\":6,\"ingredients\":52,\"left_ms\":2800,\"line\":0,\"margin\":128,\"mode\":\"auto\",\"ms\":11000,\"net\":71,\"paid\":900,\"paid_back_ms\":-1,\"quality\":80,\"since_ms\":192500,\"state\":\"run\",\"type\":\"P06\",\"upkeep\":5},\"minutes\":3.716666666666667}",
+        "hand bags: {\"hand_rows\":[[\"duo\",4,1,84],[\"caramel\",2,2,100],[\"caramel\",2,1,80]],\"machine_best\":85,\"all_hand_q100\":1}"
+      ],
+      "ms": 107324
+    },
+    {
+      "spec": "craft35.spec.mjs",
+      "title": "the spoon finishes a batch by hand; the machine, the mix and the payback stay honest",
+      "project": "desktop",
+      "status": "FAILED",
+      "error": "Error: the hold was judged in or by the gold (undefined)\n\nexpect(received).toContain(expected) // indexOf\n\nExpected value: undefined\nReceived array: [\"perfect\", \"near\"]",
+      "notes": [
+        "spoon: {\"flavor\":\"caramel\",\"gold\":[1100,1450],\"hand_finish\":{}}"
+      ],
+      "ms": 77090
+    },
+    {
+      "spec": "customers36.spec.mjs",
+      "title": "a classic first customer, then a cast with their own tastes, faces and stars",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "cast: {\"arrived_who\":{\"classic\":15,\"elder\":2,\"kid\":7,\"student\":13},\"passed_by_who\":{\"kid\":9,\"rush\":13},\"sold\":31,\"happy\":30,\"popularity\":[50.4,56],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":162,\"thanks\":true,\"flavor_sold\":{\"caramel\":1,\"cheese\":2}}",
+        "stopped: {\"abandoned\":[0,5],\"passed\":[23,59],\"popularity\":[56,52.4],\"stars\":3}"
+      ],
+      "ms": 54048
+    },
+    {
+      "spec": "customers36.spec.mjs",
+      "title": "a classic first customer, then a cast with their own tastes, faces and stars",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "cast: {\"arrived_who\":{\"classic\":13,\"elder\":2,\"kid\":7,\"student\":13},\"passed_by_who\":{\"kid\":8,\"rush\":13},\"sold\":30,\"happy\":29,\"popularity\":[50.4,55.8],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":429,\"thanks\":true,\"flavor_sold\":{\"caramel\":1,\"cheese\":2}}",
+        "stopped: {\"abandoned\":[0,4],\"passed\":[21,55],\"popularity\":[56,52.8],\"stars\":3}"
+      ],
+      "ms": 57360
+    },
+    {
+      "spec": "customers36.spec.mjs",
+      "title": "a classic first customer, then a cast with their own tastes, faces and stars",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "cast: {\"arrived_who\":{\"classic\":15,\"elder\":2,\"kid\":6,\"student\":12},\"passed_by_who\":{\"kid\":11,\"rush\":14,\"student\":1},\"sold\":30,\"happy\":27,\"popularity\":[50.4,55.4],\"stars\":3,\"favorite\":\"plain\",\"studentPx\":94,\"thanks\":true,\"flavor_sold\":{\"caramel\":3,\"cheese\":2}}",
+        "stopped: {\"abandoned\":[0,5],\"passed\":[26,62],\"popularity\":[55.8,51.8],\"stars\":3}"
+      ],
+      "ms": 54660
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the chooser lists A, B, C and each tile opens its experiment",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3402
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the atlas draws: the money coin is gold, not a white square",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1431
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "A Click & Pop: every press pays at once",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3963
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3990
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding on burns by itself and never locks",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7012
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3563
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "runs never leak between experiments",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3296
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the chooser lists A, B, C and each tile opens its experiment",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4240
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the atlas draws: the money coin is gold, not a white square",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1753
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "A Click & Pop: every press pays at once",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4879
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4372
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding on burns by itself and never locks",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7320
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4381
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "runs never leak between experiments",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3796
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the chooser lists A, B, C and each tile opens its experiment",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3011
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the atlas draws: the money coin is gold, not a white square",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1542
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "A Click & Pop: every press pays at once",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3700
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3929
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding on burns by itself and never locks",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6963
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3397
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "runs never leak between experiments",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2796
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: three floors fit, the ring is in the kitchen, nothing covers them",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2099
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: the kettle cooks, a floor opens its detail without cooking",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5577
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "idle memory: the factory keeps far less than the stand",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: three floors fit, the ring is in the kitchen, nothing covers them",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2538
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: the kettle cooks, a floor opens its detail without cooking",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6388
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "idle memory: the factory keeps far less than the stand",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: three floors fit, the ring is in the kitchen, nothing covers them",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2228
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "the factory: the kettle cooks, a floor opens its detail without cooking",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6184
+    },
+    {
+      "spec": "factory16.spec.mjs",
+      "title": "idle memory: the factory keeps far less than the stand",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "memory: idle, kept JS heap after GC: factory 0.31 MB/min, stand 0.97 MB/min"
+      ],
+      "ms": 194774
+    },
+    {
+      "spec": "factory17.spec.mjs",
+      "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12225
+    },
+    {
+      "spec": "factory17.spec.mjs",
+      "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12846
+    },
+    {
+      "spec": "factory17.spec.mjs",
+      "title": "the factory: no money at the pop, the first sale pays the pack price, goods are conserved",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12482
+    },
+    {
+      "spec": "factory18.spec.mjs",
+      "title": "one batch from the kettle to a satisfied customer",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12386
+    },
+    {
+      "spec": "factory18.spec.mjs",
+      "title": "one batch from the kettle to a satisfied customer",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13436
+    },
+    {
+      "spec": "factory18.spec.mjs",
+      "title": "one batch from the kettle to a satisfied customer",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 13354
+    },
+    {
+      "spec": "factory19.spec.mjs",
+      "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4568
+    },
+    {
+      "spec": "factory19.spec.mjs",
+      "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5659
+    },
+    {
+      "spec": "factory19.spec.mjs",
+      "title": "the factory kettle: a real lot, the crescendo fills, an unaffordable card answers",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5492
+    },
+    {
+      "spec": "factory20.spec.mjs",
+      "title": "the packing station: fill, seal, shelf; the middle floor card sells the station",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10012
+    },
+    {
+      "spec": "factory20.spec.mjs",
+      "title": "the packing station: fill, seal, shelf; the middle floor card sells the station",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11149
+    },
+    {
+      "spec": "factory20.spec.mjs",
+      "title": "the packing station: fill, seal, shelf; the middle floor card sells the station",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10879
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "first pop -> first pack -> one paid hand-over; a calm empty shop between customers",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 23679
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "no stock, no sale: the queue fills, faces change, people leave, money stays 0",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3018
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "first pop -> first pack -> one paid hand-over; a calm empty shop between customers",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 25233
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "no stock, no sale: the queue fills, faces change, people leave, money stays 0",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3747
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "first pop -> first pack -> one paid hand-over; a calm empty shop between customers",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 24947
+    },
+    {
+      "spec": "factory21.spec.mjs",
+      "title": "no stock, no sale: the queue fills, faces change, people leave, money stays 0",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3839
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 19929
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1932
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 21824
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2296
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 21668
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2637
+    },
+    {
+      "spec": "factory23.spec.mjs",
+      "title": "two products: each customer gets the bag they ordered, once; the cue names the bottleneck",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 61696
+    },
+    {
+      "spec": "factory23.spec.mjs",
+      "title": "two products: each customer gets the bag they ordered, once; the cue names the bottleneck",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 63288
+    },
+    {
+      "spec": "factory23.spec.mjs",
+      "title": "two products: each customer gets the bag they ordered, once; the cue names the bottleneck",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 63045
+    },
+    {
+      "spec": "factory26.spec.mjs",
+      "title": "a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 79074
+    },
+    {
+      "spec": "factory26.spec.mjs",
+      "title": "a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 88576
+    },
+    {
+      "spec": "factory26.spec.mjs",
+      "title": "a cooker, a bagger and a kiosk: built from the screen, working with real goods, paid for",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 78730
+    },
+    {
+      "spec": "factory28.spec.mjs",
+      "title": "eight kitchen devices: built from the picker, each doing its own job with real inputs",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 30802
+    },
+    {
+      "spec": "factory28.spec.mjs",
+      "title": "eight kitchen devices: built from the picker, each doing its own job with real inputs",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 35670
+    },
+    {
+      "spec": "factory28.spec.mjs",
+      "title": "eight kitchen devices: built from the picker, each doing its own job with real inputs",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 31266
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "kitchen: {\"rotary\":52,\"auto_lots\":56,\"premium_lots\":20,\"premium_sold\":33,\"sorted\":15,\"dispatch_held_ms\":183250,\"vent_saves\":0,\"upkeep\":66,\"kernels\":108}"
+      ],
+      "ms": 105976
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "without vents five kettles overheat; with them the kitchen keeps cooking",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop runs the heat",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "a minute of a busy advanced factory: frame rate and kept memory",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "kitchen: {\"rotary\":55,\"auto_lots\":62,\"premium_lots\":21,\"premium_sold\":32,\"sorted\":15,\"dispatch_held_ms\":167050,\"vent_saves\":0,\"upkeep\":70,\"kernels\":115}"
+      ],
+      "ms": 115181
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "without vents five kettles overheat; with them the kitchen keeps cooking",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop runs the heat",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "a minute of a busy advanced factory: frame rate and kept memory",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "the advanced kitchen: picker, rotary popper, premium SKU sold only to premium orders, vents",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "kitchen: {\"rotary\":53,\"auto_lots\":52,\"premium_lots\":19,\"premium_sold\":32,\"sorted\":15,\"dispatch_held_ms\":206250,\"vent_saves\":0,\"upkeep\":65,\"kernels\":105}"
+      ],
+      "ms": 103035
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "without vents five kettles overheat; with them the kitchen keeps cooking",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 36730
+    },
+    {
+      "spec": "factory29.spec.mjs",
+      "title": "a minute of a busy advanced factory: frame rate and kept memory",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf: {\"fps\":[18.90735395480259,18.94694854047283,18.341538748436033,18.76172608233289,17.57640854730508,18.128041210843147],\"median\":18.76172608233289,\"heap0\":22561555,\"heap1\":30929647,\"kept_mb\":8.368092,\"draw_calls\":[822,905,946,897,945,980],\"objects\":[1255,1369,1399,1328,1394,1425],\"load\":[11.86,12.22]}"
+      ],
+      "ms": 95415
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "the packing floor: cups, the weigher, the sealer, honest SKUs",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "packing: {\"cups_sold\":14,\"small\":28,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":70,\"upkeep\":36}"
+      ],
+      "ms": 74034
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "the dispenser sells large bags at tier 1; an empty floor stops and pays nothing",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop runs the details",
+      "notes": [],
+      "ms": 21
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "frame rate with several packers working at once",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "the packing floor: cups, the weigher, the sealer, honest SKUs",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "packing: {\"cups_sold\":19,\"small\":29,\"large\":13,\"bagger\":21,\"cup_feeder\":20,\"packed\":69,\"upkeep\":31}"
+      ],
+      "ms": 74263
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "the dispenser sells large bags at tier 1; an empty floor stops and pays nothing",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop runs the details",
+      "notes": [],
+      "ms": 21
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "frame rate with several packers working at once",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 21
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "the packing floor: cups, the weigher, the sealer, honest SKUs",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "packing: {\"cups_sold\":14,\"small\":28,\"large\":20,\"bagger\":26,\"cup_feeder\":15,\"packed\":70,\"upkeep\":35}"
+      ],
+      "ms": 73361
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "the dispenser sells large bags at tier 1; an empty floor stops and pays nothing",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 70877
+    },
+    {
+      "spec": "factory30.spec.mjs",
+      "title": "frame rate with several packers working at once",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf: {\"fps\":[19.8,19.9,19.5,18.4,18.8,18],\"median\":19.540791402051784,\"packers_running\":[2,1,2,2,0,2],\"draw_calls\":[716,734,763,802,840,906],\"objects\":[1130,1139,1184,1209,1252,1317],\"load\":10.52}"
+      ],
+      "ms": 62444
+    },
+    {
+      "spec": "factory31.spec.mjs",
+      "title": "the storefront: cashier, express window, robot lanes, router -- honest sales",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "shop: {\"sold\":109,\"cashier\":58,\"express\":48,\"routed\":4,\"express_jumped\":5,\"lanes\":4,\"lost\":49,\"upkeep\":70,\"revenue\":1268}"
+      ],
+      "ms": 105179
+    },
+    {
+      "spec": "factory31.spec.mjs",
+      "title": "a paused cashier holds its customers sales until it is resumed",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop runs the details",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "factory31.spec.mjs",
+      "title": "the storefront: cashier, express window, robot lanes, router -- honest sales",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "shop: {\"sold\":110,\"cashier\":62,\"express\":44,\"routed\":0,\"express_jumped\":6,\"lanes\":4,\"lost\":51,\"upkeep\":70,\"revenue\":1288}"
+      ],
+      "ms": 114755
+    },
+    {
+      "spec": "factory31.spec.mjs",
+      "title": "a paused cashier holds its customers sales until it is resumed",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop runs the details",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "factory31.spec.mjs",
+      "title": "the storefront: cashier, express window, robot lanes, router -- honest sales",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "shop: {\"sold\":108,\"cashier\":54,\"express\":51,\"routed\":0,\"express_jumped\":7,\"lanes\":4,\"lost\":46,\"upkeep\":70,\"revenue\":1232}"
+      ],
+      "ms": 102857
+    },
+    {
+      "spec": "factory31.spec.mjs",
+      "title": "a paused cashier holds its customers sales until it is resumed",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 56984
+    },
+    {
+      "spec": "factory32.spec.mjs",
+      "title": "support machines on their floors, the upkeep overview, pause and resume everything",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 77435
+    },
+    {
+      "spec": "factory32.spec.mjs",
+      "title": "support machines on their floors, the upkeep overview, pause and resume everything",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 85140
+    },
+    {
+      "spec": "factory32.spec.mjs",
+      "title": "support machines on their floors, the upkeep overview, pause and resume everything",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 70832
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":30,\"window\":[720,1280]}",
+        "ran: {\"ran\":38,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[\"cooker\"]}",
+        "lines: {\"at_pause\":9,\"before_kitchen_pause\":6,\"moved\":1,\"line_portions\":[4,0,1]}",
+        "hidden: {\"before\":325045,\"hidden\":325125,\"after\":327725}"
+      ],
+      "ms": 213395
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":52,\"window\":[780,1688]}",
+        "ran: {\"ran\":37,\"never\":[\"cooker\",\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[\"cooker\",\"cooker\"]}",
+        "lines: {\"at_pause\":10,\"before_kitchen_pause\":5,\"moved\":2,\"line_portions\":[2,0,3]}",
+        "hidden: {\"before\":350551,\"hidden\":350654,\"after\":353229}"
+      ],
+      "ms": 239089
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":21,\"window\":[1280,800]}",
+        "ran: {\"ran\":38,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[\"cooker\"]}",
+        "lines: {\"at_pause\":7,\"before_kitchen_pause\":5,\"moved\":1,\"line_portions\":[3,0,4]}",
+        "hidden: {\"before\":333748,\"hidden\":333831,\"after\":336452}",
+        "perf: {\"machines\":44,\"fps\":[13.698630136986301,13.706677102170527,13.614703877665274,14.478764478764479,13.722799440825657,13.959981386691485],\"median\":13.722799440825657,\"heap0\":61405868,\"heap1\":81067204,\"kept_mb\":19.661336,\"draw_calls\":[1198,1183,1167,1168,1148,1190],\"objects\":[1428,1395,1403,1390,1373,1396],\"nodes\":[442,442,442,442,441,443],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":218,\"floors\":0,\"goods\":252,\"machines\":466},\"cargo\":{\"made\":340,\"peak\":12,\"reused\":785,\"skipped\":0},\"pool\":{\"bag\":8,\"lot\":2},\"actor_nodes\":61,\"load\":[8.42,10.67]}"
+      ],
+      "ms": 277515
+    },
+    {
+      "spec": "flavors34.spec.mjs",
+      "title": "the flavors sheet draws five distinct flavors on this screen",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "flavor pixels: {\"counts\":{\"plain\":972,\"cheese\":1174,\"spicy\":1196,\"caramel\":1040,\"cocoa\":701},\"scale\":1}"
+      ],
+      "ms": 2972
+    },
+    {
+      "spec": "flavors34.spec.mjs",
+      "title": "five flavors are coated, packed, asked for and sold in the browser",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "flavor trade: {\"sold\":{\"caramel\":5,\"cheese\":6,\"cocoa\":1,\"spicy\":3},\"revenue\":{\"caramel\":98,\"cheese\":80,\"cocoa\":18,\"spicy\":53},\"coated\":{\"caramel\":18,\"cheese\":16,\"cocoa\":4,\"spicy\":8},\"ingredients\":46,\"minutes\":3.1991666666666667,\"sold_total\":58,\"seen_coating\":[\"caramel\",\"cheese\",\"cocoa\"],\"asked\":{\"caramel\":6,\"cheese\":6,\"cocoa\":2,\"duo\":1,\"plain\":44,\"spicy\":5},\"news\":[]}",
+        "flavor pixels on the floors: {\"cheese\":20,\"spicy\":744,\"caramel\":170,\"cocoa\":78}"
+      ],
+      "ms": 71150
+    },
+    {
+      "spec": "flavors34.spec.mjs",
+      "title": "the flavors sheet draws five distinct flavors on this screen",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "flavor pixels: {\"counts\":{\"plain\":2214,\"cheese\":2678,\"spicy\":2750,\"caramel\":2301,\"cocoa\":1939},\"scale\":1}"
+      ],
+      "ms": 3700
+    },
+    {
+      "spec": "flavors34.spec.mjs",
+      "title": "five flavors are coated, packed, asked for and sold in the browser",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "flavor trade: {\"sold\":{\"caramel\":5,\"cheese\":8,\"cocoa\":1,\"spicy\":2},\"revenue\":{\"caramel\":98,\"cheese\":91,\"cocoa\":28,\"spicy\":28},\"coated\":{\"caramel\":18,\"cheese\":28,\"cocoa\":8,\"spicy\":4},\"ingredients\":53,\"minutes\":3.325,\"sold_total\":60,\"seen_coating\":[\"caramel\",\"spicy\",\"cocoa\",\"cheese\"],\"asked\":{\"caramel\":6,\"cheese\":8,\"cocoa\":3,\"duo\":5,\"plain\":43,\"spicy\":3},\"news\":[]}",
+        "flavor pixels on the floors: {\"cheese\":279,\"spicy\":16,\"caramel\":132,\"cocoa\":236}"
+      ],
+      "ms": 80092
+    },
+    {
+      "spec": "flavors34.spec.mjs",
+      "title": "the flavors sheet draws five distinct flavors on this screen",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "flavor pixels: {\"counts\":{\"plain\":1938,\"cheese\":1398,\"spicy\":1446,\"caramel\":1250,\"cocoa\":1058},\"scale\":1}"
+      ],
+      "ms": 3031
+    },
+    {
+      "spec": "flavors34.spec.mjs",
+      "title": "five flavors are coated, packed, asked for and sold in the browser",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "flavor trade: {\"sold\":{\"caramel\":4,\"cheese\":10,\"cocoa\":1,\"spicy\":2},\"revenue\":{\"caramel\":81,\"cheese\":139,\"cocoa\":28,\"spicy\":30},\"coated\":{\"caramel\":11,\"cheese\":28,\"cocoa\":4,\"spicy\":4},\"ingredients\":41,\"minutes\":3.1575,\"sold_total\":60,\"seen_coating\":[\"caramel\",\"cocoa\"],\"asked\":{\"caramel\":6,\"cheese\":11,\"cocoa\":4,\"duo\":3,\"plain\":44,\"spicy\":4},\"news\":[]}",
+        "flavor pixels on the floors: {\"cheese\":34,\"spicy\":1101,\"caramel\":50,\"cocoa\":26}"
+      ],
+      "ms": 68901
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7739
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6849
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3757
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4350
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2122
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4680
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2485
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "touch paths on touch projects",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "touch paths on touch projects",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10153,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 103085
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10245,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 107698
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "desktop",
+      "status": "FAILED",
+      "error": "Error: the fee paid\n\nexpect(received).toBeLessThan(expected)\n\nExpected: < 54962\nReceived:   54975",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10077,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}"
+      ],
+      "ms": 97331
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.3942212121212,7.99583333333333,3.14444444444444],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0444444444444444,0.187333333333333,0.327740740740741,0.754377104377105,0.895791245791246,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 15011
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":29,\"alive\":19,\"given\":{\"ambient\":101,\"lot\":30,\"sparkle\":28},\"low\":true,\"fps\":11.4},{\"t\":19,\"running\":25,\"alive\":39,\"given\":{\"ambient\":118,\"lot\":31,\"sparkle\":43},\"low\":true,\"fps\":12.3},{\"t\":29,\"running\":29,\"alive\":24,\"given\":{\"ambient\":150,\"lot\":37,\"sparkle\":56},\"low\":true,\"fps\":11.8},{\"t\":39,\"running\":26,\"alive\":15,\"given\":{\"ambient\":174,\"lot\":43,\"sparkle\":71},\"low\":true,\"fps\":12.3}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":105,\"belts\":6,\"render\":{\"draw_calls\":1023,\"objects\":1228,\"fps\":13,\"nodes\":406},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":105,\"open\":4,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 49291
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":48,\"secs\":13.464,\"phase\":[[48.92,48.92,48.92,15.51,0,48.92],[455.11,437.87,455.11,372,325.94,455.11]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 19690
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.269,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:serve\",\"bag:sold\"],\"sold\":24}"
+      ],
+      "ms": 19306
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.6625,8.29074074074074,3.44106666666666],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0599814814814815,0.185648148148148,0.300635802469136,0.893228395061728,1,1,-1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 15795
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":27,\"alive\":22,\"given\":{\"ambient\":93,\"lot\":30,\"sparkle\":28},\"low\":true,\"fps\":11.5},{\"t\":19,\"running\":27,\"alive\":39,\"given\":{\"ambient\":111,\"lot\":31,\"sparkle\":43},\"low\":true,\"fps\":10.1},{\"t\":29,\"running\":28,\"alive\":17,\"given\":{\"ambient\":144,\"lot\":37,\"sparkle\":58},\"low\":true,\"fps\":10.1},{\"t\":39,\"running\":25,\"alive\":21,\"given\":{\"ambient\":174,\"lot\":44,\"sparkle\":73},\"low\":true,\"fps\":11}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":104,\"belts\":6,\"render\":{\"draw_calls\":982,\"objects\":1196,\"fps\":11,\"nodes\":405},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":106,\"open\":2,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 51403
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":51,\"secs\":14.108,\"phase\":[[57.52,57.52,57.52,16.43,0,57.52],[564.5,526.34,564.5,467.02,409.71,564.5]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+      ],
+      "ms": 20750
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.978,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+      ],
+      "ms": 20719
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.3874333333333,7.98075151515152,3.1059],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0454545454545455,0.184343434343434,0.326026936026936,0.768693602693603,0.916138047138047,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 15020
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":29,\"alive\":16,\"given\":{\"ambient\":98,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":11.4},{\"t\":19,\"running\":26,\"alive\":30,\"given\":{\"ambient\":117,\"lot\":31,\"sparkle\":43},\"low\":true,\"fps\":11.3},{\"t\":29,\"running\":30,\"alive\":20,\"given\":{\"ambient\":149,\"lot\":36,\"sparkle\":56},\"low\":true,\"fps\":10.9},{\"t\":39,\"running\":26,\"alive\":20,\"given\":{\"ambient\":176,\"lot\":42,\"sparkle\":72},\"low\":true,\"fps\":11.6}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":101,\"belts\":6,\"render\":{\"draw_calls\":1240,\"objects\":1537,\"fps\":11,\"nodes\":407},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":105,\"open\":2,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 49832
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":47,\"secs\":13.829,\"phase\":[[45.9,45.9,45.9,14.72,0,45.9],[433.8,403.78,433.8,360.03,314.82,436.3]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+      ],
+      "ms": 20153
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.741,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":25}"
+      ],
+      "ms": 20001
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3582
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 18558
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":3,\"money\":400017,\"made\":8,\"from\":\"main\"}}"
+      ],
+      "ms": 8332
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7080
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3599
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 18023
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":10,\"money\":400082,\"made\":32,\"lift\":0,\"serves\":2},\"after\":{\"sold\":10,\"money\":400081,\"made\":32,\"from\":\"main\"}}"
+      ],
+      "ms": 14617
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7603
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3468
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 34302
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":5,\"money\":400032,\"made\":16,\"from\":\"main\"}}"
+      ],
+      "ms": 16760
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9754
+    },
+    {
+      "spec": "news37.spec.mjs",
+      "title": "the news: quiet at opening, a craze that brings real customers, readable, never in the way",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "still: {\"badge\":318,\"strip\":1542,\"unread\":1,\"marks\":1}",
+        "hidden: {\"left0\":112100,\"leftHidden\":112050}",
+        "craze: {\"row\":{\"asked\":17,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":17},\"afterAsked\":3,\"flavor_sold\":{\"caramel\":17}}",
+        "reload: {\"before\":79850,\"after\":78300,\"wall\":2130}"
+      ],
+      "ms": 131214
+    },
+    {
+      "spec": "news37.spec.mjs",
+      "title": "the news: quiet at opening, a craze that brings real customers, readable, never in the way",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "still: {\"badge\":377,\"strip\":1869,\"unread\":1,\"marks\":1}",
+        "hidden: {\"left0\":111450,\"leftHidden\":111350}",
+        "craze: {\"row\":{\"asked\":15,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":15},\"afterAsked\":2,\"flavor_sold\":{\"caramel\":15}}",
+        "reload: {\"before\":79850,\"after\":77850,\"wall\":2534}"
+      ],
+      "ms": 132795
+    },
+    {
+      "spec": "news37.spec.mjs",
+      "title": "the news: quiet at opening, a craze that brings real customers, readable, never in the way",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "still: {\"badge\":215,\"strip\":1015,\"unread\":1,\"marks\":1}",
+        "hidden: {\"left0\":112700,\"leftHidden\":112650}",
+        "craze: {\"row\":{\"asked\":12,\"channel\":\"flavor\",\"flavor\":\"caramel\",\"id\":\"caramel_craze\",\"left_ms\":0,\"ms\":120000,\"mult\":2,\"n\":1,\"name\":\"Caramel craze!\",\"saved\":0,\"sold\":13},\"afterAsked\":5,\"flavor_sold\":{\"caramel\":13}}",
+        "reload: {\"before\":79850,\"after\":78200,\"wall\":2230}"
+      ],
+      "ms": 129608
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf: {\"load_ms\":1309,\"heap_start\":10664827,\"heap_after_60s\":12396435,\"burst\":{\"fps\":50.21167663846759,\"draw_calls\":117,\"primitives\":4305,\"fx_peak\":152,\"fx_cap\":400},\"sleep\":{\"before\":3264,\"hidden_5s\":3280,\"after_wake\":4223},\"load_avg\":13.41}"
+      ],
+      "ms": 70897
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf: {\"worst\":{\"draw_calls\":179,\"primitives\":5345,\"fx\":44},\"fps\":[46.94835678962204,46.51162790697674,43.55142040307542,41.23306501432726,39.10450680899128,30.57500740868275],\"median_fps\":43.55142040307542,\"heap_start\":12317535,\"heap_after_60s\":19747027,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":22},\"helper_batches\":40,\"sound_played\":{\"clink\":1,\"coin\":58,\"ding\":22,\"fanfare\":1,\"pop_1\":40,\"pop_2\":22,\"sizzle\":22,\"upgrade\":7},\"load_avg\":13.03,\"hidden\":{\"helper_before\":40,\"helper_after_5s_hidden\":40},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+      ],
+      "ms": 70941
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 9152
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 20203
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3244
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 11469
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 26328
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3854
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 11541
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 21018
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3034
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "device: p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 4069
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4685
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 28
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 30
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 69
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "device: phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 4847
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 20
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 21
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "device: desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 8407
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 60
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "measured on the published URL",
+      "notes": [],
+      "ms": 72
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 59
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 66
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a reload and a trip to the stand keep the factory, and the stand keeps its own",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4959
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a killed browser loses seconds, never goods: nothing sold twice, every machine there",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one browser kill is enough; the save path is the same on every screen",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2970
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a broken save is set aside, the backup comes back, and the saves page shows both",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3942
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "the saves page exports and imports, and the factory comes back from the file",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5996
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "restart takes two taps and the old factory waits in the backup",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4897
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a reload and a trip to the stand keep the factory, and the stand keeps its own",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5718
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a killed browser loses seconds, never goods: nothing sold twice, every machine there",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one browser kill is enough; the save path is the same on every screen",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3449
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a broken save is set aside, the backup comes back, and the saves page shows both",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4300
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "the saves page exports and imports, and the factory comes back from the file",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5239
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "restart takes two taps and the old factory waits in the backup",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5155
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a reload and a trip to the stand keep the factory, and the stand keeps its own",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 12268
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a killed browser loses seconds, never goods: nothing sold twice, every machine there",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "kill: {\"pids\":2,\"built_clock\":31782,\"before_kill_clock\":38868,\"saved_clock\":31666,\"sold\":[14,12,12],\"from\":\"main\"}"
+      ],
+      "ms": 13078
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3695
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a broken save is set aside, the backup comes back, and the saves page shows both",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4817
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "the saves page exports and imports, and the factory comes back from the file",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6027
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "restart takes two taps and the old factory waits in the backup",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5456
+    },
+    {
+      "spec": "scorecard09.spec.mjs",
+      "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 352
+    },
+    {
+      "spec": "scorecard09.spec.mjs",
+      "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 340
+    },
+    {
+      "spec": "scorecard09.spec.mjs",
+      "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 382
+    },
+    {
+      "spec": "soak43.spec.mjs",
+      "title": "the control: the sound off plays nothing",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one long run on the desktop",
+      "notes": [
+        "serial: undefined"
+      ],
+      "ms": 25
+    },
+    {
+      "spec": "soak43.spec.mjs",
+      "title": "the sound on: no clip, bounded voices, no buffer growth, and no memory of its own",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one long run on the desktop",
+      "notes": [
+        "serial: undefined"
+      ],
+      "ms": 26
+    },
+    {
+      "spec": "soak43.spec.mjs",
+      "title": "the control: the sound off plays nothing",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one long run on the desktop",
+      "notes": [
+        "serial: undefined"
+      ],
+      "ms": 21
+    },
+    {
+      "spec": "soak43.spec.mjs",
+      "title": "the sound on: no clip, bounded voices, no buffer growth, and no memory of its own",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one long run on the desktop",
+      "notes": [
+        "serial: undefined"
+      ],
+      "ms": 21
+    },
+    {
+      "spec": "soak43.spec.mjs",
+      "title": "the control: the sound off plays nothing",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "serial: undefined",
+        "soak: [{\"t\":33,\"pops\":3,\"blocked\":9,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":331,\"fps\":11,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":37},{\"t\":67,\"pops\":3,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":306,\"fps\":10,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":80},{\"t\":100,\"pops\":2,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":329,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":122},{\"t\":133,\"pops\":3,\"blocked\":11,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":355,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":166},{\"t\":165,\"pops\":2,\"blocked\":14,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":353,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":213},{\"t\":198,\"pops\":2,\"blocked\":9,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":372,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":259},{\"t\":231,\"pops\":3,\"blocked\":12,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":387,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":305},{\"t\":265,\"pops\":3,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":383,\"fps\":7,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":352},{\"t\":298,\"pops\":2,\"blocked\":12,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":379,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":399},{\"t\":330,\"pops\":2,\"blocked\":7,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":495,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":447},{\"t\":362,\"pops\":2,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":431,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":493},{\"t\":396,\"pops\":3,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":434,\"fps\":11,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":541},{\"t\":431,\"pops\":2,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":428,\"fps\":5,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":589},{\"t\":463,\"pops\":2,\"blocked\":7,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":447,\"fps\":13,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":636},{\"t\":496,\"pops\":2,\"blocked\":10,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":428,\"fps\":12,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":683},{\"t\":529,\"pops\":3,\"blocked\":9,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":488,\"fps\":9,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":732},{\"t\":563,\"pops\":3,\"blocked\":8,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":496,\"fps\":4,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":790},{\"t\":603,\"pops\":3,\"blocked\":6,\"rms\":0,\"peak\":0,\"mean_rms\":0,\"buffers\":0,\"copies\":0,\"copy_mb\":0,\"sources\":0,\"heap_mb\":28,\"renderer_mb\":500,\"fps\":3,\"static_mb\":0,\"voices_peak\":0,\"beds\":0,\"bed_starts\":0,\"loop_copies\":0,\"sold\":860}]"
+      ],
+      "ms": 607891
+    },
+    {
+      "spec": "soak43.spec.mjs",
+      "title": "the sound on: no clip, bounded voices, no buffer growth, and no memory of its own",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "serial: undefined",
+        "soak: [{\"t\":36,\"pops\":3,\"blocked\":6,\"rms\":0.1714,\"peak\":0.511,\"mean_rms\":0.0156,\"buffers\":16,\"copies\":148,\"copy_mb\":64.4,\"sources\":148,\"heap_mb\":73.1,\"renderer_mb\":355,\"fps\":3,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":5,\"loop_copies\":0,\"sold\":31},{\"t\":71,\"pops\":2,\"blocked\":7,\"rms\":0.1667,\"peak\":0.49,\"mean_rms\":0.0141,\"buffers\":16,\"copies\":312,\"copy_mb\":131.4,\"sources\":312,\"heap_mb\":73.1,\"renderer_mb\":354,\"fps\":10,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":6,\"loop_copies\":0,\"sold\":74},{\"t\":104,\"pops\":2,\"blocked\":11,\"rms\":0.1704,\"peak\":0.5,\"mean_rms\":0.0165,\"buffers\":16,\"copies\":465,\"copy_mb\":194.9,\"sources\":465,\"heap_mb\":73.1,\"renderer_mb\":380,\"fps\":13,\"static_mb\":0,\"voices_peak\":8,\"beds\":3,\"bed_starts\":9,\"loop_copies\":0,\"sold\":118},{\"t\":137,\"pops\":3,\"blocked\":10,\"rms\":0.1673,\"peak\":0.457,\"mean_rms\":0.0169,\"buffers\":16,\"copies\":622,\"copy_mb\":260.1,\"sources\":622,\"heap_mb\":73.1,\"renderer_mb\":404,\"fps\":13,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":10,\"loop_copies\":0,\"sold\":160},{\"t\":172,\"pops\":2,\"blocked\":9,\"rms\":0.1694,\"peak\":0.455,\"mean_rms\":0.0168,\"buffers\":16,\"copies\":799,\"copy_mb\":326.1,\"sources\":799,\"heap_mb\":73.1,\"renderer_mb\":412,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":12,\"loop_copies\":0,\"sold\":210},{\"t\":206,\"pops\":3,\"blocked\":12,\"rms\":0.1695,\"peak\":0.468,\"mean_rms\":0.0182,\"buffers\":16,\"copies\":974,\"copy_mb\":395.4,\"sources\":974,\"heap_mb\":73.1,\"renderer_mb\":408,\"fps\":13,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":13,\"loop_copies\":0,\"sold\":257},{\"t\":240,\"pops\":3,\"blocked\":11,\"rms\":0.1688,\"peak\":0.453,\"mean_rms\":0.0172,\"buffers\":17,\"copies\":1138,\"copy_mb\":461.4,\"sources\":1138,\"heap_mb\":73.1,\"renderer_mb\":419,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":14,\"loop_copies\":0,\"sold\":305},{\"t\":272,\"pops\":2,\"blocked\":11,\"rms\":0.1707,\"peak\":0.537,\"mean_rms\":0.0173,\"buffers\":17,\"copies\":1313,\"copy_mb\":526.2,\"sources\":1313,\"heap_mb\":73.1,\"renderer_mb\":450,\"fps\":14,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":14,\"loop_copies\":0,\"sold\":350},{\"t\":305,\"pops\":3,\"blocked\":8,\"rms\":0.1701,\"peak\":0.489,\"mean_rms\":0.0186,\"buffers\":17,\"copies\":1500,\"copy_mb\":593,\"sources\":1500,\"heap_mb\":73.1,\"renderer_mb\":450,\"fps\":14,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":14,\"loop_copies\":0,\"sold\":397},{\"t\":337,\"pops\":2,\"blocked\":13,\"rms\":0.1705,\"peak\":0.545,\"mean_rms\":0.0159,\"buffers\":17,\"copies\":1671,\"copy_mb\":658.2,\"sources\":1671,\"heap_mb\":73.1,\"renderer_mb\":464,\"fps\":13,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":16,\"loop_copies\":0,\"sold\":444},{\"t\":370,\"pops\":2,\"blocked\":9,\"rms\":0.1683,\"peak\":0.469,\"mean_rms\":0.0176,\"buffers\":17,\"copies\":1851,\"copy_mb\":724,\"sources\":1851,\"heap_mb\":73.1,\"renderer_mb\":482,\"fps\":13,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":17,\"loop_copies\":0,\"sold\":491},{\"t\":403,\"pops\":3,\"blocked\":8,\"rms\":0.1722,\"peak\":0.461,\"mean_rms\":0.0176,\"buffers\":17,\"copies\":2019,\"copy_mb\":789.1,\"sources\":2019,\"heap_mb\":73.1,\"renderer_mb\":492,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":17,\"loop_copies\":0,\"sold\":539},{\"t\":435,\"pops\":2,\"blocked\":10,\"rms\":0.1724,\"peak\":0.492,\"mean_rms\":0.0175,\"buffers\":17,\"copies\":2192,\"copy_mb\":853.6,\"sources\":2192,\"heap_mb\":73.1,\"renderer_mb\":496,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":18,\"loop_copies\":0,\"sold\":585},{\"t\":468,\"pops\":3,\"blocked\":9,\"rms\":0.1685,\"peak\":0.433,\"mean_rms\":0.0186,\"buffers\":17,\"copies\":2383,\"copy_mb\":921.5,\"sources\":2383,\"heap_mb\":73.1,\"renderer_mb\":506,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":18,\"loop_copies\":0,\"sold\":635},{\"t\":500,\"pops\":2,\"blocked\":8,\"rms\":0.1663,\"peak\":0.477,\"mean_rms\":0.016,\"buffers\":17,\"copies\":2549,\"copy_mb\":986.5,\"sources\":2549,\"heap_mb\":73.1,\"renderer_mb\":576,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":19,\"loop_copies\":0,\"sold\":681},{\"t\":535,\"pops\":3,\"blocked\":12,\"rms\":0.1745,\"peak\":0.515,\"mean_rms\":0.0193,\"buffers\":17,\"copies\":2769,\"copy_mb\":1060,\"sources\":2769,\"heap_mb\":73.1,\"renderer_mb\":564,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":19,\"loop_copies\":0,\"sold\":737},{\"t\":568,\"pops\":3,\"blocked\":10,\"rms\":0.1711,\"peak\":0.496,\"mean_rms\":0.0195,\"buffers\":17,\"copies\":3008,\"copy_mb\":1133.4,\"sources\":3008,\"heap_mb\":73.1,\"renderer_mb\":564,\"fps\":12,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":19,\"loop_copies\":0,\"sold\":795},{\"t\":602,\"pops\":3,\"blocked\":8,\"rms\":0.1667,\"peak\":0.475,\"mean_rms\":0.0182,\"buffers\":17,\"copies\":3232,\"copy_mb\":1205.5,\"sources\":3232,\"heap_mb\":73.1,\"renderer_mb\":555,\"fps\":10,\"static_mb\":0,\"voices_peak\":8,\"beds\":4,\"bed_starts\":19,\"loop_copies\":0,\"sold\":853}]"
+      ],
+      "ms": 610882
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2687
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4589
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: a perfect pop, and the busy top stand, do not clip",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mix: fresh perfect rms 0.223 peak 0.759; top stand rms 0.223 peak 0.759"
+      ],
+      "ms": 30781
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: the shake clinks and the helper pops on its own",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8918
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4080
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9824
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3720
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2814
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4807
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: a perfect pop, and the busy top stand, do not clip",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mix: fresh perfect rms 0.223 peak 0.759; top stand rms 0.223 peak 0.761"
+      ],
+      "ms": 31769
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: the shake clinks and the helper pops on its own",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9305
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4543
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7716
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3660
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2489
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4481
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: a perfect pop, and the busy top stand, do not clip",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mix: fresh perfect rms 0.223 peak 0.759; top stand rms 0.223 peak 0.774"
+      ],
+      "ms": 29889
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "stand: the shake clinks and the helper pops on its own",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9198
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3710
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> calm -> off, and back on",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6453
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3166
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mix: {\"one\":{\"rms\":0.04587426984717105,\"peak\":0.10301710665225983,\"mean_rms\":0.0051797164695864305},\"forty\":{\"rms\":0.04872479615754901,\"peak\":0.11699019372463226,\"mean_rms\":0.012161166700428869},\"hand\":{\"rms\":0.16864156849503809,\"peak\":0.47649985551834106},\"pops\":3,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.7,\"playing\":true,\"target\":-18.7}},\"voices_peak\":6,\"played\":{\"bloom\":1,\"cash\":27,\"clink\":2,\"door\":18,\"heat\":4,\"mpop\":14,\"patter\":19,\"perfect\":6,\"rise\":4,\"seal\":8,\"serve\":19,\"upgrade\":2},\"refused\":{\"cash\":6,\"clink\":22,\"door\":17,\"mpop\":32,\"patter\":3,\"perfect\":1,\"seal\":2,\"upgrade\":42}}"
+      ],
+      "ms": 37144
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "a sound on the left is louder on the left, on the right louder on the right",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "pan: {\"left\":{\"left\":0.061946383340552594,\"right\":0.04348480408106538,\"energy_left\":19.240103402252853,\"energy_right\":9.52016835694898,\"frames\":43776,\"mean_rms\":0.01812439243259826},\"right\":{\"left\":0.04359078478428253,\"right\":0.06205583423668669,\"energy_left\":10.271699168974969,\"energy_right\":19.973343491942753,\"frames\":43648,\"mean_rms\":0.018613580787132024}}"
+      ],
+      "ms": 8178
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "a hidden tab is silent, and the factory is heard again after",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "hidden: {\"before\":{\"rms\":0.034585602452517156,\"peak\":0.07449167221784592},\"hidden\":{\"rms\":0.0000017065780501178046,\"peak\":0},\"after\":{\"rms\":0.04936673903175987,\"peak\":0.12535178661346436},\"paused\":true,\"beds\":0}"
+      ],
+      "ms": 17096
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "calm: no beds, the hand still heard, and the choice survives a reload",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "calm: {\"loud\":{\"rms\":0.03647067186756271,\"peak\":0.07738828659057617},\"calmFloor\":{\"rms\":0.023590090800664754,\"peak\":0.05681704729795456},\"calmHand\":{\"rms\":0.08326931597113636,\"peak\":0.23611149191856384},\"popped\":true,\"beds\":0,\"played\":{\"cash\":15,\"clink\":2,\"door\":10,\"heat\":2,\"mpop\":4,\"patter\":10,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":11,\"upgrade\":2}}"
+      ],
+      "ms": 21125
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "one sale, one cash sound",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "cash: {\"sold\":33,\"asked\":33,\"played\":25}"
+      ],
+      "ms": 16113
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mix: {\"one\":{\"rms\":0.045860413526300645,\"peak\":0.10268191248178482,\"mean_rms\":0.00485192864644135},\"forty\":{\"rms\":0.049578945168616356,\"peak\":0.1283068209886551,\"mean_rms\":0.01272265837320874},\"hand\":{\"rms\":0.17232336051045527,\"peak\":0.498332679271698},\"pops\":3,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.1,\"playing\":true,\"target\":-18.1}},\"voices_peak\":6,\"played\":{\"bloom\":1,\"cash\":29,\"clink\":2,\"door\":18,\"heat\":4,\"mpop\":15,\"patter\":19,\"perfect\":6,\"rise\":4,\"seal\":8,\"serve\":18,\"upgrade\":2},\"refused\":{\"cash\":5,\"clink\":22,\"door\":18,\"mpop\":32,\"patter\":7,\"perfect\":1,\"seal\":3,\"serve\":2,\"upgrade\":42}}"
+      ],
+      "ms": 38227
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "a sound on the left is louder on the left, on the right louder on the right",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "pan: {\"left\":{\"left\":0.06199697038182455,\"right\":0.043532348829510945,\"energy_left\":19.413332397994427,\"energy_right\":9.776479970205806,\"frames\":45440,\"mean_rms\":0.017921794471527343},\"right\":{\"left\":0.04355434838028061,\"right\":0.062023948550967996,\"energy_left\":10.30096264495776,\"energy_right\":20.005721330025764,\"frames\":43648,\"mean_rms\":0.018632538961304075}}"
+      ],
+      "ms": 8543
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "a hidden tab is silent, and the factory is heard again after",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "hidden: {\"before\":{\"rms\":0.03554477330066173,\"peak\":0.06533195078372955},\"hidden\":{\"rms\":0.000006964890025084141,\"peak\":0},\"after\":{\"rms\":0.05039695837684419,\"peak\":0.1346663236618042},\"paused\":true,\"beds\":0}"
+      ],
+      "ms": 17690
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "calm: no beds, the hand still heard, and the choice survives a reload",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "calm: {\"loud\":{\"rms\":0.034202071628350636,\"peak\":0.07604415714740753},\"calmFloor\":{\"rms\":0.023288889100186817,\"peak\":0.05481769144535065},\"calmHand\":{\"rms\":0.08369328571194368,\"peak\":0.23649802803993225},\"popped\":true,\"beds\":0,\"played\":{\"cash\":17,\"clink\":2,\"door\":10,\"heat\":2,\"mpop\":3,\"patter\":9,\"perfect\":2,\"rise\":2,\"seal\":3,\"serve\":12,\"upgrade\":2}}"
+      ],
+      "ms": 22381
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "one sale, one cash sound",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "cash: {\"sold\":32,\"asked\":32,\"played\":25}"
+      ],
+      "ms": 16346
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "the first touch wakes the factory; one machine is quiet, forty-four are lively, and nothing clips",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mix: {\"one\":{\"rms\":0.04589606988982501,\"peak\":0.1024191677570343,\"mean_rms\":0.005178319306904312},\"forty\":{\"rms\":0.04886718431616573,\"peak\":0.13214869797229767,\"mean_rms\":0.012270537456204494},\"hand\":{\"rms\":0.17496095417869556,\"peak\":0.5394772291183472},\"pops\":3,\"beds_one\":{\"belt\":{\"db\":-61,\"playing\":false,\"target\":-80},\"chug\":{\"db\":-61,\"playing\":false,\"target\":-80},\"hum\":{\"db\":-61,\"playing\":false,\"target\":-80},\"murmur\":{\"db\":-21.9,\"playing\":true,\"target\":-21.9}},\"beds_forty\":{\"belt\":{\"db\":-18.5,\"playing\":true,\"target\":-18.5},\"chug\":{\"db\":-18,\"playing\":true,\"target\":-18},\"hum\":{\"db\":-15.8,\"playing\":true,\"target\":-15.8},\"murmur\":{\"db\":-18.1,\"playing\":true,\"target\":-18.1}},\"voices_peak\":7,\"played\":{\"bloom\":1,\"cash\":30,\"clink\":2,\"door\":18,\"heat\":4,\"mpop\":17,\"patter\":16,\"perfect\":6,\"rise\":4,\"seal\":7,\"serve\":19,\"upgrade\":2},\"refused\":{\"cash\":4,\"clink\":22,\"door\":19,\"mpop\":31,\"patter\":4,\"perfect\":1,\"seal\":2,\"serve\":1,\"upgrade\":42}}"
+      ],
+      "ms": 38711
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "a sound on the left is louder on the left, on the right louder on the right",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "pan: {\"left\":{\"left\":0.0620597056043208,\"right\":0.04359617777212397,\"energy_left\":19.26010353500874,\"energy_right\":9.534840764636558,\"frames\":43648,\"mean_rms\":0.018161886163181616},\"right\":{\"left\":0.0435571957053456,\"right\":0.06202848120657411,\"energy_left\":10.375837944087838,\"energy_right\":19.89598624736313,\"frames\":44544,\"mean_rms\":0.018433580150068775}}"
+      ],
+      "ms": 8244
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "a hidden tab is silent, and the factory is heard again after",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "hidden: {\"before\":{\"rms\":0.03773581453172433,\"peak\":0.07903607189655304},\"hidden\":{\"rms\":0,\"peak\":0},\"after\":{\"rms\":0.04921848462190847,\"peak\":0.1201966255903244},\"paused\":true,\"beds\":0}"
+      ],
+      "ms": 17365
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "calm: no beds, the hand still heard, and the choice survives a reload",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "calm: {\"loud\":{\"rms\":0.0351510861163051,\"peak\":0.07407096028327942},\"calmFloor\":{\"rms\":0.023300562053028013,\"peak\":0.05589177832007408},\"calmHand\":{\"rms\":0.08527754763427053,\"peak\":0.255407452583313},\"popped\":true,\"beds\":0,\"played\":{\"cash\":15,\"clink\":2,\"door\":10,\"heat\":2,\"mpop\":4,\"patter\":8,\"perfect\":2,\"rise\":2,\"seal\":2,\"serve\":10,\"upgrade\":2}}"
+      ],
+      "ms": 21398
+    },
+    {
+      "spec": "sound43.spec.mjs",
+      "title": "one sale, one cash sound",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "cash: {\"sold\":33,\"asked\":33,\"played\":24}"
+      ],
+      "ms": 15911
+    },
+    {
+      "spec": "stall09.spec.mjs",
+      "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "hold: finger 1551 ms, game judged 1609 ms (perfect)"
+      ],
+      "ms": 3174
+    },
+    {
+      "spec": "stall09.spec.mjs",
+      "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "hold: finger 1551 ms, game judged 1593 ms (perfect)"
+      ],
+      "ms": 3389
+    },
+    {
+      "spec": "stall09.spec.mjs",
+      "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "hold: finger 1552 ms, game judged 1570 ms (perfect)"
+      ],
+      "ms": 3101
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10460
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2409
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11273
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2793
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 10802
+    },
+    {
+      "spec": "stand10.spec.mjs",
+      "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2281
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "load: 1257 ms to the first drawn frame"
+      ],
+      "ms": 4453
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1900
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5798
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1758
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "load: 1381 ms to the first drawn frame"
+      ],
+      "ms": 5510
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2200
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6002
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2005
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "load: 1239 ms to the first drawn frame"
+      ],
+      "ms": 4154
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1788
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5792
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1731
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "targets: {\"project\":\"p720\",\"viewport\":{\"width\":720,\"height\":1280},\"scenes\":{\"fresh\":{\"k\":1,\"min\":48,\"rows\":{\"back\":84,\"motion\":84,\"news\":64,\"restart\":84,\"slot_kitchen_0\":85.4,\"slot_kitchen_1\":85.4,\"slot_kitchen_2\":85.4,\"slot_kitchen_3\":85.4,\"slot_kitchen_4\":85.4,\"slot_kitchen_5\":85.4,\"slot_kitchen_6\":85.4,\"slot_kitchen_7\":85.4,\"slot_packing_0\":48.4,\"slot_packing_1\":48.4,\"slot_packing_2\":48.4,\"slot_packing_3\":48.4,\"slot_shop_0\":48,\"slot_shop_1\":48,\"slot_shop_2\":48,\"slot_shop_3\":48,\"sound\":84,\"upgrade\":166.4}},\"twelve\":{\"k\":1,\"min\":48,\"rows\":{\"back\":84,\"motion\":84,\"news\":64,\"overview\":52.4,\"restart\":84,\"slot_kitchen_0\":85.4,\"slot_kitchen_1\":85.4,\"slot_kitchen_2\":85.4,\"slot_kitchen_3\":85.4,\"slot_kitchen_4\":85.4,\"slot_kitchen_5\":85.4,\"slot_kitchen_6\":85.4,\"slot_kitchen_7\":85.4,\"slot_packing_0\":48.4,\"slot_packing_1\":48.4,\"slot_packing_2\":48.4,\"slot_packing_3\":48.4,\"slot_shop_0\":48,\"slot_shop_1\":48,\"slot_shop_2\":48,\"slot_shop_3\":48,\"sound\":84,\"upgrade\":166.4}},\"overview\":{\"k\":1,\"min\":48,\"rows\":{\"back\":84,\"motion\":84,\"news\":64,\"ov_line_kitchen\":68.5,\"ov_line_packing\":68.5,\"ov_line_shop\":68.5,\"ov_rate_0\":74.3,\"ov_rate_1\":74.3,\"ov_rate_2\":74.3,\"overview\":52.4,\"restart\":84,\"slot_kitchen_0\":85.4,\"slot_kitchen_1\":85.4,\"slot_kitchen_2\":85.4,\"slot_kitchen_3\":85.4,\"slot_kitchen_4\":85.4,\"slot_kitchen_5\":85.4,\"slot_kitchen_6\":85.4,\"slot_kitchen_7\":85.4,\"slot_packing_0\":48.4,\"slot_packing_1\":48.4,\"slot_packing_2\":48.4,\"slot_packing_3\":48.4,\"slot_shop_0\":48,\"slot_shop_1\":48,\"slot_shop_2\":48,\"slot_shop_3\":48,\"sound\":84,\"upgrade\":166.4}},\"picker\":{\"k\":1,\"min\":48,\"rows\":{\"back\":84,\"motion\":84,\"news\":64,\"overview\":52.4,\"pick_P01\":65.5,\"pick_P02\":65.5,\"pick_P04\":65.5,\"pick_P05\":65.5,\"pick_P06\":65.5,\"pick_U01\":65.5,\"pick_U02\":65.5,\"pick_U03\":65.5,\"pick_U04\":65.5,\"pick_U05\":65.5,\"pick_U07\":65.5,\"pick_bagger\":65.5,\"restart\":84,\"slot_kitchen_0\":85.4,\"slot_kitchen_1\":85.4,\"slot_kitchen_2\":85.4,\"slot_kitchen_3\":85.4,\"slot_kitchen_4\":85.4,\"slot_kitchen_5\":85.4,\"slot_kitchen_6\":85.4,\"slot_kitchen_7\":85.4,\"slot_packing_0\":48.4,\"slot_packing_1\":48.4,\"slot_packing_2\":48.4,\"slot_packing_3\":48.4,\"slot_shop_0\":48,\"slot_shop_1\":48,\"slot_shop_2\":48,\"slot_shop_3\":48,\"sound\":84,\"upgrade\":166.4}},\"forty\":{\"k\":1,\"min\":29.5,\"rows\":{\"back\":84,\"motion\":84,\"news\":64,\"overview\":52.4,\"restart\":84,\"slot_kitchen_0\":55,\"slot_kitchen_1\":55,\"slot_kitchen_10\":55,\"slot_kitchen_11\":55,\"slot_kitchen_12\":55,\"slot_kitchen_13\":55,\"slot_kitchen_14\":55,\"slot_kitchen_15\":55,\"slot_kitchen_16\":55,\"slot_kitchen_17\":55,\"slot_kitchen_18\":55,\"slot_kitchen_19\":55,\"slot_kitchen_2\":55,\"slot_kitchen_20\":55,\"slot_kitchen_21\":55,\"slot_kitchen_22\":55,\"slot_kitchen_23\":55,\"slot_kitchen_3\":55,\"slot_kitchen_4\":55,\"slot_kitchen_5\":55,\"slot_kitchen_6\":55,\"slot_kitchen_7\":55,\"slot_kitchen_8\":55,\"slot_kitchen_9\":55,\"slot_packing_0\":42.2,\"slot_packing_1\":42.2,\"slot_packing_10\":42.2,\"slot_packing_11\":42.2,\"slot_packing_2\":42.2,\"slot_packing_3\":42.2,\"slot_packing_4\":42.2,\"slot_packing_5\":42.2,\"slot_packing_6\":42.2,\"slot_packing_7\":42.2,\"slot_packing_8\":42.2,\"slot_packing_9\":42.2,\"slot_shop_0\":29.5,\"slot_shop_1\":29.5,\"slot_shop_2\":29.5,\"slot_shop_3\":29.5,\"slot_shop_4\":29.5,\"slot_shop_5\":29.5,\"slot_shop_6\":29.5,\"slot_shop_7\":29.5,\"sound\":84,\"upgrade\":166.4}},\"forty_overview\":{\"k\":1,\"min\":29.5,\"rows\":{\"back\":84,\"motion\":84,\"news\":64,\"ov_rate_0\":74.3,\"ov_rate_1\":74.3,\"ov_rate_2\":74.3,\"overview\":52.4,\"restart\":84,\"slot_kitchen_0\":55,\"slot_kitchen_1\":55,\"slot_kitchen_10\":55,\"slot_kitchen_11\":55,\"slot_kitchen_12\":55,\"slot_kitchen_13\":55,\"slot_kitchen_14\":55,\"slot_kitchen_15\":55,\"slot_kitchen_16\":55,\"slot_kitchen_17\":55,\"slot_kitchen_18\":55,\"slot_kitchen_19\":55,\"slot_kitchen_2\":55,\"slot_kitchen_20\":55,\"slot_kitchen_21\":55,\"slot_kitchen_22\":55,\"slot_kitchen_23\":55,\"slot_kitchen_3\":55,\"slot_kitchen_4\":55,\"slot_kitchen_5\":55,\"slot_kitchen_6\":55,\"slot_kitchen_7\":55,\"slot_kitchen_8\":55,\"slot_kitchen_9\":55,\"slot_packing_0\":42.2,\"slot_packing_1\":42.2,\"slot_packing_10\":42.2,\"slot_packing_11\":42.2,\"slot_packing_2\":42.2,\"slot_packing_3\":42.2,\"slot_packing_4\":42.2,\"slot_packing_5\":42.2,\"slot_packing_6\":42.2,\"slot_packing_7\":42.2,\"slot_packing_8\":42.2,\"slot_packing_9\":42.2,\"slot_shop_0\":29.5,\"slot_shop_1\":29.5,\"slot_shop_2\":29.5,\"slot_shop_3\":29.5,\"slot_shop_4\":29.5,\"slot_shop_5\":29.5,\"slot_shop_6\":29.5,\"slot_shop_7\":29.5,\"sound\":84,\"upgrade\":166.4}}}}"
+      ],
+      "ms": 9776
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8572
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6196
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4783
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "targets: {\"project\":\"phone\",\"viewport\":{\"width\":390,\"height\":844},\"scenes\":{\"fresh\":{\"k\":0.5,\"min\":26,\"rows\":{\"back\":45.5,\"motion\":45.5,\"news\":34.7,\"restart\":45.5,\"slot_kitchen_0\":43.1,\"slot_kitchen_1\":43.1,\"slot_kitchen_2\":43.1,\"slot_kitchen_3\":43.1,\"slot_kitchen_4\":43.1,\"slot_kitchen_5\":43.1,\"slot_kitchen_6\":43.1,\"slot_kitchen_7\":43.1,\"slot_packing_0\":26.2,\"slot_packing_1\":26.2,\"slot_packing_2\":26.2,\"slot_packing_3\":26.2,\"slot_shop_0\":26,\"slot_shop_1\":26,\"slot_shop_2\":26,\"slot_shop_3\":26,\"sound\":45.5,\"upgrade\":92.1}},\"twelve\":{\"k\":0.5,\"min\":26,\"rows\":{\"back\":45.5,\"motion\":45.5,\"news\":34.7,\"overview\":33.8,\"restart\":45.5,\"slot_kitchen_0\":43.1,\"slot_kitchen_1\":43.1,\"slot_kitchen_2\":43.1,\"slot_kitchen_3\":43.1,\"slot_kitchen_4\":43.1,\"slot_kitchen_5\":43.1,\"slot_kitchen_6\":43.1,\"slot_kitchen_7\":43.1,\"slot_packing_0\":26.2,\"slot_packing_1\":26.2,\"slot_packing_2\":26.2,\"slot_packing_3\":26.2,\"slot_shop_0\":26,\"slot_shop_1\":26,\"slot_shop_2\":26,\"slot_shop_3\":26,\"sound\":45.5,\"upgrade\":92.1}},\"overview\":{\"k\":0.5,\"min\":26,\"rows\":{\"back\":45.5,\"motion\":45.5,\"news\":34.7,\"ov_line_kitchen\":39.9,\"ov_line_packing\":39.9,\"ov_line_shop\":39.9,\"ov_rate_0\":42.9,\"ov_rate_1\":42.9,\"ov_rate_2\":42.9,\"overview\":33.8,\"restart\":45.5,\"slot_kitchen_0\":43.1,\"slot_kitchen_1\":43.1,\"slot_kitchen_2\":43.1,\"slot_kitchen_3\":43.1,\"slot_kitchen_4\":43.1,\"slot_kitchen_5\":43.1,\"slot_kitchen_6\":43.1,\"slot_kitchen_7\":43.1,\"slot_packing_0\":26.2,\"slot_packing_1\":26.2,\"slot_packing_2\":26.2,\"slot_packing_3\":26.2,\"slot_shop_0\":26,\"slot_shop_1\":26,\"slot_shop_2\":26,\"slot_shop_3\":26,\"sound\":45.5,\"upgrade\":92.1}},\"picker\":{\"k\":0.5,\"min\":26,\"rows\":{\"back\":45.5,\"motion\":45.5,\"news\":34.7,\"overview\":33.8,\"pick_P01\":43.3,\"pick_P02\":43.3,\"pick_P04\":43.3,\"pick_P05\":43.3,\"pick_P06\":43.3,\"pick_U01\":43.3,\"pick_U02\":43.3,\"pick_U03\":43.3,\"pick_U04\":43.3,\"pick_U05\":43.3,\"pick_U07\":43.3,\"pick_bagger\":43.3,\"restart\":45.5,\"slot_kitchen_0\":43.1,\"slot_kitchen_1\":43.1,\"slot_kitchen_2\":43.1,\"slot_kitchen_3\":43.1,\"slot_kitchen_4\":43.1,\"slot_kitchen_5\":43.1,\"slot_kitchen_6\":43.1,\"slot_kitchen_7\":43.1,\"slot_packing_0\":26.2,\"slot_packing_1\":26.2,\"slot_packing_2\":26.2,\"slot_packing_3\":26.2,\"slot_shop_0\":26,\"slot_shop_1\":26,\"slot_shop_2\":26,\"slot_shop_3\":26,\"sound\":45.5,\"upgrade\":92.1}},\"forty\":{\"k\":0.5,\"min\":25.8,\"rows\":{\"back\":45.5,\"motion\":45.5,\"news\":34.7,\"overview\":33.8,\"restart\":45.5,\"slot_kitchen_0\":35.5,\"slot_kitchen_1\":35.5,\"slot_kitchen_10\":35.5,\"slot_kitchen_11\":35.5,\"slot_kitchen_12\":35.5,\"slot_kitchen_13\":35.5,\"slot_kitchen_14\":35.5,\"slot_kitchen_15\":35.5,\"slot_kitchen_16\":35.5,\"slot_kitchen_17\":35.5,\"slot_kitchen_18\":35.5,\"slot_kitchen_19\":35.5,\"slot_kitchen_2\":35.5,\"slot_kitchen_20\":35.5,\"slot_kitchen_21\":35.5,\"slot_kitchen_22\":35.5,\"slot_kitchen_23\":35.5,\"slot_kitchen_3\":35.5,\"slot_kitchen_4\":35.5,\"slot_kitchen_5\":35.5,\"slot_kitchen_6\":35.5,\"slot_kitchen_7\":35.5,\"slot_kitchen_8\":35.5,\"slot_kitchen_9\":35.5,\"slot_packing_0\":25.8,\"slot_packing_1\":25.8,\"slot_packing_10\":25.8,\"slot_packing_11\":25.8,\"slot_packing_2\":25.8,\"slot_packing_3\":25.8,\"slot_packing_4\":25.8,\"slot_packing_5\":25.8,\"slot_packing_6\":25.8,\"slot_packing_7\":25.8,\"slot_packing_8\":25.8,\"slot_packing_9\":25.8,\"slot_shop_0\":26,\"slot_shop_1\":26,\"slot_shop_2\":26,\"slot_shop_3\":26,\"slot_shop_4\":26,\"slot_shop_5\":26,\"slot_shop_6\":26,\"slot_shop_7\":26,\"sound\":45.5,\"upgrade\":92.1}},\"forty_overview\":{\"k\":0.5,\"min\":25.8,\"rows\":{\"back\":45.5,\"motion\":45.5,\"news\":34.7,\"ov_rate_0\":42.9,\"ov_rate_1\":42.9,\"ov_rate_2\":42.9,\"overview\":33.8,\"restart\":45.5,\"slot_kitchen_0\":35.5,\"slot_kitchen_1\":35.5,\"slot_kitchen_10\":35.5,\"slot_kitchen_11\":35.5,\"slot_kitchen_12\":35.5,\"slot_kitchen_13\":35.5,\"slot_kitchen_14\":35.5,\"slot_kitchen_15\":35.5,\"slot_kitchen_16\":35.5,\"slot_kitchen_17\":35.5,\"slot_kitchen_18\":35.5,\"slot_kitchen_19\":35.5,\"slot_kitchen_2\":35.5,\"slot_kitchen_20\":35.5,\"slot_kitchen_21\":35.5,\"slot_kitchen_22\":35.5,\"slot_kitchen_23\":35.5,\"slot_kitchen_3\":35.5,\"slot_kitchen_4\":35.5,\"slot_kitchen_5\":35.5,\"slot_kitchen_6\":35.5,\"slot_kitchen_7\":35.5,\"slot_kitchen_8\":35.5,\"slot_kitchen_9\":35.5,\"slot_packing_0\":25.8,\"slot_packing_1\":25.8,\"slot_packing_10\":25.8,\"slot_packing_11\":25.8,\"slot_packing_2\":25.8,\"slot_packing_3\":25.8,\"slot_packing_4\":25.8,\"slot_packing_5\":25.8,\"slot_packing_6\":25.8,\"slot_packing_7\":25.8,\"slot_packing_8\":25.8,\"slot_packing_9\":25.8,\"slot_shop_0\":26,\"slot_shop_1\":26,\"slot_shop_2\":26,\"slot_shop_3\":26,\"slot_shop_4\":26,\"slot_shop_5\":26,\"slot_shop_6\":26,\"slot_shop_7\":26,\"sound\":45.5,\"upgrade\":92.1}}}}"
+      ],
+      "ms": 11122
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9031
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6548
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5590
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "targets: {\"project\":\"desktop\",\"viewport\":{\"width\":1280,\"height\":800},\"scenes\":{\"fresh\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"twelve\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"overview\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"ov_line_kitchen\":59.8,\"ov_line_packing\":59.8,\"ov_line_shop\":59.8,\"ov_rate_0\":64.4,\"ov_rate_1\":64.4,\"ov_rate_2\":64.4,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"picker\":{\"k\":1,\"min\":39,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"pick_P01\":65,\"pick_P02\":65,\"pick_P04\":65,\"pick_P05\":65,\"pick_P06\":65,\"pick_U01\":65,\"pick_U02\":65,\"pick_U03\":65,\"pick_U04\":65,\"pick_U05\":65,\"pick_U07\":65,\"pick_bagger\":65,\"restart\":65,\"slot_kitchen_0\":64.3,\"slot_kitchen_1\":64.3,\"slot_kitchen_2\":64.3,\"slot_kitchen_3\":64.3,\"slot_kitchen_4\":64.3,\"slot_kitchen_5\":64.3,\"slot_kitchen_6\":64.3,\"slot_kitchen_7\":64.3,\"slot_packing_0\":40.5,\"slot_packing_1\":40.5,\"slot_packing_2\":40.5,\"slot_packing_3\":40.5,\"slot_shop_0\":39,\"slot_shop_1\":39,\"slot_shop_2\":39,\"slot_shop_3\":39,\"sound\":65,\"upgrade\":138.1}},\"forty\":{\"k\":1,\"min\":20.6,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":43.3,\"slot_kitchen_1\":43.3,\"slot_kitchen_10\":43.3,\"slot_kitchen_11\":43.3,\"slot_kitchen_12\":43.3,\"slot_kitchen_13\":43.3,\"slot_kitchen_14\":43.3,\"slot_kitchen_15\":43.3,\"slot_kitchen_16\":43.3,\"slot_kitchen_17\":43.3,\"slot_kitchen_18\":43.3,\"slot_kitchen_19\":43.3,\"slot_kitchen_2\":43.3,\"slot_kitchen_20\":43.3,\"slot_kitchen_21\":43.3,\"slot_kitchen_22\":43.3,\"slot_kitchen_23\":43.3,\"slot_kitchen_3\":43.3,\"slot_kitchen_4\":43.3,\"slot_kitchen_5\":43.3,\"slot_kitchen_6\":43.3,\"slot_kitchen_7\":43.3,\"slot_kitchen_8\":43.3,\"slot_kitchen_9\":43.3,\"slot_packing_0\":32.1,\"slot_packing_1\":32.1,\"slot_packing_10\":32.1,\"slot_packing_11\":32.1,\"slot_packing_2\":32.1,\"slot_packing_3\":32.1,\"slot_packing_4\":32.1,\"slot_packing_5\":32.1,\"slot_packing_6\":32.1,\"slot_packing_7\":32.1,\"slot_packing_8\":32.1,\"slot_packing_9\":32.1,\"slot_shop_0\":20.6,\"slot_shop_1\":20.6,\"slot_shop_2\":20.6,\"slot_shop_3\":20.6,\"slot_shop_4\":20.6,\"slot_shop_5\":20.6,\"slot_shop_6\":20.6,\"slot_shop_7\":20.6,\"sound\":65,\"upgrade\":138.1}},\"forty_overview\":{\"k\":1,\"min\":20.6,\"rows\":{\"back\":65,\"motion\":65,\"news\":52,\"ov_rate_0\":64.4,\"ov_rate_1\":64.4,\"ov_rate_2\":64.4,\"overview\":40.6,\"restart\":65,\"slot_kitchen_0\":43.3,\"slot_kitchen_1\":43.3,\"slot_kitchen_10\":43.3,\"slot_kitchen_11\":43.3,\"slot_kitchen_12\":43.3,\"slot_kitchen_13\":43.3,\"slot_kitchen_14\":43.3,\"slot_kitchen_15\":43.3,\"slot_kitchen_16\":43.3,\"slot_kitchen_17\":43.3,\"slot_kitchen_18\":43.3,\"slot_kitchen_19\":43.3,\"slot_kitchen_2\":43.3,\"slot_kitchen_20\":43.3,\"slot_kitchen_21\":43.3,\"slot_kitchen_22\":43.3,\"slot_kitchen_23\":43.3,\"slot_kitchen_3\":43.3,\"slot_kitchen_4\":43.3,\"slot_kitchen_5\":43.3,\"slot_kitchen_6\":43.3,\"slot_kitchen_7\":43.3,\"slot_kitchen_8\":43.3,\"slot_kitchen_9\":43.3,\"slot_packing_0\":32.1,\"slot_packing_1\":32.1,\"slot_packing_10\":32.1,\"slot_packing_11\":32.1,\"slot_packing_2\":32.1,\"slot_packing_3\":32.1,\"slot_packing_4\":32.1,\"slot_packing_5\":32.1,\"slot_packing_6\":32.1,\"slot_packing_7\":32.1,\"slot_packing_8\":32.1,\"slot_packing_9\":32.1,\"slot_shop_0\":20.6,\"slot_shop_1\":20.6,\"slot_shop_2\":20.6,\"slot_shop_3\":20.6,\"slot_shop_4\":20.6,\"slot_shop_5\":20.6,\"slot_shop_6\":20.6,\"slot_shop_7\":20.6,\"sound\":65,\"upgrade\":138.1}}}}"
+      ],
+      "ms": 9841
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8561
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6404
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4905
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "m-p720",
+      "status": "SKIPPED",
+      "cause": "p720 runs it",
+      "notes": [],
+      "ms": 25
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "m-p720",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "m-p720",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 28
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "m-p720",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "targets: {\"project\":\"m-hd\",\"viewport\":{\"width\":1920,\"height\":1080},\"scenes\":{\"fresh\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"twelve\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"overview\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"ov_line_kitchen\":80.7,\"ov_line_packing\":80.7,\"ov_line_shop\":80.7,\"ov_rate_0\":86.9,\"ov_rate_1\":86.9,\"ov_rate_2\":86.9,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"picker\":{\"k\":1,\"min\":52.7,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"pick_P01\":87.8,\"pick_P02\":87.8,\"pick_P04\":87.8,\"pick_P05\":87.8,\"pick_P06\":87.8,\"pick_U01\":87.8,\"pick_U02\":87.8,\"pick_U03\":87.8,\"pick_U04\":87.8,\"pick_U05\":87.8,\"pick_U07\":87.8,\"pick_bagger\":87.8,\"restart\":87.8,\"slot_kitchen_0\":86.9,\"slot_kitchen_1\":86.9,\"slot_kitchen_2\":86.9,\"slot_kitchen_3\":86.9,\"slot_kitchen_4\":86.9,\"slot_kitchen_5\":86.9,\"slot_kitchen_6\":86.9,\"slot_kitchen_7\":86.9,\"slot_packing_0\":54.7,\"slot_packing_1\":54.7,\"slot_packing_2\":54.7,\"slot_packing_3\":54.7,\"slot_shop_0\":52.7,\"slot_shop_1\":52.7,\"slot_shop_2\":52.7,\"slot_shop_3\":52.7,\"sound\":87.8,\"upgrade\":186.5}},\"forty\":{\"k\":1,\"min\":27.8,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":68.4,\"slot_kitchen_1\":68.4,\"slot_kitchen_10\":68.4,\"slot_kitchen_11\":68.4,\"slot_kitchen_12\":68.4,\"slot_kitchen_13\":68.4,\"slot_kitchen_14\":68.4,\"slot_kitchen_15\":68.4,\"slot_kitchen_16\":68.4,\"slot_kitchen_17\":68.4,\"slot_kitchen_18\":68.4,\"slot_kitchen_19\":68.4,\"slot_kitchen_2\":68.4,\"slot_kitchen_20\":68.4,\"slot_kitchen_21\":68.4,\"slot_kitchen_22\":68.4,\"slot_kitchen_23\":68.4,\"slot_kitchen_3\":68.4,\"slot_kitchen_4\":68.4,\"slot_kitchen_5\":68.4,\"slot_kitchen_6\":68.4,\"slot_kitchen_7\":68.4,\"slot_kitchen_8\":68.4,\"slot_kitchen_9\":68.4,\"slot_packing_0\":43.3,\"slot_packing_1\":43.3,\"slot_packing_10\":43.3,\"slot_packing_11\":43.3,\"slot_packing_2\":43.3,\"slot_packing_3\":43.3,\"slot_packing_4\":43.3,\"slot_packing_5\":43.3,\"slot_packing_6\":43.3,\"slot_packing_7\":43.3,\"slot_packing_8\":43.3,\"slot_packing_9\":43.3,\"slot_shop_0\":27.8,\"slot_shop_1\":27.8,\"slot_shop_2\":27.8,\"slot_shop_3\":27.8,\"slot_shop_4\":27.8,\"slot_shop_5\":27.8,\"slot_shop_6\":27.8,\"slot_shop_7\":27.8,\"sound\":87.8,\"upgrade\":186.5}},\"forty_overview\":{\"k\":1,\"min\":27.8,\"rows\":{\"back\":87.8,\"motion\":87.8,\"news\":70.2,\"ov_rate_0\":86.9,\"ov_rate_1\":86.9,\"ov_rate_2\":86.9,\"overview\":54.8,\"restart\":87.8,\"slot_kitchen_0\":68.4,\"slot_kitchen_1\":68.4,\"slot_kitchen_10\":68.4,\"slot_kitchen_11\":68.4,\"slot_kitchen_12\":68.4,\"slot_kitchen_13\":68.4,\"slot_kitchen_14\":68.4,\"slot_kitchen_15\":68.4,\"slot_kitchen_16\":68.4,\"slot_kitchen_17\":68.4,\"slot_kitchen_18\":68.4,\"slot_kitchen_19\":68.4,\"slot_kitchen_2\":68.4,\"slot_kitchen_20\":68.4,\"slot_kitchen_21\":68.4,\"slot_kitchen_22\":68.4,\"slot_kitchen_23\":68.4,\"slot_kitchen_3\":68.4,\"slot_kitchen_4\":68.4,\"slot_kitchen_5\":68.4,\"slot_kitchen_6\":68.4,\"slot_kitchen_7\":68.4,\"slot_kitchen_8\":68.4,\"slot_kitchen_9\":68.4,\"slot_packing_0\":43.3,\"slot_packing_1\":43.3,\"slot_packing_10\":43.3,\"slot_packing_11\":43.3,\"slot_packing_2\":43.3,\"slot_packing_3\":43.3,\"slot_packing_4\":43.3,\"slot_packing_5\":43.3,\"slot_packing_6\":43.3,\"slot_packing_7\":43.3,\"slot_packing_8\":43.3,\"slot_packing_9\":43.3,\"slot_shop_0\":27.8,\"slot_shop_1\":27.8,\"slot_shop_2\":27.8,\"slot_shop_3\":27.8,\"slot_shop_4\":27.8,\"slot_shop_5\":27.8,\"slot_shop_6\":27.8,\"slot_shop_7\":27.8,\"sound\":87.8,\"upgrade\":186.5}}}}"
+      ],
+      "ms": 12649
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "m-hd",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "m-hd",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "m-hd",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "targets: {\"project\":\"m-small\",\"viewport\":{\"width\":360,\"height\":640},\"scenes\":{\"fresh\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"twelve\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"overview\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"ov_line_kitchen\":34.3,\"ov_line_packing\":34.3,\"ov_line_shop\":34.3,\"ov_rate_0\":37.1,\"ov_rate_1\":37.1,\"ov_rate_2\":37.1,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"picker\":{\"k\":0.333,\"min\":24,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"pick_P01\":32.7,\"pick_P02\":32.7,\"pick_P04\":32.7,\"pick_P05\":32.7,\"pick_P06\":32.7,\"pick_U01\":32.7,\"pick_U02\":32.7,\"pick_U03\":32.7,\"pick_U04\":32.7,\"pick_U05\":32.7,\"pick_U07\":32.7,\"pick_bagger\":32.7,\"restart\":42,\"slot_kitchen_0\":42.7,\"slot_kitchen_1\":42.7,\"slot_kitchen_2\":42.7,\"slot_kitchen_3\":42.7,\"slot_kitchen_4\":42.7,\"slot_kitchen_5\":42.7,\"slot_kitchen_6\":42.7,\"slot_kitchen_7\":42.7,\"slot_packing_0\":24.2,\"slot_packing_1\":24.2,\"slot_packing_2\":24.2,\"slot_packing_3\":24.2,\"slot_shop_0\":24,\"slot_shop_1\":24,\"slot_shop_2\":24,\"slot_shop_3\":24,\"sound\":42,\"upgrade\":83.2}},\"forty\":{\"k\":0.333,\"min\":14.8,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":27.5,\"slot_kitchen_1\":27.5,\"slot_kitchen_10\":27.5,\"slot_kitchen_11\":27.5,\"slot_kitchen_12\":27.5,\"slot_kitchen_13\":27.5,\"slot_kitchen_14\":27.5,\"slot_kitchen_15\":27.5,\"slot_kitchen_16\":27.5,\"slot_kitchen_17\":27.5,\"slot_kitchen_18\":27.5,\"slot_kitchen_19\":27.5,\"slot_kitchen_2\":27.5,\"slot_kitchen_20\":27.5,\"slot_kitchen_21\":27.5,\"slot_kitchen_22\":27.5,\"slot_kitchen_23\":27.5,\"slot_kitchen_3\":27.5,\"slot_kitchen_4\":27.5,\"slot_kitchen_5\":27.5,\"slot_kitchen_6\":27.5,\"slot_kitchen_7\":27.5,\"slot_kitchen_8\":27.5,\"slot_kitchen_9\":27.5,\"slot_packing_0\":21.1,\"slot_packing_1\":21.1,\"slot_packing_10\":21.1,\"slot_packing_11\":21.1,\"slot_packing_2\":21.1,\"slot_packing_3\":21.1,\"slot_packing_4\":21.1,\"slot_packing_5\":21.1,\"slot_packing_6\":21.1,\"slot_packing_7\":21.1,\"slot_packing_8\":21.1,\"slot_packing_9\":21.1,\"slot_shop_0\":14.8,\"slot_shop_1\":14.8,\"slot_shop_2\":14.8,\"slot_shop_3\":14.8,\"slot_shop_4\":14.8,\"slot_shop_5\":14.8,\"slot_shop_6\":14.8,\"slot_shop_7\":14.8,\"sound\":42,\"upgrade\":83.2}},\"forty_overview\":{\"k\":0.333,\"min\":14.8,\"rows\":{\"back\":42,\"motion\":42,\"news\":32,\"ov_rate_0\":37.1,\"ov_rate_1\":37.1,\"ov_rate_2\":37.1,\"overview\":26.2,\"restart\":42,\"slot_kitchen_0\":27.5,\"slot_kitchen_1\":27.5,\"slot_kitchen_10\":27.5,\"slot_kitchen_11\":27.5,\"slot_kitchen_12\":27.5,\"slot_kitchen_13\":27.5,\"slot_kitchen_14\":27.5,\"slot_kitchen_15\":27.5,\"slot_kitchen_16\":27.5,\"slot_kitchen_17\":27.5,\"slot_kitchen_18\":27.5,\"slot_kitchen_19\":27.5,\"slot_kitchen_2\":27.5,\"slot_kitchen_20\":27.5,\"slot_kitchen_21\":27.5,\"slot_kitchen_22\":27.5,\"slot_kitchen_23\":27.5,\"slot_kitchen_3\":27.5,\"slot_kitchen_4\":27.5,\"slot_kitchen_5\":27.5,\"slot_kitchen_6\":27.5,\"slot_kitchen_7\":27.5,\"slot_kitchen_8\":27.5,\"slot_kitchen_9\":27.5,\"slot_packing_0\":21.1,\"slot_packing_1\":21.1,\"slot_packing_10\":21.1,\"slot_packing_11\":21.1,\"slot_packing_2\":21.1,\"slot_packing_3\":21.1,\"slot_packing_4\":21.1,\"slot_packing_5\":21.1,\"slot_packing_6\":21.1,\"slot_packing_7\":21.1,\"slot_packing_8\":21.1,\"slot_packing_9\":21.1,\"slot_shop_0\":14.8,\"slot_shop_1\":14.8,\"slot_shop_2\":14.8,\"slot_shop_3\":14.8,\"slot_shop_4\":14.8,\"slot_shop_5\":14.8,\"slot_shop_6\":14.8,\"slot_shop_7\":14.8,\"sound\":42,\"upgrade\":83.2}}}}"
+      ],
+      "ms": 13432
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "m-small",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "m-small",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "m-small",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "targets: {\"project\":\"m-tablet\",\"viewport\":{\"width\":768,\"height\":1024},\"scenes\":{\"fresh\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"twelve\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"overview\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"ov_line_kitchen\":54.8,\"ov_line_packing\":54.8,\"ov_line_shop\":54.8,\"ov_rate_0\":59.4,\"ov_rate_1\":59.4,\"ov_rate_2\":59.4,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"picker\":{\"k\":0.5,\"min\":38.4,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"pick_P01\":52.4,\"pick_P02\":52.4,\"pick_P04\":52.4,\"pick_P05\":52.4,\"pick_P06\":52.4,\"pick_U01\":52.4,\"pick_U02\":52.4,\"pick_U03\":52.4,\"pick_U04\":52.4,\"pick_U05\":52.4,\"pick_U07\":52.4,\"pick_bagger\":52.4,\"restart\":67.2,\"slot_kitchen_0\":68.3,\"slot_kitchen_1\":68.3,\"slot_kitchen_2\":68.3,\"slot_kitchen_3\":68.3,\"slot_kitchen_4\":68.3,\"slot_kitchen_5\":68.3,\"slot_kitchen_6\":68.3,\"slot_kitchen_7\":68.3,\"slot_packing_0\":38.7,\"slot_packing_1\":38.7,\"slot_packing_2\":38.7,\"slot_packing_3\":38.7,\"slot_shop_0\":38.4,\"slot_shop_1\":38.4,\"slot_shop_2\":38.4,\"slot_shop_3\":38.4,\"sound\":67.2,\"upgrade\":133.1}},\"forty\":{\"k\":0.5,\"min\":23.6,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":44,\"slot_kitchen_1\":44,\"slot_kitchen_10\":44,\"slot_kitchen_11\":44,\"slot_kitchen_12\":44,\"slot_kitchen_13\":44,\"slot_kitchen_14\":44,\"slot_kitchen_15\":44,\"slot_kitchen_16\":44,\"slot_kitchen_17\":44,\"slot_kitchen_18\":44,\"slot_kitchen_19\":44,\"slot_kitchen_2\":44,\"slot_kitchen_20\":44,\"slot_kitchen_21\":44,\"slot_kitchen_22\":44,\"slot_kitchen_23\":44,\"slot_kitchen_3\":44,\"slot_kitchen_4\":44,\"slot_kitchen_5\":44,\"slot_kitchen_6\":44,\"slot_kitchen_7\":44,\"slot_kitchen_8\":44,\"slot_kitchen_9\":44,\"slot_packing_0\":33.8,\"slot_packing_1\":33.8,\"slot_packing_10\":33.8,\"slot_packing_11\":33.8,\"slot_packing_2\":33.8,\"slot_packing_3\":33.8,\"slot_packing_4\":33.8,\"slot_packing_5\":33.8,\"slot_packing_6\":33.8,\"slot_packing_7\":33.8,\"slot_packing_8\":33.8,\"slot_packing_9\":33.8,\"slot_shop_0\":23.6,\"slot_shop_1\":23.6,\"slot_shop_2\":23.6,\"slot_shop_3\":23.6,\"slot_shop_4\":23.6,\"slot_shop_5\":23.6,\"slot_shop_6\":23.6,\"slot_shop_7\":23.6,\"sound\":67.2,\"upgrade\":133.1}},\"forty_overview\":{\"k\":0.5,\"min\":23.6,\"rows\":{\"back\":67.2,\"motion\":67.2,\"news\":51.2,\"ov_rate_0\":59.4,\"ov_rate_1\":59.4,\"ov_rate_2\":59.4,\"overview\":41.9,\"restart\":67.2,\"slot_kitchen_0\":44,\"slot_kitchen_1\":44,\"slot_kitchen_10\":44,\"slot_kitchen_11\":44,\"slot_kitchen_12\":44,\"slot_kitchen_13\":44,\"slot_kitchen_14\":44,\"slot_kitchen_15\":44,\"slot_kitchen_16\":44,\"slot_kitchen_17\":44,\"slot_kitchen_18\":44,\"slot_kitchen_19\":44,\"slot_kitchen_2\":44,\"slot_kitchen_20\":44,\"slot_kitchen_21\":44,\"slot_kitchen_22\":44,\"slot_kitchen_23\":44,\"slot_kitchen_3\":44,\"slot_kitchen_4\":44,\"slot_kitchen_5\":44,\"slot_kitchen_6\":44,\"slot_kitchen_7\":44,\"slot_kitchen_8\":44,\"slot_kitchen_9\":44,\"slot_packing_0\":33.8,\"slot_packing_1\":33.8,\"slot_packing_10\":33.8,\"slot_packing_11\":33.8,\"slot_packing_2\":33.8,\"slot_packing_3\":33.8,\"slot_packing_4\":33.8,\"slot_packing_5\":33.8,\"slot_packing_6\":33.8,\"slot_packing_7\":33.8,\"slot_packing_8\":33.8,\"slot_packing_9\":33.8,\"slot_shop_0\":23.6,\"slot_shop_1\":23.6,\"slot_shop_2\":23.6,\"slot_shop_3\":23.6,\"slot_shop_4\":23.6,\"slot_shop_5\":23.6,\"slot_shop_6\":23.6,\"slot_shop_7\":23.6,\"sound\":67.2,\"upgrade\":133.1}}}}"
+      ],
+      "ms": 15584
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "m-tablet",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 24
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "m-tablet",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "m-tablet",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 23
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "every finger target is big enough and nothing pressable sits on the ring, at every size",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "targets: {\"project\":\"m-landscape\",\"viewport\":{\"width\":844,\"height\":390},\"scenes\":{\"fresh\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"twelve\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"overview\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"ov_line_kitchen\":29.2,\"ov_line_packing\":29.2,\"ov_line_shop\":29.2,\"ov_rate_0\":31.4,\"ov_rate_1\":31.4,\"ov_rate_2\":31.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"picker\":{\"k\":0.333,\"min\":19,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"pick_P01\":31.7,\"pick_P02\":31.7,\"pick_P04\":31.7,\"pick_P05\":31.7,\"pick_P06\":31.7,\"pick_U01\":31.7,\"pick_U02\":31.7,\"pick_U03\":31.7,\"pick_U04\":31.7,\"pick_U05\":31.7,\"pick_U07\":31.7,\"pick_bagger\":31.7,\"restart\":31.7,\"slot_kitchen_0\":31.4,\"slot_kitchen_1\":31.4,\"slot_kitchen_2\":31.4,\"slot_kitchen_3\":31.4,\"slot_kitchen_4\":31.4,\"slot_kitchen_5\":31.4,\"slot_kitchen_6\":31.4,\"slot_kitchen_7\":31.4,\"slot_packing_0\":19.8,\"slot_packing_1\":19.8,\"slot_packing_2\":19.8,\"slot_packing_3\":19.8,\"slot_shop_0\":19,\"slot_shop_1\":19,\"slot_shop_2\":19,\"slot_shop_3\":19,\"sound\":31.7,\"upgrade\":67.3}},\"forty\":{\"k\":0.333,\"min\":10.1,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":32.5,\"slot_kitchen_1\":32.5,\"slot_kitchen_10\":32.5,\"slot_kitchen_11\":32.5,\"slot_kitchen_12\":32.5,\"slot_kitchen_13\":32.5,\"slot_kitchen_14\":32.5,\"slot_kitchen_15\":32.5,\"slot_kitchen_16\":32.5,\"slot_kitchen_17\":32.5,\"slot_kitchen_18\":32.5,\"slot_kitchen_19\":32.5,\"slot_kitchen_2\":32.5,\"slot_kitchen_20\":32.5,\"slot_kitchen_21\":32.5,\"slot_kitchen_22\":32.5,\"slot_kitchen_23\":32.5,\"slot_kitchen_3\":32.5,\"slot_kitchen_4\":32.5,\"slot_kitchen_5\":32.5,\"slot_kitchen_6\":32.5,\"slot_kitchen_7\":32.5,\"slot_kitchen_8\":32.5,\"slot_kitchen_9\":32.5,\"slot_packing_0\":15.6,\"slot_packing_1\":15.6,\"slot_packing_10\":15.6,\"slot_packing_11\":15.6,\"slot_packing_2\":15.6,\"slot_packing_3\":15.6,\"slot_packing_4\":15.6,\"slot_packing_5\":15.6,\"slot_packing_6\":15.6,\"slot_packing_7\":15.6,\"slot_packing_8\":15.6,\"slot_packing_9\":15.6,\"slot_shop_0\":10.1,\"slot_shop_1\":10.1,\"slot_shop_2\":10.1,\"slot_shop_3\":10.1,\"slot_shop_4\":10.1,\"slot_shop_5\":10.1,\"slot_shop_6\":10.1,\"slot_shop_7\":10.1,\"sound\":31.7,\"upgrade\":67.3}},\"forty_overview\":{\"k\":0.333,\"min\":10.1,\"rows\":{\"back\":31.7,\"motion\":31.7,\"news\":25.4,\"ov_rate_0\":31.4,\"ov_rate_1\":31.4,\"ov_rate_2\":31.4,\"overview\":19.8,\"restart\":31.7,\"slot_kitchen_0\":32.5,\"slot_kitchen_1\":32.5,\"slot_kitchen_10\":32.5,\"slot_kitchen_11\":32.5,\"slot_kitchen_12\":32.5,\"slot_kitchen_13\":32.5,\"slot_kitchen_14\":32.5,\"slot_kitchen_15\":32.5,\"slot_kitchen_16\":32.5,\"slot_kitchen_17\":32.5,\"slot_kitchen_18\":32.5,\"slot_kitchen_19\":32.5,\"slot_kitchen_2\":32.5,\"slot_kitchen_20\":32.5,\"slot_kitchen_21\":32.5,\"slot_kitchen_22\":32.5,\"slot_kitchen_23\":32.5,\"slot_kitchen_3\":32.5,\"slot_kitchen_4\":32.5,\"slot_kitchen_5\":32.5,\"slot_kitchen_6\":32.5,\"slot_kitchen_7\":32.5,\"slot_kitchen_8\":32.5,\"slot_kitchen_9\":32.5,\"slot_packing_0\":15.6,\"slot_packing_1\":15.6,\"slot_packing_10\":15.6,\"slot_packing_11\":15.6,\"slot_packing_2\":15.6,\"slot_packing_3\":15.6,\"slot_packing_4\":15.6,\"slot_packing_5\":15.6,\"slot_packing_6\":15.6,\"slot_packing_7\":15.6,\"slot_packing_8\":15.6,\"slot_packing_9\":15.6,\"slot_shop_0\":10.1,\"slot_shop_1\":10.1,\"slot_shop_2\":10.1,\"slot_shop_3\":10.1,\"slot_shop_4\":10.1,\"slot_shop_5\":10.1,\"slot_shop_6\":10.1,\"slot_shop_7\":10.1,\"sound\":31.7,\"upgrade\":67.3}}}}"
+      ],
+      "ms": 15989
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a refused press shows the full bin, a first tap brings the hold hint",
+      "project": "m-landscape",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 21
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "a cancelled touch or a mouse that leaves ends the hold",
+      "project": "m-landscape",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "ui44.spec.mjs",
+      "title": "the motion button calms the factory and the choice survives a reload",
+      "project": "m-landscape",
+      "status": "SKIPPED",
+      "cause": "the everyday three",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+      ],
+      "ms": 2174
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+      ],
+      "ms": 2175
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+      ],
+      "ms": 2204
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 332 CSS px, floors 218/191/476 CSS px tall"
+      ],
+      "ms": 2234
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3312
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2479
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+      ],
+      "ms": 2917
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+      ],
+      "ms": 2804
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+      ],
+      "ms": 2779
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 342 CSS px, floors 224/195/489 CSS px tall"
+      ],
+      "ms": 3232
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4678
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-hd",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3159
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+      ],
+      "ms": 3278
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+      ],
+      "ms": 3074
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+      ],
+      "ms": 3067
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 166 CSS px, floors 109/95/238 CSS px tall"
+      ],
+      "ms": 3414
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5526
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-small",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3748
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+      ],
+      "ms": 4001
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+      ],
+      "ms": 3909
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+      ],
+      "ms": 4530
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 266 CSS px, floors 175/153/381 CSS px tall"
+      ],
+      "ms": 5095
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7549
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-tablet",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4729
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "click: fits, no overlaps, readable",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+      ],
+      "ms": 3844
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "perfect: fits, no overlaps, readable",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+      ],
+      "ms": 3707
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "explosion: fits, no overlaps, readable",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+      ],
+      "ms": 3705
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "factory: floors fit, ring in the kitchen, nothing overlaps",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [
+        "sizes: ring 123 CSS px, floors 81/71/177 CSS px tall"
+      ],
+      "ms": 4378
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "reduced motion and sound off still play",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6925
+    },
+    {
+      "spec": "responsive07.spec.mjs",
+      "title": "stand: card, shakers and helper fit",
+      "project": "m-landscape",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4256
+    }
+  ],
+  "run": {
+    "mode": "full",
+    "started": "2026-11-20T00:34:16Z",
+    "ended": "2026-11-20T03:23:49.948Z",
+    "specs_run": [
+      "art15.spec.mjs",
+      "art40.spec.mjs",
+      "art41.spec.mjs",
+      "burst14.spec.mjs",
+      "career39.spec.mjs",
+      "catalog27.spec.mjs",
+      "contests38.spec.mjs",
+      "craft35.spec.mjs",
+      "customers36.spec.mjs",
+      "experiments04.spec.mjs",
+      "factory16.spec.mjs",
+      "factory17.spec.mjs",
+      "factory18.spec.mjs",
+      "factory19.spec.mjs",
+      "factory20.spec.mjs",
+      "factory21.spec.mjs",
+      "factory22.spec.mjs",
+      "factory23.spec.mjs",
+      "factory26.spec.mjs",
+      "factory28.spec.mjs",
+      "factory29.spec.mjs",
+      "factory30.spec.mjs",
+      "factory31.spec.mjs",
+      "factory32.spec.mjs",
+      "factory33.spec.mjs",
+      "flavors34.spec.mjs",
+      "input07.spec.mjs",
+      "journey46.spec.mjs",
+      "motion42.spec.mjs",
+      "negative46.spec.mjs",
+      "news37.spec.mjs",
+      "perf07.spec.mjs",
+      "progression07.spec.mjs",
+      "release12.spec.mjs",
+      "responsive07.spec.mjs",
+      "save45.spec.mjs",
+      "scorecard09.spec.mjs",
+      "soak43.spec.mjs",
+      "sound05.spec.mjs",
+      "sound43.spec.mjs",
+      "stall09.spec.mjs",
+      "stand10.spec.mjs",
+      "stub03.spec.mjs",
+      "ui44.spec.mjs"
+    ],
+    "not_run": {
+      "perf46.spec.mjs": "the Step 46 benchmark table, desktop and phone (--perf)",
+      "play180.spec.mjs": "three real minutes per experiment (--slow)",
+      "play_stand.spec.mjs": "a long real-time stand session, one project (--slow)",
+      "render_probe.spec.mjs": "a probe, not a gate: load time and render cost of a build (--perf)",
+      "sessions22.spec.mjs": "Step 22 evidence: real-time 3-minute sessions from seeds, writes $OUT/sessions22.json (--slow)"
+    },
+    "load": {
+      "start": "1.48 1.57 1.92",
+      "end": "12.11 10.34 11.36"
+    },
+    "mem_available_mb": {
+      "start": 21228,
+      "end": 13951
+    }
+  },
+  "browser_totals": {
+    "passed": 308,
+    "passed_on_retry": 0,
+    "failed": 2,
+    "skipped": 58
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
+  "sha": "30d115a34a3b",
+  "dirty": true,
+  "build": {
+    "version": "0.45.0",
+    "pack": "game-868b603e35f4.pck",
+    "packSize": 989248,
+    "engine": "engine-7eda98958eb0",
+    "godot": "4.7.stable.official.5b4e0cb0f",
+    "source": "0537653ef5f6"
+  },
+  "target": "local docs/ (http://127.0.0.1)",
+  "when": "2026-11-20T00:16:58.107Z",
+  "stages": {
+    "headless": "FAILED",
+    "deploy": "SKIPPED (headless failed)",
+    "browser": "SKIPPED (no fresh deploy)"
+  },
+  "headless_summary": "346 passed, 0 failed, 24066 checks, 27 files, 688.9s",
+  "browser_checks": [],
+  "run": {
+    "mode": "full",
+    "started": "2026-11-20T00:05:19Z",
+    "ended": "2026-11-20T00:16:58.069Z",
+    "specs_run": [],
+    "not_run": {
+      "art15.spec.mjs": "not in this run",
+      "art40.spec.mjs": "not in this run",
+      "art41.spec.mjs": "not in this run",
+      "burst14.spec.mjs": "not in this run",
+      "career39.spec.mjs": "not in this run",
+      "catalog27.spec.mjs": "not in this run",
+      "contests38.spec.mjs": "not in this run",
+      "craft35.spec.mjs": "not in this run",
+      "customers36.spec.mjs": "not in this run",
+      "experiments04.spec.mjs": "not in this run",
+      "factory16.spec.mjs": "not in this run",
+      "factory17.spec.mjs": "not in this run",
+      "factory18.spec.mjs": "not in this run",
+      "factory19.spec.mjs": "not in this run",
+      "factory20.spec.mjs": "not in this run",
+      "factory21.spec.mjs": "not in this run",
+      "factory22.spec.mjs": "not in this run",
+      "factory23.spec.mjs": "not in this run",
+      "factory26.spec.mjs": "not in this run",
+      "factory28.spec.mjs": "not in this run",
+      "factory29.spec.mjs": "not in this run",
+      "factory30.spec.mjs": "not in this run",
+      "factory31.spec.mjs": "not in this run",
+      "factory32.spec.mjs": "not in this run",
+      "factory33.spec.mjs": "not in this run",
+      "flavors34.spec.mjs": "not in this run",
+      "input07.spec.mjs": "not in this run",
+      "journey46.spec.mjs": "not in this run",
+      "motion42.spec.mjs": "not in this run",
+      "negative46.spec.mjs": "not in this run",
+      "news37.spec.mjs": "not in this run",
+      "perf07.spec.mjs": "not in this run",
+      "perf46.spec.mjs": "the Step 46 benchmark table, desktop and phone (--perf)",
+      "play180.spec.mjs": "three real minutes per experiment (--slow)",
+      "play_stand.spec.mjs": "a long real-time stand session, one project (--slow)",
+      "progression07.spec.mjs": "not in this run",
+      "release12.spec.mjs": "not in this run",
+      "render_probe.spec.mjs": "a probe, not a gate: load time and render cost of a build (--perf)",
+      "responsive07.spec.mjs": "not in this run",
+      "save45.spec.mjs": "not in this run",
+      "scorecard09.spec.mjs": "not in this run",
+      "sessions22.spec.mjs": "Step 22 evidence: real-time 3-minute sessions from seeds, writes $OUT/sessions22.json (--slow)",
+      "soak43.spec.mjs": "not in this run",
+      "sound05.spec.mjs": "not in this run",
+      "sound43.spec.mjs": "not in this run",
+      "stall09.spec.mjs": "not in this run",
+      "stand10.spec.mjs": "not in this run",
+      "stub03.spec.mjs": "not in this run",
+      "ui44.spec.mjs": "not in this run"
+    },
+    "load": {
+      "start": "0.85 1.63 4.24",
+      "end": "1.34 1.54 2.80"
+    },
+    "mem_available_mb": {
+      "start": 21352,
+      "end": 21365
+    }
+  },
+  "browser_totals": {
+    "passed": 0,
+    "passed_on_retry": 0,
+    "failed": 0,
+    "skipped": 0
+  }
+}

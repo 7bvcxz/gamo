@@ -1,0 +1,121 @@
+{
+  "when": "2026-11-21T19:05:35.845Z",
+  "kinds": [
+    "createBuffer",
+    "createVertexArray",
+    "fenceSync",
+    "createTexture",
+    "createFramebuffer",
+    "createRenderbuffer",
+    "createQuery",
+    "createSampler"
+  ],
+  "rows": [
+    {
+      "scene": "0 machines, idle",
+      "frames": 226,
+      "per_frame": {
+        "createBuffer": 0.4,
+        "createVertexArray": 0.2,
+        "fenceSync": 2,
+        "createTexture": 0,
+        "createFramebuffer": 0,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 2.7,
+      "draw_calls": 434,
+      "atlas": true,
+      "fx_alive": 0
+    },
+    {
+      "scene": "44 machines",
+      "frames": 131,
+      "per_frame": {
+        "createBuffer": 30.5,
+        "createVertexArray": 17.7,
+        "fenceSync": 2.2,
+        "createTexture": 1.4,
+        "createFramebuffer": 0.7,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 52.5,
+      "draw_calls": 962,
+      "atlas": true,
+      "fx_alive": 24
+    },
+    {
+      "scene": "44, goods_layer hidden",
+      "frames": 131,
+      "per_frame": {
+        "createBuffer": 28,
+        "createVertexArray": 16.8,
+        "fenceSync": 2.2,
+        "createTexture": 0.9,
+        "createFramebuffer": 0.5,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 48.2,
+      "draw_calls": 791,
+      "atlas": true,
+      "fx_alive": 4
+    },
+    {
+      "scene": "44, bakes off and freed",
+      "frames": 118,
+      "per_frame": {
+        "createBuffer": 37.1,
+        "createVertexArray": 21.9,
+        "fenceSync": 2,
+        "createTexture": 0,
+        "createFramebuffer": 0,
+        "createRenderbuffer": 0,
+        "createQuery": 0,
+        "createSampler": 0
+      },
+      "ids_per_frame": 61,
+      "draw_calls": 1023,
+      "atlas": true,
+      "fx_alive": 13
+    },
+    {
+      "scene": "render info",
+      "info": {
+        "actor_bakes_live": 0,
+        "actor_bakes_made": 73,
+        "app_prof": {
+          "flush": 0.636876387147831,
+          "sim": 1.98009097806923
+        },
+        "atlas_ready": true,
+        "draw_calls": 994,
+        "fps": 15,
+        "fx_alive": 13,
+        "nodes": 303,
+        "objects": 1334,
+        "ok": true,
+        "primitives": 29726,
+        "process_ms": 39.4,
+        "static_mem": 0,
+        "view_prof": {
+          "actors": 0.072387636428617,
+          "base": 4.16584880989051,
+          "inventory_key": 0.139788413138644,
+          "machine_motion": 0.207411755400845,
+          "machine_nodes": 5.20892131913051,
+          "misc": 0.00131866578195934,
+          "overview": 0.0406920037843242,
+          "spoons_news_fx": 1.6732151753468,
+          "station_bell_hint_cues": 1.63865456894837,
+          "structure_key": 0.052110983603383
+        },
+        "viewports": 37
+      }
+    }
+  ]
+}

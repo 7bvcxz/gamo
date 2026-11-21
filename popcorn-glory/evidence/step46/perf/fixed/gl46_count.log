@@ -1,0 +1,20 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:24] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:24] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:24] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:24] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:24] "GET /popcorn-glory/game-271a69fc0b9a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:24] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:25] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 18:10:25] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"scene":"0 machines, idle","frames":230,"per_frame":{"createBuffer":1.5,"createVertexArray":0.9,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":4.4,"draw_calls":482}
+{"scene":"44 machines","frames":122,"per_frame":{"createBuffer":221,"createVertexArray":124.3,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.6,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":349.2,"draw_calls":1033}
+{"scene":"44, goods_layer hidden","frames":122,"per_frame":{"createBuffer":181.4,"createVertexArray":103.3,"fenceSync":2.2,"createTexture":0.9,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":288.3,"draw_calls":820}
+{"scene":"44, machine_layer hidden","frames":118,"per_frame":{"createBuffer":211.3,"createVertexArray":119.3,"fenceSync":2.2,"createTexture":1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":334.4,"draw_calls":875}
+{"scene":"44, detail_layer hidden","frames":119,"per_frame":{"createBuffer":147.1,"createVertexArray":86.1,"fenceSync":2.2,"createTexture":1.1,"createFramebuffer":0.5,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":237,"draw_calls":828}
+{"scene":"44, bakes off and freed","frames":110,"per_frame":{"createBuffer":245.8,"createVertexArray":137.8,"fenceSync":2,"createTexture":0,"createFramebuffer":0,"createRenderbuffer":0,"createQuery":0,"createSampler":0},"ids_per_frame":385.6,"draw_calls":1030}
+  ✓  1 [desktop] › specs/zz_gl46_count.spec.mjs:10:1 › gl objects per frame (1.2m)
+
+  1 passed (1.2m)

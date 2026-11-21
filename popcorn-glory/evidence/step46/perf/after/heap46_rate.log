@@ -1,0 +1,21 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:47] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:48] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:48] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:48] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:48] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:48] "GET /popcorn-glory/game-9b95d7f5a3b2.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:49] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:37:49] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"variant":"0 machines","fps":28.3,"draw_calls":485,"viewports":2,"heap_mb":[9.6,10.2],"mb_per_min":0.2,"mb_per_1k_frames":0.1}
+{"variant":"44 machines","fps":10.4,"draw_calls":1059,"viewports":78,"heap_mb":[13.6,68.8],"mb_per_min":22,"mb_per_1k_frames":35.2}
+{"variant":"44, bakes off and freed","fps":14.5,"draw_calls":1108,"viewports":25,"heap_mb":[91.8,135.9],"mb_per_min":17.6,"mb_per_1k_frames":20.2}
+{"variant":"44, goods layer hidden","fps":15,"draw_calls":902,"viewports":25,"heap_mb":[194.5,194.5],"mb_per_min":0,"mb_per_1k_frames":0}
+{"variant":"44, in the background tab (no frames)","fps":13.4,"draw_calls":1109,"viewports":25,"heap_mb":[194.6,194.5],"mb_per_min":0,"mb_per_1k_frames":0}
+  ✓  1 [desktop] › specs/zz_heap46_rate.spec.mjs:13:1 › heap rate (14.2m)
+
+  Slow test file: [desktop] › specs/zz_heap46_rate.spec.mjs (14.2m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 passed (14.2m)

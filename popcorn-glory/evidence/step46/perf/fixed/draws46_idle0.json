@@ -1,0 +1,23 @@
+{
+  "label": "idle0",
+  "hooked": 60,
+  "frames": 155,
+  "redraws_per_frame": [
+    [
+      "Over:Ring",
+      1
+    ],
+    [
+      "UI:Frame",
+      0.04
+    ],
+    [
+      "@Control@30:BottleneckCue",
+      0.01
+    ],
+    [
+      "Hint:@Node2D@32",
+      0.01
+    ]
+  ]
+}

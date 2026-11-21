@@ -1,0 +1,52 @@
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:37] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 2 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:38] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:38] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:38] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:38] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:38] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:39] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:39] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:40] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:39:40] "HEAD /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  1 [phone] › specs/perf46.spec.mjs:60:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged (3.2m)
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:51] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:51] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:51] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:51] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:51] "GET /popcorn-glory/game-dae01447f63a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:53] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:53] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:54] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [20/Nov/2026 03:42:54] "HEAD /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✘  2 [desktop] › specs/perf46.spec.mjs:60:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged (8.0m)
+
+
+  1) [desktop] › specs/perf46.spec.mjs:60:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged 
+
+    Error: five minutes keep under 30 MB more heap
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 30
+    Received:   139.4
+
+      105 |   // Gates that hold on any machine: the game runs (frames come), memory does not run away.
+      106 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);
+    > 107 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);
+          |                                                                                              ^
+      108 |   expect(pop.errors).toEqual([]);
+      109 | });
+      110 |
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:107:94
+
+    Error Context: test-results/perf46-the-benchmark-table-be756-turated-rush-hour-prolonged-desktop/error-context.md
+
+  Slow test file: [desktop] › specs/perf46.spec.mjs (8.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [desktop] › specs/perf46.spec.mjs:60:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged 
+  1 passed (11.2m)
+exit 1

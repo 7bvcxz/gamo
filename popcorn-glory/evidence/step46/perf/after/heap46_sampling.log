@@ -1,0 +1,15 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:25] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 1 test using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:26] "GET /popcorn-glory/?sound=off HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:26] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:26] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:26] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:26] "GET /popcorn-glory/game-9b95d7f5a3b2.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:27] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 17:32:27] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+{"heap":[16.4,97.9],"frames":[[35.23,"genObject engine-7eda98958eb0.js:0"],[17.72,"_emscripten_glGenBuffers engine-7eda98958eb0.js:0"],[17.67,"_emscripten_glGenVertexArrays engine-7eda98958eb0.js:0"],[17.61,"_emscripten_glFenceSync engine-7eda98958eb0.js:0"]]}
+  ✓  1 [desktop] › specs/zz_heap46_sampling.spec.mjs:7:1 › heap sampling (4.4m)
+
+  1 passed (4.4m)

@@ -1,0 +1,9 @@
+
+Running 2 tests using 1 worker
+
+{"tag":"old","project":"phone","version":"0.46.0","bin":35,"shelf":7,"queue":0}
+  ✓  1 [phone] › specs/zz_look46.spec.mjs:6:1 › the factory scene for the eye (11.7s)
+{"tag":"old","project":"desktop","version":"0.46.0","bin":35,"shelf":7,"queue":0}
+  ✓  2 [desktop] › specs/zz_look46.spec.mjs:6:1 › the factory scene for the eye (9.6s)
+
+  2 passed (22.0s)

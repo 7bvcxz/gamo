@@ -1,0 +1,385 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/perf46.spec.mjs",
+      "--project=desktop",
+      "--project=phone",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "perf46.spec.mjs",
+      "file": "perf46.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 1500000,
+              "annotations": [
+                {
+                  "type": "perf46",
+                  "description": "{\"build\":{\"version\":\"0.46.0\",\"pack\":\"game-dae01447f63a.pck\",\"pack_bytes\":991440,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2224},\"rows\":[{\"scene\":\"1 machines\",\"fps\":11.149307811830752,\"p10\":10.08619108394684,\"draw\":744,\"obj\":1352,\"heap\":15.2,\"voices\":7,\"load\":13.91},{\"scene\":\"5 machines\",\"fps\":8.638894219958017,\"p10\":5.248884614647394,\"draw\":723,\"obj\":1172,\"heap\":21.7,\"voices\":9,\"load\":24.53},{\"scene\":\"10 machines\",\"fps\":8.811435288193945,\"p10\":2.958288136151763,\"draw\":689,\"obj\":1103,\"heap\":32.2,\"voices\":9,\"load\":26.41},{\"scene\":\"20 machines\",\"fps\":10.202188835045366,\"p10\":9.737098344693282,\"draw\":1182,\"obj\":1615,\"heap\":41.1,\"voices\":10,\"load\":22.5},{\"scene\":\"44 machines\",\"fps\":9.924573248986588,\"p10\":9.36504963309024,\"draw\":1211,\"obj\":1463,\"heap\":41,\"voices\":10,\"load\":18.39},{\"scene\":\"44, bin filled\",\"fps\":9.91276764285219,\"p10\":9.294544097668574,\"draw\":1248,\"obj\":1494,\"heap\":54.1,\"voices\":10,\"load\":16.84},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":9.83284169292524,\"p10\":8.909479681844221,\"draw\":1206,\"obj\":1475,\"heap\":54.1,\"voices\":10,\"load\":17.06}]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 193165,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:39:38.081Z",
+                  "annotations": [
+                    {
+                      "type": "perf46",
+                      "description": "{\"build\":{\"version\":\"0.46.0\",\"pack\":\"game-dae01447f63a.pck\",\"pack_bytes\":991440,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2224},\"rows\":[{\"scene\":\"1 machines\",\"fps\":11.149307811830752,\"p10\":10.08619108394684,\"draw\":744,\"obj\":1352,\"heap\":15.2,\"voices\":7,\"load\":13.91},{\"scene\":\"5 machines\",\"fps\":8.638894219958017,\"p10\":5.248884614647394,\"draw\":723,\"obj\":1172,\"heap\":21.7,\"voices\":9,\"load\":24.53},{\"scene\":\"10 machines\",\"fps\":8.811435288193945,\"p10\":2.958288136151763,\"draw\":689,\"obj\":1103,\"heap\":32.2,\"voices\":9,\"load\":26.41},{\"scene\":\"20 machines\",\"fps\":10.202188835045366,\"p10\":9.737098344693282,\"draw\":1182,\"obj\":1615,\"heap\":41.1,\"voices\":10,\"load\":22.5},{\"scene\":\"44 machines\",\"fps\":9.924573248986588,\"p10\":9.36504963309024,\"draw\":1211,\"obj\":1463,\"heap\":41,\"voices\":10,\"load\":18.39},{\"scene\":\"44, bin filled\",\"fps\":9.91276764285219,\"p10\":9.294544097668574,\"draw\":1248,\"obj\":1494,\"heap\":54.1,\"voices\":10,\"load\":16.84},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":9.83284169292524,\"p10\":8.909479681844221,\"draw\":1206,\"obj\":1475,\"heap\":54.1,\"voices\":10,\"load\":17.06}]}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "50a46d618c4aed30f498-12dfed7c636a5c8a3064",
+          "file": "perf46.spec.mjs",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 1500000,
+              "annotations": [
+                {
+                  "type": "perf46",
+                  "description": "{\"build\":{\"version\":\"0.46.0\",\"pack\":\"game-dae01447f63a.pck\",\"pack_bytes\":991440,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2412},\"rows\":[{\"scene\":\"1 machines\",\"fps\":16.825574870808353,\"p10\":15.32420267097843,\"draw\":903,\"obj\":1562,\"heap\":15.2,\"voices\":7,\"load\":15.96},{\"scene\":\"5 machines\",\"fps\":15.83015178884321,\"p10\":13.972055888223553,\"draw\":924,\"obj\":1467,\"heap\":21.7,\"voices\":8,\"load\":18.08},{\"scene\":\"10 machines\",\"fps\":14.985014985014985,\"p10\":12.7688832210062,\"draw\":922,\"obj\":1437,\"heap\":32.2,\"voices\":9,\"load\":16.58},{\"scene\":\"20 machines\",\"fps\":12.127997008172688,\"p10\":11.160714287694137,\"draw\":1386,\"obj\":1916,\"heap\":40.9,\"voices\":10,\"load\":14.17},{\"scene\":\"44 machines\",\"fps\":12.564028223056344,\"p10\":12.309440400571459,\"draw\":1470,\"obj\":1795,\"heap\":54.1,\"voices\":10,\"load\":13.01},{\"scene\":\"44, bin filled\",\"fps\":12.36093943363855,\"p10\":11.604293595048864,\"draw\":1357,\"obj\":1653,\"heap\":54,\"voices\":10,\"load\":12.52},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":12.132524498366775,\"p10\":11.228595491851488,\"draw\":1310,\"obj\":1634,\"heap\":73.6,\"voices\":10,\"load\":12.34},{\"scene\":\"44, prolonged start\",\"fps\":12.290819705345834,\"p10\":11.726766341994818,\"draw\":1290,\"obj\":1615,\"heap\":73.6,\"voices\":10,\"load\":11.43},{\"scene\":\"44, prolonged after 5 min\",\"fps\":12.831902077884727,\"p10\":11.490950874086254,\"draw\":1413,\"obj\":1730,\"heap\":213,\"voices\":10,\"load\":10.41}]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 478923,
+                  "error": {
+                    "message": "Error: five minutes keep under 30 MB more heap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m30\u001b[39m\nReceived:   \u001b[31m139.4\u001b[39m",
+                    "stack": "Error: five minutes keep under 30 MB more heap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m30\u001b[39m\nReceived:   \u001b[31m139.4\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:107:94",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                      "column": 94,
+                      "line": 107
+                    },
+                    "snippet": "  105 |   // Gates that hold on any machine: the game runs (frames come), memory does not run away.\n  106 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);\n> 107 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);\n      |                                                                                              ^\n  108 |   expect(pop.errors).toEqual([]);\n  109 | });\n  110 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                        "column": 94,
+                        "line": 107
+                      },
+                      "message": "Error: five minutes keep under 30 MB more heap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m30\u001b[39m\nReceived:   \u001b[31m139.4\u001b[39m\n\n  105 |   // Gates that hold on any machine: the game runs (frames come), memory does not run away.\n  106 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);\n> 107 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);\n      |                                                                                              ^\n  108 |   expect(pop.errors).toEqual([]);\n  109 | });\n  110 |\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:107:94"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-20T03:42:51.702Z",
+                  "annotations": [
+                    {
+                      "type": "perf46",
+                      "description": "{\"build\":{\"version\":\"0.46.0\",\"pack\":\"game-dae01447f63a.pck\",\"pack_bytes\":991440,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2412},\"rows\":[{\"scene\":\"1 machines\",\"fps\":16.825574870808353,\"p10\":15.32420267097843,\"draw\":903,\"obj\":1562,\"heap\":15.2,\"voices\":7,\"load\":15.96},{\"scene\":\"5 machines\",\"fps\":15.83015178884321,\"p10\":13.972055888223553,\"draw\":924,\"obj\":1467,\"heap\":21.7,\"voices\":8,\"load\":18.08},{\"scene\":\"10 machines\",\"fps\":14.985014985014985,\"p10\":12.7688832210062,\"draw\":922,\"obj\":1437,\"heap\":32.2,\"voices\":9,\"load\":16.58},{\"scene\":\"20 machines\",\"fps\":12.127997008172688,\"p10\":11.160714287694137,\"draw\":1386,\"obj\":1916,\"heap\":40.9,\"voices\":10,\"load\":14.17},{\"scene\":\"44 machines\",\"fps\":12.564028223056344,\"p10\":12.309440400571459,\"draw\":1470,\"obj\":1795,\"heap\":54.1,\"voices\":10,\"load\":13.01},{\"scene\":\"44, bin filled\",\"fps\":12.36093943363855,\"p10\":11.604293595048864,\"draw\":1357,\"obj\":1653,\"heap\":54,\"voices\":10,\"load\":12.52},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":12.132524498366775,\"p10\":11.228595491851488,\"draw\":1310,\"obj\":1634,\"heap\":73.6,\"voices\":10,\"load\":12.34},{\"scene\":\"44, prolonged start\",\"fps\":12.290819705345834,\"p10\":11.726766341994818,\"draw\":1290,\"obj\":1615,\"heap\":73.6,\"voices\":10,\"load\":11.43},{\"scene\":\"44, prolonged after 5 min\",\"fps\":12.831902077884727,\"p10\":11.490950874086254,\"draw\":1413,\"obj\":1730,\"heap\":213,\"voices\":10,\"load\":10.41}]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/perf46-the-benchmark-table-be756-turated-rush-hour-prolonged-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                    "column": 94,
+                    "line": 107
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "50a46d618c4aed30f498-2f5a050ef4f09489cfe1",
+          "file": "perf46.spec.mjs",
+          "line": 60,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-20T03:39:37.637Z",
+    "duration": 673136.8690000001,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

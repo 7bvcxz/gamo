@@ -1,0 +1,51 @@
+{
+  "when": "2026-11-21T17:36:50.242Z",
+  "version": "0.46.1",
+  "query": "?sound=off",
+  "minutes": 4,
+  "heap_mb": [
+    16.4,
+    97.9
+  ],
+  "sold": 346,
+  "top_frames_mb": [
+    [
+      35.23,
+      "genObject engine-7eda98958eb0.js:0"
+    ],
+    [
+      17.72,
+      "_emscripten_glGenBuffers engine-7eda98958eb0.js:0"
+    ],
+    [
+      17.67,
+      "_emscripten_glGenVertexArrays engine-7eda98958eb0.js:0"
+    ],
+    [
+      17.61,
+      "_emscripten_glFenceSync engine-7eda98958eb0.js:0"
+    ]
+  ],
+  "top_stacks_mb": [
+    [
+      17.72,
+      "(root) :-1 < MainLoop_runner engine-7eda98958eb0.js:0 < runIter engine-7eda98958eb0.js:0 < callUserCallback engine-7eda98958eb0.js:0 < _emscripten_glGenBuffers engine-7eda98958eb0.js:0"
+    ],
+    [
+      17.67,
+      "(root) :-1 < MainLoop_runner engine-7eda98958eb0.js:0 < runIter engine-7eda98958eb0.js:0 < callUserCallback engine-7eda98958eb0.js:0 < _emscripten_glGenVertexArrays engine-7eda98958eb0.js:0"
+    ],
+    [
+      17.62,
+      "MainLoop_runner engine-7eda98958eb0.js:0 < runIter engine-7eda98958eb0.js:0 < callUserCallback engine-7eda98958eb0.js:0 < _emscripten_glGenTextures engine-7eda98958eb0.js:0 < genObject engine-7eda98958eb0.js:0"
+    ],
+    [
+      17.61,
+      "(root) :-1 < MainLoop_runner engine-7eda98958eb0.js:0 < runIter engine-7eda98958eb0.js:0 < callUserCallback engine-7eda98958eb0.js:0 < _emscripten_glFenceSync engine-7eda98958eb0.js:0"
+    ],
+    [
+      17.61,
+      "MainLoop_runner engine-7eda98958eb0.js:0 < runIter engine-7eda98958eb0.js:0 < callUserCallback engine-7eda98958eb0.js:0 < _emscripten_glGenFramebuffers engine-7eda98958eb0.js:0 < genObject engine-7eda98958eb0.js:0"
+    ]
+  ]
+}
