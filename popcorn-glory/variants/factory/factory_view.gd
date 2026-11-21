@@ -1025,9 +1025,11 @@ func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
 			ci.draw_rect(Rect2(nc - Vector2(sign.size.y * 0.09, sign.size.y * 0.025), Vector2(sign.size.y * 0.18, sign.size.y * 0.05)), Color.WHITE)
 	# The handover places, one per lane (a mat on the counter).
 	if rules:
+		var mh := _head_px()
 		for lane in int(rules.lanes()):
 			var h := _handoff_spot(lane)
-			PopMachineArt._round_rect(ci, Rect2(h + Vector2(-_head_px() * 1.2, -4), Vector2(_head_px() * 2.4, 8)), 4, Color(1, 1, 1, 0.5))
+			_goods_piece(ci, "mat|%.1f" % mh, h, Rect2(Vector2(-mh * 1.2 - 2.0, -6.0), Vector2(mh * 2.4 + 4.0, 12.0)), func(c: CanvasItem, o: Vector2) -> void:
+				PopMachineArt._round_rect(c, Rect2(o + Vector2(-mh * 1.2, -4), Vector2(mh * 2.4, 8)), 4, Color(1, 1, 1, 0.5)))
 
 
 func counter_rect() -> Rect2:
@@ -1187,8 +1189,9 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 					PopFactoryArt.sku_bag(c, o, w, rec, false, 0, 2, hand)   # Step 34: the flavor's own bag (35: the hand's seal)
 				else:
 					PopFactoryArt.bag(c, o, w, PopTokens.STEEL_DEEP if barg else PopTokens.MACHINE, false, 0, 2, prem, barg))
-		else:
-			PopMachineArt._round_rect(ci, Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35))
+		else:   # an empty place
+			_goods_piece(ci, "place|%.1f" % w, foot, Rect2(Vector2(-w * 0.5 - 2.0, -w * 1.5 - 2.0), Vector2(w + 4.0, w * 1.5 + 4.0)), func(c: CanvasItem, o: Vector2) -> void:
+				PopMachineArt._round_rect(c, Rect2(o - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35)))
 
 
 func _draw_kitchen(_ci: CanvasItem, _r: Rect2) -> void:

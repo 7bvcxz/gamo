@@ -272,22 +272,25 @@ func _along(k: float) -> Vector2:
 
 func _draw() -> void:
 	match kind:
-		LOT:
-			if PopFactoryArt.FLAVOR_LOOK.has(recipe) and recipe != "plain":   # Step 34: a coated lot
-				for o: Vector2 in [Vector2(-0.55, 0.15), Vector2(0.5, 0.2), Vector2(0, -0.4)]:
-					PopFactoryArt.flavor_popcorn(self, o * size_px, size_px * 0.62, recipe)
-				if hand:
-					PopFactoryArt.glint(self, Vector2(size_px * 0.55, -size_px * 0.7), size_px * 0.45)
-			else:
-				for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
-					draw_circle(o * size_px, size_px * 0.5, Color(0.85, 0.64, 0.25))
-				for o: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
-					draw_circle(o * size_px, size_px * 0.4, PopPalette.CREAM)
+		LOT:   # (Step 46: lots and bags are pooled and redrawn on every trip: shared baked pictures)
+			var s := size_px
+			var rc := recipe
+			var hd := hand
+			_draw_extra("lot|%s|%s|%.1f" % [rc, hd, s], Vector2.ZERO, Rect2(Vector2(-s * 1.5 - 3.0, -s * 1.5 - 3.0), Vector2(s * 3.0 + 6.0, s * 3.0 + 6.0)),
+				func(c: CanvasItem, o: Vector2) -> void: _draw_lot(c, o, s, rc, hd))
 		BAG:
-			if recipe == "plain":
-				PopFactoryArt.bag(self, Vector2.ZERO, size_px, PopTokens.MACHINE, open, fill, of)
-			else:
-				PopFactoryArt.sku_bag(self, Vector2.ZERO, size_px, recipe, open, fill, of, hand)
+			var w := size_px
+			var rc := recipe
+			var op := open
+			var fl := fill
+			var n := of
+			var hd := hand
+			_draw_extra("bag|%s|%s|%d|%d|%s|%.1f" % [rc, op, fl, n, hd, w], Vector2.ZERO, Rect2(Vector2(-0.8 * w - 4.0, -2.0 * w - 4.0), Vector2(1.6 * w + 8.0, 2.25 * w + 8.0)),
+				func(c: CanvasItem, o: Vector2) -> void:
+					if rc == "plain":
+						PopFactoryArt.bag(c, o, w, PopTokens.MACHINE, op, fl, n)
+					else:
+						PopFactoryArt.sku_bag(c, o, w, rc, op, fl, n, hd))
 		NOZZLE:
 			PopFactoryArt.nozzle(self, size_px, scoop)
 		CUSTOMER:
@@ -315,6 +318,29 @@ func _draw() -> void:
 					func(c: CanvasItem, o: Vector2) -> void: PopFactoryArt.sku_bag(c, o, bw, rc, false, 0, 2, hd))
 
 
+static func _draw_lot(c: CanvasItem, o: Vector2, s: float, rc: String, hd: bool) -> void:
+	if PopFactoryArt.FLAVOR_LOOK.has(rc) and rc != "plain":   # Step 34: a coated lot
+		for q: Vector2 in [Vector2(-0.55, 0.15), Vector2(0.5, 0.2), Vector2(0, -0.4)]:
+			PopFactoryArt.flavor_popcorn(c, o + q * s, s * 0.62, rc)
+		if hd:
+			PopFactoryArt.glint(c, o + Vector2(s * 0.55, -s * 0.7), s * 0.45)
+	else:
+		for q: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
+			c.draw_circle(o + q * s, s * 0.5, Color(0.85, 0.64, 0.25))
+		for q: Vector2 in [Vector2(-0.6, 0.1), Vector2(0.5, 0.15), Vector2(0, -0.45), Vector2(0.15, 0.5), Vector2(-0.3, 0.55)]:
+			c.draw_circle(o + q * s, s * 0.4, PopPalette.CREAM)
+
+
+## The node that holds the baked pictures' viewports (made once, at the tree's root).
+func _ensure_holder() -> bool:
+	if _holder == null or not is_instance_valid(_holder):
+		_holder = Node.new()
+		_holder.name = "CastBakes"
+		get_tree().root.add_child.call_deferred(_holder)
+		return false
+	return _holder.is_inside_tree()
+
+
 ## Step 46: an extra (`box` around `at`) as its shared baked picture, or as vectors while it bakes.
 func _draw_extra(key: String, at: Vector2, box: Rect2, art: Callable) -> void:
 	var tex := _extra_texture(key, box, art)
@@ -325,7 +351,7 @@ func _draw_extra(key: String, at: Vector2, box: Rect2, art: Callable) -> void:
 
 
 func _extra_texture(key: String, box: Rect2, art: Callable) -> Texture2D:
-	if not is_inside_tree() or not bake_enabled or _holder == null or not is_instance_valid(_holder) or not _holder.is_inside_tree():
+	if not is_inside_tree() or not bake_enabled or not _ensure_holder():
 		return null
 	var k := _screen_k()
 	var px := Vector2i(ceili(box.size.x * k), ceili(box.size.y * k))
@@ -346,7 +372,7 @@ func _extra_texture(key: String, box: Rect2, art: Callable) -> Texture2D:
 		_holder.add_child(vp)
 		_extras[ck] = {"vp": vp, "frame": Engine.get_frames_drawn()}
 		bakes_made += 1
-		if _extras.size() > 64:   # orders come and go: the oldest are let go
+		if _extras.size() > 96:   # orders and lots come and go: the oldest are let go
 			var old: String = _extras.keys()[0]
 			(_extras[old]["vp"] as Node).queue_free()
 			_extras.erase(old)
