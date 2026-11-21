@@ -254,8 +254,7 @@ func _process(delta: float) -> void:
 		_gains.pop_front()
 	if rules != null:
 		var size_px := machine_size()
-		var fill := 0.15 + 0.7 * float(rules.level) / maxf(1.0, float(rules.max_level()))
-		machine_node.set_look(rules.level, size_px, fill)
+		machine_node.set_look(rules.level, size_px, _kettle_fill())
 		var breathe := 0.0 if reduced_motion else sin(_t * 2.4) * 0.012
 		var hop := sin(_jump * PI) * machine_size() * 0.06 if not reduced_motion else 0.0
 		var grow := 1.0 + 0.08 * sin(_jump * PI) if not reduced_motion else 1.0
@@ -265,6 +264,13 @@ func _process(delta: float) -> void:
 	if _needs_redraw():
 		under_layer.queue_redraw()
 		over_layer.queue_redraw()
+
+
+## How full the kettle's glass is drawn. Step 46: one answer a frame -- the factory's glass
+## fill used to be set after this one every frame, the kettle's look changed twice a frame
+## and the whole kettle was redrawn every frame (R-01).
+func _kettle_fill() -> float:
+	return 0.15 + 0.7 * float(rules.level) / maxf(1.0, float(rules.max_level()))
 
 
 ## Whether the drawn layers change this frame. Every frame for the experiments

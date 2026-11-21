@@ -18,6 +18,9 @@ var _app: Node
 var _callbacks: Array[JavaScriptObject] = []
 var e2e := false
 var _p: Variant = null   ## window.popcorn, kept: its _put takes each answer (Step 46)
+var _draw_hooks := {}     ## Step 46 dev_draws: callable -> the canvas item it counts
+var _draw_counts := {}
+var _draw_from := 0
 
 
 func attach(app: Node) -> void:
@@ -109,7 +112,33 @@ func query(name: String, arg: Variant) -> Variant:
 				for k: String in (actor._baked as Dictionary).keys():
 					((actor._baked as Dictionary)[k]["vp"] as Node).queue_free()
 				(actor._baked as Dictionary).clear()
+				for k: String in (actor._extras as Dictionary).keys():   # Step 46: the bubbles and carried bags too
+					((actor._extras as Dictionary)[k]["vp"] as Node).queue_free()
+				(actor._extras as Dictionary).clear()
 			return {"ok": true, "actors": actor.bake_enabled}
+		"dev_draws":   # Step 46: which canvas items redraw, and how often ({"start": true}, then {} reads and stops)
+			var a: Dictionary = arg if typeof(arg) == TYPE_DICTIONARY else {}
+			for c: Callable in _draw_hooks.keys():
+				var ci_old: Object = _draw_hooks[c]
+				if is_instance_valid(ci_old) and (ci_old as CanvasItem).draw.is_connected(c):
+					(ci_old as CanvasItem).draw.disconnect(c)
+			_draw_hooks.clear()
+			var out := {"frames": Engine.get_frames_drawn() - _draw_from, "counts": _draw_counts.duplicate()}
+			_draw_counts.clear()
+			if bool(a.get("start", false)):
+				_draw_from = Engine.get_frames_drawn()
+				for n: Node in _app.get_tree().root.find_children("*", "CanvasItem", true, false):
+					var label := "%s:%s" % [n.get_parent().name if n.get_parent() != null else "", n.name]
+					if n.get_parent() != null and String(n.get_parent().name) == "Actors":   # by kind, not by instance
+						var scr: Script = n.get_script()
+						label = "Actors:%s%s%s" % [scr.resource_path.get_file() if scr != null else "Node2D", ("|" + String(n.get("who"))) if scr != null and "who" in n else "",
+							("|" + String(n.get_meta("type", n.get_meta("trip", "")))) if n.has_meta("type") or n.has_meta("trip") else ""]
+					var cb := func() -> void: _draw_counts[label] = int(_draw_counts.get(label, 0)) + 1
+					(n as CanvasItem).draw.connect(cb)
+					_draw_hooks[cb] = n
+				return {"ok": true, "hooked": _draw_hooks.size()}
+			out["ok"] = true
+			return out
 		"dev_hide":   # Step 46: hide one of the play view's layers (what it costs to draw and render)
 			var play: Node = _app.get("frame").play if _app.get("frame") != null else null
 			var a: Dictionary = arg if typeof(arg) == TYPE_DICTIONARY else {}
@@ -130,6 +159,8 @@ func query(name: String, arg: Variant) -> Variant:
 				"process_ms": snappedf(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, 0.01),
 				"actor_bakes_made": int(_actor().bakes_made), "actor_bakes_live": (_actor()._baked as Dictionary).size(),
 				"viewports": _app.get_tree().root.find_children("*", "SubViewport", true, false).size(),
+				"atlas_ready": PopAtlas.ready(),
+				"fx_alive": int(_app.get("frame").play.fx.alive) if _app.get("frame") != null and _app.get("frame").play != null and "fx" in _app.get("frame").play else -1,
 				"app_prof": (_app.get("prof") as Dictionary).duplicate(),
 				"view_prof": (_app.get("frame").play.get("prof") as Dictionary).duplicate() if _app.get("frame") != null and _app.get("frame").play != null and "prof" in _app.get("frame").play else {}}
 	return null

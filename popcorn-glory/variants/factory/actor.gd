@@ -84,6 +84,11 @@ static var _baked := {}         ## key -> {"vp": SubViewport, "frame": int}
 static var bakes_made := 0      ## Step 46: how many person textures were drawn (each a SubViewport)
 static var bake_enabled := true ## Step 46: a dev switch for the measurement (false: the shapes)
 static var _holder: Node = null
+## Step 46: what a customer shows besides themselves -- the order bubble, the bag they carry --
+## baked once per look and shared by everyone (a dozen shapes each, redrawn with every mood:
+## on the web each redrawn polygon is GL ids never given back, QUALITY_GATES R-01).
+static var _extras := {}         ## key -> {"vp": SubViewport, "frame": int}
+var _extra_wait := ""            ## the extra being baked (redraw when it is ready)
 var _bake_key := ""
 var _bake_wait := false
 
@@ -183,6 +188,11 @@ func _pose(delta: float, moved: float) -> void:
 		var e: Dictionary = _baked.get(_bake_key, {})
 		if e.is_empty() or Engine.get_frames_drawn() - int(e["frame"]) >= 3:
 			queue_redraw()   # the texture is ready (or the holder is): draw it
+	if _extra_wait != "":
+		var x: Dictionary = _extras.get(_extra_wait, {})
+		if x.is_empty() or Engine.get_frames_drawn() - int(x["frame"]) >= 3:
+			_extra_wait = ""
+			queue_redraw()
 	if calm:
 		skew = 0.0
 		scale = Vector2.ONE
@@ -288,6 +298,60 @@ func _draw() -> void:
 				PopFactoryArt.customer(self, Vector2.ZERO, size_px, body, skin, mood, who, look)
 			if shows_bubble():
 				var lift := {"rush": 0.4, "kid": -0.4}.get(who, 0.0) as float   # Step 36: over their own head
-				PopFactoryArt.order_bubble(self, Vector2(0, -size_px * (3.75 + lift)), size_px, order_size, order_premium, order_bargain, order_recipe)
+				var hp := size_px
+				var os := order_size
+				var op := order_premium
+				var ob := order_bargain
+				var orr := order_recipe
+				_draw_extra("bubble|%d|%s|%s|%s|%.1f" % [os, op, ob, orr, hp], Vector2(0, -size_px * (3.75 + lift)),
+					Rect2(Vector2(-hp * 0.85 - 3.0, -hp * 1.75 - 3.0), Vector2(hp * 1.7 + 6.0, hp * 1.85 + 6.0)),
+					func(c: CanvasItem, o: Vector2) -> void: PopFactoryArt.order_bubble(c, o, hp, os, op, ob, orr))
 			if carrying:
-				PopFactoryArt.sku_bag(self, Vector2(size_px * 1.2, -size_px * 0.4), size_px * 0.9, recipe, false, 0, 2, hand)
+				var bw := size_px * 0.9
+				var rc := recipe
+				var hd := hand
+				_draw_extra("carry|%s|%s|%.1f" % [rc, hd, bw], Vector2(size_px * 1.2, -size_px * 0.4),
+					Rect2(Vector2(-0.8 * bw - 4.0, -1.75 * bw - 4.0), Vector2(1.6 * bw + 8.0, 2.0 * bw + 8.0)),
+					func(c: CanvasItem, o: Vector2) -> void: PopFactoryArt.sku_bag(c, o, bw, rc, false, 0, 2, hd))
+
+
+## Step 46: an extra (`box` around `at`) as its shared baked picture, or as vectors while it bakes.
+func _draw_extra(key: String, at: Vector2, box: Rect2, art: Callable) -> void:
+	var tex := _extra_texture(key, box, art)
+	if tex != null:
+		draw_texture_rect(tex, Rect2(at + box.position, box.size), false)
+	else:
+		art.call(self, at)
+
+
+func _extra_texture(key: String, box: Rect2, art: Callable) -> Texture2D:
+	if not is_inside_tree() or not bake_enabled or _holder == null or not is_instance_valid(_holder) or not _holder.is_inside_tree():
+		return null
+	var k := _screen_k()
+	var px := Vector2i(ceili(box.size.x * k), ceili(box.size.y * k))
+	if px.x <= 0 or px.y <= 0:
+		return null
+	var ck := "%s|%d|%d" % [key, px.x, px.y]
+	if not _extras.has(ck):
+		var vp := SubViewport.new()
+		vp.size = px
+		vp.transparent_bg = true
+		vp.disable_3d = true
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		var n := Node2D.new()
+		n.scale = Vector2(k, k)
+		n.position = -box.position * k
+		n.draw.connect(func() -> void: art.call(n, Vector2.ZERO))
+		vp.add_child(n)
+		_holder.add_child(vp)
+		_extras[ck] = {"vp": vp, "frame": Engine.get_frames_drawn()}
+		bakes_made += 1
+		if _extras.size() > 64:   # orders come and go: the oldest are let go
+			var old: String = _extras.keys()[0]
+			(_extras[old]["vp"] as Node).queue_free()
+			_extras.erase(old)
+	var e: Dictionary = _extras[ck]
+	if Engine.get_frames_drawn() - int(e["frame"]) < 3:
+		_extra_wait = ck
+		return null
+	return (e["vp"] as SubViewport).get_texture()

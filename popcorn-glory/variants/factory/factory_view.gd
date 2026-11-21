@@ -51,6 +51,18 @@ var floor_layer := Node2D.new()
 ## station, the shelf) and each machine are their own nodes -- forty machines that
 ## change state every step no longer redraw the whole factory.
 var goods_layer := Node2D.new()
+## Step 46: the goods layer's still parts (the awning, the sign's board, the counter, the belt,
+## the hopper, the station) on a child drawn behind it, redrawn with the floors' structure; and
+## the goods drawn many at once (the bin's portions, the shelf's packs) as pictures baked once
+## per look and size, on a child drawn above it. Until 0.46 every change of a count redrew all
+## of it as polygons -- 36 portions alone were 288 circles -- and on the web each redrawn
+## polygon is GL ids the engine never gives back: at 44 machines the page's heap grew ~20 MB a
+## minute (QUALITY_GATES R-01, G-30; evidence/step46/perf/).
+var goods_scenery := Node2D.new()
+var goods_tex := Node2D.new()
+var _goods_list: Array = []      ## [texture, rect] the goods_tex child draws
+var _goods_cache := {}           ## key -> {vp, frame}
+var _goods_pending := false      ## a piece was drawn as vectors while its picture bakes
 var machine_layer := Node2D.new()
 var _mnodes := {}            ## machine id -> its node
 ## Step 33: each machine's picture (type, tier, size) drawn once into a small texture: a
@@ -181,6 +193,8 @@ func setup(p_rules: PopRules) -> void:
 	for n: Node in _icon_root.get_children():
 		n.queue_free()
 	_icon_cache.clear()
+	_goods_cache.clear()
+	_goods_list.clear()
 	_goods_key = ""
 	_spoon_key = ""
 	_spoon_fx = {}
@@ -206,8 +220,26 @@ func setup(p_rules: PopRules) -> void:
 		move_child(goods_layer, 1)
 		goods_layer.draw.connect(func() -> void:
 			redraws["goods"] = int(redraws["goods"]) + 1
+			_goods_list.clear()
+			_goods_pending = false
 			_draw_shop(goods_layer, floor_rect(TOP))
-			_draw_packing(goods_layer, packing_rect()))
+			_draw_packing(goods_layer, packing_rect())
+			goods_tex.queue_redraw())
+		goods_scenery.name = "Scenery"
+		goods_scenery.show_behind_parent = true
+		goods_layer.add_child(goods_scenery)
+		goods_scenery.draw.connect(func() -> void:
+			redraws["scenery"] = int(redraws.get("scenery", 0)) + 1
+			_draw_shop_scenery(goods_scenery, floor_rect(TOP))
+			_draw_packing_scenery(goods_scenery, packing_rect()))
+		goods_tex.name = "GoodsPictures"
+		var gmat := CanvasItemMaterial.new()
+		gmat.blend_mode = CanvasItemMaterial.BLEND_MODE_PREMULT_ALPHA   # viewport textures
+		goods_tex.material = gmat
+		goods_layer.add_child(goods_tex)
+		goods_tex.draw.connect(func() -> void:
+			for e: Array in _goods_list:
+				goods_tex.draw_texture_rect(e[0], e[1], false))
 		machine_layer.name = "Machines"
 		add_child(machine_layer)
 		move_child(machine_layer, 2)
@@ -243,6 +275,10 @@ func setup(p_rules: PopRules) -> void:
 		cue_node.name = "BottleneckCue"
 		add_child(cue_node)
 		cue_node.draw.connect(func() -> void: _draw_cue(cue_node))
+		ring_layer.name = "Ring"
+		ring_layer.show_behind_parent = true   # under the effects, as when it was the over layer's
+		over_layer.add_child(ring_layer)
+		ring_layer.draw.connect(func() -> void: _draw_ring_layer(ring_layer))
 		stats_node.name = "StageNumbers"
 		add_child(stats_node)
 		stats_node.draw.connect(func() -> void: _draw_stage_numbers(stats_node))
@@ -270,6 +306,7 @@ func setup(p_rules: PopRules) -> void:
 
 
 var _wide_default := true
+var _detail_stale := false   ## Step 46: a floor's card waits for the next half-second tick
 
 
 # -- geometry -------------------------------------------------------------
@@ -647,6 +684,7 @@ func _process(delta: float) -> void:
 		_floors_key = key
 		floor_layer.queue_redraw()
 		goods_layer.queue_redraw()
+		goods_scenery.queue_redraw()
 		customer_node.queue_redraw()
 		detail_layer.queue_redraw()
 		_redraw_once = true
@@ -656,17 +694,28 @@ func _process(delta: float) -> void:
 		_goods_key = gkey
 		goods_layer.queue_redraw()
 		if selected >= 0 and not overview:
-			detail_layer.queue_redraw()
+			# Step 46: a machine's card shows that machine's numbers (in the key) -- at once. A
+			# floor's card shows its station's forms and slow numbers (popularity, the packer's
+			# time bar): twice a second; the kitchen's depends on the kettle's level alone (in
+			# the floors' key). Each redraw of a card is ~200 polygons (R-01).
+			if sel_machine >= 0 or not sel_slot.is_empty() or news_open:
+				detail_layer.queue_redraw()
+			elif selected != LOW:
+				_detail_stale = true
 		_redraw_once = true
+	elif _goods_pending:
+		goods_layer.queue_redraw()   # a piece's picture was baking: draw it now (nothing else)
 	_p("inventory_key")
 	_overview_t += delta
 	if _overview_t >= 0.5:   # the overview's numbers (and the wallet's warning) twice a second
 		_overview_t = 0.0
 		_low_wallet = bool(rules.upkeep_overview()["low_wallet"]) if rules else false
-		if overview:
+		if overview or _detail_stale:
 			detail_layer.queue_redraw()
+		_detail_stale = false
 	_p("overview")
 	_step_machine_nodes()
+	_step_ring()
 	_p("machine_nodes")
 	_process_glass()
 	_step_actors(delta)
@@ -687,8 +736,44 @@ func _process(delta: float) -> void:
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and
 ## springs back on release) -- the hand's action has a part that moves with it.
-func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:
-	super(ci, base, size_px)
+## Step 46: the ring, the glass's kernels and the knob are drawn on ring_layer (behind the
+## effects, as before), not on the over layer: the over layer redraws every frame while any
+## effect piece flies -- at 44 machines, always -- and the ring's arcs were ~40 polygons a
+## frame redrawn for nothing (R-01). The ring redraws while the hand works it (_step_ring).
+func _draw_over(_ci: CanvasItem, _base: Vector2, _size_px: float) -> void:
+	pass
+
+
+var ring_layer := Node2D.new()
+var _ring_key := ""
+var _ring_live := false
+
+
+func _step_ring() -> void:
+	if rules == null:
+		return
+	var st := _r()
+	# The crescendo under the ring (the factory's kettle is in burst mode) moves only while it
+	# pulses two short of full, flashes on a gain or glows after a burst; else it is its counts.
+	var burst := _burst_on()
+	var pulsing := burst and int(st.get("crescendo", 0)) + 2 >= int(st.get("crescendo_full", 0)) and not reduced_motion
+	var live := bool(st["heating"]) or _flash > 0.0 or (_mark_age < MARK_S and _mark_ms >= 0.0) or _shake() != Vector2.ZERO \
+		or (burst and (pulsing or _meter_flash > 0.0 or _burst_glow > 0.0))
+	var key := "%s|%s|%s|%d|%s|%s|%s|%s|%s|%s|%s" % [st["window"], size, machine_base(), rules.level, _mark_ms, _mark_kind, reduced_motion,
+		burst, st.get("crescendo", 0), st.get("crescendo_full", 0), st.get("burst_tier", 0)]
+	if live or _ring_live or key != _ring_key:
+		_ring_key = key
+		ring_layer.queue_redraw()
+	_ring_live = live
+
+
+func _draw_ring_layer(ci: CanvasItem) -> void:
+	if rules == null:
+		return
+	redraws["ring"] = int(redraws.get("ring", 0)) + 1
+	var base := machine_base() + _shake()
+	var size_px := machine_size()
+	super._draw_over(ci, base, size_px)
 	var st := _r()
 	var heat := float(st["heat_ms"]) if bool(st["heating"]) else 0.0
 	var burn := float((st["window"] as Array)[2])
@@ -857,40 +942,54 @@ func _draw_floors(ci: CanvasItem) -> void:
 		_draw_badge(ci, i)
 
 
-func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
+## Step 46: the shop's still parts (redrawn with the floors' structure: the sign's tier is in it).
+func _draw_shop_scenery(ci: CanvasItem, r: Rect2) -> void:
 	PopFactoryArt.awning(ci, Rect2(r.position + Vector2(90, 10), Vector2(r.size.x - 180, r.size.y * 0.12)), 10)
 	# The sign: a chalkboard with a popcorn cup (level 1 of the sign's forms).
-	var sign := Rect2(Vector2(r.position.x + r.size.x * 0.08, r.position.y + r.size.y * 0.3), Vector2(r.size.y * 0.42, r.size.y * 0.32))
+	var sign := _sign_rect()   # (r is the shop's floor: floor_rect(TOP))
 	PopFactoryArt.shadow(ci, sign, PopTokens.R_PART)
 	PopFactoryArt.shop_sign(ci, sign, int(rules.shop_sign()["look"]) if rules else 0)
 	PopFactoryArt.bag(ci, sign.get_center() + Vector2(-sign.size.x * 0.18, sign.size.y * 0.3), sign.size.y * 0.42)
+	PopFactoryArt.machine(ci, counter_rect())
+
+
+func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
+	var sign := _sign_rect()   # (r is the shop's floor: floor_rect(TOP))
 	# Step 21: the stock, on the board -- one gold dot per sealed pack ready, an
 	# empty ring per free place; out of stock with someone waiting: the bag in red.
 	if rules:
 		var ready := (rules.get("shelf") as Array).size()
 		var cap := int(rules.economy.table("factory")["shelf_packs"])
 		var dr := sign.size.y * 0.06
+		# (Step 46: the dots, stars, heart and kernels below are baked pieces -- _goods_piece.)
 		for k in cap:
 			var p := Vector2(sign.position.x + sign.size.x * (0.62 + 0.18 * (k % 2)), sign.position.y + sign.size.y * (0.16 + 0.19 * (k / 2)))
-			if k < ready:
-				ci.draw_circle(p, dr, PopPalette.GOLD)
-			else:
-				ci.draw_arc(p, dr, 0, TAU, 10, Color(1, 1, 1, 0.45), 1.5)
+			var full := k < ready
+			_goods_piece(ci, "dot|%s|%.1f" % [full, dr], p, Rect2(Vector2(-dr - 3.0, -dr - 3.0), Vector2(dr * 2.0 + 6.0, dr * 2.0 + 6.0)), func(c: CanvasItem, o: Vector2) -> void:
+				if full:
+					c.draw_circle(o, dr, PopPalette.GOLD)
+				else:
+					c.draw_arc(o, dr, 0, TAU, 10, Color(1, 1, 1, 0.45), 1.5))
 		# Step 36: the shop's popularity -- five small stars along the board's top, gold as earned.
 		var nst := int(rules.stars())
+		var sr := sign.size.y * 0.075
 		for q in 5:
 			var sp := sign.position + Vector2(sign.size.x * (0.14 + 0.18 * q), sign.size.y * 1.06)
-			PopFactoryArt.star(ci, sp, sign.size.y * 0.075, PopPalette.GOLD if q < nst else Color(1, 1, 1, 0.35), PopTokens.BRASS if q < nst else Color(PopPalette.INK, 0.25))
+			var lit := q < nst
+			_goods_piece(ci, "star|%s|%.1f" % [lit, sr], sp, _star_box(sr), func(c: CanvasItem, o: Vector2) -> void:
+				PopFactoryArt.star(c, o, sr, PopPalette.GOLD if lit else Color(1, 1, 1, 0.35), PopTokens.BRASS if lit else Color(PopPalette.INK, 0.25)))
 		# ... what people ask for most lately: a heart with its kernel, right of the board.
 		var fav := String(rules.favorite())
 		if fav != "":
 			var hc := sign.position + Vector2(sign.size.x * 1.13, sign.size.y * 0.22)
-			PopFactoryArt.heart(ci, hc, sign.size.y * 0.16)
+			var hr := sign.size.y * 0.16
+			_goods_piece(ci, "heart|%.1f" % hr, hc, Rect2(Vector2(-hr * 1.1 - 2.0, -hr * 1.1 - 2.0), Vector2(hr * 2.2 + 4.0, hr * 2.2 + 4.0)), func(c: CanvasItem, o: Vector2) -> void:
+				PopFactoryArt.heart(c, o, hr))
 			if PopFactoryArt.MIX_PARTS.has(fav):
-				PopFactoryArt.flavor_popcorn(ci, hc + Vector2(-sign.size.y * 0.06, sign.size.y * 0.28), sign.size.y * 0.06, String(PopFactoryArt.MIX_PARTS[fav][0]))
-				PopFactoryArt.flavor_popcorn(ci, hc + Vector2(sign.size.y * 0.06, sign.size.y * 0.28), sign.size.y * 0.06, String(PopFactoryArt.MIX_PARTS[fav][1]))
+				_kernel_piece(ci, hc + Vector2(-sign.size.y * 0.06, sign.size.y * 0.28), sign.size.y * 0.06, String(PopFactoryArt.MIX_PARTS[fav][0]))
+				_kernel_piece(ci, hc + Vector2(sign.size.y * 0.06, sign.size.y * 0.28), sign.size.y * 0.06, String(PopFactoryArt.MIX_PARTS[fav][1]))
 			else:
-				PopFactoryArt.flavor_popcorn(ci, hc + Vector2(0, sign.size.y * 0.28), sign.size.y * 0.08, fav if PopFactoryArt.FLAVOR_LOOK.has(fav) else "plain")
+				_kernel_piece(ci, hc + Vector2(0, sign.size.y * 0.28), sign.size.y * 0.08, fav if PopFactoryArt.FLAVOR_LOOK.has(fav) else "plain")
 		# ... and a flavor someone waits for with none on the shelf: its kernel with a red bar.
 		var out_of: Array = []
 		var on_shelf := {}
@@ -902,16 +1001,20 @@ func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
 				out_of.append(rr)
 		for i in out_of.size():
 			var oc := sign.position + Vector2(sign.size.x * 1.13, sign.size.y * (0.68 + 0.3 * i))
-			ci.draw_circle(oc, sign.size.y * 0.12, Color(1, 1, 1, 0.9))
 			var part := String(PopFactoryArt.MIX_PARTS[out_of[i]][0]) if PopFactoryArt.MIX_PARTS.has(out_of[i]) else String(out_of[i])
-			PopFactoryArt.flavor_popcorn(ci, oc, sign.size.y * 0.07, part)
-			ci.draw_line(oc + Vector2(-sign.size.y * 0.1, sign.size.y * 0.1), oc + Vector2(sign.size.y * 0.1, -sign.size.y * 0.1), PopTokens.WARN, maxf(2.0, sign.size.y * 0.035))
+			var sy := sign.size.y
+			_goods_piece(ci, "out|%s|%.1f" % [part, sy], oc, Rect2(Vector2(-sy * 0.14 - 3.0, -sy * 0.14 - 3.0), Vector2(sy * 0.28 + 6.0, sy * 0.28 + 6.0)), func(c: CanvasItem, o: Vector2) -> void:
+				c.draw_circle(o, sy * 0.12, Color(1, 1, 1, 0.9))
+				PopFactoryArt.flavor_popcorn(c, o, sy * 0.07, part)
+				c.draw_line(o + Vector2(-sy * 0.1, sy * 0.1), o + Vector2(sy * 0.1, -sy * 0.1), PopTokens.WARN, maxf(2.0, sy * 0.035)))
 		# Step 35: the board's special -- a gold star with the flavor's kernel, top left of the board.
 		var specials: Array = rules.flavor_ids().filter(func(f: String) -> bool: return rules.promoted(f))
 		for i in specials.size():
 			var sc := sign.position + Vector2(sign.size.x * (0.02 + 0.3 * i), -sign.size.y * 0.04)
-			PopFactoryArt.star(ci, sc, sign.size.y * 0.3, PopPalette.GOLD, PopTokens.BRASS)
-			PopFactoryArt.flavor_popcorn(ci, sc + Vector2(0, sign.size.y * 0.02), sign.size.y * 0.1, String(specials[i]))
+			var ssr := sign.size.y * 0.3
+			_goods_piece(ci, "star|special|%.1f" % ssr, sc, _star_box(ssr), func(c: CanvasItem, o: Vector2) -> void:
+				PopFactoryArt.star(c, o, ssr, PopPalette.GOLD, PopTokens.BRASS))
+			_kernel_piece(ci, sc + Vector2(0, sign.size.y * 0.02), sign.size.y * 0.1, String(specials[i]))
 		if ready == 0 and not (rules.get("queue") as Array).is_empty():
 			# Out of stock with someone waiting: the bag greys and a red no-entry sign sits on it.
 			var bp := sign.get_center() + Vector2(-sign.size.x * 0.18, sign.size.y * 0.3)
@@ -920,8 +1023,6 @@ func _draw_shop(ci: CanvasItem, r: Rect2) -> void:
 			var nc := bp + Vector2(sign.size.y * 0.2, -sign.size.y * 0.5)
 			ci.draw_circle(nc, sign.size.y * 0.14, PopTokens.WARN)
 			ci.draw_rect(Rect2(nc - Vector2(sign.size.y * 0.09, sign.size.y * 0.025), Vector2(sign.size.y * 0.18, sign.size.y * 0.05)), Color.WHITE)
-	var counter := counter_rect()
-	PopFactoryArt.machine(ci, counter)
 	# The handover places, one per lane (a mat on the counter).
 	if rules:
 		for lane in int(rules.lanes()):
@@ -944,14 +1045,94 @@ func _draw_customer(_ci: CanvasItem) -> void:
 	return   # Step 18: customers are actors (they walk); kept for the layer order.
 
 
-func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
-	var belt := Rect2(Vector2(r.position.x + 30, r.end.y - r.size.y * 0.2), Vector2(r.size.x - 110, r.size.y * 0.08))
-	PopFactoryArt.steel(ci, belt, belt.size.y * 0.5)
+func _packing_belt(r: Rect2) -> Rect2:
+	return Rect2(Vector2(r.position.x + 30, r.end.y - r.size.y * 0.2), Vector2(r.size.x - 110, r.size.y * 0.08))
+
+
+func _packing_hopper(r: Rect2) -> Rect2:
 	var hs := r.size.y * 0.46
-	var hop := Rect2(Vector2(r.position.x + r.size.x * 0.14, r.position.y + r.size.y * 0.16), Vector2(hs * 0.9, hs))
+	return Rect2(Vector2(r.position.x + r.size.x * 0.14, r.position.y + r.size.y * 0.16), Vector2(hs * 0.9, hs))
+
+
+## Step 46: the packing floor's still parts (redrawn with the floors' structure: the station's
+## tier is in it). The bin's portions and the shelf are drawn over them.
+func _draw_packing_scenery(ci: CanvasItem, r: Rect2) -> void:
+	var belt := _packing_belt(r)
+	PopFactoryArt.steel(ci, belt, belt.size.y * 0.5)
+	var hop := _packing_hopper(r)
 	PopEnvArt.hopper_back(ci, hop, belt.position.y)   # Step 40: a steel stand and spout behind the glass
 	PopFactoryArt.glass(ci, hop, PopTokens.R_PART)
 	PopEnvArt.hopper_rim(ci, hop)
+	# Step 20: the station at its tier (the nozzles and the bags in it are actors).
+	if rules:
+		PopFactoryArt.packer(ci, _station_rect(), int(rules.packer()["look"]), int(rules.packer()["per_cycle"]))
+
+
+## Step 46: a piece of goods drawn as its baked picture (on goods_tex, above `ci`), or as
+## vectors on `ci` for the frames its picture takes to bake. `box` is the piece's extent
+## around `at`; `art` draws it at a given origin: art.call(canvas_item, origin).
+func _goods_piece(ci: CanvasItem, key: String, at: Vector2, box: Rect2, art: Callable) -> void:
+	var tex := _goods_texture(key, box, art)
+	if tex == null:
+		art.call(ci, at)
+		_goods_pending = true
+		return
+	_goods_list.append([tex, Rect2(at + box.position, box.size)])
+
+
+func _goods_texture(key: String, box: Rect2, art: Callable) -> Texture2D:
+	var k := clampf(snappedf(get_global_transform_with_canvas().get_scale().x * 1.5, 0.25), 1.0, 3.0)
+	var px := Vector2i(ceili(box.size.x * k), ceili(box.size.y * k))
+	if px.x <= 0 or px.y <= 0:
+		return null
+	var ck := "%s|%d|%d" % [key, px.x, px.y]
+	if not _goods_cache.has(ck):
+		var vp := SubViewport.new()
+		vp.size = px
+		vp.transparent_bg = true
+		vp.disable_3d = true
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		var n := Node2D.new()
+		n.scale = Vector2(k, k)
+		n.position = -box.position * k
+		n.draw.connect(func() -> void: art.call(n, Vector2.ZERO))
+		vp.add_child(n)
+		_icon_root.add_child(vp)
+		# Process frames, not frames drawn: headless draws none (Engine.get_frames_drawn() stays 0),
+		# and a piece would wait for its picture forever.
+		_goods_cache[ck] = {"vp": vp, "frame": Engine.get_process_frames()}
+		if _goods_cache.size() > 120:   # a resized window leaves old sizes behind
+			var old: String = _goods_cache.keys()[0]
+			(_goods_cache[old]["vp"] as Node).queue_free()
+			_goods_cache.erase(old)
+	var e: Dictionary = _goods_cache[ck]
+	if Engine.get_process_frames() - int(e["frame"]) < 3:
+		return null
+	return (e["vp"] as SubViewport).get_texture()
+
+
+## The extent of a puff of size s around its centre, and of a bag or cup w wide above its foot.
+static func _puff_box(s: float) -> Rect2:
+	return Rect2(Vector2(-1.3 * s - 2.0, -1.3 * s - 2.0), Vector2(2.6 * s + 4.0, 2.6 * s + 4.0))
+
+
+static func _star_box(r: float) -> Rect2:
+	return Rect2(Vector2(-r * 1.15 - 2.0, -r * 1.15 - 2.0), Vector2(r * 2.3 + 4.0, r * 2.3 + 4.0))
+
+
+## A flavor's kernel (the sign's favourite, a special, a missing flavor), baked like the bin's.
+func _kernel_piece(ci: CanvasItem, at: Vector2, s: float, flavor: String) -> void:
+	_goods_piece(ci, "kernel|%s|%.1f" % [flavor, s], at, _puff_box(s), func(c: CanvasItem, o: Vector2) -> void:
+		PopFactoryArt.flavor_popcorn(c, o, s, flavor))
+
+
+static func _pack_box(w: float) -> Rect2:
+	return Rect2(Vector2(-0.8 * w - 4.0, -1.75 * w - 4.0), Vector2(1.6 * w + 8.0, 2.0 * w + 8.0))
+
+
+func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
+	var belt := _packing_belt(r)
+	var hop := _packing_hopper(r)
 	# The raw bin's real portions: one puff per portion, piled from the bottom.
 	var portions := int(rules.bin_portions()) if rules else 0
 	var cap := int(rules.state()["bin_cap"]) if rules else 1
@@ -962,15 +1143,18 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 		var col := k % per_row
 		var row := k / per_row
 		var at := Vector2(hop.position.x + hop.size.x * (0.2 + 0.2 * col) + (row % 2) * pr * 0.4, hop.end.y - pr * 1.1 - row * pr * 1.2)
+		var kind := "plain"
 		if k < kinds.size() and String(kinds[k]).trim_suffix("+") not in ["plain", "premium", "bargain"]:
-			PopFactoryArt.flavor_popcorn(ci, at, pr, String(kinds[k]).trim_suffix("+"))
-			if String(kinds[k]).ends_with("+"):   # Step 35: a hand-finished portion shines
-				PopFactoryArt.glint(ci, at + Vector2(pr * 0.5, -pr * 0.6), pr * 0.55)
-		else:
-			PopFactoryArt.popcorn(ci, at, pr)
-	# Step 20: the station at its tier (the nozzles and the bags in it are actors).
-	if rules:
-		PopFactoryArt.packer(ci, _station_rect(), int(rules.packer()["look"]), int(rules.packer()["per_cycle"]))
+			kind = String(kinds[k])
+		var fl := kind.trim_suffix("+")
+		var shine := kind.ends_with("+")
+		_goods_piece(ci, "puff|%s|%.1f" % [kind, pr], at, _puff_box(pr), func(c: CanvasItem, o: Vector2) -> void:
+			if fl == "plain":
+				PopFactoryArt.popcorn(c, o, pr)
+				return
+			PopFactoryArt.flavor_popcorn(c, o, pr, fl)
+			if shine:   # Step 35: a hand-finished portion shines
+				PopFactoryArt.glint(c, o + Vector2(pr * 0.5, -pr * 0.6), pr * 0.55))
 	# The shelf: one bag per real sealed pack, empty places dashed.
 	var shelf_n := (int(rules.state()["shelf"]) - _bags_flying_to_shelf()) if rules else 0
 	var shelf_cap := int(rules.state()["shelf_cap"]) if rules else 0
@@ -991,15 +1175,18 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 			var prem := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "premium"
 			var barg := k < shelved.size() and String((shelved[k] as Dictionary).get("recipe", "")) == "bargain"
 			var rec := String((shelved[k] as Dictionary).get("recipe", "plain")) if k < shelved.size() else "plain"
-			if k < shelved.size() and int((shelved[k] as Dictionary).get("size", 2)) == 1:
-				PopFactoryArt.cup(ci, foot, w * 0.9)   # Step 30: a cup
-				if rec not in ["plain", "premium", "bargain"]:   # Step 34: its flavor's kernels on top
-					PopFactoryArt.flavor_popcorn(ci, foot - Vector2(0, w * 1.05), w * 0.3, rec)
-			elif rec not in ["plain", "premium", "bargain"]:
-				var sp: Dictionary = shelved[k] if k < shelved.size() else {}
-				PopFactoryArt.sku_bag(ci, foot, w, rec, false, 0, 2, _hand_mark(sp))   # Step 34: the flavor's own bag (35: the hand's seal)
-			else:
-				PopFactoryArt.bag(ci, foot, w, PopTokens.STEEL_DEEP if barg else PopTokens.MACHINE, false, 0, 2, prem, barg)
+			var is_cup := k < shelved.size() and int((shelved[k] as Dictionary).get("size", 2)) == 1
+			var sp: Dictionary = shelved[k] if k < shelved.size() else {}
+			var hand := not is_cup and rec not in ["plain", "premium", "bargain"] and _hand_mark(sp)
+			_goods_piece(ci, "pack|%s|%s|%s|%s|%s|%.1f" % [is_cup, rec, prem, barg, hand, w], foot, _pack_box(w), func(c: CanvasItem, o: Vector2) -> void:
+				if is_cup:
+					PopFactoryArt.cup(c, o, w * 0.9)   # Step 30: a cup
+					if rec not in ["plain", "premium", "bargain"]:   # Step 34: its flavor's kernels on top
+						PopFactoryArt.flavor_popcorn(c, o - Vector2(0, w * 1.05), w * 0.3, rec)
+				elif rec not in ["plain", "premium", "bargain"]:
+					PopFactoryArt.sku_bag(c, o, w, rec, false, 0, 2, hand)   # Step 34: the flavor's own bag (35: the hand's seal)
+				else:
+					PopFactoryArt.bag(c, o, w, PopTokens.STEEL_DEEP if barg else PopTokens.MACHINE, false, 0, 2, prem, barg))
 		else:
 			PopMachineArt._round_rect(ci, Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35))
 
@@ -1916,11 +2103,14 @@ func _structure_key() -> String:
 func _process_glass() -> void:
 	if rules == null:
 		return
+	machine_node.set_look(rules.level, machine_size(), _kettle_fill())
+
+
+func _kettle_fill() -> float:
 	var g: Dictionary = rules.get("glass")
-	var fill := 0.15
-	if not g.is_empty():
-		fill = 0.25 + 0.65 * clampf(float(g["portions"]) / maxf(1.0, float(rules.kettle_capacity())), 0.0, 1.0)
-	machine_node.set_look(rules.level, machine_size(), fill)
+	if g.is_empty():
+		return 0.15
+	return 0.25 + 0.65 * clampf(float(g["portions"]) / maxf(1.0, float(rules.kettle_capacity())), 0.0, 1.0)
 
 
 ## A press while the glass is full: the kettle shakes and puffs (the model refuses it).
