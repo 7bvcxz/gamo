@@ -7,6 +7,7 @@
 //     draw calls and objects in a frame, nodes, JS heap after a forced GC, voices, cargo
 //   44 machines, saturated buffers (the bin filled); 44 at rush hour (the film festival:
 //     x1.5 arrivals); the peak of goods drawn moving at once
+//   44 with fifty cargo journeys asked for at once (the dev storm: the view draws at most 40)
 //   prolonged (desktop): five real minutes at 44 machines -- fps and heap at the start and end
 // Writes $OUT/perf46_<project>.json (or the test's output folder) and an annotation.
 import fs from 'node:fs';
@@ -90,6 +91,13 @@ test('the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, pro
   const news = await pop.call('dev_news', 'film_festival');
   for (let i = 0; i < 4; i++) await pop.call('dev_advance', 5000);
   rows.push({ ...(await sample(pop, '44, rush hour (x1.5 arrivals)')), news_ok: news.ok });
+  // 44 at rush hour, and fifty cargo journeys asked for at once (the view's dev storm: lot lifts
+  // up the tube through the model's own event, asked again every frame; no model change). Natural
+  // play reaches 7-9 in the air; the view draws at most its cap (40) and refuses the rest.
+  await pop.call('dev_cargo', { n: 50, seconds: 60 });
+  const stormRow = await sample(pop, '44, 50 cargo asked at once');
+  const storm = await pop.call('dev_cargo', { n: 0 });
+  rows.push({ ...stormRow, storm });
   // Prolonged: five real minutes at 44 (desktop), the hand popping now and then.
   let prolonged = null;
   if (project === 'desktop') {
@@ -107,6 +115,12 @@ test('the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, pro
   testInfo.annotations.push({ type: 'perf46', description: JSON.stringify({ build, rows: rows.map((r) => ({ scene: r.scene, fps: r.fps.median, p10: r.fps.p10, draw: r.draw_calls, obj: r.objects, heap: r.heap_mb, voices: r.voices_peak, load: r.load[0] })) }) });
   // Gates that hold on any machine: the game runs (frames come), memory does not run away.
   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);
+  expect(storm.ok, 'the storm ran').toBe(true);
+  // No new journey starts over the cap; a bag being filled under its head keeps flying when it
+  // is sealed (it is drawn already), so the peak may pass the cap by the bags being filled.
+  expect(storm.peak, 'fifty asked fill the cap').toBeGreaterThanOrEqual(storm.cargo_max);
+  expect(storm.peak, 'and pass it by no more than the bags being filled').toBeLessThanOrEqual(storm.cargo_max + storm.filling_peak);
+  expect(storm.refused, 'the asks over the cap are refused').toBeGreaterThan(0);
   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);
   expect(pop.errors).toEqual([]);
 });

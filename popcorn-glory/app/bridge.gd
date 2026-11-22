@@ -147,6 +147,14 @@ func query(name: String, arg: Variant) -> Variant:
 				return {"ok": false, "error": "no layer " + nm}
 			(play.get(nm) as CanvasItem).visible = not bool(a.get("hidden", true))
 			return {"ok": true}
+		"dev_cargo":   # Step 46: the benchmark's cargo storm -- n lot lifts wanted at once for a while (no model change)
+			var cplay: Node = _app.get("frame").play if _app.get("frame") != null else null
+			var ca: Dictionary = arg if typeof(arg) == TYPE_DICTIONARY else {}
+			if cplay == null or not cplay.has_method("dev_cargo"):
+				return {"ok": false, "error": "not the factory"}
+			var was: Dictionary = cplay.dev_cargo(int(ca.get("n", 0)), float(ca.get("seconds", 0.0)))
+			was["ok"] = true
+			return was
 		"dev_render_info":
 			return {"ok": true,
 				"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),

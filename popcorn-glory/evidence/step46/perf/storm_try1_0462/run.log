@@ -1,0 +1,487 @@
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:57] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 2 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:57] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:57] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:57] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:57] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:57] "GET /popcorn-glory/game-57079235c929.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:58] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:58] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:59] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:20:59] "HEAD /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✘  1 [phone] › specs/perf46.spec.mjs:61:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged (2.8m)
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:46] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:46] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:46] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:46] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:46] "GET /popcorn-glory/game-57079235c929.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:47] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:47] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:48] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [21/Nov/2026 23:23:48] "HEAD /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✘  2 [desktop] › specs/perf46.spec.mjs:61:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged (8.0m)
+
+
+  1) [phone] › specs/perf46.spec.mjs:61:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged 
+
+    Error: fifty asked fill the cap
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 40
+    Received: 41
+
+      117 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);
+      118 |   expect(storm.ok, 'the storm ran').toBe(true);
+    > 119 |   expect(storm.peak, 'fifty asked fill the cap').toBe(storm.cargo_max);
+          |                                                  ^
+      120 |   expect(storm.refused, 'the asks over the cap are refused').toBeGreaterThan(0);
+      121 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);
+      122 |   expect(pop.errors).toEqual([]);
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:119:50
+
+    Error Context: test-results/perf46-the-benchmark-table-be756-turated-rush-hour-prolonged-phone/error-context.md
+
+  2) [desktop] › specs/perf46.spec.mjs:61:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged 
+
+    Error: fifty asked fill the cap
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 40
+    Received: 41
+
+      117 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);
+      118 |   expect(storm.ok, 'the storm ran').toBe(true);
+    > 119 |   expect(storm.peak, 'fifty asked fill the cap').toBe(storm.cargo_max);
+          |                                                  ^
+      120 |   expect(storm.refused, 'the asks over the cap are refused').toBeGreaterThan(0);
+      121 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);
+      122 |   expect(pop.errors).toEqual([]);
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:119:50
+
+    Error Context: test-results/perf46-the-benchmark-table-be756-turated-rush-hour-prolonged-desktop/error-context.md
+
+  Slow test file: [desktop] › specs/perf46.spec.mjs (8.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  2 failed
+    [phone] › specs/perf46.spec.mjs:61:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged 
+    [desktop] › specs/perf46.spec.mjs:61:1 › the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged 
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/perf46.spec.mjs",
+      "--project=desktop",
+      "--project=phone",
+      "--retries=0",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07|ui44/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "http://127.0.0.1:18530/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "python3 -m http.server 18530 --bind 127.0.0.1 --directory /home/merti/Workspace/gamo-popcorn/docs",
+      "url": "http://127.0.0.1:18530/popcorn-glory/version.json",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "perf46.spec.mjs",
+      "file": "perf46.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 1500000,
+              "annotations": [
+                {
+                  "type": "perf46",
+                  "description": "{\"build\":{\"version\":\"0.46.2\",\"pack\":\"game-57079235c929.pck\",\"pack_bytes\":1003792,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2244},\"rows\":[{\"scene\":\"1 machines\",\"fps\":20.38241288567637,\"p10\":17.973040439340988,\"draw\":539,\"obj\":1072,\"heap\":11,\"voices\":9,\"load\":8.52},{\"scene\":\"5 machines\",\"fps\":19.17913309967575,\"p10\":17.664376840039253,\"draw\":542,\"obj\":985,\"heap\":12.9,\"voices\":10,\"load\":8.64},{\"scene\":\"10 machines\",\"fps\":18.475301428849036,\"p10\":17.152658668327824,\"draw\":547,\"obj\":861,\"heap\":14.4,\"voices\":10,\"load\":9.2},{\"scene\":\"20 machines\",\"fps\":16.65360501256228,\"p10\":15.499370335216245,\"draw\":626,\"obj\":1041,\"heap\":16.7,\"voices\":10,\"load\":9.14},{\"scene\":\"44 machines\",\"fps\":14.231499051233397,\"p10\":13.23626737498782,\"draw\":750,\"obj\":976,\"heap\":17.4,\"voices\":10,\"load\":9.67},{\"scene\":\"44, bin filled\",\"fps\":13.953488372093023,\"p10\":13.854527461652648,\"draw\":743,\"obj\":968,\"heap\":17.4,\"voices\":10,\"load\":8.5},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":13.332063608146102,\"p10\":13.145539906103286,\"draw\":732,\"obj\":956,\"heap\":17.4,\"voices\":10,\"load\":8.55},{\"scene\":\"44, 50 cargo asked at once\",\"fps\":13.468013468013469,\"p10\":13.173990768748512,\"draw\":742,\"obj\":996,\"heap\":20,\"voices\":10,\"load\":8.06}]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 168432,
+                  "error": {
+                    "message": "Error: fifty asked fill the cap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m40\u001b[39m\nReceived: \u001b[31m41\u001b[39m",
+                    "stack": "Error: fifty asked fill the cap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m40\u001b[39m\nReceived: \u001b[31m41\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:119:50",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                      "column": 50,
+                      "line": 119
+                    },
+                    "snippet": "  117 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);\n  118 |   expect(storm.ok, 'the storm ran').toBe(true);\n> 119 |   expect(storm.peak, 'fifty asked fill the cap').toBe(storm.cargo_max);\n      |                                                  ^\n  120 |   expect(storm.refused, 'the asks over the cap are refused').toBeGreaterThan(0);\n  121 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);\n  122 |   expect(pop.errors).toEqual([]);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                        "column": 50,
+                        "line": 119
+                      },
+                      "message": "Error: fifty asked fill the cap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m40\u001b[39m\nReceived: \u001b[31m41\u001b[39m\n\n  117 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);\n  118 |   expect(storm.ok, 'the storm ran').toBe(true);\n> 119 |   expect(storm.peak, 'fifty asked fill the cap').toBe(storm.cargo_max);\n      |                                                  ^\n  120 |   expect(storm.refused, 'the asks over the cap are refused').toBeGreaterThan(0);\n  121 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);\n  122 |   expect(pop.errors).toEqual([]);\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:119:50"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T23:20:57.477Z",
+                  "annotations": [
+                    {
+                      "type": "perf46",
+                      "description": "{\"build\":{\"version\":\"0.46.2\",\"pack\":\"game-57079235c929.pck\",\"pack_bytes\":1003792,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2244},\"rows\":[{\"scene\":\"1 machines\",\"fps\":20.38241288567637,\"p10\":17.973040439340988,\"draw\":539,\"obj\":1072,\"heap\":11,\"voices\":9,\"load\":8.52},{\"scene\":\"5 machines\",\"fps\":19.17913309967575,\"p10\":17.664376840039253,\"draw\":542,\"obj\":985,\"heap\":12.9,\"voices\":10,\"load\":8.64},{\"scene\":\"10 machines\",\"fps\":18.475301428849036,\"p10\":17.152658668327824,\"draw\":547,\"obj\":861,\"heap\":14.4,\"voices\":10,\"load\":9.2},{\"scene\":\"20 machines\",\"fps\":16.65360501256228,\"p10\":15.499370335216245,\"draw\":626,\"obj\":1041,\"heap\":16.7,\"voices\":10,\"load\":9.14},{\"scene\":\"44 machines\",\"fps\":14.231499051233397,\"p10\":13.23626737498782,\"draw\":750,\"obj\":976,\"heap\":17.4,\"voices\":10,\"load\":9.67},{\"scene\":\"44, bin filled\",\"fps\":13.953488372093023,\"p10\":13.854527461652648,\"draw\":743,\"obj\":968,\"heap\":17.4,\"voices\":10,\"load\":8.5},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":13.332063608146102,\"p10\":13.145539906103286,\"draw\":732,\"obj\":956,\"heap\":17.4,\"voices\":10,\"load\":8.55},{\"scene\":\"44, 50 cargo asked at once\",\"fps\":13.468013468013469,\"p10\":13.173990768748512,\"draw\":742,\"obj\":996,\"heap\":20,\"voices\":10,\"load\":8.06}]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/perf46-the-benchmark-table-be756-turated-rush-hour-prolonged-phone/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                    "column": 50,
+                    "line": 119
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "50a46d618c4aed30f498-12dfed7c636a5c8a3064",
+          "file": "perf46.spec.mjs",
+          "line": 61,
+          "column": 1
+        },
+        {
+          "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 1500000,
+              "annotations": [
+                {
+                  "type": "perf46",
+                  "description": "{\"build\":{\"version\":\"0.46.2\",\"pack\":\"game-57079235c929.pck\",\"pack_bytes\":1003792,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2095},\"rows\":[{\"scene\":\"1 machines\",\"fps\":21.274538237969644,\"p10\":19.306882893090563,\"draw\":726,\"obj\":1351,\"heap\":11.5,\"voices\":8,\"load\":8.23},{\"scene\":\"5 machines\",\"fps\":20.169035713227284,\"p10\":18.60556208729801,\"draw\":733,\"obj\":1260,\"heap\":12.9,\"voices\":8,\"load\":8.43},{\"scene\":\"10 machines\",\"fps\":20.45388137128788,\"p10\":18.81188118811881,\"draw\":722,\"obj\":1134,\"heap\":14.3,\"voices\":8,\"load\":10.22},{\"scene\":\"20 machines\",\"fps\":18.34862385321101,\"p10\":16.53696498054475,\"draw\":798,\"obj\":1291,\"heap\":16.6,\"voices\":9,\"load\":9.27},{\"scene\":\"44 machines\",\"fps\":15.158692562766461,\"p10\":13.64788458804105,\"draw\":943,\"obj\":1262,\"heap\":17.4,\"voices\":9,\"load\":13.11},{\"scene\":\"44, bin filled\",\"fps\":15.081534538005728,\"p10\":14.894250813542145,\"draw\":908,\"obj\":1201,\"heap\":17.4,\"voices\":9,\"load\":12.5},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":14.46480231436837,\"p10\":14.072614696846117,\"draw\":973,\"obj\":1309,\"heap\":20,\"voices\":9,\"load\":11.21},{\"scene\":\"44, 50 cargo asked at once\",\"fps\":14.544749342796285,\"p10\":14.377456146130276,\"draw\":938,\"obj\":1282,\"heap\":19.9,\"voices\":9,\"load\":10.84},{\"scene\":\"44, prolonged start\",\"fps\":14.561693034118198,\"p10\":14.272121788772598,\"draw\":957,\"obj\":1283,\"heap\":19.9,\"voices\":9,\"load\":9.41},{\"scene\":\"44, prolonged after 5 min\",\"fps\":13.416387158600863,\"p10\":12.88404360753221,\"draw\":909,\"obj\":1213,\"heap\":29.6,\"voices\":9,\"load\":9.95}]}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 480058,
+                  "error": {
+                    "message": "Error: fifty asked fill the cap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m40\u001b[39m\nReceived: \u001b[31m41\u001b[39m",
+                    "stack": "Error: fifty asked fill the cap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m40\u001b[39m\nReceived: \u001b[31m41\u001b[39m\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:119:50",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                      "column": 50,
+                      "line": 119
+                    },
+                    "snippet": "  117 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);\n  118 |   expect(storm.ok, 'the storm ran').toBe(true);\n> 119 |   expect(storm.peak, 'fifty asked fill the cap').toBe(storm.cargo_max);\n      |                                                  ^\n  120 |   expect(storm.refused, 'the asks over the cap are refused').toBeGreaterThan(0);\n  121 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);\n  122 |   expect(pop.errors).toEqual([]);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                        "column": 50,
+                        "line": 119
+                      },
+                      "message": "Error: fifty asked fill the cap\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m40\u001b[39m\nReceived: \u001b[31m41\u001b[39m\n\n  117 |   for (const r of rows) expect(r.fps.median, `${r.scene}: frames come`).toBeGreaterThan(3);\n  118 |   expect(storm.ok, 'the storm ran').toBe(true);\n> 119 |   expect(storm.peak, 'fifty asked fill the cap').toBe(storm.cargo_max);\n      |                                                  ^\n  120 |   expect(storm.refused, 'the asks over the cap are refused').toBeGreaterThan(0);\n  121 |   if (prolonged) expect(prolonged.heap_growth_mb, 'five minutes keep under 30 MB more heap').toBeLessThan(30);\n  122 |   expect(pop.errors).toEqual([]);\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs:119:50"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T23:23:46.288Z",
+                  "annotations": [
+                    {
+                      "type": "perf46",
+                      "description": "{\"build\":{\"version\":\"0.46.2\",\"pack\":\"game-57079235c929.pck\",\"pack_bytes\":1003792,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2095},\"rows\":[{\"scene\":\"1 machines\",\"fps\":21.274538237969644,\"p10\":19.306882893090563,\"draw\":726,\"obj\":1351,\"heap\":11.5,\"voices\":8,\"load\":8.23},{\"scene\":\"5 machines\",\"fps\":20.169035713227284,\"p10\":18.60556208729801,\"draw\":733,\"obj\":1260,\"heap\":12.9,\"voices\":8,\"load\":8.43},{\"scene\":\"10 machines\",\"fps\":20.45388137128788,\"p10\":18.81188118811881,\"draw\":722,\"obj\":1134,\"heap\":14.3,\"voices\":8,\"load\":10.22},{\"scene\":\"20 machines\",\"fps\":18.34862385321101,\"p10\":16.53696498054475,\"draw\":798,\"obj\":1291,\"heap\":16.6,\"voices\":9,\"load\":9.27},{\"scene\":\"44 machines\",\"fps\":15.158692562766461,\"p10\":13.64788458804105,\"draw\":943,\"obj\":1262,\"heap\":17.4,\"voices\":9,\"load\":13.11},{\"scene\":\"44, bin filled\",\"fps\":15.081534538005728,\"p10\":14.894250813542145,\"draw\":908,\"obj\":1201,\"heap\":17.4,\"voices\":9,\"load\":12.5},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":14.46480231436837,\"p10\":14.072614696846117,\"draw\":973,\"obj\":1309,\"heap\":20,\"voices\":9,\"load\":11.21},{\"scene\":\"44, 50 cargo asked at once\",\"fps\":14.544749342796285,\"p10\":14.377456146130276,\"draw\":938,\"obj\":1282,\"heap\":19.9,\"voices\":9,\"load\":10.84},{\"scene\":\"44, prolonged start\",\"fps\":14.561693034118198,\"p10\":14.272121788772598,\"draw\":957,\"obj\":1283,\"heap\":19.9,\"voices\":9,\"load\":9.41},{\"scene\":\"44, prolonged after 5 min\",\"fps\":13.416387158600863,\"p10\":12.88404360753221,\"draw\":909,\"obj\":1213,\"heap\":29.6,\"voices\":9,\"load\":9.95}]}"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/perf46-the-benchmark-table-be756-turated-rush-hour-prolonged-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf46.spec.mjs",
+                    "column": 50,
+                    "line": 119
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "50a46d618c4aed30f498-2f5a050ef4f09489cfe1",
+          "file": "perf46.spec.mjs",
+          "line": 61,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T23:20:57.040Z",
+    "duration": 649431.292,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}
+perf46 exit 1

@@ -1,0 +1,556 @@
+{
+  "project": "desktop",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "when": "2026-11-22T00:09:53.992Z",
+  "machine": "K12 (Linux, Playwright Chromium, software WebGL)",
+  "build": {
+    "version": "0.46.2",
+    "pack": "game-a96a4a030639.pck",
+    "pack_bytes": 1003984,
+    "engine": "engine-7eda98958eb0",
+    "wasm_bytes": 39509339,
+    "load_to_first_frame_ms": 1982
+  },
+  "rows": [
+    {
+      "scene": "1 machines",
+      "machines": 1,
+      "load": [
+        8.14,
+        8,
+        7.47
+      ],
+      "fps": {
+        "min": 19.567557001464284,
+        "p10": 19.567557001464284,
+        "median": 21.208907756850586,
+        "p90": 22.373540856031127,
+        "all": [
+          19.6,
+          21,
+          20.5,
+          22.2,
+          21.5,
+          22.1,
+          22.4,
+          20.9,
+          22.4,
+          21.2
+        ]
+      },
+      "draw_calls": 728,
+      "objects": 1359,
+      "primitives": 21846,
+      "nodes": 287,
+      "heap_mb": 11.5,
+      "voices": 1,
+      "voices_peak": 8,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 98,
+        "peak": 9,
+        "reused": 85,
+        "skipped": 0
+      },
+      "cargo_peak_seen": 9,
+      "queue": 3,
+      "bin": 0,
+      "shelf": 0
+    },
+    {
+      "scene": "5 machines",
+      "machines": 5,
+      "load": [
+        9.52,
+        8.31,
+        7.59
+      ],
+      "fps": {
+        "min": 18.262206850217684,
+        "p10": 18.262206850217684,
+        "median": 20.594292442804797,
+        "p90": 21.396615448435206,
+        "all": [
+          18.3,
+          19.7,
+          20.5,
+          21.4,
+          20.6,
+          20.4,
+          21.1,
+          21.6,
+          20.9,
+          21
+        ]
+      },
+      "draw_calls": 733,
+      "objects": 1261,
+      "primitives": 21770,
+      "nodes": 310,
+      "heap_mb": 12.9,
+      "voices": 2,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 113,
+        "peak": 6,
+        "reused": 96,
+        "skipped": 0
+      },
+      "cargo_peak_seen": 6,
+      "queue": 1,
+      "bin": 1,
+      "shelf": 0
+    },
+    {
+      "scene": "10 machines",
+      "machines": 10,
+      "load": [
+        10.78,
+        8.67,
+        7.72
+      ],
+      "fps": {
+        "min": 18.43765162542455,
+        "p10": 18.43765162542455,
+        "median": 20.475819025145373,
+        "p90": 20.825069424776014,
+        "all": [
+          18.4,
+          19,
+          20.1,
+          20.5,
+          20.8,
+          20.5,
+          20.8,
+          20.8,
+          21,
+          20.5
+        ]
+      },
+      "draw_calls": 684,
+      "objects": 1087,
+      "primitives": 21180,
+      "nodes": 321,
+      "heap_mb": 14.3,
+      "voices": 0,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 102,
+        "peak": 11,
+        "reused": 129,
+        "skipped": 0
+      },
+      "cargo_peak_seen": 11,
+      "queue": 0,
+      "bin": 0,
+      "shelf": 5
+    },
+    {
+      "scene": "20 machines",
+      "machines": 20,
+      "load": [
+        10.39,
+        8.77,
+        7.78
+      ],
+      "fps": {
+        "min": 15.987210228767667,
+        "p10": 15.987210228767667,
+        "median": 18.145353827789226,
+        "p90": 18.60374032747637,
+        "all": [
+          17,
+          16,
+          18.1,
+          18.7,
+          18.2,
+          18.1,
+          18.4,
+          18.1,
+          18.6,
+          18.2
+        ]
+      },
+      "draw_calls": 797,
+      "objects": 1289,
+      "primitives": 24147,
+      "nodes": 403,
+      "heap_mb": 16.6,
+      "voices": 1,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 100,
+        "peak": 10,
+        "reused": 148,
+        "skipped": 0
+      },
+      "cargo_peak_seen": 10,
+      "queue": 0,
+      "bin": 18,
+      "shelf": 8
+    },
+    {
+      "scene": "44 machines",
+      "machines": 44,
+      "load": [
+        11.1,
+        9.05,
+        7.9
+      ],
+      "fps": {
+        "min": 13.771394840396056,
+        "p10": 13.771394840396056,
+        "median": 15.33448342519613,
+        "p90": 15.75268288176094,
+        "all": [
+          13.8,
+          14,
+          15.4,
+          15.8,
+          15.6,
+          15.5,
+          15.8,
+          14.9,
+          14.9,
+          15.3
+        ]
+      },
+      "draw_calls": 938,
+      "objects": 1248,
+      "primitives": 27739,
+      "nodes": 505,
+      "heap_mb": 17.4,
+      "voices": 1,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 68,
+        "peak": 9,
+        "reused": 153,
+        "skipped": 0
+      },
+      "cargo_peak_seen": 9,
+      "queue": 0,
+      "bin": 36,
+      "shelf": 8
+    },
+    {
+      "scene": "44, bin filled",
+      "machines": 44,
+      "load": [
+        12.39,
+        9.47,
+        8.06
+      ],
+      "fps": {
+        "min": 15.006565361612173,
+        "p10": 15.006565361612173,
+        "median": 15.350666791779807,
+        "p90": 15.438054810776872,
+        "all": [
+          15.4,
+          15.3,
+          15.5,
+          15.4,
+          15,
+          15.4,
+          15.4,
+          15.2,
+          15.4,
+          15.2
+        ]
+      },
+      "draw_calls": 910,
+      "objects": 1210,
+      "primitives": 27138,
+      "nodes": 504,
+      "heap_mb": 17.4,
+      "voices": 1,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 84,
+        "peak": 9,
+        "reused": 201,
+        "skipped": 0
+      },
+      "cargo_peak_seen": 9,
+      "queue": 0,
+      "bin": 35,
+      "shelf": 7
+    },
+    {
+      "scene": "44, rush hour (x1.5 arrivals)",
+      "machines": 44,
+      "load": [
+        12.06,
+        9.49,
+        8.08
+      ],
+      "fps": {
+        "min": 13.836726623207012,
+        "p10": 13.836726623207012,
+        "median": 14.365064166577206,
+        "p90": 14.906091619951196,
+        "all": [
+          14.4,
+          13.9,
+          13.8,
+          14.9,
+          14.9,
+          14.4,
+          14.4,
+          14.8,
+          14.2,
+          14.7
+        ]
+      },
+      "draw_calls": 919,
+      "objects": 1224,
+      "primitives": 27326,
+      "nodes": 510,
+      "heap_mb": 20,
+      "voices": 1,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 156,
+        "peak": 10,
+        "reused": 353,
+        "skipped": 0
+      },
+      "cargo_peak_seen": 10,
+      "queue": 0,
+      "bin": 36,
+      "shelf": 7,
+      "news_ok": true
+    },
+    {
+      "scene": "44, 50 cargo asked at once",
+      "machines": 44,
+      "load": [
+        10.94,
+        9.37,
+        8.06
+      ],
+      "fps": {
+        "min": 14.416146083613647,
+        "p10": 14.416146083613647,
+        "median": 14.728986651235921,
+        "p90": 15.148646078813199,
+        "all": [
+          14.8,
+          14.5,
+          15.1,
+          14.8,
+          14.4,
+          14.5,
+          15.3,
+          14.5,
+          14.7,
+          14.8
+        ]
+      },
+      "draw_calls": 961,
+      "objects": 1315,
+      "primitives": 28800,
+      "nodes": 547,
+      "heap_mb": 20,
+      "voices": 4,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 229,
+        "peak": 41,
+        "reused": 849,
+        "skipped": 1903
+      },
+      "cargo_peak_seen": 41,
+      "queue": 0,
+      "bin": 31,
+      "shelf": 4,
+      "storm": {
+        "asked": 2427,
+        "cargo_max": 40,
+        "drawn": 506,
+        "filling_peak": 1,
+        "frames": 168,
+        "in_air": 37,
+        "n": 50,
+        "ok": true,
+        "peak": 41,
+        "refused": 1921,
+        "until_ms": 209904
+      }
+    },
+    {
+      "scene": "44, prolonged start",
+      "machines": 44,
+      "load": [
+        11.43,
+        9.49,
+        8.11
+      ],
+      "fps": {
+        "min": 14.348574700391888,
+        "p10": 14.348574700391888,
+        "median": 14.94172725515517,
+        "p90": 15.14864609249136,
+        "all": [
+          14.9,
+          14.5,
+          14.3,
+          15.1,
+          15.2
+        ]
+      },
+      "draw_calls": 1005,
+      "objects": 1346,
+      "primitives": 29564,
+      "nodes": 533,
+      "heap_mb": 19.9,
+      "voices": 4,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 231,
+        "peak": 41,
+        "reused": 910,
+        "skipped": 1958
+      },
+      "cargo_peak_seen": 41,
+      "queue": 0,
+      "bin": 31,
+      "shelf": 5
+    },
+    {
+      "scene": "44, prolonged after 5 min",
+      "machines": 44,
+      "load": [
+        9.23,
+        9.24,
+        8.34
+      ],
+      "fps": {
+        "min": 13.420245388958172,
+        "p10": 13.420245388958172,
+        "median": 13.818971468491245,
+        "p90": 13.851785893580704,
+        "all": [
+          13.8,
+          13.9,
+          13.9,
+          13.4,
+          13.4
+        ]
+      },
+      "draw_calls": 912,
+      "objects": 1218,
+      "primitives": 27996,
+      "nodes": 504,
+      "heap_mb": 29.6,
+      "voices": 1,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 504,
+        "peak": 41,
+        "reused": 2074,
+        "skipped": 1958
+      },
+      "cargo_peak_seen": 41,
+      "queue": 0,
+      "bin": 35,
+      "shelf": 6
+    }
+  ],
+  "prolonged": {
+    "start": {
+      "scene": "44, prolonged start",
+      "machines": 44,
+      "load": [
+        11.43,
+        9.49,
+        8.11
+      ],
+      "fps": {
+        "min": 14.348574700391888,
+        "p10": 14.348574700391888,
+        "median": 14.94172725515517,
+        "p90": 15.14864609249136,
+        "all": [
+          14.9,
+          14.5,
+          14.3,
+          15.1,
+          15.2
+        ]
+      },
+      "draw_calls": 1005,
+      "objects": 1346,
+      "primitives": 29564,
+      "nodes": 533,
+      "heap_mb": 19.9,
+      "voices": 4,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 231,
+        "peak": 41,
+        "reused": 910,
+        "skipped": 1958
+      },
+      "cargo_peak_seen": 41,
+      "queue": 0,
+      "bin": 31,
+      "shelf": 5
+    },
+    "end": {
+      "scene": "44, prolonged after 5 min",
+      "machines": 44,
+      "load": [
+        9.23,
+        9.24,
+        8.34
+      ],
+      "fps": {
+        "min": 13.420245388958172,
+        "p10": 13.420245388958172,
+        "median": 13.818971468491245,
+        "p90": 13.851785893580704,
+        "all": [
+          13.8,
+          13.9,
+          13.9,
+          13.4,
+          13.4
+        ]
+      },
+      "draw_calls": 912,
+      "objects": 1218,
+      "primitives": 27996,
+      "nodes": 504,
+      "heap_mb": 29.6,
+      "voices": 1,
+      "voices_peak": 9,
+      "loop_copies": 0,
+      "cargo": {
+        "made": 504,
+        "peak": 41,
+        "reused": 2074,
+        "skipped": 1958
+      },
+      "cargo_peak_seen": 41,
+      "queue": 0,
+      "bin": 35,
+      "shelf": 6
+    },
+    "heap_growth_mb": 9.7
+  }
+}

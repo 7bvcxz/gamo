@@ -2191,8 +2191,10 @@ func _bags_flying_to_shelf() -> int:
 
 ## Step 33: lots and bags are pooled -- a busy factory reuses the same few nodes
 ## instead of making and freeing one per lot (no churn for the garbage collector);
-## at most CARGO_MAX journeys are drawn at once (the model moves every good either way;
-## the bin, the shelf and the counters show the real amounts).
+## no new journey starts once CARGO_MAX are drawn (the model moves every good either way;
+## the bin, the shelf and the counters show the real amounts). A bag already drawn under its
+## packing head is not refused when it is sealed -- it would vanish -- so the journeys can pass
+## the cap by the bags being filled (Step 46: 41 at 44 machines under the cargo storm).
 const CARGO_MAX := 40
 var _pool := {"lot": [], "bag": []}
 var cargo_stats := {"peak": 0, "skipped": 0, "made": 0, "reused": 0}
@@ -2203,6 +2205,66 @@ func _cargo_full() -> bool:
 		cargo_stats["skipped"] = int(cargo_stats["skipped"]) + 1
 		return true
 	return false
+
+
+## Step 46: a cargo storm for the benchmark (dev only, the bridge's `dev_cargo`). For its time
+## the view wants `n` lot lifts in the air at once and asks for the missing ones every frame,
+## through the same event as the model's (`lot_lifted`, up the tube from a kitchen machine).
+## The view draws at most CARGO_MAX journeys; an ask over the cap is refused and counted. It
+## never touches the model: it is a picture of cargo, not cargo (no portion is made or moved).
+const STORM_ID0 := 1000000000
+var storm := {"n": 0, "until_ms": 0, "asked": 0, "drawn": 0, "refused": 0, "peak": 0, "filling_peak": 0, "frames": 0}
+var _storm_ids := {}
+var _storm_next := STORM_ID0
+
+
+func dev_cargo(n: int, seconds: float) -> Dictionary:
+	var out := storm.duplicate()
+	out["in_air"] = _storm_ids.size()
+	out["cargo_max"] = CARGO_MAX
+	storm = {"n": maxi(0, n), "until_ms": Time.get_ticks_msec() + int(round(seconds * 1000.0)),
+		"asked": 0, "drawn": 0, "refused": 0, "peak": 0, "filling_peak": 0, "frames": 0}
+	return out
+
+
+func _step_storm() -> void:
+	for id: int in _storm_ids.keys():
+		if not cargo.has(id):
+			_storm_ids.erase(id)
+	if int(storm["n"]) <= 0 or rules == null:
+		return
+	if Time.get_ticks_msec() >= int(storm["until_ms"]):
+		storm["n"] = 0
+		return
+	storm["frames"] = int(storm["frames"]) + 1
+	var want := int(storm["n"]) - _storm_ids.size()
+	if want > 0:
+		var kitchen: Array[int] = []
+		for m: Dictionary in rules.machines:
+			if String(m["floor"]) == "kitchen":
+				kitchen.append(int(m["id"]))
+		var events: Array[Dictionary] = []
+		for i in want:
+			var d := {"lot": _storm_next}
+			if not kitchen.is_empty():
+				d["machine"] = kitchen[_storm_next % kitchen.size()]
+			events.append({"type": "lot_lifted", "t": 0, "data": d})
+			_storm_next += 1
+		_flow_events(events)
+		var drawn := 0
+		for e: Dictionary in events:
+			var id := int(e["data"]["lot"])
+			if cargo.has(id):
+				var a: Node2D = cargo[id]
+				a.set_meta("end_on_arrival", true)   # no model event will land it
+				a.set_meta("trip", "lot")
+				_storm_ids[id] = true
+				drawn += 1
+		storm["asked"] = int(storm["asked"]) + want
+		storm["drawn"] = int(storm["drawn"]) + drawn
+		storm["refused"] = int(storm["refused"]) + want - drawn
+	storm["peak"] = maxi(int(storm["peak"]), cargo.size())
+	storm["filling_peak"] = maxi(int(storm["filling_peak"]), filling.size())
 
 
 func _new_actor(kind: String, id: int) -> Node2D:
@@ -2724,6 +2786,7 @@ var cast_stats := {"receive": 0, "thanks": 0, "happy": 0, "delight": 0}   ## Ste
 
 func _step_actors(delta: float) -> void:
 	_reconcile_customers()
+	_step_storm()
 	cargo_stats["peak"] = maxi(int(cargo_stats["peak"]), cargo.size())
 	for a in cargo.values():
 		a.step(delta)

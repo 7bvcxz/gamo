@@ -1,0 +1,694 @@
+{
+  "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
+  "sha": "36b981c2b815",
+  "dirty": true,
+  "build": {
+    "version": "0.46.2",
+    "pack": "game-57079235c929.pck",
+    "packSize": 1003792,
+    "engine": "engine-7eda98958eb0",
+    "godot": "4.7.stable.official.5b4e0cb0f",
+    "source": "36b981c2b815-dirty"
+  },
+  "target": "local docs/ (http://127.0.0.1)",
+  "when": "2026-11-21T23:07:51.142Z",
+  "stages": {
+    "headless": "PASSED",
+    "deploy": "PASSED",
+    "browser": "FAILED"
+  },
+  "headless_summary": "349 passed, 0 failed, 24097 checks, 29 files, 680.0s",
+  "browser_checks": [
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 19996
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2019
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 21682
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2316
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "the shop card sells the sign; the factory is saved across a reload",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 20401
+    },
+    {
+      "spec": "factory22.spec.mjs",
+      "title": "a seeded session is fresh and never saved",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2128
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":30,\"window\":[720,1280]}",
+        "ran: {\"ran\":37,\"never\":[\"cooker\",\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[\"cooker\",\"cooker\"]}",
+        "lines: {\"at_pause\":10,\"before_kitchen_pause\":9,\"moved\":4,\"line_portions\":[1,0,3]}",
+        "hidden: {\"before\":308956,\"hidden\":309022,\"after\":311663}"
+      ],
+      "ms": 197136
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":52,\"window\":[780,1688]}",
+        "ran: {\"ran\":38,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[\"cooker\"]}",
+        "lines: {\"at_pause\":11,\"before_kitchen_pause\":8,\"moved\":3,\"line_portions\":[1,0,3]}",
+        "hidden: {\"before\":337237,\"hidden\":337320,\"after\":339980}"
+      ],
+      "ms": 225863
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "desktop",
+      "status": "FAILED",
+      "error": "Error: frame rate with forty-four machines (load 4.7)\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 20\nReceived:   13.775459999382603",
+      "notes": [
+        "layout: {\"smallest_place_px\":21,\"window\":[1280,800]}",
+        "ran: {\"ran\":39,\"never\":[\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[]}",
+        "lines: {\"at_pause\":10,\"before_kitchen_pause\":9,\"moved\":3,\"line_portions\":[4,0,3]}",
+        "hidden: {\"before\":303889,\"hidden\":303973,\"after\":306576}",
+        "perf: {\"machines\":44,\"fps\":[12.895546071898362,13.260087135319983,14.042314163346344,13.596193068460005,13.775459999382603,13.951170901843547],\"median\":13.775459999382603,\"heap0\":43974441,\"heap1\":38998824,\"kept_mb\":-4.975617,\"draw_calls\":[761,768,761,769,771,749],\"objects\":[979,990,980,989,1023,957],\"nodes\":[542,540,538,540,539,539],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":218,\"floors\":0,\"goods\":255,\"machines\":496,\"ring\":723,\"scenery\":0},\"cargo\":{\"made\":321,\"peak\":11,\"reused\":728,\"skipped\":0},\"pool\":{\"bag\":7,\"lot\":1},\"actor_nodes\":59,\"load\":[4.71,5.03]}"
+      ],
+      "ms": 251492
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10092,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 100183
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10298,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 105936
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10139,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 98396
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.3882,7.98516666666666,3.11813333333333],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0457037037037038,0.203259259259259,0.349913580246914,0.806,0.938,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 14728
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":30,\"alive\":16,\"given\":{\"ambient\":98,\"lot\":26,\"sparkle\":28},\"low\":true,\"fps\":13.2},{\"t\":19,\"running\":27,\"alive\":45,\"given\":{\"ambient\":113,\"lot\":30,\"sparkle\":42},\"low\":true,\"fps\":12.8},{\"t\":29,\"running\":29,\"alive\":41,\"given\":{\"ambient\":139,\"lot\":34,\"sparkle\":54},\"low\":true,\"fps\":13.3},{\"t\":39,\"running\":26,\"alive\":21,\"given\":{\"ambient\":164,\"lot\":39,\"sparkle\":69},\"low\":true,\"fps\":12.8}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":101,\"belts\":6,\"render\":{\"draw_calls\":764,\"objects\":985,\"fps\":13,\"nodes\":473},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":100,\"open\":3,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 46934
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":48,\"secs\":13.04,\"phase\":[[47.86,47.86,47.86,13.97,0,47.86],[441.1,422.25,441.1,358.58,311.54,441.1]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 19071
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":12.805,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 18838
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.7465151515152,8.34444444444445,3.49787222222222],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0580925925925926,0.179520202020202,0.290759259259259,0.845771604938272,0.956882716049383,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 15825
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":32,\"alive\":25,\"given\":{\"ambient\":88,\"lot\":30,\"sparkle\":28},\"low\":true,\"fps\":11.5},{\"t\":19,\"running\":29,\"alive\":26,\"given\":{\"ambient\":105,\"lot\":31,\"sparkle\":42},\"low\":true,\"fps\":11.3},{\"t\":29,\"running\":28,\"alive\":11,\"given\":{\"ambient\":133,\"lot\":36,\"sparkle\":57},\"low\":true,\"fps\":11.4},{\"t\":39,\"running\":26,\"alive\":14,\"given\":{\"ambient\":160,\"lot\":42,\"sparkle\":72},\"low\":true,\"fps\":11.7}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":105,\"belts\":6,\"render\":{\"draw_calls\":712,\"objects\":916,\"fps\":11,\"nodes\":460},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":105,\"open\":3,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 50557
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":50,\"secs\":13.917,\"phase\":[[58.16,58.16,58.16,19.29,0,58.16],[557.63,524.2,557.63,461.4,403.09,557.63]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+      ],
+      "ms": 20539
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.813,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+      ],
+      "ms": 20480
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.3832158730159,7.98576666666667,3.14446666666667],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0426296296296294,0.175925925925926,0.357962962962963,0.768629629629629,0.907518518518518,1,1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 14918
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":29,\"alive\":16,\"given\":{\"ambient\":97,\"lot\":26,\"sparkle\":28},\"low\":true,\"fps\":12.3},{\"t\":19,\"running\":27,\"alive\":41,\"given\":{\"ambient\":114,\"lot\":30,\"sparkle\":41},\"low\":true,\"fps\":12.1},{\"t\":29,\"running\":30,\"alive\":37,\"given\":{\"ambient\":144,\"lot\":35,\"sparkle\":55},\"low\":true,\"fps\":11.8},{\"t\":39,\"running\":26,\"alive\":10,\"given\":{\"ambient\":170,\"lot\":40,\"sparkle\":70},\"low\":true,\"fps\":11.9}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":103,\"belts\":6,\"render\":{\"draw_calls\":945,\"objects\":1239,\"fps\":11,\"nodes\":461},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":104,\"open\":4,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 47738
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":46,\"secs\":13.212,\"phase\":[[45.13,45.13,45.13,14.64,0,45.13],[417.16,398.56,417.16,342.19,296.82,417.16]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 19308
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.141,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 19260
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3542
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 15571
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":3,\"money\":400017,\"made\":8,\"from\":\"main\"}}"
+      ],
+      "ms": 7778
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7128
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3578
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 18022
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":3,\"money\":400017,\"made\":8,\"from\":\"main\"}}"
+      ],
+      "ms": 8895
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7546
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3555
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 18939
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":3,\"money\":400017,\"made\":8,\"from\":\"main\"}}"
+      ],
+      "ms": 8242
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7312
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "device: p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 4210
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4658
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 29
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 28
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 66
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "device: phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 5046
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 27
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 20
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 21
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "device: desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 3861
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 28
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "measured on the published URL",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 20
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 20
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "load: 1248 ms to the first drawn frame"
+      ],
+      "ms": 4419
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1859
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5756
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1710
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "load: 1392 ms to the first drawn frame"
+      ],
+      "ms": 5500
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2196
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5975
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2013
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "load: 1221 ms to the first drawn frame"
+      ],
+      "ms": 4093
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1690
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5830
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 1682
+    }
+  ],
+  "run": {
+    "mode": "only",
+    "started": "2026-11-21T22:30:45Z",
+    "ended": "2026-11-21T23:07:51.100Z",
+    "specs_run": [
+      "factory33.spec.mjs",
+      "motion42.spec.mjs",
+      "journey46.spec.mjs",
+      "negative46.spec.mjs",
+      "release12.spec.mjs",
+      "factory22.spec.mjs",
+      "stub03.spec.mjs"
+    ],
+    "not_run": {
+      "art15.spec.mjs": "not asked for (--only)",
+      "art40.spec.mjs": "not asked for (--only)",
+      "art41.spec.mjs": "not asked for (--only)",
+      "burst14.spec.mjs": "not asked for (--only)",
+      "career39.spec.mjs": "not asked for (--only)",
+      "catalog27.spec.mjs": "not asked for (--only)",
+      "contests38.spec.mjs": "not asked for (--only)",
+      "craft35.spec.mjs": "not asked for (--only)",
+      "customers36.spec.mjs": "not asked for (--only)",
+      "experiments04.spec.mjs": "not asked for (--only)",
+      "factory16.spec.mjs": "not asked for (--only)",
+      "factory17.spec.mjs": "not asked for (--only)",
+      "factory18.spec.mjs": "not asked for (--only)",
+      "factory19.spec.mjs": "not asked for (--only)",
+      "factory20.spec.mjs": "not asked for (--only)",
+      "factory21.spec.mjs": "not asked for (--only)",
+      "factory23.spec.mjs": "not asked for (--only)",
+      "factory26.spec.mjs": "not asked for (--only)",
+      "factory28.spec.mjs": "not asked for (--only)",
+      "factory29.spec.mjs": "not asked for (--only)",
+      "factory30.spec.mjs": "not asked for (--only)",
+      "factory31.spec.mjs": "not asked for (--only)",
+      "factory32.spec.mjs": "not asked for (--only)",
+      "flavors34.spec.mjs": "not asked for (--only)",
+      "input07.spec.mjs": "not asked for (--only)",
+      "news37.spec.mjs": "not asked for (--only)",
+      "perf07.spec.mjs": "not asked for (--only)",
+      "perf46.spec.mjs": "the Step 46 benchmark table, desktop and phone (--perf)",
+      "play180.spec.mjs": "three real minutes per experiment (--slow)",
+      "play_stand.spec.mjs": "a long real-time stand session, one project (--slow)",
+      "progression07.spec.mjs": "not asked for (--only)",
+      "render_probe.spec.mjs": "a probe, not a gate: load time and render cost of a build (--perf)",
+      "responsive07.spec.mjs": "not asked for (--only)",
+      "save45.spec.mjs": "not asked for (--only)",
+      "scorecard09.spec.mjs": "not asked for (--only)",
+      "sessions22.spec.mjs": "Step 22 evidence: real-time 3-minute sessions from seeds, writes $OUT/sessions22.json (--slow)",
+      "soak43.spec.mjs": "not asked for (--only)",
+      "sound05.spec.mjs": "not asked for (--only)",
+      "sound43.spec.mjs": "not asked for (--only)",
+      "stall09.spec.mjs": "not asked for (--only)",
+      "stand10.spec.mjs": "not asked for (--only)",
+      "ui44.spec.mjs": "not asked for (--only)"
+    },
+    "load": {
+      "start": "0.81 1.33 4.08",
+      "end": "10.78 8.96 7.54"
+    },
+    "mem_available_mb": {
+      "start": 33030,
+      "end": 33838
+    }
+  },
+  "browser_totals": {
+    "passed": 53,
+    "passed_on_retry": 0,
+    "failed": 1,
+    "skipped": 9
+  }
+}

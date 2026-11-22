@@ -1,0 +1,288 @@
+{
+  "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
+  "sha": "36b981c2b815",
+  "dirty": true,
+  "build": {
+    "version": "0.46.2",
+    "pack": "game-a96a4a030639.pck",
+    "packSize": 1003984,
+    "engine": "engine-7eda98958eb0",
+    "godot": "4.7.stable.official.5b4e0cb0f",
+    "source": "36b981c2b815-dirty"
+  },
+  "target": "local docs/ (http://127.0.0.1)",
+  "when": "2026-11-22T00:11:36.101Z",
+  "stages": {
+    "headless": "PASSED",
+    "deploy": "PASSED",
+    "browser": "PASSED"
+  },
+  "headless_summary": "349 passed, 0 failed, 24097 checks, 29 files, 676.9s",
+  "browser_checks": [
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":30,\"window\":[720,1280]}",
+        "ran: {\"ran\":38,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[\"cooker\"]}",
+        "lines: {\"at_pause\":10,\"before_kitchen_pause\":9,\"moved\":3,\"line_portions\":[1,0,1]}",
+        "hidden: {\"before\":309142,\"hidden\":309215,\"after\":311836}"
+      ],
+      "ms": 197504
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":52,\"window\":[780,1688]}",
+        "ran: {\"ran\":38,\"never\":[\"cooker\",\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\"],\"holding_a_lot\":[\"cooker\"]}",
+        "lines: {\"at_pause\":7,\"before_kitchen_pause\":4,\"moved\":1,\"line_portions\":[3,0,7]}",
+        "hidden: {\"before\":337668,\"hidden\":337760,\"after\":340365}"
+      ],
+      "ms": 226414
+    },
+    {
+      "spec": "factory33.spec.mjs",
+      "title": "forty-four machines at once: built by hand, readable, routed, recovering, measured",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "layout: {\"smallest_place_px\":21,\"window\":[1280,800]}",
+        "ran: {\"ran\":38,\"never\":[\"kiosk\",\"U08\",\"kiosk\",\"bagger\",\"bagger\",\"cooker\"],\"holding_a_lot\":[\"cooker\"]}",
+        "lines: {\"at_pause\":11,\"before_kitchen_pause\":9,\"moved\":4,\"line_portions\":[0,0,3]}",
+        "hidden: {\"before\":297672,\"hidden\":297752,\"after\":300386}",
+        "perf: {\"machines\":44,\"fps\":[14.539110209143274,15.104314167015087,15.294904879232824,14.425851135801164,14.457831325301205,14.140271490670209],\"median\":14.539110209143274,\"heap0\":39075621,\"heap1\":38991543,\"kept_mb\":-0.084078,\"draw_calls\":[778,768,739,773,763,765],\"objects\":[1013,984,951,983,979,990],\"nodes\":[539,538,537,539,538,538],\"static_mem\":[0,0,0,0,0,0],\"redraws_per_min\":{\"detail\":232,\"floors\":0,\"goods\":272,\"machines\":556,\"ring\":782,\"scenery\":0},\"cargo\":{\"made\":305,\"peak\":9,\"reused\":701,\"skipped\":0},\"pool\":{\"bag\":6,\"lot\":1},\"actor_nodes\":58,\"load\":[4.79,8.22]}",
+        "fps44: median 14.5 fps at load 4.8; Step 33's target of 20 NOT met (Step 48, D-69)"
+      ],
+      "ms": 247639
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.3860714285714,7.97638888888889,3.12538333333333],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0423086419753088,0.214012345679012,0.355604938271605,0.780271604938272,0.918160493827161,1,1,1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 14693
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":30,\"alive\":19,\"given\":{\"ambient\":97,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":13.1},{\"t\":19,\"running\":27,\"alive\":20,\"given\":{\"ambient\":113,\"lot\":30,\"sparkle\":41},\"low\":true,\"fps\":13.3},{\"t\":29,\"running\":28,\"alive\":16,\"given\":{\"ambient\":138,\"lot\":33,\"sparkle\":54},\"low\":true,\"fps\":13.5},{\"t\":39,\"running\":25,\"alive\":24,\"given\":{\"ambient\":165,\"lot\":39,\"sparkle\":69},\"low\":true,\"fps\":13}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":102,\"belts\":6,\"render\":{\"draw_calls\":810,\"objects\":1048,\"fps\":13,\"nodes\":471},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":102,\"open\":3,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 46807
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":48,\"secs\":12.931,\"phase\":[[49.11,49.11,49.11,15.49,0,49.11],[440.03,421.94,440.03,356.09,309.42,440.03]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 18991
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":12.819,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 18979
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.7393939393939,8.32103233333332,3.47],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0599300411522634,0.229972139917695,0.33717378600823,0.910485596707819,1,1,-1,-1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 15888
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":26,\"alive\":25,\"given\":{\"ambient\":89,\"lot\":31,\"sparkle\":29},\"low\":true,\"fps\":11},{\"t\":19,\"running\":28,\"alive\":29,\"given\":{\"ambient\":103,\"lot\":32,\"sparkle\":43},\"low\":true,\"fps\":11.5},{\"t\":29,\"running\":27,\"alive\":10,\"given\":{\"ambient\":132,\"lot\":36,\"sparkle\":57},\"low\":true,\"fps\":11.1},{\"t\":39,\"running\":26,\"alive\":15,\"given\":{\"ambient\":158,\"lot\":42,\"sparkle\":72},\"low\":true,\"fps\":11.7}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":111,\"belts\":6,\"render\":{\"draw_calls\":712,\"objects\":915,\"fps\":11,\"nodes\":473},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":103,\"open\":2,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 50378
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":49,\"secs\":13.713,\"phase\":[[58.31,58.31,58.31,17.1,0,58.31],[547.9,528.45,547.9,448.62,372.02,550.68]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":26}"
+      ],
+      "ms": 20413
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":16.214,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":29}"
+      ],
+      "ms": 22952
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "one batch lights the floors bottom to top, and a celebration never moves the ring",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "arc: {\"glow_at\":[10.4401515151515,8.04436666666668,3.17833333333334],\"tier\":\"solo\"}",
+        "celebrate: {\"climb\":[0.0416666666666667,0.186432098765432,0.300320987654321,0.749395061728395,0.888061728395062,1,1,1,-1,-1],\"moved\":0,\"celebrations\":1,\"kind\":\"sign\"}"
+      ],
+      "ms": 14949
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "forty-four machines: a bounded crescendo through a resize and a hidden tab",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "crescendo: {\"samples\":[{\"t\":9,\"running\":31,\"alive\":17,\"given\":{\"ambient\":97,\"lot\":29,\"sparkle\":28},\"low\":true,\"fps\":12.1},{\"t\":19,\"running\":27,\"alive\":41,\"given\":{\"ambient\":113,\"lot\":31,\"sparkle\":41},\"low\":true,\"fps\":12.1},{\"t\":29,\"running\":29,\"alive\":37,\"given\":{\"ambient\":143,\"lot\":35,\"sparkle\":55},\"low\":true,\"fps\":12.2},{\"t\":39,\"running\":25,\"alive\":11,\"given\":{\"ambient\":170,\"lot\":40,\"sparkle\":70},\"low\":true,\"fps\":11.9}],\"tiers\":[\"swarm\",\"crowded\"],\"peak\":104,\"belts\":6,\"render\":{\"draw_calls\":921,\"objects\":1204,\"fps\":12,\"nodes\":461},\"after\":{\"log\":[400,400],\"trips\":{\"starts\":102,\"open\":2,\"bad\":[]},\"light\":4,\"belt_nodes\":6,\"moved\":[0,0,0,0]}}"
+      ],
+      "ms": 47923
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "low effects: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "low effects: {\"low\":true,\"reduced\":false,\"given\":50,\"secs\":13.28,\"phase\":[[44.06,44.06,44.06,14.02,0,44.06],[418.12,406.17,418.12,343.11,298.09,418.12]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 19433
+    },
+    {
+      "spec": "motion42.spec.mjs",
+      "title": "reduced motion: smaller or still effects, and a batch still travels kitchen to shop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "reduced motion: {\"low\":true,\"reduced\":true,\"given\":0,\"secs\":13.028,\"phase\":[[0,0,0,0,0,0],[0,0,0,0,0,0]],\"kinds\":[\"lot:start\",\"lot:end\",\"fill:start\",\"fill:end\",\"bag:start\",\"bag:redirect\",\"bag:end\",\"bag:sold\",\"bag:serve\"],\"sold\":24}"
+      ],
+      "ms": 19240
+    },
+    {
+      "spec": "perf46.spec.mjs",
+      "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "the table is taken on the desktop and the phone",
+      "notes": [],
+      "ms": 25
+    },
+    {
+      "spec": "perf46.spec.mjs",
+      "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "perf46: {\"build\":{\"version\":\"0.46.2\",\"pack\":\"game-a96a4a030639.pck\",\"pack_bytes\":1003984,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":2226},\"rows\":[{\"scene\":\"1 machines\",\"fps\":19.663749888164084,\"p10\":18.401937046004843,\"draw\":568,\"obj\":1116,\"heap\":11,\"voices\":10,\"load\":8.51},{\"scene\":\"5 machines\",\"fps\":19.087612136246733,\"p10\":17.45369921135554,\"draw\":545,\"obj\":990,\"heap\":12.9,\"voices\":10,\"load\":8.2},{\"scene\":\"10 machines\",\"fps\":18.867924528301888,\"p10\":16.322611617858858,\"draw\":502,\"obj\":804,\"heap\":14.4,\"voices\":10,\"load\":9.29},{\"scene\":\"20 machines\",\"fps\":16.674840608141245,\"p10\":15.333013895543843,\"draw\":626,\"obj\":1041,\"heap\":16.7,\"voices\":10,\"load\":9.19},{\"scene\":\"44 machines\",\"fps\":14.199166974512657,\"p10\":13.3753702135771,\"draw\":723,\"obj\":940,\"heap\":17.4,\"voices\":10,\"load\":8.55},{\"scene\":\"44, bin filled\",\"fps\":14.216661922639346,\"p10\":13.861386138613861,\"draw\":720,\"obj\":938,\"heap\":17.4,\"voices\":10,\"load\":8.67},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":13.47968419768259,\"p10\":13.12951326783808,\"draw\":733,\"obj\":957,\"heap\":17.4,\"voices\":10,\"load\":9.04},{\"scene\":\"44, 50 cargo asked at once\",\"fps\":13.430544889020512,\"p10\":13.090229079008882,\"draw\":741,\"obj\":991,\"heap\":20,\"voices\":10,\"load\":9.62}]}"
+      ],
+      "ms": 167894
+    },
+    {
+      "spec": "perf46.spec.mjs",
+      "title": "the benchmark table: load, bytes, 1-44 machines, saturated, rush hour, prolonged",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf46: {\"build\":{\"version\":\"0.46.2\",\"pack\":\"game-a96a4a030639.pck\",\"pack_bytes\":1003984,\"engine\":\"engine-7eda98958eb0\",\"wasm_bytes\":39509339,\"load_to_first_frame_ms\":1982},\"rows\":[{\"scene\":\"1 machines\",\"fps\":21.208907756850586,\"p10\":19.567557001464284,\"draw\":728,\"obj\":1359,\"heap\":11.5,\"voices\":8,\"load\":8.14},{\"scene\":\"5 machines\",\"fps\":20.594292442804797,\"p10\":18.262206850217684,\"draw\":733,\"obj\":1261,\"heap\":12.9,\"voices\":9,\"load\":9.52},{\"scene\":\"10 machines\",\"fps\":20.475819025145373,\"p10\":18.43765162542455,\"draw\":684,\"obj\":1087,\"heap\":14.3,\"voices\":9,\"load\":10.78},{\"scene\":\"20 machines\",\"fps\":18.145353827789226,\"p10\":15.987210228767667,\"draw\":797,\"obj\":1289,\"heap\":16.6,\"voices\":9,\"load\":10.39},{\"scene\":\"44 machines\",\"fps\":15.33448342519613,\"p10\":13.771394840396056,\"draw\":938,\"obj\":1248,\"heap\":17.4,\"voices\":9,\"load\":11.1},{\"scene\":\"44, bin filled\",\"fps\":15.350666791779807,\"p10\":15.006565361612173,\"draw\":910,\"obj\":1210,\"heap\":17.4,\"voices\":9,\"load\":12.39},{\"scene\":\"44, rush hour (x1.5 arrivals)\",\"fps\":14.365064166577206,\"p10\":13.836726623207012,\"draw\":919,\"obj\":1224,\"heap\":20,\"voices\":9,\"load\":12.06},{\"scene\":\"44, 50 cargo asked at once\",\"fps\":14.728986651235921,\"p10\":14.416146083613647,\"draw\":961,\"obj\":1315,\"heap\":20,\"voices\":9,\"load\":10.94},{\"scene\":\"44, prolonged start\",\"fps\":14.94172725515517,\"p10\":14.348574700391888,\"draw\":1005,\"obj\":1346,\"heap\":19.9,\"voices\":9,\"load\":11.43},{\"scene\":\"44, prolonged after 5 min\",\"fps\":13.818971468491245,\"p10\":13.420245388958172,\"draw\":912,\"obj\":1218,\"heap\":29.6,\"voices\":9,\"load\":9.23}]}"
+      ],
+      "ms": 479612
+    }
+  ],
+  "run": {
+    "mode": "only",
+    "started": "2026-11-21T23:32:50Z",
+    "ended": "2026-11-22T00:11:36.059Z",
+    "specs_run": [
+      "perf46.spec.mjs",
+      "factory33.spec.mjs",
+      "motion42.spec.mjs"
+    ],
+    "not_run": {
+      "art15.spec.mjs": "not asked for (--only)",
+      "art40.spec.mjs": "not asked for (--only)",
+      "art41.spec.mjs": "not asked for (--only)",
+      "burst14.spec.mjs": "not asked for (--only)",
+      "career39.spec.mjs": "not asked for (--only)",
+      "catalog27.spec.mjs": "not asked for (--only)",
+      "contests38.spec.mjs": "not asked for (--only)",
+      "craft35.spec.mjs": "not asked for (--only)",
+      "customers36.spec.mjs": "not asked for (--only)",
+      "experiments04.spec.mjs": "not asked for (--only)",
+      "factory16.spec.mjs": "not asked for (--only)",
+      "factory17.spec.mjs": "not asked for (--only)",
+      "factory18.spec.mjs": "not asked for (--only)",
+      "factory19.spec.mjs": "not asked for (--only)",
+      "factory20.spec.mjs": "not asked for (--only)",
+      "factory21.spec.mjs": "not asked for (--only)",
+      "factory22.spec.mjs": "not asked for (--only)",
+      "factory23.spec.mjs": "not asked for (--only)",
+      "factory26.spec.mjs": "not asked for (--only)",
+      "factory28.spec.mjs": "not asked for (--only)",
+      "factory29.spec.mjs": "not asked for (--only)",
+      "factory30.spec.mjs": "not asked for (--only)",
+      "factory31.spec.mjs": "not asked for (--only)",
+      "factory32.spec.mjs": "not asked for (--only)",
+      "flavors34.spec.mjs": "not asked for (--only)",
+      "input07.spec.mjs": "not asked for (--only)",
+      "journey46.spec.mjs": "not asked for (--only)",
+      "negative46.spec.mjs": "not asked for (--only)",
+      "news37.spec.mjs": "not asked for (--only)",
+      "perf07.spec.mjs": "not asked for (--only)",
+      "play180.spec.mjs": "three real minutes per experiment (--slow)",
+      "play_stand.spec.mjs": "a long real-time stand session, one project (--slow)",
+      "progression07.spec.mjs": "not asked for (--only)",
+      "release12.spec.mjs": "not asked for (--only)",
+      "render_probe.spec.mjs": "a probe, not a gate: load time and render cost of a build (--perf)",
+      "responsive07.spec.mjs": "not asked for (--only)",
+      "save45.spec.mjs": "not asked for (--only)",
+      "scorecard09.spec.mjs": "not asked for (--only)",
+      "sessions22.spec.mjs": "Step 22 evidence: real-time 3-minute sessions from seeds, writes $OUT/sessions22.json (--slow)",
+      "soak43.spec.mjs": "not asked for (--only)",
+      "sound05.spec.mjs": "not asked for (--only)",
+      "sound43.spec.mjs": "not asked for (--only)",
+      "stall09.spec.mjs": "not asked for (--only)",
+      "stand10.spec.mjs": "not asked for (--only)",
+      "stub03.spec.mjs": "not asked for (--only)",
+      "ui44.spec.mjs": "not asked for (--only)"
+    },
+    "load": {
+      "start": "3.67 7.55 7.98",
+      "end": "9.06 9.34 8.48"
+    },
+    "mem_available_mb": {
+      "start": 33838,
+      "end": 33793
+    }
+  },
+  "browser_totals": {
+    "passed": 17,
+    "passed_on_retry": 0,
+    "failed": 0,
+    "skipped": 1
+  }
+}
