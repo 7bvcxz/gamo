@@ -89,6 +89,7 @@ func test_a_crowded_shop_moves_without_jumps_and_keeps_clear_of_the_tube_and_but
 	var last := {}
 	var worst_step := 0.0   # per frame, or per tenth of a second when the frame was longer
 	var worst_raw := 0.0
+	var d_last := 0.0   # the engine's delta of the frame before (see below)
 	var worst_rot := 0.0
 	var sy_lo := 9.0
 	var sy_hi := 0.0
@@ -105,12 +106,18 @@ func test_a_crowded_shop_moves_without_jumps_and_keeps_clear_of_the_tube_and_but
 	for f in 1100:
 		# the game's minutes pass 120 ms a frame; the last 200 frames at 4 ms (the people settle)
 		app.dev_advance(120 if f < 900 else 4)
-		var t_frame := Time.get_ticks_usec()
 		await tree.process_frame
 		# The people move by the frame's own delta (a walk, never faster). On a slow machine a
-		# headless frame reaches the engine's cap (~0.133 s): a walk step there is ~28 px
-		# (CI, Step 46). So a step is judged per tenth of a second when the frame was longer.
-		var frame_s := clampf(float(Time.get_ticks_usec() - t_frame) / 1e6, 0.0, 8.0 / 60.0)
+		# headless frame reaches the engine's cap (~0.133 s): a walk step there is ~28-32 px
+		# (CI, Steps 46-48). So a step is judged per tenth of a second when the frame was longer.
+		# The frame's length is the engine's own delta, not a wall clock around the await: that
+		# clock missed the time dev_advance took before it (a slow model step on CI made a capped
+		# 0.133 s frame look short, and an honest walk failed as a jump). process_frame comes before
+		# the nodes' _process, so the positions read now moved by the previous frame's delta:
+		# the longer of the two is used.
+		var d_now := tree.root.get_process_delta_time()
+		var frame_s := clampf(maxf(d_now, d_last), 0.0, 8.0 / 60.0)
+		d_last = d_now
 		var per_tenth := minf(1.0, 0.1 / maxf(frame_s, 1e-6))
 		var people: Array = v.cast_debug()["people"]
 		people_max = maxi(people_max, people.size())
