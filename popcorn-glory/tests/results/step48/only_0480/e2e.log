@@ -1,0 +1,673 @@
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:43] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 92 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:43] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:43] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:43] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:43] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:43] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:45] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:39:45] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘   1 [p720] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes (1.6m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:41:22] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:41:22] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:41:22] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:41:22] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:41:22] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:41:23] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:41:23] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   2 [p720] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters (2.3m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:41] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:41] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:41] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:41] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:41] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:42] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:42] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:43:59] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:00] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   3 [p720] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (20.0s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:01] "GET /popcorn-glory/?seed=5 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:01] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:01] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:01] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:01] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:02] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:02] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   4 [p720] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (2.0s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:03] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:03] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:03] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:03] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:03] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:04] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:44:04] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:40] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:41] "GET /popcorn-glory/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:41] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:41] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   5 [p720] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:44] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:44] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:44] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:44] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   6 [p720] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:47] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:47] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:47] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:47] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:47] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:48] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:45:48] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓   7 [p720] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (15.8s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:03] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:03] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:03] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:03] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:03] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:04] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:04] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:08] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:09] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   8 [p720] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (7.9s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:11] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:11] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:11] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:11] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:11] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:12] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:12] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   9 [p720] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (7.1s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:18] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:18] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:18] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:18] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:18] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:19] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:46:19] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:19] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:19] "GET /popcorn-glory/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:20] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:20] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 304 -
+  ✓  10 [p720] › specs/news37.spec.mjs:64:1 › the news: quiet at opening, a craze that brings real customers, readable, never in the way (2.1m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:22] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:22] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:22] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:22] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:22] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:23] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:23] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  11 [p720] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (10.3s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:32] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:32] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:32] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:32] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:32] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:33] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:33] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:34] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:34] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  12 [p720] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (4.1s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:36] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:36] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:36] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:36] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:36] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:37] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:37] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:39] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:39] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:39] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:39] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:39] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:40] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:40] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  13 [p720] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion (4.6s)
+  -  14 [p720] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /popcorn-glory/index.html HTTP/1.1" 200 -
+  ✓  15 [p720] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins) (29ms)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /popcorn-glory/about.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+  ✓  16 [p720] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere (66ms)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:41] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  17 [p720] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (4.2s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:45] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:45] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:45] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:45] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:45] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:46] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:46] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  18 [p720] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (1.8s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:47] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:47] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:47] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:47] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:47] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:48] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:48] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  19 [p720] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (5.7s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:52] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:52] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:52] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:52] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:52] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:53] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:53] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  20 [p720] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (1.7s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:54] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:54] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:54] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:54] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:54] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:55] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:48:55] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  21 [p720] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (9.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:04] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:04] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:04] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:04] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:04] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:05] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:05] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  22 [p720] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint (8.5s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:12] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:12] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:12] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:12] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:12] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:13] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:13] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  23 [p720] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold (6.3s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:19] "GET /popcorn-glory/?motion=&x=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:19] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:19] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:19] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:19] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:20] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:20] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:21] "GET /popcorn-glory/?motion=&x=1 HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:21] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  24 [p720] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload (4.8s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:24] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:24] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:24] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:24] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:24] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:25] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:49:25] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:19] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:19] "GET /popcorn-glory/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:19] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:19] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 304 -
+  ✓  25 [phone] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes (2.1m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:27] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:27] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:27] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:27] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:27] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:28] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:51:28] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  26 [phone] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters (2.5m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:53:57] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:53:57] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:53:57] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:53:58] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:53:58] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:53:59] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:53:59] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:17] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:17] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  27 [phone] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (21.5s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:19] "GET /popcorn-glory/?seed=5 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:19] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:19] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:19] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:19] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:20] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:20] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  28 [phone] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (2.4s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:21] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:21] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:21] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:21] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:21] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:23] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:54:23] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:04] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:04] "GET /popcorn-glory/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:04] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:04] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 304 -
+  ✓  29 [phone] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.8m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:07] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:07] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:07] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:07] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  30 [phone] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:11] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:11] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:11] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:11] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:11] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:12] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:12] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  31 [phone] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (18.1s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:29] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:29] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:29] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:29] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:29] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:30] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:30] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:35] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:35] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  32 [phone] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (9.0s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:38] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:38] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:38] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:38] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:38] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:39] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:39] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  33 [phone] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (7.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:46] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:46] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:46] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:46] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:46] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:47] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:56:47] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:56] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:57] "GET /popcorn-glory/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:57] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:57] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 304 -
+  ✓  34 [phone] › specs/news37.spec.mjs:64:1 › the news: quiet at opening, a craze that brings real customers, readable, never in the way (2.2m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:59] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:59] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:59] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:59] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:58:59] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:00] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:00] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  35 [phone] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (11.4s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:10] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:10] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:10] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:10] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:10] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:11] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:11] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:13] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:13] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  36 [phone] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (4.7s)
+  -  37 [phone] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -  38 [phone] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -  39 [phone] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  40 [phone] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:15] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:15] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:15] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:15] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:15] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:16] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:16] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  41 [phone] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (5.5s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:21] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:21] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:21] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:21] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:21] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:22] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:22] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  42 [phone] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (2.2s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:23] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:23] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:23] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:23] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:23] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:24] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:24] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  43 [phone] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (6.0s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:29] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:29] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:29] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:29] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:29] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:30] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:30] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  44 [phone] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.0s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:31] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:31] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:31] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:31] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:31] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:32] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:32] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  45 [phone] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (10.8s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:42] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:42] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:42] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:42] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:42] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:43] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:43] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  46 [phone] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint (9.1s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:51] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:51] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:51] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:51] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:51] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:52] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:52] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  47 [phone] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold (6.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:57] "GET /popcorn-glory/?motion=&x=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:57] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:57] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:57] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:57] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:59] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 03:59:59] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:00] "GET /popcorn-glory/?motion=&x=1 HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:00] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  48 [phone] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload (5.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:03] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:03] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:03] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:03] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:03] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:05] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:00:05] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  49 [desktop] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes (1.6m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:01:42] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:01:42] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:01:42] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:01:42] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:01:42] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:01:43] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:01:43] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  50 [desktop] › specs/contests38.spec.mjs:283:1 › contests: an advanced factory enters lean packing and its score comes from the counters (2.2m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:03:57] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:03:57] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:03:57] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:03:57] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:03:57] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:03:58] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:03:58] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:15] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:15] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  51 [desktop] › specs/factory22.spec.mjs:10:1 › the shop card sells the sign; the factory is saved across a reload (20.2s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:17] "GET /popcorn-glory/?seed=5 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:17] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:17] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:17] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:17] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:18] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:18] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  52 [desktop] › specs/factory22.spec.mjs:49:1 › a seeded session is fresh and never saved (2.1s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:19] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:19] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:19] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:19] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:19] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:20] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:04:20] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✘  53 [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:02] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:02] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:02] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:02] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  54 [desktop] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:06] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:06] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:06] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:06] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:06] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:07] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:07] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  55 [desktop] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (19.4s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:25] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:25] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:25] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:25] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:25] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:27] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:27] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:31] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:31] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  56 [desktop] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (8.3s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:34] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:34] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:34] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:34] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:34] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:35] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:35] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  57 [desktop] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (7.3s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:41] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:41] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:41] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:41] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:41] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:42] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:06:42] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:41] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:41] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  58 [desktop] › specs/news37.spec.mjs:64:1 › the news: quiet at opening, a craze that brings real customers, readable, never in the way (2.0m)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:43] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:43] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:43] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:43] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:43] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:44] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:44] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  59 [desktop] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (10.5s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:53] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:53] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:53] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:53] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:53] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:54] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:54] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:55] "GET /popcorn-glory/ HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:55] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  60 [desktop] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (4.0s)
+  -  61 [desktop] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -  62 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -  63 [desktop] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  64 [desktop] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:57] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:57] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:57] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:57] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:57] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:58] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:08:58] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  65 [desktop] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (4.1s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:02] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:02] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:02] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:02] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:02] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:02] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:02] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  66 [desktop] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (1.7s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:03] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:03] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:03] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:03] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:03] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:04] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:04] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  67 [desktop] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (5.8s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:09] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:09] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:09] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:09] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:09] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:10] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:10] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  68 [desktop] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (1.7s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:11] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:11] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:11] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:11] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:11] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:12] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:12] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  69 [desktop] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (9.8s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:21] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:21] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:21] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:21] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:21] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:22] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:22] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  70 [desktop] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint (8.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:29] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:29] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:29] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:29] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:29] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:30] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:30] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  71 [desktop] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold (6.4s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:36] "GET /popcorn-glory/?motion=&x=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:36] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:36] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:36] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:36] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:37] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:37] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:38] "GET /popcorn-glory/?motion=&x=1 HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:38] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  72 [desktop] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload (5.0s)
+  -  73 [m-p720] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size
+  -  74 [m-p720] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  75 [m-p720] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  76 [m-p720] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:41] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:41] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:41] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:42] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:42] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:43] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:43] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  77 [m-hd] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (12.4s)
+  -  78 [m-hd] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  79 [m-hd] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  80 [m-hd] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:54] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:54] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:54] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:54] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:54] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:56] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:09:56] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  81 [m-small] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (13.2s)
+  -  82 [m-small] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  83 [m-small] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  84 [m-small] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:08] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:08] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:08] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:08] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:08] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:09] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:09] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  85 [m-tablet] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (15.6s)
+  -  86 [m-tablet] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  87 [m-tablet] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  88 [m-tablet] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:24] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:24] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:24] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:24] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:24] "GET /popcorn-glory/game-b200c5621787.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:25] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 04:10:25] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓  89 [m-landscape] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (15.9s)
+  -  90 [m-landscape] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  91 [m-landscape] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  92 [m-landscape] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+
+
+  1) [p720] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "perfect_streak"
+    Received: undefined
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      209 |   const prizes0 = s.run.stats.contest_prizes || 0;
+      210 |   await pop.tap('contest_enter_perfect_streak');
+    > 211 |   await expect.poll(async () => C(await pop.state()).entry.id).toBe('perfect_streak');
+          |                                                                ^
+      212 |   await pop.tap('contest_cancel');
+      213 |   await expect.poll(async () => (await pop.state()).view.cancel_armed).toBe(true);
+      214 |   expect(C(await pop.state()).entry.id, 'one tap only arms it').toBe('perfect_streak');
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/contests38.spec.mjs:211:64
+
+    Error Context: test-results/contests38-contests-a-plai-0eab3-ancels-collides-and-resumes-p720/error-context.md
+
+  2) [desktop] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "perfect_streak"
+    Received: undefined
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      209 |   const prizes0 = s.run.stats.contest_prizes || 0;
+      210 |   await pop.tap('contest_enter_perfect_streak');
+    > 211 |   await expect.poll(async () => C(await pop.state()).entry.id).toBe('perfect_streak');
+          |                                                                ^
+      212 |   await pop.tap('contest_cancel');
+      213 |   await expect.poll(async () => (await pop.state()).view.cancel_armed).toBe(true);
+      214 |   expect(C(await pop.state()).entry.id, 'one tap only arms it').toBe('perfect_streak');
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/contests38.spec.mjs:211:64
+
+    Error Context: test-results/contests38-contests-a-plai-0eab3-ancels-collides-and-resumes-desktop/error-context.md
+
+  3) [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+
+    Error: entered by a tap
+
+    entered by a tap
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "perfect_streak"
+    Received: ""
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      141 |   const fees0 = (await pop.state()).run.stats.contest_fees || 0;
+      142 |   await pop.tap('contest_enter_perfect_streak');
+    > 143 |   await expect.poll(async () => (await pop.state()).run.contests.entry?.id ?? '', { message: 'entered by a tap' }).toBe('perfect_streak');
+          |                                                                                                                    ^
+      144 |   // The fee, from the fee counter: the factory keeps selling while the paper is open, so the
+      145 |   // wallet alone can be higher after the tap (Step 46 full run, desktop: 54962 -> 54975).
+      146 |   const entry = (await pop.state()).run.contests.entry;
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/journey46.spec.mjs:143:116
+
+    Error Context: test-results/journey46-a-novice-journey-85c5a-er-a-contest-resume-restart-desktop/error-context.md
+
+  3 failed
+    [p720] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes 
+    [desktop] › specs/contests38.spec.mjs:95:1 › contests: a plain stand opens them, enters, wins by real pops, repeats, cancels, collides and resumes 
+    [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart 
+  25 skipped
+  64 passed (31.0m)

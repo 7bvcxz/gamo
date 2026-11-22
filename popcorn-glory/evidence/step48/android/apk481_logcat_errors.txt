@@ -1,0 +1,7 @@
+11-22 14:16:05.707 26434 26434 E ve.popcornglory: Unable to open libpenguin.so: dlopen failed: library "libpenguin.so" not found.
+11-22 14:16:05.831  4800  9407 E AppWidgetSupplier: Couldn't find any provider services packageName=com.heydive.popcornglory
+11-22 14:16:15.785 26169 26171 I artd    : OatFileAssistant test for existing oat file /data/app/~~UDsmdQjOxtqcy_AQDCNtSQ==/com.heydive.popcornglory-JrzwLf43NiAlQYT4WETEbw==/base.dm: I/O error
+11-22 14:16:15.785 26169 26171 I artd    : OatFileAssistant test for existing oat file /data/app/~~UDsmdQjOxtqcy_AQDCNtSQ==/com.heydive.popcornglory-JrzwLf43NiAlQYT4WETEbw==/base.dm: I/O error
+11-22 14:17:01.244 26169 26172 I artd    : OatFileAssistant test for existing oat file /data/app/~~UDsmdQjOxtqcy_AQDCNtSQ==/com.heydive.popcornglory-JrzwLf43NiAlQYT4WETEbw==/base.dm: I/O error
+11-22 14:17:01.244 26169 26172 I artd    : OatFileAssistant test for existing oat file /data/app/~~UDsmdQjOxtqcy_AQDCNtSQ==/com.heydive.popcornglory-JrzwLf43NiAlQYT4WETEbw==/base.dm: I/O error
+11-22 14:17:28.383 26855 26855 E ve.popcornglory: Unable to open libpenguin.so: dlopen failed: library "libpenguin.so" not found.

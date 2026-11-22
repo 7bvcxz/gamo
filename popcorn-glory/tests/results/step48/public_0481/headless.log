@@ -1,0 +1,68 @@
+── Popcorn: import
+── Popcorn: editor load
+── Popcorn: unit + integration
+  storm 1: { "n": 50, "until_ms": 602987, "asked": 940, "drawn": 40, "refused": 900, "peak": 40, "filling_peak": 0, "frames": 90, "in_air": 40, "cargo_max": 40, "worst": 40 } left 0; storm 2: { "n": 50, "until_ms": 603891, "asked": 940, "drawn": 40, "refused": 900, "peak": 40, "filling_peak": 0, "frames": 90, "in_air": 40, "cargo_max": 40, "worst": 40 } left 0; nodes 151 -> 193 -> 193; cap 40
+  card ys before [199.199996948242, 298.0] after [199.199996948242]
+  idle, 40 frames: { "kettle": 0, "face": 0, "ring": 0, "scenery": 0, "goods": 0, "detail": 0, "floors": 0 }
+  12 machines, 60 frames: { "kettle": 0, "face": 14, "ring": 0, "scenery": 0, "goods": 1, "detail": 0, "floors": 0 } bin 0 shelf 0
+  full bin 14: pending false, pictures 41
+  M01 M01: states idle,run, done 66, busy 92 s, keep 1
+  M02 M02: states idle,run, done 0, busy 34 s, keep 1
+  M03 M03: states idle,run, done 0, busy 30 s, keep 1
+  M04 M04: states idle,run, done 0, busy 33 s, keep 1
+  M05 M05: states idle,run, done 0, busy 30 s, keep 0
+  M06 M06: states idle,run, done 0, busy 63 s, keep 1
+  M07 cooker: states blocked,run,starved, done 5, busy 293 s, keep 2
+  M08 M08: states idle,run, done 0, busy 164 s, keep 2
+  M09 M09: states idle,run, done 0, busy 30 s, keep 1
+  M10 M10: states idle,run, done 0, busy 162 s, keep 4
+  M11 M11: states idle,run, done 0, busy 30 s, keep 1
+  M12 M12: states idle, done 0, busy 0 s, keep 0
+  M13 M13: states idle,run, done 0, busy 30 s, keep 1
+  M14 M14: states idle,run, done 0, busy 31 s, keep 0
+  M15 M15: states run, done 0, busy 294 s, keep 9
+  M16 M16: states blocked,run,starved, done 5, busy 291 s, keep 1
+  P01 P01: states blocked,run,starved, done 87, busy 283 s, keep 2
+  P02 P02: states idle,run, done 0, busy 289 s, keep 4
+  P03 bagger: states blocked,run,starved, done 54, busy 293 s, keep 13
+  P04 P04: states idle,run, done 0, busy 288 s, keep 9
+  P05 P05: states idle,run,starved, done 35, busy 109 s, keep 2
+  P06 P06: states idle,run,starved, done 22, busy 226 s, keep 10
+  P07 P07: states idle,run, done 0, busy 292 s, keep 9
+  P08 P08: states idle,run, done 0, busy 292 s, keep 9
+  S01 S01: states run, done 0, busy 293 s, keep 4
+  S02 S02: states run, done 0, busy 291 s, keep 4
+  S03 S03: states run, done 321, busy 293 s, keep 9
+  S04 S04: states run, done 0, busy 293 s, keep 4
+  S05 S05: states idle,run, done 142, busy 249 s, keep 7
+  S06 S06: states run, done 0, busy 290 s, keep 4
+  S07 kiosk: states idle,run, done 21, busy 78 s, keep 3
+  S08 S08: states run, done 0, busy 291 s, keep 19
+  U01 U01: states idle,run, done 0, busy 291 s, keep 9
+  U02 U02: states idle,run, done 0, busy 27 s, keep 0
+  U03 U03: states idle,run, done 0, busy 33 s, keep 0
+  U04 U04: states idle,run, done 0, busy 214 s, keep 3
+  U05 U05: states idle,run, done 0, busy 230 s, keep 3
+  U06: not buildable (aging)
+  U07 U07: states idle, done 0, busy 0 s, keep 0
+  U08 U08: states idle, done 0, busy 0 s, keep 0
+  sold by recipe: {"caramel":20,"cheese":38,"cocoa":23,"duo":10,"plain":212,"spicy":12}, asked: {"caramel":32,"cheese":45,"cocoa":27,"duo":15,"plain":239,"spicy":12}, ledger 315 rows
+  wallet zeroed a minute: unpaid_ms 0 -> 0, money 0, states {"M01:unpaid":35700,"M12:idle":1350,"P05:idle":7800,"P05:starved":14000,"P06:starved":17000,"bagger:starved":15000,"cooker:blocked":9000,"kiosk:idle":13000}
+  ten minutes, 44 machines: made 1026, packed 958, sold 935 portions
+  1 machines: ten model minutes in 288 ms, sold 431, upkeep 2, revenue 5296
+  5 machines: ten model minutes in 795 ms, sold 425, upkeep 87, revenue 5149
+  10 machines: ten model minutes in 1400 ms, sold 422, upkeep 144, revenue 5055
+  20 machines: ten model minutes in 3743 ms, sold 421, upkeep 280, revenue 4996
+  44 machines: ten model minutes in 9843 ms, sold 416, upkeep 287, revenue 4418
+  the special: on at 21400 ms, surplus gone at 396850 ms, spicy sold 5
+  no special: surplus gone at -1 ms, spicy sold 2
+  tastes: { "classic": { "sweet": 0.06666666666667, "savoury": 0.09466666666667, "plain": 0.817, "large": 0.37266666666667 }, "kid": { "sweet": 0.406, "savoury": 0.16533333333333, "plain": 0.34233333333333, "large": 0.23866666666667 }, "student": { "sweet": 0.08533333333333, "savoury": 0.31533333333333, "plain": 0.56833333333333, "large": 0.26666666666667 }, "rush": { "sweet": 0.17233333333333, "savoury": 0.192, "plain": 0.59366666666667, "large": 0.576 }, "elder": { "sweet": 0.29533333333333, "savoury": 0.194, "plain": 0.448, "large": 0.399 } }
+  25x arrivals, 30 min: peak queue 8 (cap 8), arrived 1331, passed by 2257, sold 1325
+  hand_first: {"everywhere":986,"longest_ms":13500,"made":986,"packed":418,"pops":31,"refused":169,"sold":408,"tries":200}
+  old rule:   {"everywhere":877,"longest_ms":294000,"made":877,"packed":370,"pops":3,"refused":197,"sold":360,"tries":200}
+  fair: {"coated":{"caramel":22,"cheese":56,"cocoa":8,"spicy":16},"sold":227}  build order: {"coated":{"caramel":36,"cheese":80,"spicy":16},"sold":258}
+354 passed, 0 failed, 24130 checks, 31 files, 697.7s
+── test.sh: OK
+── Popcorn: render (gold on top of a burst)
+gold on the arc under burst pieces: without the mode 0.00, with the crescendo mode 1.00
+── check.sh (Popcorn): OK

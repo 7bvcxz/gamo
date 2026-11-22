@@ -1,0 +1,10 @@
+
+Running 371 tests using 1 worker
+
+  ✓    1 [p720] › specs/art15.spec.mjs:6:1 › the artboard preview draws on this screen (3.4s)
+  ✓    2 [p720] › specs/art15.spec.mjs:14:1 › the chooser does not list the artboard (2.3s)
+  ✓    3 [p720] › specs/art40.spec.mjs:39:1 › the three rooms are drawn behind the machines, and the hand's kettle stays the vivid thing in the kitchen (6.6s)
+  ✓    4 [p720] › specs/art40.spec.mjs:68:1 › the upgrade card: a silhouette out of reach, the next machine in its colours once affordable (5.9s)
+  ✓    5 [p720] › specs/burst14.spec.mjs:11:1 › burst mode: perfect pops fill the crescendo, the filling pop is one 1.5x burst (11.9s)
+  ✓    6 [p720] › specs/burst14.spec.mjs:41:1 › without ?burst=1 the stand has no crescendo (11.3s)
+  -    7 [p720] › specs/burst14.spec.mjs:51:1 › the fountain is heard and does not clip

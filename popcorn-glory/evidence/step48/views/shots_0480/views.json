@@ -1,0 +1,167 @@
+[
+  {
+    "view": "m0",
+    "size": "phone",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 0,
+    "money": 0,
+    "last_outcome": "perfect:1",
+    "errors": []
+  },
+  {
+    "view": "m0",
+    "size": "p720",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 0,
+    "money": 0,
+    "last_outcome": "perfect:1",
+    "errors": []
+  },
+  {
+    "view": "m0",
+    "size": "desktop",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 0,
+    "money": 0,
+    "last_outcome": "perfect:1",
+    "errors": []
+  },
+  {
+    "view": "m3",
+    "size": "phone",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 1,
+    "money": 111,
+    "last_outcome": "early:1 late:6 near:6 perfect:9",
+    "errors": []
+  },
+  {
+    "view": "m3",
+    "size": "p720",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 1,
+    "money": 111,
+    "last_outcome": "early:1 late:6 near:6 perfect:9",
+    "errors": []
+  },
+  {
+    "view": "m3",
+    "size": "desktop",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 1,
+    "money": 111,
+    "last_outcome": "early:1 late:6 near:6 perfect:9",
+    "errors": []
+  },
+  {
+    "view": "m10",
+    "size": "phone",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 3,
+    "money": 285,
+    "last_outcome": "early:2 late:10 near:18 perfect:32",
+    "errors": []
+  },
+  {
+    "view": "m10",
+    "size": "p720",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 3,
+    "money": 285,
+    "last_outcome": "early:2 late:10 near:18 perfect:32",
+    "errors": []
+  },
+  {
+    "view": "m10",
+    "size": "desktop",
+    "version": "0.48.0",
+    "machines": 0,
+    "level": 0,
+    "sign": 3,
+    "money": 285,
+    "last_outcome": "early:2 late:10 near:18 perfect:32",
+    "errors": []
+  },
+  {
+    "view": "m30",
+    "size": "phone",
+    "version": "0.48.0",
+    "machines": 8,
+    "level": 4,
+    "sign": 4,
+    "money": 525,
+    "last_outcome": "early:14 late:21 near:56 perfect:65",
+    "errors": []
+  },
+  {
+    "view": "m30",
+    "size": "p720",
+    "version": "0.48.0",
+    "machines": 8,
+    "level": 4,
+    "sign": 4,
+    "money": 515,
+    "last_outcome": "early:14 late:21 near:56 perfect:65",
+    "errors": []
+  },
+  {
+    "view": "m30",
+    "size": "desktop",
+    "version": "0.48.0",
+    "machines": 8,
+    "level": 4,
+    "sign": 4,
+    "money": 515,
+    "last_outcome": "early:14 late:21 near:56 perfect:65",
+    "errors": []
+  },
+  {
+    "view": "f44",
+    "size": "phone",
+    "version": "0.48.0",
+    "machines": 44,
+    "level": 6,
+    "sign": 8,
+    "money": 9988,
+    "last_outcome": "perfect:1",
+    "errors": []
+  },
+  {
+    "view": "f44",
+    "size": "p720",
+    "version": "0.48.0",
+    "machines": 44,
+    "level": 6,
+    "sign": 8,
+    "money": 9979,
+    "last_outcome": "perfect:1",
+    "errors": []
+  },
+  {
+    "view": "f44",
+    "size": "desktop",
+    "version": "0.48.0",
+    "machines": 44,
+    "level": 6,
+    "sign": 8,
+    "money": 9968,
+    "last_outcome": "",
+    "errors": []
+  }
+]
