@@ -41,11 +41,11 @@ export function WhatIsGamo() {
             살려 내는 것 자체가 즐거운지 확인하는 게임입니다.
           </span>
         </a>
-        <a className="card" href={game('/popcorn-glory/#stand')}>
+        <a className="card" href={game('/popcorn-glory/#factory')}>
           <b>Popcorn &amp; Glory</b>
           <span>
-            팝콘 가게. 세 실험(바로 터지는 손맛·딱 맞춘 순간·쌓였다 터지는 폭발)으로 고른 &lsquo;금색에서 떼기&rsquo;
-            위에, 흔들기·양념·자동화가 하나씩 열리는 가게를 키웁니다.
+            3층 팝콘 공장. 세 실험으로 고른 &lsquo;금색에서 떼기&rsquo; 위에, 부엌·포장·가게 세 층을 지나
+            손님에게 가는 팝콘의 흐름을 키웁니다. 출시 후보 0.48.1이 소유자의 결정을 기다립니다.
           </span>
         </a>
         <a className="card" href={game('/gunslinger/')}>

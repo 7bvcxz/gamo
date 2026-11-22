@@ -31,9 +31,9 @@ const GAMES = [
   },
   {
     name: 'Popcorn & Glory',
-    path: game('/popcorn-glory/#stand'),
+    path: game('/popcorn-glory/#factory'),
     blurb:
-      '팝콘 가게. 누르고 있다가 금색에서 떼면 팝콘이 터집니다. 가게가 자라면 흔들기·양념·자동화가 하나씩 열립니다. 세 실험으로 고른 손맛 위에 만들었습니다.',
+      '3층 팝콘 공장. 냄비를 누르고 있다가 금색에서 떼면 팝콘이 터지고, 팝콘은 유리관을 타고 포장 층을 지나 계산대의 손님에게 갑니다. 기계 40종, 맛 다섯, 뉴스와 대회. 출시 후보 0.48.1.',
     extra: [{ href: site('/popcorn-glory/doc/'), label: '문서' }],
   },
   {

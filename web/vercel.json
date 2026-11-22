@@ -21,7 +21,12 @@
     },
     {
       "source": "/popcorn-glory",
-      "destination": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+      "destination": "https://7bvcxz.github.io/gamo/popcorn-glory/#factory",
+      "permanent": false
+    },
+    {
+      "source": "/popcorn-glory/",
+      "destination": "https://7bvcxz.github.io/gamo/popcorn-glory/#factory",
       "permanent": false
     },
     {

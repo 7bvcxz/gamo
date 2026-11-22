@@ -63,6 +63,13 @@ not a smarter guess about which single commit mattered.
 here, so a guessed URL is sent to the host that has them. A 308 would be cached
 by browsers and would outlive the decision about where the games live.
 
+`trailingSlash: true` answers `/popcorn-glory` with its own 308 to
+`/popcorn-glory/` *before* a redirect whose source has no slash can match, so
+that address was a 404 (as of 2026-11-22 it still is for every other game here).
+Popcorn & Glory therefore lists both spellings. Its destination carries
+`#factory`, the game's route for the three-floor factory (the release
+candidate), so the short address opens the game rather than its chooser.
+
 **`regions: ["icn1"]`** — matches heydive-client.
 
 ## Vercel project settings
