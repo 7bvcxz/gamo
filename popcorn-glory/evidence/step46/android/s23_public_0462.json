@@ -1,0 +1,84 @@
+{
+  "url": "https://7bvcxz.github.io/gamo/popcorn-glory/?dev=1#factory",
+  "device": "Samsung S23 (SM-S911N), Chrome on Android, over DevTools",
+  "when": "2026-11-22T00:16:39.885Z",
+  "load_to_ready_ms": 4008,
+  "rows": [
+    {
+      "scene": "fresh factory",
+      "machines": 0,
+      "window": [
+        2115,
+        840
+      ],
+      "fps": {
+        "min": 56.840845675474796,
+        "p10": 57.080995943534425,
+        "median": 58.07086614173228,
+        "p90": 58.77664872363941,
+        "all": [
+          56.8,
+          57.1,
+          57.3,
+          57.7,
+          57.9,
+          58.1,
+          58.4,
+          58.5,
+          58.8,
+          59.1
+        ]
+      },
+      "draw_calls": 484,
+      "objects": 865,
+      "nodes": 105,
+      "heap_mb": 24.5,
+      "version": "0.46.2"
+    },
+    {
+      "scene": "44 machines",
+      "machines": 44,
+      "window": [
+        2115,
+        840
+      ],
+      "fps": {
+        "min": 14.829461196243203,
+        "p10": 15.658641609917158,
+        "median": 16.643822195492785,
+        "p90": 17.706079097119318,
+        "all": [
+          14.8,
+          15.7,
+          15.8,
+          16.1,
+          16.4,
+          16.6,
+          16.9,
+          17.7,
+          17.7,
+          18.2
+        ]
+      },
+      "draw_calls": 966,
+      "objects": 1274,
+      "nodes": 457,
+      "heap_mb": 24.5,
+      "version": "0.46.2"
+    }
+  ],
+  "build_ok": true,
+  "prolonged": {
+    "heap_start_mb": 10,
+    "t0": 1795306634995,
+    "heap_end_mb": 17.1,
+    "minutes": 5.06,
+    "fps_start": 17,
+    "fps_end": 10.5,
+    "growth_mb": 7.1,
+    "state": {
+      "version": "0.46.2",
+      "machines": 44
+    }
+  }
+}

@@ -1,0 +1,2 @@
+{"load":4008,"rows":[["fresh factory",0,58.1,484,24.5,"0.46.2"],["44 machines",44,16.6,966,24.5,"0.46.2"]],"prolonged":{"heap_start_mb":10,"t0":1795306634995,"heap_end_mb":17.1,"minutes":5.06,"fps_start":17,"fps_end":10.5,"growth_mb":7.1,"state":{"version":"0.46.2","machines":44}}}
+exit 0

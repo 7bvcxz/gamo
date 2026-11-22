@@ -1,0 +1,72 @@
+{
+  "url": "https://7bvcxz.github.io/gamo/popcorn-glory/?dev=1#factory",
+  "device": "Samsung S23 (SM-S911N), Chrome on Android, over DevTools",
+  "when": "2026-11-22T00:22:50.139Z",
+  "load_to_ready_ms": 2844,
+  "rows": [
+    {
+      "scene": "fresh factory",
+      "machines": 0,
+      "window": [
+        2115,
+        840
+      ],
+      "fps": {
+        "min": 38.59475507174666,
+        "p10": 40.207904293095076,
+        "median": 41.932907372198684,
+        "p90": 42.4565560741529,
+        "all": [
+          38.6,
+          40.2,
+          40.8,
+          41.4,
+          41.9,
+          41.9,
+          42,
+          42.3,
+          42.5,
+          43
+        ]
+      },
+      "draw_calls": 482,
+      "objects": 863,
+      "nodes": 102,
+      "heap_mb": 24.5,
+      "version": "0.46.2"
+    },
+    {
+      "scene": "44 machines",
+      "machines": 44,
+      "window": [
+        2115,
+        840
+      ],
+      "fps": {
+        "min": 10.869565217391305,
+        "p10": 11.598685478035426,
+        "median": 12.16772743638859,
+        "p90": 12.414056522659306,
+        "all": [
+          10.9,
+          11.6,
+          11.9,
+          11.9,
+          12,
+          12.2,
+          12.2,
+          12.3,
+          12.4,
+          12.4
+        ]
+      },
+      "draw_calls": 1025,
+      "objects": 1352,
+      "nodes": 451,
+      "heap_mb": 24.5,
+      "version": "0.46.2"
+    }
+  ],
+  "build_ok": true,
+  "thermal_note": "right after the 5-minute run, thermal status 1, AP 43.3 C"
+}

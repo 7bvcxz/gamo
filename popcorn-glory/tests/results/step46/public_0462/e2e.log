@@ -1,0 +1,55 @@
+
+Running 48 tests using 1 worker
+
+  ✓   1 [p720] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+  ✓   2 [p720] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+  ✓   3 [p720] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (16.6s)
+  ✓   4 [p720] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (9.8s)
+  ✓   5 [p720] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (8.0s)
+  ✓   6 [p720] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (6.3s)
+  ✓   7 [p720] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion (6.4s)
+  -   8 [p720] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  ✓   9 [p720] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins) (312ms)
+  ✓  10 [p720] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere (510ms)
+  ✓  11 [p720] › specs/save45.spec.mjs:48:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (6.8s)
+  -  12 [p720] › specs/save45.spec.mjs:81:1 › a killed browser loses seconds, never goods: nothing sold twice, every machine there
+  ✓  13 [p720] › specs/save45.spec.mjs:122:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.8s)
+  ✓  14 [p720] › specs/save45.spec.mjs:144:1 › a broken save is set aside, the backup comes back, and the saves page shows both (4.6s)
+  ✓  15 [p720] › specs/save45.spec.mjs:181:1 › the saves page exports and imports, and the factory comes back from the file (7.5s)
+  ✓  16 [p720] › specs/save45.spec.mjs:210:1 › restart takes two taps and the old factory waits in the backup (5.1s)
+  ✓  17 [phone] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.8m)
+  ✓  18 [phone] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.9s)
+  ✓  19 [phone] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (18.9s)
+  ✓  20 [phone] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (10.8s)
+  ✓  21 [phone] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (8.6s)
+  ✓  22 [phone] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (6.2s)
+  -  23 [phone] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -  24 [phone] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -  25 [phone] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  26 [phone] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  27 [phone] › specs/save45.spec.mjs:48:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (7.5s)
+  -  28 [phone] › specs/save45.spec.mjs:81:1 › a killed browser loses seconds, never goods: nothing sold twice, every machine there
+  ✓  29 [phone] › specs/save45.spec.mjs:122:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (4.3s)
+  ✓  30 [phone] › specs/save45.spec.mjs:144:1 › a broken save is set aside, the backup comes back, and the saves page shows both (5.2s)
+  ✓  31 [phone] › specs/save45.spec.mjs:181:1 › the saves page exports and imports, and the factory comes back from the file (6.9s)
+  ✓  32 [phone] › specs/save45.spec.mjs:210:1 › restart takes two taps and the old factory waits in the backup (5.8s)
+  ✓  33 [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+  ✓  34 [desktop] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.6s)
+  ✓  35 [desktop] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (19.9s)
+  ✓  36 [desktop] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (10.3s)
+  ✓  37 [desktop] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (8.1s)
+  ✓  38 [desktop] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.5s)
+  -  39 [desktop] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  ✓  40 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (1.1m)
+  -  41 [desktop] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  42 [desktop] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  43 [desktop] › specs/save45.spec.mjs:48:1 › a reload and a trip to the stand keep the factory, and the stand keeps its own (7.1s)
+
+  ✓  44 [desktop] › specs/save45.spec.mjs:81:1 › a killed browser loses seconds, never goods: nothing sold twice, every machine there (13.1s)
+  ✓  45 [desktop] › specs/save45.spec.mjs:122:1 › old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory (3.9s)
+  ✓  46 [desktop] › specs/save45.spec.mjs:144:1 › a broken save is set aside, the backup comes back, and the saves page shows both (4.7s)
+  ✓  47 [desktop] › specs/save45.spec.mjs:181:1 › the saves page exports and imports, and the factory comes back from the file (6.3s)
+  ✓  48 [desktop] › specs/save45.spec.mjs:210:1 › restart takes two taps and the old factory waits in the backup (5.2s)
+
+  10 skipped
+  38 passed (10.4m)

@@ -1,0 +1,529 @@
+{
+  "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
+  "sha": "a831551aec88",
+  "dirty": true,
+  "build": {
+    "version": "0.46.2",
+    "pack": "game-a96a4a030639.pck",
+    "packSize": 1003984,
+    "engine": "engine-7eda98958eb0",
+    "godot": "4.7.stable.official.5b4e0cb0f",
+    "source": "86ff50bdcc77"
+  },
+  "target": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+  "when": "2026-11-22T00:24:58.680Z",
+  "stages": {
+    "headless": "SKIPPED",
+    "deploy": "SKIPPED (--public: testing the published build)",
+    "browser": "PASSED"
+  },
+  "headless_summary": null,
+  "browser_checks": [
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10149,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 104878
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10256,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 108145
+    },
+    {
+      "spec": "journey46.spec.mjs",
+      "title": "a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "by_hand: {\"first_sale_ms\":10173,\"minute_sales\":6,\"revenue\":60,\"sign_open\":true}",
+        "stations: {\"sign\":[0,5],\"packer\":[0,2],\"kettle\":[0,1]}",
+        "hooks: [\"dev_money\",\"dev_news\",\"dev_contest\"]"
+      ],
+      "ms": 100423
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3647
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 16584
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":3,\"money\":400017,\"made\":8,\"from\":\"main\"}}"
+      ],
+      "ms": 9849
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7986
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3919
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 18861
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":3,\"money\":400017,\"made\":8,\"from\":\"main\"}}"
+      ],
+      "ms": 10844
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8575
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a game pack that fails to download says so -- no endless blank page",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "pack_failure: {\"aborted\":4,\"notice\":\"Failed to fetch\"}"
+      ],
+      "ms": 3641
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "jitter: {\"taps\":24,\"presses\":12,\"heating\":false,\"outcomes\":{\"burnt\":0,\"early\":12,\"late\":0,\"near\":0,\"perfect\":0}}"
+      ],
+      "ms": 19940
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a reload in the middle of a pack: every portion and every coin where it was",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mid_pack: {\"before\":{\"sold\":4,\"money\":400024,\"made\":16,\"lift\":4,\"serves\":1},\"after\":{\"sold\":3,\"money\":400017,\"made\":8,\"from\":\"main\"}}"
+      ],
+      "ms": 10279
+    },
+    {
+      "spec": "negative46.spec.mjs",
+      "title": "a hold across a hidden tab ends the press: nothing heats while nobody looks",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8074
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "device: p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 6319
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6381
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 25
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 312
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 510
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "device: phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 6208
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 25
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "desktop measures",
+      "notes": [],
+      "ms": 20
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 19
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 20
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "stand: saved across a reload, written when hidden, two taps to restart",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "device: desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      ],
+      "ms": 5508
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "plays on offline once loaded; follows reduce motion",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 25
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "first load on a slow connection (recorded)",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "slow_load: Fast 3G emulation: first drawn frame after 64162 ms"
+      ],
+      "ms": 64186
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the game page asks browsers not to translate it (a Korean phone offered to, over the coins)",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 25
+    },
+    {
+      "spec": "release12.spec.mjs",
+      "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "one project",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a reload and a trip to the stand keep the factory, and the stand keeps its own",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6836
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a killed browser loses seconds, never goods: nothing sold twice, every machine there",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one browser kill is enough; the save path is the same on every screen",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3841
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a broken save is set aside, the backup comes back, and the saves page shows both",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4573
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "the saves page exports and imports, and the factory comes back from the file",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7533
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "restart takes two taps and the old factory waits in the backup",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5118
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a reload and a trip to the stand keep the factory, and the stand keeps its own",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7539
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a killed browser loses seconds, never goods: nothing sold twice, every machine there",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one browser kill is enough; the save path is the same on every screen",
+      "notes": [],
+      "ms": 22
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4314
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a broken save is set aside, the backup comes back, and the saves page shows both",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5243
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "the saves page exports and imports, and the factory comes back from the file",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6944
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "restart takes two taps and the old factory waits in the backup",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5821
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a reload and a trip to the stand keep the factory, and the stand keeps its own",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7117
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a killed browser loses seconds, never goods: nothing sold twice, every machine there",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "kill: {\"pids\":2,\"built_clock\":31662,\"before_kill_clock\":38710,\"saved_clock\":31544,\"sold\":[14,12,12],\"from\":\"main\"}"
+      ],
+      "ms": 13134
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "old builds' saves open: a 0.12.2 stand and a 0.43.0 forty-four-machine factory",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3949
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "a broken save is set aside, the backup comes back, and the saves page shows both",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4690
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "the saves page exports and imports, and the factory comes back from the file",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6307
+    },
+    {
+      "spec": "save45.spec.mjs",
+      "title": "restart takes two taps and the old factory waits in the backup",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5236
+    }
+  ],
+  "run": {
+    "mode": "only",
+    "started": "2026-11-22T00:14:33Z",
+    "ended": "2026-11-22T00:24:58.641Z",
+    "specs_run": [
+      "release12.spec.mjs",
+      "journey46.spec.mjs",
+      "negative46.spec.mjs",
+      "save45.spec.mjs"
+    ],
+    "not_run": {
+      "art15.spec.mjs": "not asked for (--only)",
+      "art40.spec.mjs": "not asked for (--only)",
+      "art41.spec.mjs": "not asked for (--only)",
+      "burst14.spec.mjs": "not asked for (--only)",
+      "career39.spec.mjs": "not asked for (--only)",
+      "catalog27.spec.mjs": "not asked for (--only)",
+      "contests38.spec.mjs": "not asked for (--only)",
+      "craft35.spec.mjs": "not asked for (--only)",
+      "customers36.spec.mjs": "not asked for (--only)",
+      "experiments04.spec.mjs": "not asked for (--only)",
+      "factory16.spec.mjs": "not asked for (--only)",
+      "factory17.spec.mjs": "not asked for (--only)",
+      "factory18.spec.mjs": "not asked for (--only)",
+      "factory19.spec.mjs": "not asked for (--only)",
+      "factory20.spec.mjs": "not asked for (--only)",
+      "factory21.spec.mjs": "not asked for (--only)",
+      "factory22.spec.mjs": "not asked for (--only)",
+      "factory23.spec.mjs": "not asked for (--only)",
+      "factory26.spec.mjs": "not asked for (--only)",
+      "factory28.spec.mjs": "not asked for (--only)",
+      "factory29.spec.mjs": "not asked for (--only)",
+      "factory30.spec.mjs": "not asked for (--only)",
+      "factory31.spec.mjs": "not asked for (--only)",
+      "factory32.spec.mjs": "not asked for (--only)",
+      "factory33.spec.mjs": "not asked for (--only)",
+      "flavors34.spec.mjs": "not asked for (--only)",
+      "input07.spec.mjs": "not asked for (--only)",
+      "motion42.spec.mjs": "not asked for (--only)",
+      "news37.spec.mjs": "not asked for (--only)",
+      "perf07.spec.mjs": "not asked for (--only)",
+      "perf46.spec.mjs": "the Step 46 benchmark table, desktop and phone (--perf)",
+      "play180.spec.mjs": "three real minutes per experiment (--slow)",
+      "play_stand.spec.mjs": "a long real-time stand session, one project (--slow)",
+      "progression07.spec.mjs": "not asked for (--only)",
+      "render_probe.spec.mjs": "a probe, not a gate: load time and render cost of a build (--perf)",
+      "responsive07.spec.mjs": "not asked for (--only)",
+      "scorecard09.spec.mjs": "not asked for (--only)",
+      "sessions22.spec.mjs": "Step 22 evidence: real-time 3-minute sessions from seeds, writes $OUT/sessions22.json (--slow)",
+      "soak43.spec.mjs": "not asked for (--only)",
+      "sound05.spec.mjs": "not asked for (--only)",
+      "sound43.spec.mjs": "not asked for (--only)",
+      "stall09.spec.mjs": "not asked for (--only)",
+      "stand10.spec.mjs": "not asked for (--only)",
+      "stub03.spec.mjs": "not asked for (--only)",
+      "ui44.spec.mjs": "not asked for (--only)"
+    },
+    "load": {
+      "start": "1.36 5.58 7.17",
+      "end": "6.83 7.07 7.47"
+    },
+    "mem_available_mb": {
+      "start": 33868,
+      "end": 33627
+    }
+  },
+  "browser_totals": {
+    "passed": 38,
+    "passed_on_retry": 0,
+    "failed": 0,
+    "skipped": 10
+  }
+}
