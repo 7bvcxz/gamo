@@ -1,0 +1,61 @@
+{
+  "run": "smoke_save",
+  "version": "0.46.2",
+  "url_hash": "factory",
+  "prepared_save": "factory44_0462.json",
+  "seconds": 31,
+  "commands": 2,
+  "taps": 0,
+  "holds": 0,
+  "drags": 0,
+  "waits": 1,
+  "wait_s": 8,
+  "notes": 0,
+  "looks": 1,
+  "first_action_s": null,
+  "hand_presses": 0,
+  "outcomes": {},
+  "first_perfect_s": null,
+  "first_sale_s": 3,
+  "sales": 45,
+  "first_machine_s": null,
+  "machines_built": 0,
+  "first_purchase_s": null,
+  "purchases": 0,
+  "purchase_kinds": {},
+  "seconds_between_purchases": [],
+  "longest_without_purchase_s": 31,
+  "longest_without_sale_s": 3,
+  "first_recipe_change_s": null,
+  "recipe_changes": 0,
+  "paper_opened_s": null,
+  "news_events": 0,
+  "first_contest_entry_s": null,
+  "contests_entered": 0,
+  "refused": 0,
+  "repeated_taps": 0,
+  "money": [
+    9898,
+    10219
+  ],
+  "machines": [
+    44,
+    44
+  ],
+  "revenue_in_session": 438,
+  "running_costs_in_session": 117,
+  "sold_in_session": 43,
+  "bottleneck_samples": {
+    "demand": 7
+  },
+  "sign_tier": [
+    8,
+    8
+  ],
+  "level": [
+    6,
+    6
+  ],
+  "page_errors": 0,
+  "profit_in_session": 321
+}

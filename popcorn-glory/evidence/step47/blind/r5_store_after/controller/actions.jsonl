@@ -1,0 +1,142 @@
+{"t":0.3,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":11.5,"issued":11.5,"cmd":"note","args":{"text":"First look: a popcorn shop! Coins 0 at top. Top panel: 3 customers at a counter wanting popcorn (speech bubbles with a cup). Middle panel: a white room with a hopper and a hanging hook - maybe packing. Bottom panel: a red popcorn machine with a big ring around it (red, yellow, blue segments) and a little gauge/needle. Row of 9 empty circles under it - maybe batch count. Locked slots on right. Bottom: an upgrade button 30 coins, +4 -> +6, arrow. I think I can press the popcorn machine (maybe hold it to heat, aim for yellow?). Buttons top: back, sparkle, sound, restart. I'll try tapping the machine first."}}
+{"t":13.8,"issued":13,"cmd":"tap","args":{"x":260,"y":860},"shot":"002.png"}
+{"t":23.7,"issued":23.7,"cmd":"note","args":{"text":"Tapped machine: a popcorn puff appeared in the middle room, a 4th customer arrived. A white dot appeared on the ring's right side and a marker at the top of the ring. Coins still 0. Maybe the dot goes around and I tap when it's in the yellow? Let me wait a bit and see if the popcorn reaches customers."}}
+{"t":27.2,"issued":25,"cmd":"wait","args":{"s":2},"shot":"003.png"}
+{"t":35.5,"issued":35.5,"cmd":"note","args":{"text":"Got 8 coins! The popcorn went to a customer. Upgrade button fills with yellow bar toward 30. +4 per tap maybe, but I got 8 - perhaps a bonus. Tapping again."}}
+{"t":37.7,"issued":36.9,"cmd":"tap","args":{"x":260,"y":860},"shot":"004.png"}
+{"t":49.2,"issued":49.2,"cmd":"note","args":{"text":"Second tap: same thing, a puff on the hook, white dot at 3 o'clock on the ring. A customer frowns. The ring has arrows going clockwise, blue then yellow then red. Maybe holding the machine moves the dot around and I should release in the yellow zone. Trying a 3 second hold."}}
+{"t":54.3,"issued":50.6,"cmd":"hold","args":{"x":260,"y":860,"s":3},"shot":"005.png","held_ms":3066}
+{"t":64.7,"issued":64.7,"cmd":"note","args":{"text":"Whoa, a 3 second hold made a big black smoke cloud - I burned it! So the hold is a cook timer: the needle goes clockwise, blue=underdone, yellow=perfect, red=burnt. 3s was too much. Coins 16 from the earlier sale. Yellow sits around 7-9 o'clock. Trying a 2 second hold."}}
+{"t":68.9,"issued":66.1,"cmd":"hold","args":{"x":260,"y":860,"s":2},"shot":"006.png","held_ms":2079}
+{"t":81.9,"issued":81.9,"cmd":"note","args":{"text":"2s hold: the marker stopped at ~10 o'clock, in the red part just past yellow. Not burnt this time - popcorn on the hook, and the first of the 9 little circles turned gold! So the circles may count good batches. Queue of 5 customers getting grumpy. Next try 1.6s to land in yellow."}}
+{"t":85.6,"issued":83.3,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"007.png","held_ms":1657}
+{"t":95.1,"issued":95.1,"cmd":"note","args":{"text":"1.6s landed right in the yellow! Golden popcorn burst out, 3 of the 9 circles now gold, coins 33. Satisfying! The upgrade button lit up gold with a red arrow - machine upgrade +4 -> +6 for 30. Buying it."}}
+{"t":97.3,"issued":96.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"008.png"}
+{"t":108.2,"issued":108.2,"cmd":"note","args":{"text":"Upgrade bought: machine got a striped awning. Next machine upgrade costs 54 (+6 -> +8). Coins 23. Now the middle packing room has a red outline, like it's asking for attention. The selected panel seems to decide what the bottom button upgrades. Let me tap the middle room."}}
+{"t":110.9,"issued":110.1,"cmd":"tap","args":{"x":300,"y":460},"shot":"009.png"}
+{"t":123.4,"issued":123.4,"cmd":"note","args":{"text":"Middle room selected: an info card pops up - looks like a packing line (hook drops popcorn into cups, conveyor). Stats 1>1, timer 4.0>3.0, cups 15>20. Upgrade costs 250 - way too much for now. A counter shows 4 cups and 0. Going back to cook more perfect batches - holding 1.6s again."}}
+{"t":127.7,"issued":125.3,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"010.png","held_ms":1660}
+{"t":140.5,"issued":138.1,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"011.png","held_ms":1655}
+{"t":151.5,"issued":151.5,"cmd":"note","args":{"text":"Two more perfects in a row. Coins 43, 8 of 9 circles gold and the end circle glowing. All customers served, counter empty. A filled striped cup appeared on the conveyor in the packing room, counter 5 / 1. The sign by the counter changed from 'no popcorn' to a popcorn bucket. One more perfect to fill the row - let's see what happens."}}
+{"t":155.9,"issued":153.5,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"012.png","held_ms":1673}
+{"t":168.1,"issued":168.1,"cmd":"note","args":{"text":"Filled the row: a huge popcorn explosion, the row reset. Customer paid +10. Coins 63. The little board by the counter now has 2 gold dots out of 10 and some stars under it - maybe shop level/rating progress. Packing room: 2 cups on the belt, counter 7 / 2. I have 63, machine upgrade was 54 - selecting the machine panel via its icon."}}
+{"t":170.8,"issued":170,"cmd":"tap","args":{"x":48,"y":610},"shot":"013.png"}
+{"t":179.7,"issued":178.9,"cmd":"tap","args":{"x":300,"y":1180},"shot":"014.png"}
+{"t":191.2,"issued":191.2,"cmd":"note","args":{"text":"Bought machine level 3: now a cart on wheels, bigger. Next costs 97. Stats show 8>11, 550>600 and 400>350. Coins 19. But the packing room now has 6 cups stacked up and no customers at the counter - customers are the bottleneck now. Let me check the shop (top) panel's upgrade."}}
+{"t":194,"issued":193.2,"cmd":"tap","args":{"x":48,"y":145},"shot":"015.png"}
+{"t":205.6,"issued":205.6,"cmd":"note","args":{"text":"Shop panel: upgrade costs 40, a sign board -> lit sign. Stats: 0>1 (sign?), 4.0>5.4 (customers?), 15.0>11.0 (wait time?), stars 2/5 x0.99. Coins 29, so I need 11 more. A white dot is creeping around the ring on its own near 1 o'clock - is the machine moving by itself? Waiting a few seconds."}}
+{"t":212,"issued":207.7,"cmd":"wait","args":{"s":4},"shot":"016.png"}
+{"t":221.1,"issued":220.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"017.png"}
+{"t":231.6,"issued":231.6,"cmd":"note","args":{"text":"Bought the shop upgrade (40): a little sign hangs on the awning now, customers should come more often (5.4, wait 11s). Coins 9. Next shop upgrade 100. Back to cooking - checking if 1.6s still hits yellow on the new cart."}}
+{"t":236.3,"issued":233.9,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"018.png","held_ms":1667}
+{"t":247.9,"issued":245.6,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"019.png","held_ms":1659}
+{"t":258.2,"issued":258.2,"cmd":"note","args":{"text":"Two more perfects (yellow at ~7:30). 4 circles gold, coins 39. The hopper in the packing room is now filling with popcorn while the hook fills cups one by one - so now packing might become the slow step. Keep cooking; 1.6s is my rhythm."}}
+{"t":263,"issued":260.6,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"020.png","held_ms":1660}
+{"t":269.4,"issued":267.1,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"021.png","held_ms":1676}
+{"t":280.7,"issued":280.7,"cmd":"note","args":{"text":"Filled the row again - explosion. Coins 59. Customer stat jumped 5.4 -> 8.1 and the star multiplier went x0.99 -> x1.49 - perfect popcorn seems to boost reputation. A red '1' badge appeared on the newspaper icon at top-right of the shop. Cups pile up again in packing. Tapping the newspaper."}}
+{"t":284,"issued":283.2,"cmd":"tap","args":{"x":550,"y":147},"shot":"022.png"}
+{"t":295.1,"issued":295.1,"cmd":"note","args":{"text":"Newspaper panel opened: a news item with a factory and people icon, 'x1.5', '3', and a clock 1:01 counting down - I guess a crowd event: 1.5x customers for a minute. No words, just icons. There's a trophy tab too. Coins 79. Tapping the trophy tab."}}
+{"t":298.6,"issued":297.7,"cmd":"tap","args":{"x":543,"y":145},"shot":"023.png"}
+{"t":310.9,"issued":310.9,"cmd":"note","args":{"text":"Trophy tab: a challenge card - a ? button, popcorn clouds linked by a line, timer 3:00, a popcorn costing -5 coins, then medals: bronze 3 ->15 coins, silver 5 ->30, gold 8 ->60, and a big play button. 5 empty trophies at the bottom. I guess a 3-minute challenge for rows/combos. Coins 99 - first I'll buy the machine upgrade (97)."}}
+{"t":314.2,"issued":313.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"024.png"}
+{"t":324.9,"issued":324.9,"cmd":"note","args":{"text":"Machine level 4 - bigger cart with light bulbs, popcorn confetti everywhere. Next costs 175. Coins 22. Now curious about the challenge - pressing the play button."}}
+{"t":328.2,"issued":327.4,"cmd":"tap","args":{"x":524,"y":226},"shot":"025.png"}
+{"t":340.4,"issued":338,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"026.png","held_ms":1674}
+{"t":350.8,"issued":350.8,"cmd":"note","args":{"text":"Challenge running: timer 2:48, the counter went 0 -> 1 after a perfect batch. So it counts perfect (maybe consecutive) batches; 8 for gold. Going for a streak of 1.6s holds."}}
+{"t":355.7,"issued":353.3,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"027.png","held_ms":1682}
+{"t":369,"issued":366.5,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"028.png","held_ms":1684}
+{"t":375.4,"issued":373.1,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"029.png","held_ms":1661}
+{"t":386.3,"issued":386.3,"cmd":"note","args":{"text":"4 perfects, bronze trophy icon next to the count! Timer 2:13. Row filled again and the machine exploded with popcorn - the screen turns all bright when the row completes. Pushing for silver (5) and gold (8)."}}
+{"t":391.2,"issued":388.8,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"030.png","held_ms":1701}
+{"t":397.8,"issued":395.4,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"031.png","held_ms":1691}
+{"t":410.9,"issued":410.9,"cmd":"note","args":{"text":"Hmm, count is stuck at 4 (timer 1:50). The ring is greyed out except the yellow part and the machine looks empty - maybe it's cooling down/reloading after the big explosion, so my last two holds did nothing? Red arrows now point at the locked slots on the right and up at the side scrollbar. Confusing. Looking again."}}
+{"t":413.6,"issued":413.3,"cmd":"look","args":{},"shot":"032.png"}
+{"t":427.4,"issued":426.5,"cmd":"tap","args":{"x":260,"y":860},"shot":"033.png"}
+{"t":439.9,"issued":439.9,"cmd":"note","args":{"text":"Tapping the grey machine just flashes red arrows pointing right and up toward the packing room - I think the machine is blocked because the next room is full. The newspaper panel hides the shop and packing rooms. Timer 1:21 ticking and I'm stuck at 4. Trying to close the newspaper via its icon to see what's going on."}}
+{"t":443.2,"issued":442.3,"cmd":"tap","args":{"x":57,"y":145},"shot":"034.png"}
+{"t":457.3,"issued":457.3,"cmd":"note","args":{"text":"Closed the newspaper (challenge still shown as a small trophy '4' badge). Now I see it: the hopper is packed full and 9 cups are stacked in packing, packing icon has a red dot. Too much popcorn, not enough customers! That's why the machine stalled. Coins 147 - buying the shop upgrade (100) for more customers."}}
+{"t":460.5,"issued":459.7,"cmd":"tap","args":{"x":48,"y":145},"shot":"035.png"}
+{"t":471.4,"issued":470.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"036.png"}
+{"t":483.2,"issued":483.2,"cmd":"note","args":{"text":"Shop level 3 - lit sign, a delighted grandma with star eyes. Coins 77, next shop upgrade 220. The machine ring is coloured again so maybe I can cook. Trying another perfect for the challenge."}}
+{"t":488,"issued":485.6,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"037.png","held_ms":1679}
+{"t":502.1,"issued":502.1,"cmd":"note","args":{"text":"Perfect! Challenge badge now 5 (silver). But right after, the machine greyed out again - the hopper is still full, so the machine waits. So grey ring = 'no room downstream'. Customers can't keep up with my popcorn. Waiting for space to free up."}}
+{"t":510.9,"issued":504.6,"cmd":"wait","args":{"s":6},"shot":"038.png"}
+{"t":524.9,"issued":524.9,"cmd":"note","args":{"text":"Challenge over: silver trophy, +30 coins popup. Coins 147. Nice reward. Lesson: the challenge was capped by my own bottleneck, not my timing. Machine is colourful again. Saving for the shop upgrade (220) since customers are the slow part; cooking perfects meanwhile."}}
+{"t":529.9,"issued":527.1,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"039.png","held_ms":1691}
+{"t":542.6,"issued":542.6,"cmd":"note","args":{"text":"Perfect again, then blocked again: shelf full (red no-entry sign over 8 cups), counter empty of customers. Coins 177, need 220 for the shop. While waiting, curious about the sparkle button at the top - tapping it."}}
+{"t":545.7,"issued":544.9,"cmd":"tap","args":{"x":393,"y":58},"shot":"040.png"}
+{"t":557.8,"issued":557.8,"cmd":"note","args":{"text":"The sparkle button just changed its icon to a sparkle-over-a-line and got a gold ring - some toggle, maybe effects or vibration? Nothing obvious happened. I'll switch it back. Newspaper has a new red 1 badge, stars at x1.53 and customers 11.5 - the news event seems to bring a crowd."}}
+{"t":562,"issued":560.4,"cmd":"tap","args":{"x":393,"y":58},"shot":"041.png"}
+{"t":572.5,"issued":571.6,"cmd":"tap","args":{"x":300,"y":1180},"shot":"042.png"}
+{"t":584.2,"issued":584.2,"cmd":"note","args":{"text":"Shop level 4: customers 16.8, faster arrivals (5.5s). Next shop upgrade 500 - steep jump. New dashed blue outlines appeared on the right of the shop window, like empty spots to fill. Coins 37. Checking the newspaper's red badge."}}
+{"t":587.5,"issued":586.7,"cmd":"tap","args":{"x":550,"y":147},"shot":"043.png"}
+{"t":598.9,"issued":598.9,"cmd":"note","args":{"text":"News: another factory crowd x1.5 with 11 people, 0:37 left; an older one ticked with 12. Also I notice the 8 slots beside the machine lost their padlocks - they show pale jar shapes now. Maybe unlocked by the shop upgrade? Closing news and tapping a slot."}}
+{"t":602.2,"issued":601.3,"cmd":"tap","args":{"x":57,"y":145},"shot":"044.png"}
+{"t":612.9,"issued":612,"cmd":"tap","args":{"x":468,"y":625},"shot":"045.png"}
+{"t":625.1,"issued":625.1,"cmd":"note","args":{"text":"Tapping a jar slot opens a picker at the top with 3 gadgets: a mini popcorn machine (selected, shows 0 > 19 and a red -4 with a pin icon), a lever/arm, and a red fan disc. Buying costs 300. So the slots hold add-on machines! Let me peek at the other two options."}}
+{"t":628.6,"issued":627.7,"cmd":"tap","args":{"x":326,"y":158},"shot":"046.png"}
+{"t":638.9,"issued":638.1,"cmd":"tap","args":{"x":395,"y":160},"shot":"047.png"}
+{"t":654.3,"issued":654.3,"cmd":"note","args":{"text":"Options: lever/ramp costs 220 (0, -1), fan costs 200 (0, -1, and a GREEN check where the others had grey). Mini machine 300 (0>19, -4). No words so I'm guessing what they do - the fan might cool things, the lever push popcorn? The green check on the fan feels like 'recommended/available'. I have 177; cooking a batch while I wait to buy the fan."}}
+{"t":659.2,"issued":656.8,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"048.png","held_ms":1675}
+{"t":674.8,"issued":669.5,"cmd":"wait","args":{"s":5},"shot":"049.png"}
+{"t":686.2,"issued":685.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"050.png"}
+{"t":697.8,"issued":697.8,"cmd":"note","args":{"text":"Bought the fan (200): it sits in the first slot as a red fan. The fan disappeared from the picker (one only?). A new round icon appeared at the bottom-left of the machine room - the same pin/needle symbol as the red '-1' stat. Coins 27. I don't see what the fan changed yet. Tapping that new icon."}}
+{"t":701.2,"issued":700.4,"cmd":"tap","args":{"x":48,"y":1053},"shot":"051.png"}
+{"t":715.7,"issued":715.7,"cmd":"note","args":{"text":"That icon opened a big overview: top row popcorn 1, cups 5, coins 5 (each with a little clock - rates?). The popcorn '1' is boxed in red, maybe the bottleneck. Then -0.0 coins, +50, +50. Below: three rows (shop, packer, machine) of gadget slots - my fan shows in the machine row - with '+' buttons costing 2k / 1.? to add slots. And a pause button. Lots of numbers, no words; hard to read. I'll close it and keep making popcorn."}}
+{"t":719.1,"issued":718.3,"cmd":"tap","args":{"x":48,"y":1053},"shot":"052.png"}
+{"t":734.2,"issued":731.8,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"053.png","held_ms":1688}
+{"t":739.5,"issued":739.5,"cmd":"note","args":{"text":"Rush hour! Closed the overview and found 6 grumpy customers and an empty counter sign - crowd event x1.5 for 1:29. Now I'm the bottleneck. Cooking as fast as I can."}}
+{"t":744.3,"issued":741.9,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"054.png","held_ms":1678}
+{"t":756.2,"issued":756.2,"cmd":"note","args":{"text":"Hopper is full again but the packer fills just one cup at a time while 5 customers wait - now packing is the slow step. Packing upgrade costs 250 and I have 37. Bottleneck keeps moving around - that's kind of the puzzle. Keep cooking."}}
+{"t":760.9,"issued":758.6,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"055.png","held_ms":1669}
+{"t":772,"issued":772,"cmd":"note","args":{"text":"Machine greyed out again and the packing room now has a red outline - the game itself is pointing at the bottleneck, nice. Coins 77, need 250. Selecting the packing room so I can buy as soon as I can afford it, then waiting."}}
+{"t":775.3,"issued":774.4,"cmd":"tap","args":{"x":48,"y":393},"shot":"056.png"}
+{"t":788.2,"issued":785.8,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"057.png","held_ms":1691}
+{"t":794.3,"issued":794.3,"cmd":"note","args":{"text":"Packing selected: the bar under its stats is green-blue-red, the red end maybe meaning it's maxed out. Counter shows 10 cups. Coins 117 climbing. Cooked one more batch while waiting for 250."}}
+{"t":807.2,"issued":796.9,"cmd":"wait","args":{"s":10},"shot":"058.png"}
+{"t":820.7,"issued":818.3,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"059.png","held_ms":1673}
+{"t":832,"issued":832,"cmd":"note","args":{"text":"Another full row and explosion. Coins 227, almost at 250 for the packer. The cooking itself is fun for the first few minutes but now it feels like I'm mostly waiting for coins."}}
+{"t":837.8,"issued":834.6,"cmd":"wait","args":{"s":3},"shot":"060.png"}
+{"t":848.4,"issued":847.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"061.png"}
+{"t":860,"issued":860,"cmd":"note","args":{"text":"Packer upgraded: the hook became a shiny red dispenser nozzle, 3.0s per cup, 20 capacity. Next 700 (two nozzles). Four dashed gadget slots appeared above its conveyor too. Coins 47. Cool visual change. Back to cooking."}}
+{"t":864.9,"issued":862.5,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"062.png","held_ms":1690}
+{"t":878.2,"issued":878.2,"cmd":"note","args":{"text":"Perfect again, the new nozzle pumps popcorn into cups. Coins 87. Newspaper has a red badge again - checking whether there's a new trophy challenge now that my packer is faster."}}
+{"t":882,"issued":881.1,"cmd":"tap","args":{"x":550,"y":147},"shot":"063.png"}
+{"t":893,"issued":892.1,"cmd":"tap","args":{"x":543,"y":145},"shot":"064.png"}
+{"t":907.2,"issued":907.2,"cmd":"note","args":{"text":"Trophy tab now shows my silver (5, +30) and the first trophy on the shelf is silver. A NEW challenge appeared: customers + cup icon, 4:00, -15, medals 42/52/62 customers for 40/80/160 coins. Its button shows a newspaper icon with a ring instead of play - maybe it needs a news event, or is charging up. The perfect-streak challenge can be replayed. Tapping the new one's button."}}
+{"t":910.6,"issued":909.7,"cmd":"tap","args":{"x":524,"y":332},"shot":"065.png"}
+{"t":922.8,"issued":922.8,"cmd":"note","args":{"text":"Nothing happens on the newspaper-icon button - probably locked until the news crowd event finishes (the ring around it looks like a timer). Coins didn't move while the paper was open, so it might pause the shop. I'll replay the perfect-streak challenge and go for gold now that packing is faster."}}
+{"t":926.4,"issued":925.5,"cmd":"tap","args":{"x":524,"y":426},"shot":"066.png"}
+{"t":939.2,"issued":936.7,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"067.png","held_ms":1673}
+{"t":939.9,"issued":939.9,"cmd":"note","args":{"text":"Challenge restarted - it took 5 coins as an entry fee (157 -> 152), so that's what the -5 meant. Cooking flat out."}}
+{"t":948,"issued":945.5,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"068.png","held_ms":1717}
+{"t":960.8,"issued":958.3,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"069.png","held_ms":1695}
+{"t":961.3,"issued":961.3,"cmd":"note","args":{"text":"2 perfects at 2:38. The customer challenge now shows a padlock and its targets dropped to 28/35/42 - locked while another challenge runs, I guess. Coins 172."}}
+{"t":970.4,"issued":967.9,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"070.png","held_ms":1699}
+{"t":985.2,"issued":985.2,"cmd":"note","args":{"text":"4 perfects (bronze) at 2:16, but the machine is grey/blocked again. Same wall as last time - the challenge is really about the downstream rooms keeping up. Coins 242; the machine upgrade is lit but more popcorn won't help a full hopper. Waiting for it to unblock."}}
+{"t":994,"issued":987.6,"cmd":"wait","args":{"s":6},"shot":"071.png"}
+{"t":1011,"issued":1008.6,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"072.png","held_ms":1659}
+{"t":1011.7,"issued":1011.7,"cmd":"note","args":{"text":"Unblocked - the yellow zone is glowing white, like it's flashing 'ready'. Coins 312. Cooking again for silver."}}
+{"t":1025.1,"issued":1022.7,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"073.png","held_ms":1704}
+{"t":1025.6,"issued":1025.6,"cmd":"note","args":{"text":"Silver again (5) with 1:35 left and the machine still free this time! Three more for gold."}}
+{"t":1034.6,"issued":1032.1,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"074.png","held_ms":1690}
+{"t":1047.7,"issued":1045.2,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"075.png","held_ms":1682}
+{"t":1048.6,"issued":1048.6,"cmd":"note","args":{"text":"7 at 1:12 and the row exploded again! One more for gold - heart racing a little. This is the most exciting part so far."}}
+{"t":1061.5,"issued":1061.5,"cmd":"note","args":{"text":"GOLD! 8 perfects, +60 coins, a gold trophy now sits first on the shelf. Very satisfying. Coins 472. The customer challenge unlocked (play button). With 2.5 minutes left I'll buy the machine upgrade (175) and then try the customer challenge."}}
+{"t":1065,"issued":1064.1,"cmd":"tap","args":{"x":300,"y":1180},"shot":"076.png"}
+{"t":1077.2,"issued":1077.2,"cmd":"note","args":{"text":"Machine level 5 - wider cart with a gold star on top. Next costs 430 (+14 -> +18). Oddly, the customer challenge card vanished from the trophy list after I bought it... maybe it only appears at certain times. Cooking a few more batches with the time I have left."}}
+{"t":1082.2,"issued":1079.7,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"077.png","held_ms":1694}
+{"t":1093.8,"issued":1093.8,"cmd":"note","args":{"text":"Perfect, and blocked again straight away - the bigger machine fills the hopper even faster. Closing the newspaper to look at the whole shop for my last 2 minutes."}}
+{"t":1097.2,"issued":1096.3,"cmd":"tap","args":{"x":57,"y":145},"shot":"078.png"}
+{"t":1109.2,"issued":1109.2,"cmd":"note","args":{"text":"Whole view: shelf full (no-entry sign over 8 cups), hopper full, and the SHOP has the red outline now - customers are the bottleneck again. Coins 407, shop upgrade is 500. Quick experiment while I wait: a short 1.0s hold to see what an undercooked batch looks like."}}
+{"t":1113.5,"issued":1111.7,"cmd":"hold","args":{"x":260,"y":860,"s":1},"shot":"079.png","held_ms":1064}
+{"t":1125.5,"issued":1125.5,"cmd":"note","args":{"text":"1.0s hold landed at about 4:30 in the blue part: popcorn still came out but no gold circle was added - so blue = plain popcorn, yellow = bonus progress, too long = burnt. Coins 437. Selecting the shop to buy its 500 upgrade if I get there in time."}}
+{"t":1128.8,"issued":1128,"cmd":"tap","args":{"x":48,"y":145},"shot":"080.png"}
+{"t":1141.7,"issued":1133.5,"cmd":"wait","args":{"s":8},"shot":"081.png"}
+{"t":1152.1,"issued":1151.2,"cmd":"tap","args":{"x":300,"y":1180},"shot":"082.png"}
+{"t":1163.8,"issued":1163.8,"cmd":"note","args":{"text":"Shop level 5: a neon-framed sign, customers 28.0, one every 3.5s, next upgrade 1,100. The yellow zone is flashing white again, ready. One last perfect batch to finish."}}
+{"t":1168.7,"issued":1166.3,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"083.png","held_ms":1679}
+{"t":1176.2,"issued":1173.8,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"084.png","held_ms":1682}
+{"t":1188,"issued":1188,"cmd":"note","args":{"text":"Row exploded again. And now, after the shop upgrade, the shelf is EMPTY and 3 customers wait under a no-popcorn sign - the packer is the slow step again (next packer upgrade 700). The bottleneck ping-pongs between rooms with every purchase. Coins 140. That's my twenty minutes."}}
+{"t":1192.8,"issued":1190.3,"cmd":"hold","args":{"x":260,"y":860,"s":1.6},"shot":"085.png","held_ms":1679}

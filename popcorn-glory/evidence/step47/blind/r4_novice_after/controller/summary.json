@@ -1,0 +1,14 @@
+{
+  "reason": "time",
+  "elapsed_s": 180,
+  "counts": {
+    "look": 1,
+    "note": 14,
+    "tap": 9,
+    "hold": 7,
+    "wait": 1
+  },
+  "shots": 19,
+  "final_shot": "/tmp/claude-1000/-home-merti-Workspace-gamo/13d45a88-28c9-4ba9-8060-8163e6f4a88a/scratchpad/phone/p4/player/shots/019.png",
+  "version": "0.47.0"
+}

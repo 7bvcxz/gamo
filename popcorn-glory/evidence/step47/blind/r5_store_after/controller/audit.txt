@@ -1,0 +1,1 @@
+p5: tool calls {'Bash': 258, 'Read': 74}; flagged 0

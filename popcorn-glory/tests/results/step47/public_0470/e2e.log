@@ -1,0 +1,71 @@
+
+Running 65 tests using 1 worker
+
+  ✓   1 [p720] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+  ✓   2 [p720] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.4s)
+  ✓   3 [p720] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (16.4s)
+  ✓   4 [p720] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (9.8s)
+  ✓   5 [p720] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (8.0s)
+  ✓   6 [p720] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (11.1s)
+  ✓   7 [p720] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.8s)
+  ✓   8 [p720] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion (6.3s)
+  -   9 [p720] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  ✓  10 [p720] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins) (275ms)
+  ✓  11 [p720] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere (469ms)
+  ✓  12 [p720] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (10.4s)
+  ✓  13 [p720] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint (9.4s)
+  ✓  14 [p720] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold (7.0s)
+  ✓  15 [p720] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload (6.5s)
+  ✓  16 [phone] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.8m)
+  ✓  17 [phone] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.5s)
+  ✓  18 [phone] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (18.9s)
+  ✓  19 [phone] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (11.0s)
+  ✓  20 [phone] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (8.4s)
+  ✓  21 [phone] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (12.2s)
+  ✓  22 [phone] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (6.3s)
+  -  23 [phone] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -  24 [phone] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -  25 [phone] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  26 [phone] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  27 [phone] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (11.7s)
+  ✓  28 [phone] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint (9.9s)
+  ✓  29 [phone] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold (7.5s)
+  ✓  30 [phone] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload (7.3s)
+  ✓  31 [desktop] › specs/journey46.spec.mjs:55:1 › a novice journey: first sale, three stations, every category, the card, the paper, a contest, resume, restart (1.7m)
+  ✓  32 [desktop] › specs/negative46.spec.mjs:11:1 › a game pack that fails to download says so -- no endless blank page (3.4s)
+  ✓  33 [desktop] › specs/negative46.spec.mjs:27:1 › a jittery finger on the kettle: one press a press, nothing stuck, nothing burnt by the jitter (20.0s)
+  ✓  34 [desktop] › specs/negative46.spec.mjs:73:1 › a reload in the middle of a pack: every portion and every coin where it was (10.3s)
+  ✓  35 [desktop] › specs/negative46.spec.mjs:101:1 › a hold across a hidden tab ends the press: nothing heats while nobody looks (8.1s)
+  ✓  36 [desktop] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (11.4s)
+  ✓  37 [desktop] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.6s)
+  -  38 [desktop] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  ✓  39 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (1.1m)
+  -  40 [desktop] › specs/release12.spec.mjs:92:1 › the game page asks browsers not to translate it (a Korean phone offered to, over the coins)
+  -  41 [desktop] › specs/release12.spec.mjs:100:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  42 [desktop] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (11.2s)
+  ✓  43 [desktop] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint (9.3s)
+  ✓  44 [desktop] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold (7.2s)
+  ✓  45 [desktop] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload (6.6s)
+  -  46 [m-p720] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size
+  -  47 [m-p720] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  48 [m-p720] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  49 [m-p720] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+  ✓  50 [m-hd] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (13.6s)
+  -  51 [m-hd] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  52 [m-hd] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  53 [m-hd] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+  ✓  54 [m-small] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (14.0s)
+  -  55 [m-small] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  56 [m-small] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  57 [m-small] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+  ✓  58 [m-tablet] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (16.2s)
+  -  59 [m-tablet] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  60 [m-tablet] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  61 [m-tablet] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+  ✓  62 [m-landscape] › specs/ui44.spec.mjs:58:1 › every finger target is big enough and nothing pressable sits on the ring, at every size (16.7s)
+  -  63 [m-landscape] › specs/ui44.spec.mjs:120:1 › a refused press shows the full bin, a first tap brings the hold hint
+  -  64 [m-landscape] › specs/ui44.spec.mjs:148:1 › a cancelled touch or a mouse that leaves ends the hold
+  -  65 [m-landscape] › specs/ui44.spec.mjs:180:1 › the motion button calms the factory and the choice survives a reload
+
+  24 skipped
+  41 passed (12.1m)

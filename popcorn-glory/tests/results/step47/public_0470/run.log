@@ -1,0 +1,5 @@
+headless: SKIPPED
+deploy: SKIPPED
+browser: PASSED 
+report: /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/results/step47/public_0470/report.md — browser passed 41, failed 0, skipped 24
+exit 0

@@ -1,0 +1,21 @@
+{
+  "made": "2026-11-22T00:34:20.494Z",
+  "from": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+  "version": "0.46.2",
+  "key": "popcorn-glory.factory.v1",
+  "bytes": 85989,
+  "plan_rows": 44,
+  "built": {
+    "built": 44,
+    "machines": 44,
+    "ok": true
+  },
+  "machines": 44,
+  "money": 9809,
+  "level": 6,
+  "sign_tier": 8,
+  "packer_tier": 3,
+  "sold": 918,
+  "active_ms": 634224,
+  "how": "dev_restart; dev_build(perf46 PLAN, sign 8, packer 3) leaves $3,000; dev_advance 120 x 5 s; dev_save"
+}

@@ -62,6 +62,16 @@ When the time is up, reply with a short report as yourself, the player:
   그것이 불가능했다(가게의 흔들기를 아무도 찾지 못한 이유 중 하나). 이 명령은 무엇을 하라고 말하지 않는다. 시간은 시계로 지킨다(1.6초 요청 →
   1.64–1.69초, 게임 판정 1,550–1,616ms). Step 11의 긴 세션은 보고에 '6. What do you think the goal of the game is?'를 더한다.
 
+- **Step 47: 세 가지 장면과 새 도구.**
+  - `session.mjs --save FILE`: 미리 만든 공장 저장으로 시작한다. 새 프로필의 localStorage에 페이지가 열리기 전에 한 번 넣는다. 세션 안의 새로 고침은 플레이어가 만든 것을 지킨다. `start.json`에 파일·크기·sha256이 남고, **보고서와 플레이어 프롬프트 둘 다 그 사실을 말한다.** 프롬프트에는 "This phone already has a game in progress that someone else built up over a while; you are picking it up from where they left it." 한 문장을 더한다.
+  - `session.mjs --log-every S`: 게임 자신의 기록을 S초마다 읽는다(기본 5). 44대 공장은 20분에 기록이 수만 줄이고, 그것을 5초마다 통째로 읽으면 플레이어가 보는 공장을 멈춘다.
+  - 상태 표본에 `view`(신문이 열렸는지, 고른 층·기계)가 들어간다.
+  - `prepare_factory.mjs`: 공개 빌드의 개발 다리(`?dev=1`)로 44대 저장을 만든다. 결과는 `<out>`과 `<out>.about.json`이다(`evidence/step47/fixtures/`).
+  - `evaluate47.mjs`: 공장의 이정표를 플레이어 시계로 잰다. 첫 Perfect, 첫 판매, 첫 기계, 첫 구매와 구매 사이 시간, 조리법 바꾸기, 신문 열기, 대회 참가, 거절된 누름, 같은 자리 다시 누르기, 병목 표본, 세션 동안의 매출·운영비를 낸다.
+  - **중립 경로:** 플레이어의 명령 경로에 게임 이름·`blind`·step 번호가 보이지 않게, `play.mjs`를 스크래치패드의 `phone/`에 복사해 쓰고 세션 폴더도 그 옆에 둔다(`phone/p1` …). 감사는 그 경로를 플레이어 것으로 센다.
+  - **감사 고침:** 첫 20분 플레이어가 `P=<phone 폴더>; node $P/play.mjs $P/p2 …`처럼 같은 명령 안에서 변수를 정의해 썼고, 감사는 147개 호출을 모두 표시했다(모두 전화기 명령이었다). 이제 감사는 같은 명령 안에서 정의된 변수를 그 값으로 바꾼 뒤 경로를 본다. 가짜 기록으로 확인했다: 전화기 명령은 통과하고 `cat $P/../../x.txt`·`ls $X`는 여전히 표시된다.
+  - 긴 세션의 녹화는 VP9 6fps로, 스크린숏은 WebP(품질 72)로 줄여 남긴다. 플레이어가 본 것은 같은 프레임의 PNG 원본이다(`actions.jsonl`의 `shot` 이름은 `.png` 그대로).
+
 ## 한계 (정직하게)
 
 - **블라인드는 지시로만 지킨다.** 에이전트 도구(Read·Bash)는 기술적으로 샌드박스되어 있지 않다. 그래서 끝난 뒤 플레이어 에이전트의

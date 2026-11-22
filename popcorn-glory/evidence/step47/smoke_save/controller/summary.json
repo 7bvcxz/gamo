@@ -1,0 +1,11 @@
+{
+  "reason": "time",
+  "elapsed_s": 31,
+  "counts": {
+    "look": 1,
+    "wait": 1
+  },
+  "shots": 3,
+  "final_shot": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/evidence/step47/smoke_save/player/shots/003.png",
+  "version": "0.46.2"
+}

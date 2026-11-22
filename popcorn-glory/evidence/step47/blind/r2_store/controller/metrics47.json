@@ -1,0 +1,85 @@
+{
+  "run": "r2_store",
+  "version": "0.46.2",
+  "url_hash": "factory",
+  "prepared_save": null,
+  "seconds": 1201,
+  "commands": 247,
+  "taps": 63,
+  "holds": 60,
+  "drags": 0,
+  "waits": 27,
+  "wait_s": 143,
+  "notes": 96,
+  "looks": 1,
+  "first_action_s": 14.6,
+  "hand_presses": 72,
+  "outcomes": {
+    "early": 12,
+    "near": 1,
+    "perfect": 40
+  },
+  "first_perfect_s": 79.8,
+  "first_sale_s": 22,
+  "sales": 265,
+  "first_machine_s": 1090.7,
+  "machines_built": 1,
+  "first_purchase_s": 56.6,
+  "purchases": 12,
+  "purchase_kinds": {
+    "upgrade": 5,
+    "station_upgrade": 6,
+    "machine_built": 1
+  },
+  "seconds_between_purchases": [
+    78.6,
+    63.2,
+    88.8,
+    76.9,
+    87.7,
+    89.9,
+    89.6,
+    214.9,
+    207.5,
+    37,
+    0
+  ],
+  "longest_without_purchase_s": 214.9,
+  "longest_without_sale_s": 22.2,
+  "first_recipe_change_s": null,
+  "recipe_changes": 0,
+  "paper_opened_s": 100.5,
+  "news_events": 4,
+  "first_contest_entry_s": 206.5,
+  "contests_entered": 3,
+  "refused": 38,
+  "repeated_taps": 7,
+  "money": [
+    0,
+    466
+  ],
+  "machines": [
+    0,
+    1
+  ],
+  "revenue_in_session": 2621,
+  "running_costs_in_session": 4,
+  "sold_in_session": 265,
+  "bottleneck_samples": {
+    "production": 12,
+    "packaging": 33,
+    "": 40,
+    "demand": 146,
+    "service": 11
+  },
+  "sign_tier": [
+    0,
+    4
+  ],
+  "level": [
+    0,
+    5
+  ],
+  "page_errors": 0,
+  "profit_in_session": 2617
+}

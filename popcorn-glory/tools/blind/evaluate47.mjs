@@ -10,19 +10,23 @@
 //   node evaluate47.mjs RUN [RUN ...]  ->  Markdown on stdout, RUN/controller/metrics47.json
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 
 const round = (v, d = 1) => (v === null || v === undefined ? null : Math.round(v * 10 ** d) / 10 ** d);
 const tables = [];
 for (const run of process.argv.slice(2)) {
   const ctl = path.join(path.resolve(run), 'controller');
-  const read = (f) => (fs.existsSync(path.join(ctl, f)) ? fs.readFileSync(path.join(ctl, f), 'utf8') : '');
+  // A file, or its gzip (the evidence keeps big samples compressed).
+  const read = (f) => (fs.existsSync(path.join(ctl, f)) ? fs.readFileSync(path.join(ctl, f), 'utf8')
+    : fs.existsSync(path.join(ctl, f + '.gz')) ? zlib.gunzipSync(fs.readFileSync(path.join(ctl, f + '.gz'))).toString('utf8') : '');
   const jsonl = (f) => read(f).split('\n').filter(Boolean).map((l) => JSON.parse(l));
   const actions = jsonl('actions.jsonl');
   const states = jsonl('state.jsonl').filter((x) => x.exp === 'factory' && x.run);
   const start = JSON.parse(read('start.json') || '{}');
   const summary = JSON.parse(read('summary.json') || '{}');
-  // The factory's own log: the newest of game_log_factory*.json (a restart keeps the old one).
-  const logs = fs.readdirSync(ctl).filter((f) => /^game_log_factory(_\d+)?\.json$/.test(f));
+  // The factory's own log: the final game_log.json (complete at the end) and any snapshots
+  // game_log_factory*.json (a restart keeps the old run's), merged without duplicates.
+  const logs = fs.readdirSync(ctl).filter((f) => /^game_log(_factory(_\d+)?)?\.json(\.gz)?$/.test(f)).map((f) => f.replace(/\.gz$/, ''));
   const lines = logs.flatMap((f) => JSON.parse(read(f)).lines ?? []);
   const seen = new Set();
   const uniq = lines.filter((l) => { const k = `${l.t}|${l.type}|${JSON.stringify(l.data)}`; if (seen.has(k)) return false; seen.add(k); return true; });

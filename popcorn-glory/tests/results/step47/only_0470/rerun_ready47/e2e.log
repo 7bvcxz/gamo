@@ -1,0 +1,73 @@
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:35] "GET /popcorn-glory/version.json HTTP/1.1" 200 -
+
+Running 3 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:36] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:36] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:36] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:36] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:36] "GET /popcorn-glory/game-9ee57c56628a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:37] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:37] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓  1 [p720] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (10.5s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:47] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:47] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:47] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:47] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:47] "GET /popcorn-glory/game-9ee57c56628a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:48] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:48] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘  2 [phone] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (11.6s)
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:59] "GET /popcorn-glory/ HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:59] "GET /popcorn-glory/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:59] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:59] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:17:59] "GET /popcorn-glory/game-9ee57c56628a.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:18:00] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [22/Nov/2026 02:18:00] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✘  3 [desktop] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts (10.7s)
+
+
+  1) [phone] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts 
+
+    Error: the dimmed ring is less saturated (ready 0.445, waiting 0.433)
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 0.3559064121653328
+    Received:   0.43331662704283685
+
+      73 |   expect(s.view.full_cue, 'the cue is still up 0.4 s after the finger lifts').toBe(true);
+      74 |   expect(s.run.heating, 'no heat').toBe(false);
+    > 75 |   expect(waiting, `the dimmed ring is less saturated (ready ${ready.toFixed(3)}, waiting ${waiting.toFixed(3)})`).toBeLessThan(ready * 0.8);
+         |                                                                                                                   ^
+      76 | });
+      77 |
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ready47.spec.mjs:75:115
+
+    Error Context: test-results/ready47-a-waiting-kettle-d-cec8c--why-after-the-finger-lifts-phone/error-context.md
+
+  2) [desktop] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts 
+
+    Error: the dimmed ring is less saturated (ready 0.428, waiting 0.417)
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 0.34261425898586095
+    Received:   0.4166309553881282
+
+      73 |   expect(s.view.full_cue, 'the cue is still up 0.4 s after the finger lifts').toBe(true);
+      74 |   expect(s.run.heating, 'no heat').toBe(false);
+    > 75 |   expect(waiting, `the dimmed ring is less saturated (ready ${ready.toFixed(3)}, waiting ${waiting.toFixed(3)})`).toBeLessThan(ready * 0.8);
+         |                                                                                                                   ^
+      76 | });
+      77 |
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/ready47.spec.mjs:75:115
+
+    Error Context: test-results/ready47-a-waiting-kettle-d-cec8c--why-after-the-finger-lifts-desktop/error-context.md
+
+  2 failed
+    [phone] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts 
+    [desktop] › specs/ready47.spec.mjs:44:1 › a waiting kettle dims its ring, and a refused hold shows why after the finger lifts 
+  1 passed (34.0s)
+exit 1

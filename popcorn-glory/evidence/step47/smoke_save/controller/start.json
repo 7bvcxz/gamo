@@ -1,0 +1,17 @@
+{
+  "url": "https://7bvcxz.github.io/gamo/popcorn-glory/#factory",
+  "version": "0.46.2",
+  "load_ms": 4268,
+  "viewport": {
+    "width": 400,
+    "height": 860
+  },
+  "dpr": 1.5,
+  "seconds": 30,
+  "log_every_s": 60,
+  "prepared_save": {
+    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/evidence/step47/fixtures/factory44_0462.json",
+    "bytes": 85989,
+    "sha256": "0d23beba23e4b172f9b972dd3e5c284c52d7486e1c530d8064c5df9b303f4b21"
+  }
+}
