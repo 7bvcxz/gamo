@@ -1251,6 +1251,7 @@ func _news_row(n: int) -> Dictionary:
 
 func toggle_news() -> void:
 	news_open = not news_open
+	_contest_sig = ""   # Step 48: the page is seen afresh
 	if news_open:
 		_clear_machine_selection()
 		selected = -1
@@ -1610,6 +1611,7 @@ func set_news_tab(tab: String) -> void:
 	if tab == news_tab:
 		return
 	news_tab = tab
+	_contest_sig = ""   # Step 48: the contests page seen afresh
 	_contest_info = ""
 	_cancel_armed = 0.0
 	_paper_seen()
@@ -1654,16 +1656,22 @@ func _contest_layout(d: Rect2) -> Dictionary:
 	# The page's size: the paper's, smaller (never below 22) so the posted contests fit with
 	# the running one (or the last result) above them; the shelf only where there is room.
 	var base := clampf(minf(d.size.y * 0.075, d.size.x * 0.05), 16.0, 30.0)   # the masthead's (the paper's)
-	var need := (4.2 if not e.is_empty() or not res.is_empty() else 0.0) + 3.8 * float(maxi(1, (cs["posted"] as Array).size())) + 2.2
+	# Step 48: the slot for the running contest (or the last result) is always kept, so the posted
+	# cards never move down when the first one is entered or ends -- a blind player's tap meant for
+	# the second card started the first ("the rows had shifted and I restarted the popping challenge").
+	# The size is fitted to the board's capacity, not to how many are posted now (a card leaving
+	# used to enlarge the rest and move them too).
+	var board := int(rules.contest_rules().get("board", 3)) if rules != null and rules.has_method("contest_rules") else 3
+	var need := 4.2 + 3.8 * float(maxi(maxi(1, board), (cs["posted"] as Array).size())) + 2.2
 	var fs := clampf(minf(base, (d.size.y - base * 2.6) / need), minf(base, 26.0), 30.0)
 	var y := d.position.y + base * 2.6
 	var top := {}
+	var top_rect := Rect2(Vector2(d.position.x + fs * 0.6, y), Vector2(d.size.x - fs * 1.2, fs * 3.9))
 	if not e.is_empty() or not res.is_empty():
-		var rr := Rect2(Vector2(d.position.x + fs * 0.6, y), Vector2(d.size.x - fs * 1.2, fs * 3.9))
-		top = {"rect": rr, "row": e if not e.is_empty() else res.back(), "live": not e.is_empty()}
+		top = {"rect": top_rect, "row": e if not e.is_empty() else res.back(), "live": not e.is_empty()}
 		if not e.is_empty():
-			top["cancel"] = Rect2(Vector2(rr.end.x - fs * 1.55, rr.position.y + fs * 0.2), Vector2(fs * 1.3, fs * 1.3))
-		y += fs * 4.2
+			top["cancel"] = Rect2(Vector2(top_rect.end.x - fs * 1.55, top_rect.position.y + fs * 0.2), Vector2(fs * 1.3, fs * 1.3))
+	y += fs * 4.2
 	var cards: Array = []
 	for p: Dictionary in cs["posted"]:
 		if y + fs * 3.6 > d.end.y - fs * 0.3:
@@ -1675,7 +1683,32 @@ func _contest_layout(d: Rect2) -> Dictionary:
 	var shelf := Rect2()
 	if y + fs * 2.0 <= d.end.y:
 		shelf = Rect2(Vector2(d.position.x + fs * 0.6, d.end.y - fs * 2.1), Vector2(d.size.x - fs * 1.2, fs * 1.8))
-	return {"fs": fs, "top": top, "cards": cards, "shelf": shelf, "cs": cs}
+	# Step 48: a list that changed (a card posted or gone, the top slot filled) takes no entry
+	# for a moment -- the finger was aimed at what was there before.
+	var sig := "%s|%s" % [",".join((cs["posted"] as Array).map(func(q: Dictionary) -> String: return String(q["id"]))), top.is_empty()]
+	if sig != _contest_sig:
+		if _contest_sig != "":   # the first sight of the page is not a change (it was not on screen)
+			_contest_sig_ms = Time.get_ticks_msec()
+			_contest_before = _contest_last
+		_contest_sig = sig
+	_contest_last = cards.map(func(c: Dictionary) -> Array: return [c["rect"], String(c["row"]["id"])])
+	return {"fs": fs, "top": top, "top_rect": top_rect, "cards": cards, "shelf": shelf, "cs": cs}
+
+
+## The card at a point in a list of [rect, id] ("" if none).
+func _contest_card_at(list: Array, p: Vector2) -> String:
+	for c: Array in list:
+		if (c[0] as Rect2).has_point(p):
+			return String(c[1])
+	return ""
+
+
+const CONTEST_SETTLE_MS := 600
+var _contest_sig := ""
+var _contest_sig_ms := -1000000
+var _contest_before: Array = []   ## the cards ([rect, id]) as they were before the last change
+var _contest_last: Array = []
+var contest_taps_held := 0   ## (for the tests) entries ignored because the list had just changed
 
 
 func _contest_press(p: Vector2) -> bool:
@@ -1699,6 +1732,14 @@ func _contest_press(p: Vector2) -> bool:
 			_sound("clink", 1.5, -14.0)
 			return true
 		if (c["enter"] as Rect2).grow(4).has_point(p):
+			# Held back only when another card was under the finger a moment ago (it moved away);
+			# the same card, or a new one where there was none, is what the finger meant.
+			var was := _contest_card_at(_contest_before, p)
+			if Time.get_ticks_msec() - _contest_sig_ms < CONTEST_SETTLE_MS and was != "" and was != String(row["id"]):
+				contest_taps_held += 1   # the list just moved under the finger: no entry, no fee
+				_sound("thud", 1.2, -12.0)
+				detail_layer.queue_redraw()
+				return true
 			if String(row.get("problem", "")) == "" and (L["cs"]["entry"] as Dictionary).is_empty():
 				command.emit("contest_enter", {"type": "contest_enter", "id": String(row["id"])})
 				_contest_info = ""
@@ -1721,6 +1762,8 @@ func _draw_contests_page(ci: CanvasItem, d: Rect2, _mast_fs: float) -> void:
 			_draw_contest_live(ci, font, top, fs)
 		else:
 			_draw_contest_result(ci, font, top, fs, int(cs["unseen"]) == int(top["row"].get("seq", -1)))
+	elif not (L["cards"] as Array).is_empty():
+		PopFactoryArt.dashed_slot(ci, L["top_rect"], Color(PopTokens.AUTO, 0.45))   # Step 48: the running contest's place, kept
 	if (L["cards"] as Array).is_empty() and top.is_empty():   # nothing posted now: a resting trophy
 		var qc := Vector2(d.get_center().x, d.position.y + fs * 5.0)
 		PopContestArt.trophy(ci, qc, fs * 2.6, 0)
@@ -2138,7 +2181,18 @@ func _press() -> void:
 		full_cues += 1
 		full_cue.visible = true
 		full_cue.queue_redraw()
+		# Step 48: the paper covers the floors that are full (two blind players found out why
+		# only after closing it): a refused press folds it, so the cue and the full bin show. The
+		# running contest keeps its pill at the top.
+		if news_open:
+			news_open = false
+			papers_folded += 1
+			detail_layer.queue_redraw()
+			news_node.queue_redraw()
 	super()
+
+
+var papers_folded := 0   ## (for the tests)
 
 
 const FULL_HELD_MS := 7000    ## the cue's limit while the finger stays down (a hold is at most a few s)

@@ -3,7 +3,9 @@ extends SceneTree
 ## stand at minute 0 played to minute N by a simulated hand and a purchase policy that only
 ## uses what the game offers (the bottleneck chip, the build menu's prices and locks, the
 ## contests board, the news). SIMULATED TARGETS, NOT PLAYER ENJOYMENT.
-##   godot --headless --path popcorn-glory --script res://tools/sim/career39.gd -- <out_dir> [minutes] [only] [seeds]
+##   godot --headless --path popcorn-glory --script res://tools/sim/career39.gd -- <out_dir> [minutes] [only] [seeds] [dump_min] [save_minutes]
+## Step 48: save_minutes (e.g. 3,10,30) writes <out>/save_<hand>_<policy>_<seed>_<m>.json at those minutes -- the
+## game's own save document (PopSaveDoc), so a browser can open the career's factory as it was then.
 ## Writes <out>/career.csv (one row a minute, every run), <out>/purchases.csv, <out>/career.json
 ## (milestones, segments, trap checks). Asserts conservation and the money identity every minute.
 const Factory := preload("res://variants/factory/factory_rules.gd")
@@ -50,6 +52,8 @@ const EARLY := ["M07", "M01", "M08", "M06", "M16", "M04", "M05", "M09", "bagger"
 
 var _rng := RandomNumberGenerator.new()
 var dump_min := -1   ## [5th arg] print the factory's state at this minute (diagnosis)
+var save_minutes: Array = []   ## [6th arg] Step 48: write the game's save at these minutes
+var out_dir := "/tmp"
 
 
 func _dump(f: PopRules, key: String, m: int) -> void:
@@ -460,6 +464,11 @@ func _run(hand: String, policy: String, minutes: int, seed_value: int, rows: Arr
 			var m := t / 60000
 			if dump_min > 0 and m == dump_min:
 				_dump(f, key, m)
+			if m in save_minutes:
+				var doc := PopSaveDoc.encode("factory", String(ProjectSettings.get_setting("application/config/version")), t, int(Time.get_unix_time_from_system()), f.call("to_save"))
+				var fs := FileAccess.open("%s/save_%s_%d.json" % [out_dir, key.replace("/", "_"), m], FileAccess.WRITE)
+				fs.store_string(doc)
+				fs.close()
 			var rev := int(f.stats["revenue"])
 			var upk := int(f.stats["upkeep_paid"])
 			var inp := int(f.stats.get("kernels_paid", 0)) + int(f.stats.get("oil_paid", 0)) + int(f.stats.get("ingredient_coins", 0))
@@ -570,6 +579,9 @@ func _init() -> void:
 		seeds = Array(String(args[3]).split(",")).map(func(s: String) -> int: return int(s))
 	if args.size() > 4:
 		dump_min = int(args[4])
+	if args.size() > 5:
+		save_minutes = Array(String(args[5]).split(",")).map(func(s: String) -> int: return int(s))
+	out_dir = out
 	var md5_0 := FileAccess.get_md5("res://data/economy.json")
 	var rows: Array = []
 	var buys: Array = []
