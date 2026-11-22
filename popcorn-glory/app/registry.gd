@@ -8,6 +8,14 @@ extends RefCounted
 ## in it) and the colour of its tile and frame.
 
 const EXPERIMENTS: Array[Dictionary] = [
+	# Step 16: the three-floor factory. Step 48: listed, first -- it is the game the release candidate
+	# ships. It had waited "until its flow is real" (Step 17+) and was never put on, so the bare
+	# address and the Android app (no #factory) could not reach it.
+	# `wide`: on a landscape screen it takes the whole width (floors left, cards right).
+	# `save` from Step 22: the whole factory is kept (its own save name).
+	{"id": "factory", "letter": "", "listed": true, "wide": true, "save": true,
+		"rules": "res://variants/factory/factory_rules.gd", "view": "res://variants/factory/factory_view.gd",
+		"color": Color(0.84, 0.21, 0.17)},
 	# Step 10: the owner-approved vertical slice on B's hold and release (#114).
 	# `keep`: leaving parks the run and reopening resumes it (Step 11); restart starts over.
 	# `save`: its progress is kept across reloads (Step 12, app/save_store.gd).
@@ -24,12 +32,6 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "explosion", "letter": "C", "listed": true,
 		"rules": "res://variants/explosion/explosion_rules.gd", "view": "res://variants/explosion/explosion_view.gd",
 		"color": Color(0.55, 0.3, 0.75)},
-	# Step 16: the three-floor factory (not on the chooser until its flow is real, Step 17+).
-	# `wide`: on a landscape screen it takes the whole width (floors left, cards right).
-	# `save` from Step 22: the whole factory is kept (its own save name).
-	{"id": "factory", "letter": "", "listed": false, "wide": true, "save": true,
-		"rules": "res://variants/factory/factory_rules.gd", "view": "res://variants/factory/factory_view.gd",
-		"color": Color(0.84, 0.21, 0.17)},
 	# Step 15: the art direction drawn in the engine from art/tokens.gd (a preview, nothing plays).
 	{"id": "artboard", "letter": "", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/artboard/artboard_view.gd",

@@ -7,6 +7,9 @@ extends "res://tests/framework/test_case.gd"
 ## button buys, restart starts from nothing, back returns to the chooser.
 
 const Main := preload("res://app/main.tscn")
+## Step 48: the chooser now opens the factory (its first tile), so this file loads actor.gd first; it
+## keeps it loaded, like test_factory -- see test_cargo46 for the runner-exit leak otherwise.
+const Actor := preload("res://variants/factory/actor.gd")
 
 var app: PopApp
 
@@ -62,7 +65,7 @@ func _open_stub() -> void:
 func test_starts_on_the_chooser_with_a_b_c() -> void:
 	assert_eq(app.screen, "chooser", "chooser first")
 	var ids: Array = app.chooser.tiles.map(func(t: Dictionary) -> String: return String(t["id"]))
-	assert_eq(ids, ["stand", "click", "perfect", "explosion"], "the stand (Step 10) first, then A, B, C in order; the stub is not listed")
+	assert_eq(ids, ["factory", "stand", "click", "perfect", "explosion"], "the factory (Step 48: the game shipped) first, the stand (Step 10), then A, B, C in order; the stub is not listed")
 	assert_true(app.chooser.visible, "visible")
 	assert_false(app.frame.visible, "frame hidden")
 

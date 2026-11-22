@@ -41,18 +41,21 @@ func _layout() -> void:
 	if n == 0:
 		return
 	var col := minf(size.x, 720.0)
-	var tile_h := clampf((size.y - 200.0) / n - 32.0, 180.0, 300.0)
-	var total := n * tile_h + (n - 1) * 32.0
+	# Step 48: five tiles (the factory first) fit a 1280x800 window too -- a smaller gap and floor
+	# on a short screen (four tiles of 180 already ran 16 px past 800).
+	var gap := 32.0 if size.y >= 1000.0 else 20.0
+	var tile_h := clampf((size.y - 160.0) / n - gap, 110.0, 300.0)
+	var total := n * tile_h + (n - 1) * gap
 	var y := (size.y - total) / 2
 	for b: PopPressArea in _buttons:
 		b.size = Vector2(col - 120, tile_h)
 		b.position = Vector2((size.x - b.size.x) / 2, y)
-		y += tile_h + 32.0
+		y += tile_h + gap
 
 
 ## What you do, as a picture behind the machine: a ring with its gold arc (B).
 func _draw_mechanic(b: CanvasItem, id: String, base: Vector2, size: float, _color: Color) -> void:
-	if id == "perfect" or id == "stand":
+	if id == "perfect" or id == "stand" or id == "factory":
 		var c := base - Vector2(0, size * 0.45)
 		b.draw_arc(c, size * 0.62, -PI / 2, PI * 0.6, 32, Color(0.3, 0.55, 0.95, 0.6), size * 0.06)
 		b.draw_arc(c, size * 0.62, PI * 0.6, PI * 1.05, 16, PopPalette.GOLD, size * 0.11)
@@ -80,6 +83,15 @@ func _draw_mechanic_over(b: CanvasItem, id: String, base: Vector2, size: float, 
 			for k in 3:
 				b.draw_rect(Rect2(bag.position + Vector2(bag.size.x * (0.1 + 0.3 * float(k)), 0), Vector2(bag.size.x * 0.14, bag.size.y)), PopPalette.RED)
 			b.draw_rect(bag, PopPalette.INK, false, 2.0)
+		"factory":
+			# The floors above the hand's kettle: a bag on a belt going up to the counter.
+			var belt := Rect2(base + Vector2(size * 0.5, -size * 0.95), Vector2(size * 0.42, size * 0.05))
+			b.draw_rect(belt, PopPalette.INK)
+			for k in 2:
+				var bag := Rect2(belt.position + Vector2(size * (0.04 + 0.2 * float(k)), -size * 0.2), Vector2(size * 0.13, size * 0.2))
+				b.draw_rect(bag, PopPalette.CREAM)
+				b.draw_rect(Rect2(bag.position + Vector2(bag.size.x * 0.35, 0), Vector2(bag.size.x * 0.3, bag.size.y)), PopPalette.RED)
+				b.draw_rect(bag, PopPalette.INK, false, 2.0)
 		"explosion":
 			for i in 8:
 				var q := top + Vector2((float(i) - 3.5) * size * 0.11, -size * 0.12)
@@ -97,7 +109,15 @@ func _draw_tile(b: PopPressArea, e: Dictionary) -> void:
 	PopMachineArt._round_rect(b, Rect2(r.position, Vector2(r.size.y, r.size.y)), 36, color)
 	var font := ThemeDB.fallback_font
 	var fs := int(r.size.y * 0.55)
-	if String(e["letter"]) == "":
+	if String(e["id"]) == "factory":
+		# The factory: three floors stacked, not a letter.
+		var box := Rect2(r.position, Vector2(r.size.y, r.size.y))
+		var fw := box.size.x * 0.56
+		var fh := box.size.y * 0.15
+		for k in 3:
+			var fr := Rect2(box.get_center() + Vector2(-fw * 0.5, (float(k) - 1.5) * fh * 1.35), Vector2(fw, fh))
+			PopMachineArt._round_rect(b, fr, fh * 0.3, Color.WHITE)
+	elif String(e["letter"]) == "":
 		# The stand (the game itself): a star, not a letter.
 		b.draw_colored_polygon(PopMachineArt._star(r.position + Vector2(r.size.y, r.size.y) * 0.5, r.size.y * 0.3, r.size.y * 0.13), Color.WHITE)
 	else:
