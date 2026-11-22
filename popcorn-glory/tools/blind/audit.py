@@ -44,7 +44,8 @@ def calls(path):
 def audit(run, path):
     counts, flagged, filters = {}, [], set()
     # (Step 35: the repo's own phone tool and an evidence run folder count as the player's too)
-    own = re.compile(r"((scratchpad|\$\w+|\$\{\w+\})(/phone(/play\.mjs)?|/blind\w*/" + re.escape(run) + r")?|/tools/blind/play\.mjs|/blind/" + re.escape(run) + r")/?$")
+    # (Step 47: a run folder beside the phone tool, scratchpad/phone/<run>, names nothing about the game)
+    own = re.compile(r"((scratchpad|\$\w+|\$\{\w+\})(/phone(/play\.mjs|/" + re.escape(run) + r")?|/blind\w*/" + re.escape(run) + r")?|/tools/blind/play\.mjs|/blind/" + re.escape(run) + r")/?$")
     for name, inp in calls(path):
         counts[name] = counts.get(name, 0) + 1
         if name == "Read":
@@ -55,6 +56,12 @@ def audit(run, path):
             flagged.append("tool " + name)
             continue
         cmd = inp.get("command", "")
+        # Step 47: a variable assigned in the same command (`P=<phone folder>; node $P/play.mjs $P/r1`)
+        # is replaced by its value, so the check sees the real paths (the first long run named its
+        # folder this way and every call was flagged).
+        for name, value in re.findall(r"(?:^|[;&|\n]\s*)([A-Za-z_]\w*)=([^\s;&|]+)", cmd):
+            value = value.strip("'\"")
+            cmd = re.sub(r"\$\{" + name + r"\}|\$" + name + r"\b", lambda _m: value, cmd)
         try:
             toks = shlex.split(re.sub(r"(;|&&|\|\||\n)", r" \1 ", cmd).replace("|", " | "))
         except ValueError:

@@ -753,6 +753,14 @@ func _step_ring() -> void:
 	if rules == null:
 		return
 	var st := _r()
+	var waiting := kettle_waiting()
+	if waiting != ring_waiting:
+		ring_waiting = waiting
+		ring_layer.modulate = RING_WAIT_TINT if waiting else Color.WHITE
+		if not waiting and not reduced_motion:
+			_flash = 0.6
+			_flash_col = Color.WHITE
+			ring_ready_flashes += 1
 	# The crescendo under the ring (the factory's kettle is in burst mode) moves only while it
 	# pulses two short of full, flashes on a gain or glows after a burst; else it is its counts.
 	var burst := _burst_on()
@@ -2117,16 +2125,56 @@ func _kettle_fill() -> float:
 
 
 ## A press while the glass is full: the kettle shakes and puffs (the model refuses it).
+## Step 47: the cue stays up while the finger is down and 2 s after it lifts. It used to last
+## 1.6 s from the press, so a player who held for 1.8 s and looked after letting go never saw
+## it (two blind players: "my holds were silently swallowed", "nothing on screen to say the
+## kettle wasn't ready").
 func _press() -> void:
 	if rules != null and not (rules.get("glass") as Dictionary).is_empty() and not bool(_r()["heating"]):
 		squash(0.0, 6.0)
 		_sound("thud", 1.4, -12.0)
 		_redraw_once = true
-		_full_until = now_ms + 1600
+		_full_until = now_ms + FULL_HELD_MS
 		full_cues += 1
 		full_cue.visible = true
 		full_cue.queue_redraw()
 	super()
+
+
+const FULL_HELD_MS := 7000    ## the cue's limit while the finger stays down (a hold is at most a few s)
+const FULL_AFTER_MS := 2000   ## and after it lifts: a still taken then shows it
+
+
+func _release() -> void:
+	if full_cue.visible:
+		_full_until = mini(_full_until, now_ms + FULL_AFTER_MS)
+	super()
+
+
+## Step 47: the kettle can take a press (not heating, no lot waiting in the glass, not cooling).
+## When it cannot, the ring is dimmed -- in every still, before the press -- and it lights up
+## again when the kettle is ready (a white flash). The ring's own layer is tinted: nothing is
+## redrawn for it (R-01).
+const RING_WAIT_TINT := Color(0.62, 0.62, 0.66, 0.5)
+var ring_waiting := false
+var ring_ready_flashes := 0   ## (for the tests)
+
+
+## The ring's centre and radius in the window's coordinates (the rects' space), for the tests.
+func _ring_geom() -> Array:
+	if rules == null:
+		return []
+	# The viewport's final transform as well (the window's stretch), as _window_rect does.
+	var g := get_viewport().get_final_transform() * ring_layer.get_global_transform()
+	var c := g * machine_centre()
+	return [c.x, c.y, ring_radius() * g.get_scale().x]
+
+
+func kettle_waiting() -> bool:
+	if rules == null:
+		return false
+	var st := _r()
+	return not bool(st["heating"]) and (not (rules.get("glass") as Dictionary).is_empty() or int(st.get("cooldown_left", 0)) > 0)
 
 
 ## The lift's path from the hand's kettle to the bin (the way its lot will go), and the bin.
@@ -2871,7 +2919,7 @@ func debug_state() -> Dictionary:
 		"ov_machine": ov_machine, "selected": selected, "sel_machine": sel_machine, "sel_slot": sel_slot,
 		"news_open": news_open, "ticker": int(_ticker.get("n", -1)), "ticker_end": bool(_ticker.get("end", false)), "news_marks": _news_marks().size(),
 		"news_tab": news_tab, "contest_info": _contest_info, "cancel_armed": _cancel_armed > 0.0, "contest_chip": _chip_visible(), "cticker": int((_cticker.get("row", {}) as Dictionary).get("seq", -1)),
-		"motion": motion_debug(), "overview": overview, "full_cues": full_cues, "full_cue": full_cue.visible, "coach_shown": coach_shown,
+		"motion": motion_debug(), "overview": overview, "full_cues": full_cues, "full_cue": full_cue.visible, "ring_waiting": ring_waiting, "ring_ready_flashes": ring_ready_flashes, "ring_geom": _ring_geom(), "coach_shown": coach_shown,
 		"hint": hint_node.visible, "announced": announced.duplicate(), "focus_releases": focus_releases, "ov_flash": _ov_flash_line}
 
 

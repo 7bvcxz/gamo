@@ -3,6 +3,7 @@ extends "res://tests/framework/test_case.gd"
 ## Step 44: usability without words.
 ## - a press refused because the glass waits shows why (arrows up to the bin, the bin ringed),
 ##   for long enough to be in a still a moment later, and makes no smoke (read as burning)
+##   (Step 47: up while the finger is down and 2 s after it lifts -- test_ready47)
 ## - a newcomer's tap (an early release) before any Perfect brings the hint once: the dot runs
 ##   to the gold with the finger down; never after a Perfect, at most three times
 ## - the overview's rates are a way in: a rate opens its floor with a free place's picker; a full
@@ -61,8 +62,8 @@ func test_a_press_on_a_waiting_glass_shows_the_full_bin_not_smoke() -> void:
 	assert_true(v.full_cue.visible, "the cue is up 0.4 s after the press")
 	assert_true(v.full_bin_rect().intersects(v.packing_rect()), "the cue rings the bin, on the packing floor")
 	assert_false(bool(app.rules.heating), "the kettle did not heat (refused)")
-	await _frames(16)
-	assert_false(v.full_cue.visible, "gone after 1.6 s")
+	await _frames(17)
+	assert_false(v.full_cue.visible, "gone 2 s after the finger lifted (Step 47)")
 	var src := FileAccess.get_file_as_string("res://variants/factory/factory_view.gd")
 	var press_fn := src.substr(src.find("func _press() -> void:"), 600)
 	assert_false(press_fn.contains("fx.smoke"), "no smoke on a refused press")

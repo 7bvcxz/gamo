@@ -7,6 +7,10 @@
 // no dev mode, no time acceleration. The player never sees the URL.
 //
 //   node session.mjs --run /abs/run1 --url 'https://7bvcxz.github.io/gamo/popcorn-glory/#click' [--seconds 180]
+//        [--save FILE]       Step 47: start from a prepared factory save (put into the fresh profile's
+//                            localStorage before the page loads, once; the report must say so)
+//        [--log-every S]     Step 47: read the game's own log every S seconds (default 5). A dense
+//                            factory logs thousands of lines; reading them all every 5 s stalls it.
 //
 // <run>/player/shots/  what the player may see: its screenshots
 // <run>/controller/    what only the evaluator reads: timed actions, the game's
@@ -29,6 +33,8 @@ if (!opt('run') || !opt('url')) { console.error('usage: node session.mjs --run D
 const run = path.resolve(opt('run'));
 const url = opt('url');
 const SECONDS = Number(opt('seconds', 180));
+const LOG_EVERY = Number(opt('log-every', 5));
+const SAVE = opt('save') ? path.resolve(opt('save')) : null;
 // A phone held upright: touch, portrait; screenshots are 600 x 1290 px.
 const VIEWPORT = { width: 400, height: 860 };
 const DPR = 1.5;
@@ -59,12 +65,20 @@ const page = context.pages()[0] || (await context.newPage());
 page.on('pageerror', (e) => fs.appendFileSync(errors, JSON.stringify({ t: elapsed(), kind: 'pageerror', text: e.message }) + '\n'));
 page.on('console', (m) => { if (m.type() === 'error') fs.appendFileSync(errors, JSON.stringify({ t: elapsed(), kind: 'console', text: m.text() }) + '\n'); });
 
+let prepared = null;
+if (SAVE) {
+  const text = fs.readFileSync(SAVE, 'utf8');
+  const { createHash } = await import('node:crypto');
+  prepared = { file: SAVE, bytes: text.length, sha256: createHash('sha256').update(text).digest('hex') };
+  // Only when the key is absent: a reload in the session keeps what the player made.
+  await context.addInitScript((t) => { try { if (!localStorage.getItem('popcorn-glory.factory.v1')) localStorage.setItem('popcorn-glory.factory.v1', t); } catch (e) {} }, text);
+}
 const loadStarted = Date.now();
 await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120_000 });
 await page.waitForFunction(() => window.popcorn && window.popcorn.ready, null, { timeout: 150_000 });
 await page.waitForTimeout(1500);
 const version = await page.evaluate(() => window.popcorn.version);
-fs.writeFileSync(path.join(ctl, 'start.json'), JSON.stringify({ url, version, load_ms: Date.now() - loadStarted, viewport: VIEWPORT, dpr: DPR, seconds: SECONDS }, null, 2));
+fs.writeFileSync(path.join(ctl, 'start.json'), JSON.stringify({ url, version, load_ms: Date.now() - loadStarted, viewport: VIEWPORT, dpr: DPR, seconds: SECONDS, log_every_s: LOG_EVERY, prepared_save: prepared }, null, 2));
 
 const toCss = (x, y) => ({ x: Math.max(0, Math.min(VIEWPORT.width - 1, x / DPR)), y: Math.max(0, Math.min(VIEWPORT.height - 1, y / DPR)) });
 async function screenshot() {
@@ -82,15 +96,19 @@ async function touch(type, p) {
 }
 const lastLogLen = {};
 const runsSeen = {};
-async function snapshot() {
+let lastLogRead = 0;
+async function snapshot(force = false) {
   const s = await page.evaluate(() => window.popcorn.state()).catch(() => null);
-  if (s) fs.appendFileSync(states, JSON.stringify({ t: Math.round(elapsed() * 10) / 10, screen: s.screen, exp: s.exp, run: s.run, clock_ms: s.clock_ms, sound: s.sound }) + '\n');
+  // Step 47: what the factory view has open (the paper, a floor's card), for the evaluator.
+  const view = s && s.view ? { news_open: s.view.news_open, selected: s.view.selected, sel_machine: s.view.sel_machine, overview: s.view.overview } : null;
+  if (s) fs.appendFileSync(states, JSON.stringify({ t: Math.round(elapsed() * 10) / 10, screen: s.screen, exp: s.exp, run: s.run, view, clock_ms: s.clock_ms, sound: s.sound }) + '\n');
   // Each experiment's own log, kept as it grows (Step 10: a player went back to the chooser
   // and opened A at 9:09, and the final game_log.json held only A's four inputs -- the stand
   // run's lines were gone).
   // A run that starts over (restart, or a fresh open) gets a new file: the old one is kept
   // as game_log_<exp>_<n>.json (Step 11: a restart overwrote 13 minutes of the stand's log).
-  if (s && s.screen === 'play' && s.exp) {
+  if (s && s.screen === 'play' && s.exp && (force || Date.now() - lastLogRead >= LOG_EVERY * 1000 - 50)) {
+    lastLogRead = Date.now();
     const log = await page.evaluate(() => window.popcorn.call('log_document')).catch(() => null);
     if (log) {
       const file = path.join(ctl, `game_log_${s.exp}.json`);
@@ -109,7 +127,7 @@ async function finish(reason) {
   finished = true;
   await busy.catch(() => {});
   const final = await screenshot().catch(() => '');
-  await snapshot().catch(() => {});
+  await snapshot(true).catch(() => {});
   const log = await page.evaluate(() => window.popcorn.call('log_document')).catch(() => null);
   if (log) fs.writeFileSync(path.join(ctl, 'game_log.json'), JSON.stringify(log, null, 2));
   fs.writeFileSync(path.join(ctl, 'summary.json'), JSON.stringify({ reason, elapsed_s: Math.round(elapsed()), counts, shots, final_shot: final, version }, null, 2));
