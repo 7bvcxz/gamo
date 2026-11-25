@@ -35,7 +35,17 @@
       "permanent": false
     },
     {
+      "source": "/snowball-relay/",
+      "destination": "https://7bvcxz.github.io/gamo/snowball-relay/",
+      "permanent": false
+    },
+    {
       "source": "/bubble-wrap-empire",
+      "destination": "https://7bvcxz.github.io/gamo/bubble-wrap-empire/",
+      "permanent": false
+    },
+    {
+      "source": "/bubble-wrap-empire/",
       "destination": "https://7bvcxz.github.io/gamo/bubble-wrap-empire/",
       "permanent": false
     },
