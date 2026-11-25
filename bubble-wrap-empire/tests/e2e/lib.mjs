@@ -10,12 +10,13 @@ export const { chromium } = require('playwright');
 export const BASE = process.env.BASE || 'http://localhost:8851/bubble-wrap-empire/';
 export const STATE = '__bubble';
 
-export async function open(browser, { w = 390, h = 844, touch = true, dpr = 2 } = {}) {
+export async function open(browser, { w = 390, h = 844, touch = true, dpr = 2, init = null } = {}) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, hasTouch: touch, isMobile: touch });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
+  if (init) await page.addInitScript(init);
   await page.goto(BASE);
   await page.waitForFunction((k) => !!window[k], STATE, { timeout: 90000 });
   const cdp = await ctx.newCDPSession(page);

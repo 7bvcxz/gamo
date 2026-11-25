@@ -216,6 +216,8 @@ func _step(dt: float) -> void:
 				wait[b] -= dt
 			else:
 				fill[b] = minf(1.0, fill[b] + rate * dt)
+				if fill[b] >= 1.0:
+					events.append({"t": "refill", "i": b})
 
 
 func _pop(b: int) -> void:

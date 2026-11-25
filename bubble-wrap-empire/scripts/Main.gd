@@ -20,6 +20,10 @@ const GOLD := Color("f2b632")
 var sim: RefCounted = Sim.new(5)
 var metrics: RefCounted = Metrics.new()
 var panel_open: bool = false
+var mirror: bool = false
+var _haptics: bool = false
+var _gc_seen: float = 0.0
+var _buzz_t: float = -9.0
 var _session_t0: float = 0.0
 var _g_t0: float = 0.0
 var _copied_until: float = -1.0
@@ -55,12 +59,20 @@ var _bridge_t: float = 0.0
 var _win: JavaScriptObject = null
 var _sheet: Rect2 = Rect2()
 var _cell: float = 60.0
+var _flash: Array[float] = []
 
 
 func _ready() -> void:
 	_build_sfx()
+	for i in sim.pos.size():
+		_flash.append(0.0)
 	if OS.has_feature("web"):
 		_win = JavaScriptBridge.get_interface("window")
+		# Static scripts only (no data goes into them). A touchcancel, the window losing focus
+		# or the tab being hidden all cancel the gesture in progress: Godot Web delivers the
+		# first of those as a plain release, which would otherwise count as a deliberate action.
+		JavaScriptBridge.eval("window.__gcancel = 0; (function () { var b = function () { window.__gcancel++; }; window.addEventListener('touchcancel', b, true); window.addEventListener('blur', b); document.addEventListener('visibilitychange', function () { if (document.hidden) { b(); } }); })();", true)
+		_haptics = bool(JavaScriptBridge.eval("typeof navigator.vibrate === 'function'", true))
 		var d: Variant = JavaScriptBridge.eval("window.devicePixelRatio")
 		if d != null:
 			metrics.dpr = float(d)
@@ -71,41 +83,65 @@ func _ready() -> void:
 func _view() -> Vector2:
 	return get_viewport_rect().size
 
+func _wide() -> bool:
+	var v: Vector2 = _view()
+	return v.x >= v.y * 0.9
+
 func _column() -> Rect2:
 	var v: Vector2 = _view()
-	var cw: float = minf(v.x, v.y * 0.62)
+	var cw: float = minf(v.x, v.y * (1.0 if _wide() else 0.62))
 	return Rect2((v.x - cw) * 0.5, 0.0, cw, v.y)
 
 func _layout() -> void:
 	var col: Rect2 = _column()
 	var v: Vector2 = _view()
-	var u: float = col.size.x / 720.0
+	# UI size follows the height-limited column, so a wide desktop window does not blow it up
+	var u: float = minf(col.size.x, v.y * 0.62) / 720.0
 	var b: float = 94.0 * minf(u, 1.15)
 	var gap: float = 10.0 * u
 	var m: float = 16.0 * u
-	var bottom: float = v.y - m
+	var bottom: float = v.y - m - 8.0 * u   # clear of a home-indicator bar
+	var wide: bool = _wide()
 	_rects.clear()
-	for i in 5:
-		var y: float = bottom - b - float(4 - i) * (b + gap)
-		_rects["up%d" % i] = Rect2(col.position.x + m, y, b, b)
-	var col_top: float = bottom - 5.0 * b - 4.0 * gap
 	var zw: float = col.size.x * 0.52
 	var zh: float = minf(v.y * 0.3, 420.0 * u)
+	var col_top: float = bottom - 5.0 * b - 4.0 * gap
+	var side_pad: float = 0.0
+	if wide:
+		# desktop / landscape: the five upgrades sit in a row at the bottom, the pad is a smaller
+		# square at the bottom right, and the sheet keeps clear of both
+		for i in 5:
+			_rects["up%d" % i] = Rect2(col.position.x + m + float(i) * (b + gap), bottom - b, b, b)
+		zw = 250.0 * u
+		zh = minf(zw * 1.1, v.y * 0.3)
+		col_top = bottom - b
+		side_pad = zw + 2.0 * m
+	else:
+		for i in 5:
+			var y: float = bottom - b - float(4 - i) * (b + gap)
+			_rects["up%d" % i] = Rect2(col.position.x + m, y, b, b)
 	_rects["pad"] = Rect2(col.end.x - m - zw, bottom - zh, zw, zh)
 	var ib: float = 64.0 * minf(u, 1.15)
 	_rects["reset"] = Rect2(col.position.x + m, m, ib, ib)
 	_rects["mute"] = Rect2(col.end.x - m - ib, m, ib, ib)
 	_rects["info"] = Rect2(col.position.x + m + ib + 10.0 * u, m, ib, ib)
+	_rects["mirror"] = Rect2(col.end.x - m - 2.0 * ib - 10.0 * u, m, ib, ib)
 	if panel_open:
-		var pw: float = col.size.x - 2.0 * m
-		_rects["panel"] = Rect2(col.position.x + m, 120.0 * u, pw, 400.0 * u)
-		_rects["copy"] = Rect2(col.position.x + m + 16.0 * u, 120.0 * u + 330.0 * u, 150.0 * u, 56.0 * u)
-		_rects["num"] = Rect2(col.position.x + m + 182.0 * u, 120.0 * u + 330.0 * u, 150.0 * u, 56.0 * u)
+		var pw: float = minf(col.size.x, v.y * 0.62) - 2.0 * m
+		_rects["panel"] = Rect2(col.position.x + m, 120.0 * u, pw, 440.0 * u)
+		_rects["copy"] = Rect2(col.position.x + m + 16.0 * u, 120.0 * u + 372.0 * u, 150.0 * u, 56.0 * u)
+		_rects["num"] = Rect2(col.position.x + m + 182.0 * u, 120.0 * u + 372.0 * u, 150.0 * u, 56.0 * u)
 	_rects["u"] = Rect2(0, 0, u, u)
-	# the sheet: as large as fits between the top bar and the upgrade column
+	if mirror:
+		for k in ["up0", "up1", "up2", "up3", "up4", "pad"]:
+			var fr: Rect2 = _rects[k]
+			_rects[k] = Rect2(col.position.x * 2.0 + col.size.x - fr.position.x - fr.size.x, fr.position.y, fr.size.x, fr.size.y)
+	# the sheet: as large as fits between the top bar and the controls
 	var y0: float = 120.0 * u
-	var y1: float = minf(col_top - 14.0 * u, v.y * 0.62)
+	var y1: float = minf(col_top - 14.0 * u, v.y * 0.62) if not wide else col_top - 14.0 * u
 	_cell = minf(col.size.x * 0.95 / (float(Sim.COLS) + 0.5), (y1 - y0) / (float(Sim.ROWS - 1) * 0.866 + 1.0))
+	if wide:
+		_cell = minf(_cell, (col.size.x - 2.0 * side_pad) / (float(Sim.COLS) + 0.8))
 	var sw: float = (float(Sim.COLS) - 0.5) * _cell
 	var sh: float = float(Sim.ROWS - 1) * 0.866 * _cell
 	_sheet = Rect2(col.position.x + (col.size.x - sw) * 0.5, y0 + _cell * 0.5, sw, sh)
@@ -169,9 +205,30 @@ func _input(e: InputEvent) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
-		if _gid != -99:
-			metrics.press(_t(), sim.earned, "field" if _g_target == "" else "button", _clock - _g_t0, _g_len, _g_len / _short_side(), true, false)
-		_cancel_gesture()
+		_abort()
+
+
+# Drop the gesture in progress without acting on it, and count it as cancelled.
+func _abort() -> void:
+	if _gid != -99:
+		metrics.press(_t(), sim.earned, "field" if _g_target == "" else ("upgrade" if _g_target.begins_with("up") else "button"), _clock - _g_t0, _g_len, _g_len / _short_side(), true, false)
+	_cancel_gesture()
+
+
+func _gcancel_now() -> float:
+	if _win == null:
+		return 0.0
+	var v: Variant = _win.get("__gcancel")
+	return float(v) if v != null else 0.0
+
+
+# Haptics are optional and only used when the browser really has the API; whether a
+# given phone buzzes is not something this code can know.
+func _buzz(ms: int) -> void:
+	if not _haptics or muted or _clock - _buzz_t < 0.08:
+		return
+	_buzz_t = _clock
+	JavaScriptBridge.eval("navigator.vibrate(%d)" % ms, true)
 
 
 func _cancel_gesture() -> void:
@@ -191,7 +248,10 @@ func _hit(p: Vector2) -> String:
 
 func _down(id: int, p: Vector2) -> void:
 	if _gid != -99:
-		return   # one touch at a time: a second finger is ignored, never doubled
+		if id == _gid or _clock - _g_t0 > 1.2:
+			_abort()   # the old gesture never ended (a lost touchend): do not let it block every later touch
+		else:
+			return   # one touch at a time: a second finger is ignored, never doubled
 	_layout()
 	_gid = id
 	_g_pos = p
@@ -200,6 +260,7 @@ func _down(id: int, p: Vector2) -> void:
 	_g_target = _hit(p)
 	_g_pad = (_rects["pad"] as Rect2).has_point(p)
 	_g_t0 = _clock
+	_gc_seen = _gcancel_now()
 	metrics.view = _view()
 	_last_input_t = _clock
 
@@ -215,6 +276,8 @@ func _move(id: int, p: Vector2) -> void:
 func _up(id: int, p: Vector2, canceled: bool) -> void:
 	if id != _gid:
 		return
+	if id >= -1 and _gcancel_now() != _gc_seen:
+		canceled = true   # touchcancel / blur / tab hidden happened during this gesture
 	var target: String = _g_target
 	var in_pad: bool = _g_pad
 	var len_px: float = _g_len
@@ -242,6 +305,8 @@ func _press_button(k: String) -> bool:
 		_toggle_mute()
 	elif k == "info":
 		panel_open = not panel_open
+	elif k == "mirror":
+		mirror = not mirror
 	elif k == "copy":
 		DisplayServer.clipboard_set(_summary())
 		_copied_until = _clock + 1.5
@@ -329,6 +394,8 @@ func _summary() -> String:
 # ---- frame ------------------------------------------------------------------
 
 func _process(delta: float) -> void:
+	if _gid != -99 and _clock - _g_t0 > 8.0:
+		_abort()   # nobody holds a finger down this long on purpose
 	var dt: float = minf(delta, 0.1)   # a tab that was asleep must not fast-forward the sheet
 	_clock += dt
 	_layout()
@@ -358,12 +425,17 @@ func _on_event(ev: Dictionary) -> void:
 				col = GOLD
 			if _rings.size() < 90:
 				_rings.append({"p": c, "t": 0.0, "col": col})
+			_flash[i] = 0.0
 			for k in 4:
 				var a: float = randf() * TAU
 				_spawn(c, Vector2(cos(a), sin(a)) * randf_range(70.0, 190.0) * u, randf_range(0.25, 0.5), randf_range(2.5, 5.0) * u, col)
 			if _clock - _pop_snd_t > 0.03:
 				_pop_snd_t = _clock
 				_pop_sound(d, bool(ev["mega"]))
+		"trigger":
+			_buzz(30 if bool(ev["mega"]) else 10)
+		"refill":
+			_flash[int(ev["i"])] = 1.0
 		"wave":
 			if int(ev["count"]) > 1 or bool(ev["mega"]):
 				var sp: Vector2 = _bp(int(ev["seed"]))
@@ -397,6 +469,8 @@ func _tick_fx(dt: float) -> void:
 		if float(r["t"]) > 0.28:
 			_rings.remove_at(i)
 		i -= 1
+	for j in _flash.size():
+		_flash[j] = maxf(0.0, _flash[j] - dt * 3.0)
 	i = _floaters.size() - 1
 	while i >= 0:
 		var f: Dictionary = _floaters[i]
@@ -416,11 +490,12 @@ func _draw() -> void:
 	_draw_sheet(u)
 	for r in _rings:
 		var k: float = float(r["t"]) / 0.28
+		draw_circle(r["p"], _cell * 0.46 * (1.0 + 0.35 * k), Color(r["col"], 0.4 * (1.0 - k) * (1.0 - k)))
 		draw_arc(r["p"], _cell * (0.3 + 0.75 * k), 0, TAU, 20, Color(r["col"], 1.0 - k), maxf(2.0, _cell * 0.07 * (1.0 - k)))
 	for p in _particles:
 		var a: float = clampf(float(p["life"]) / float(p["max"]), 0.0, 1.0)
 		draw_circle(p["p"], float(p["r"]) * (0.4 + 0.6 * a), Color(p["c"], a))
-	for f in _floaters:
+	for f in ([] if numbers_hidden else _floaters):
 		var k2: float = float(f["t"])
 		var fs: int = int((44 if f["big"] else 30) * u)
 		draw_string(_font, (f["p"] as Vector2) + Vector2(-30.0 * u, -_cell * 0.5 - 70.0 * u * k2), f["text"], HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(GOLD if f["big"] else INK, 1.0 - k2))
@@ -443,7 +518,7 @@ func _draw_sheet(u: float) -> void:
 		var f: float = sim.fill[i]
 		var sched: bool = sim.pop_at[i] >= 0.0
 		if f >= 0.999:
-			var swell: float = 1.0
+			var swell: float = 1.0 + 0.1 * _flash[i]
 			var tint: Color = Color(0.74, 0.8, 1.0, 0.45)
 			if sched:
 				var left: float = clampf((sim.pop_at[i] - sim.time) / 0.12, 0.0, 1.0)
@@ -454,6 +529,8 @@ func _draw_sheet(u: float) -> void:
 			draw_arc(c, r, 0, TAU, 28, Color(ACCENT, 0.55), maxf(1.5, _cell * 0.035))
 			draw_arc(c, r * 0.68, 3.5, 4.8, 8, Color(1, 1, 1, 0.9), maxf(2.0, _cell * 0.05))
 			draw_circle(c + Vector2(-r * 0.38, -r * 0.4), r * 0.1, Color(1, 1, 1, 0.95))
+			if _flash[i] > 0.0:
+				draw_arc(c, r * (1.05 + 0.3 * (1.0 - _flash[i])), 0, TAU, 24, Color(1, 1, 1, _flash[i]), maxf(2.0, _cell * 0.05))
 		elif f > 0.0:
 			var e: float = 1.0 - pow(1.0 - f, 2.0)
 			draw_circle(c, r0 * e, Color(0.78, 0.84, 1.0, 0.3 * e))
@@ -494,6 +571,7 @@ func _draw_hud(u: float) -> void:
 	_icon_button(_rects["reset"], "reset", _clock < _reset_armed_until)
 	_icon_button(_rects["mute"], "mute", muted)
 	_icon_button(_rects["info"], "info", panel_open)
+	_icon_button(_rects["mirror"], "mirror", mirror)
 	if panel_open:
 		_draw_panel(u)
 
@@ -516,6 +594,7 @@ func _draw_panel(u: float) -> void:
 		"waves %d  avg %.1f pops  max %d  avg %.2fs" % [sim.wave_total, (float(sim.wave_pops_sum) / float(sim.wave_total)) if sim.wave_total > 0 else 0.0, sim.wave_max, (sim.wave_secs_sum / float(sim.wave_total)) if sim.wave_total > 0 else 0.0],
 		"sheet full %d/%d  refill %.1fs" % [sim.full_count(), sim.pos.size(), sim.refill_time()],
 		"first action %.1fs  first buy %.1fs  levels %s" % [metrics.first_action_t, metrics.first_buy_t, str(sim.lv)],
+		"vibrate API %s (effect not verified)" % ("present" if _haptics else "absent"),
 	])
 	for i in lines.size():
 		draw_string(_font, r.position + Vector2(18.0 * u, (34.0 + 33.0 * float(i)) * u), lines[i], HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 30.0 * u, int(22.0 * u), INK)
@@ -540,6 +619,11 @@ func _icon_button(r: Rect2, kind: String, on: bool) -> void:
 	if kind == "reset":
 		draw_arc(c, rad * 0.45, 0.6, TAU - 0.2, 20, ink, 4.0)
 		draw_colored_polygon(PackedVector2Array([c + Vector2(rad * 0.55, -rad * 0.55), c + Vector2(rad * 0.1, -rad * 0.5), c + Vector2(rad * 0.55, -rad * 0.05)]), ink)
+	elif kind == "mirror":
+		draw_line(c + Vector2(-rad * 0.55, -rad * 0.18), c + Vector2(rad * 0.55, -rad * 0.18), ink, 4.0)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(rad * 0.62, -rad * 0.18), c + Vector2(rad * 0.25, -rad * 0.45), c + Vector2(rad * 0.25, rad * 0.09)]), ink)
+		draw_line(c + Vector2(rad * 0.55, rad * 0.28), c + Vector2(-rad * 0.55, rad * 0.28), ink, 4.0)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(-rad * 0.62, rad * 0.28), c + Vector2(-rad * 0.25, rad * 0.01), c + Vector2(-rad * 0.25, rad * 0.55)]), ink)
 	elif kind == "info":
 		draw_circle(c + Vector2(0, -rad * 0.42), rad * 0.11, ink)
 		draw_line(c + Vector2(0, -rad * 0.15), c + Vector2(0, rad * 0.5), ink, 5.0)
@@ -623,6 +707,8 @@ func _draw_pad(u: float) -> void:
 	_style.set_border_width_all(int((6 if ready else 4) * u))
 	draw_style_box(_style, r)
 	# the pad is a small live map of the sheet
+	var strength: float = clampf((sim.time - sim.last_trigger_t) / Sim.RAPID_WINDOW, Sim.RAPID_FLOOR, 1.0)
+	draw_rect(Rect2(r.position.x + 24.0 * u, r.end.y - 20.0 * u, (r.size.x - 48.0 * u) * strength, 7.0 * u), Color(ACCENT, 0.35 + 0.4 * strength))
 	var inner: Rect2 = r.grow(-26.0 * u)
 	for i in sim.pos.size():
 		var p: Vector2 = sim.pos[i]
@@ -759,6 +845,9 @@ func _publish() -> void:
 		"megaReady": sim.mega_ready(),
 		"refill": snappedf(sim.refill_time(), 0.01),
 		"muted": muted,
+		"mirror": mirror,
+		"haptics": _haptics,
+		"gid": _gid,
 		"hidden": numbers_hidden,
 		"view": [v.x, v.y],
 		"rects": rects,
