@@ -18,6 +18,11 @@ const I_MEGA: int = 4
 const HOP_DELAY: float = 0.075       # seconds between a bubble and the ones it sets off
 const REFILL_WAIT: float = 0.35      # a popped bubble rests this long before it re-inflates
 const TRIGGER_REFRACTORY: float = 0.2  # a second touch this soon is the same touch, not a new trigger
+# A touch that follows the last one sooner than this pays proportionally less
+# (never less than a quarter): the touch is taken, the pop happens, only the
+# value of that wave is softened. Waiting costs nothing and rapid taps gain little.
+const RAPID_WINDOW: float = 0.8
+const RAPID_FLOOR: float = 0.25
 const MAX_NEIGHBOUR: float = 5.2
 
 var pop: float = 0.0
@@ -42,6 +47,10 @@ var waves: Dictionary = {}
 var _next_wave: int = 1
 var last_wave_count: int = 0
 var last_wave_secs: float = 0.0
+var wave_total: int = 0            # finished waves
+var wave_pops_sum: int = 0
+var wave_secs_sum: float = 0.0
+var wave_max: int = 0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
@@ -130,6 +139,7 @@ func trigger(at: Vector2) -> int:
 				seed_i = i
 	if seed_i < 0:
 		return -1
+	var scale: float = clampf((time - last_trigger_t) / RAPID_WINDOW, RAPID_FLOOR, 1.0)
 	last_trigger_t = time
 	triggers += 1
 	var mega: bool = mega_ready()
@@ -137,7 +147,7 @@ func trigger(at: Vector2) -> int:
 		mega_clock = 0.0
 	var wid: int = _next_wave
 	_next_wave += 1
-	waves[wid] = {"seed": seed_i, "total": 0.0, "count": 0, "left": 0, "t0": time, "mega": mega}
+	waves[wid] = {"seed": seed_i, "total": 0.0, "count": 0, "left": 0, "t0": time, "mega": mega, "scale": scale}
 	_schedule(seed_i, 0, time, wid, mega)
 	var rad: float = radius() * (1.7 if mega else 1.0)
 	var max_hops: int = hops() + (2 if mega else 0)
@@ -210,7 +220,7 @@ func _step(dt: float) -> void:
 
 func _pop(b: int) -> void:
 	var w: Dictionary = waves[wave_id[b]]
-	var reward: float = value() * (1.0 + 0.08 * depth[b]) * (2.0 if mega_flag[b] else 1.0)
+	var reward: float = value() * (1.0 + 0.08 * depth[b]) * (2.0 if mega_flag[b] else 1.0) * float(w["scale"])
 	pop += reward
 	earned += reward
 	pops += 1
@@ -224,6 +234,10 @@ func _pop(b: int) -> void:
 	if w["left"] <= 0:
 		last_wave_count = w["count"]
 		last_wave_secs = time - float(w["t0"])
+		wave_total += 1
+		wave_pops_sum += int(w["count"])
+		wave_secs_sum += last_wave_secs
+		wave_max = maxi(wave_max, int(w["count"]))
 		events.append({"t": "wave", "seed": w["seed"], "total": w["total"], "count": w["count"], "mega": w["mega"]})
 		waves.erase(wave_id[b])
 

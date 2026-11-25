@@ -18,16 +18,14 @@ while ((Date.now() - t0) / 1000 < secs) {
   const el = (Date.now() - t0) / 1000;
   if (firstSnow === null && s.earned > 0) firstSnow = el;
   if (s.speed === 0) { await padSwipe(page, cdp, 0.45); swipes++; }
-  // buy the cheapest affordable (levels are on the page state; cost is not, so just try each button)
+  // buy only what the snow can pay for (a real player does not tap a button they cannot afford)
   for (const i of [0, 1, 2, 3, 4]) {
-    const before = (await state(page)).lv[i];
-    if (s.snow > 0) {
-      const c = await rectCenter(page, `up${i}`);
-      const lvBefore = before;
-      await tap(cdp, c, 40);
+    const cur = await state(page);
+    if (cur.costs[i] > 0 && cur.snow >= cur.costs[i]) {
+      const lvBefore = cur.lv[i];
+      await tap(cdp, await rectCenter(page, `up${i}`), 40);
       await sleep(120);
-      const after = (await state(page)).lv[i];
-      if (after > lvBefore) { buys++; if (firstBuy === null) firstBuy = el; }
+      if ((await state(page)).lv[i] > lvBefore) { buys++; if (firstBuy === null) firstBuy = el; }
     }
   }
   if (mi < marks.length && el >= marks[mi]) {
@@ -39,7 +37,7 @@ while ((Date.now() - t0) / 1000 < secs) {
   await sleep(250);
 }
 const fin = await state(page);
-const res = { firstSnow, firstBuy, swipes, buys, rows, final: { t: fin.t, lv: fin.lv, radius: fin.radius, rollT: fin.rollT, lastRoll: fin.lastRoll }, errors };
+const res = { m: fin.m, summary: fin.summary, firstSnow, firstBuy, swipes, buys, rows, final: { t: fin.t, lv: fin.lv, radius: fin.radius, rollT: fin.rollT, lastRoll: fin.lastRoll }, errors };
 fs.writeFileSync(`${out}/result.json`, JSON.stringify(res, null, 1));
 console.log(JSON.stringify(res));
 await browser.close();

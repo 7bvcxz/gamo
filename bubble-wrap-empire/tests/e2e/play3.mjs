@@ -27,14 +27,15 @@ while ((Date.now() - t0) / 1000 < secs) {
     const a = await state(page);
     if (firstPop === null && a.pops > 0) firstPop = (Date.now() - t0) / 1000;
   }
+  // buy only what the POP can pay for
   for (const i of [0, 1, 2, 3, 4]) {
-    const s = await state(page);
-    if (s.pop <= 0) break;
-    const before = s.lv[i];
-    await tap(cdp, await rectCenter(page, `up${i}`), 40);
-    await sleep(100);
-    const after = (await state(page)).lv[i];
-    if (after > before) { buys++; if (firstBuy === null) firstBuy = (Date.now() - t0) / 1000; }
+    const cur = await state(page);
+    if (cur.costs[i] > 0 && cur.pop >= cur.costs[i]) {
+      const before = cur.lv[i];
+      await tap(cdp, await rectCenter(page, `up${i}`), 40);
+      await sleep(100);
+      if ((await state(page)).lv[i] > before) { buys++; if (firstBuy === null) firstBuy = (Date.now() - t0) / 1000; }
+    }
   }
   const m = await state(page);
   biggest = Math.max(biggest, m.lastWave);
@@ -46,7 +47,7 @@ while ((Date.now() - t0) / 1000 < secs) {
   await sleep(150);
 }
 const fin = await state(page);
-const res = { firstPop, firstBuy, taps, buys, rows, final: { t: fin.t, lv: fin.lv, lastWave: fin.lastWave, biggest, pops: fin.pops, triggers: fin.triggers }, errors };
+const res = { m: fin.m, summary: fin.summary, firstPop, firstBuy, taps, buys, rows, final: { t: fin.t, lv: fin.lv, lastWave: fin.lastWave, biggest, pops: fin.pops, triggers: fin.triggers }, errors };
 fs.writeFileSync(`${out}/result.json`, JSON.stringify(res, null, 1));
 console.log(JSON.stringify(res));
 await browser.close();

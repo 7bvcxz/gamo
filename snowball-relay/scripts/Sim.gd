@@ -17,7 +17,7 @@ const I_IMPACT: int = 4
 
 # Pushes that arrive sooner than this after the last one count for less: a
 # frantic swipe is accepted, it just is not worth more (soft saturation).
-const PUSH_REFRACTORY: float = 0.7
+const PUSH_REFRACTORY: float = 1.5
 # Decay shape: dx/dt = -(K/T) * (0.35 + 0.65 x), x = speed / v0. K makes a full
 # push last about T seconds from v0 to a stop.
 const DECAY_K: float = 1.56
@@ -36,6 +36,9 @@ var breaks: int = 0
 var last_push_t: float = -99.0
 var roll_started_t: float = -1.0   # when the current roll began (speed was 0)
 var last_roll_len: float = 0.0     # seconds the last finished roll lasted
+var rolls: int = 0                 # finished rolls
+var roll_len_sum: float = 0.0
+var moving_time: float = 0.0       # seconds the ball was rolling at all
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _next_prop_d: float = 5.0
@@ -61,7 +64,7 @@ func roll_time() -> float:
 	return 3.0 + 2.4 * lv[I_MOMENTUM]
 
 func vcap() -> float:
-	return v0() * 1.1
+	return v0() * 1.0
 
 func cost(i: int) -> float:
 	return roundf(BASE_COST[i] * pow(COST_GROWTH, lv[i]))
@@ -79,7 +82,7 @@ func can_buy(i: int) -> bool:
 # Returns the speed that was actually added.
 func push(strength: float) -> float:
 	var since: float = time - last_push_t
-	var rate: float = clampf(since / PUSH_REFRACTORY, 0.25, 1.0)
+	var rate: float = clampf(since / PUSH_REFRACTORY, 0.08, 1.0)
 	var room: float = maxf(0.0, 1.0 - speed / vcap())
 	var dv: float = v0() * clampf(strength, 0.0, 1.0) * rate * room
 	last_push_t = time
@@ -112,12 +115,15 @@ func _step(dt: float) -> void:
 	time += dt
 	if speed <= 0.0:
 		return
+	moving_time += dt
 	var x: float = speed / v0()
 	var decay: float = DECAY_K / roll_time() * (0.35 + 0.65 * x)
 	speed = maxf(0.0, speed - decay * v0() * dt)
 	if speed < 0.02 * v0():
 		speed = 0.0
 		last_roll_len = time - roll_started_t
+		rolls += 1
+		roll_len_sum += last_roll_len
 		events.append({"t": "stop"})
 		return
 	var dd: float = speed * dt

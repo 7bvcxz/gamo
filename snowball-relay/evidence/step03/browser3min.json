@@ -1,0 +1,99 @@
+{
+ "m": {
+  "accepted": 19,
+  "buys": 38,
+  "cancelled": 0,
+  "downS": 15.275,
+  "elapsed": 180.31,
+  "field": 19,
+  "inputFrac": 0.0847,
+  "raw": 60,
+  "travelNorm": 2.99,
+  "upTaps": 41
+ },
+ "summary": "elapsed_s=180.3\nviewport=720x1558 dpr=2.00\nraw_presses=60 (20.0/min) field_gestures=19 accepted=19 upgrade_taps=41 buys=38 other_taps=0 cancelled=0\ntravel_px=2155 travel_norm=2.99 touch_down_s=15.27 active_input_fraction=0.085\nfirst_action_s=1.10 first_buy_s=3.12 earned=8882.2 earned_per_min=2955.6\npushes=19\nbreaks=68\nrolls_finished=18\navg_roll_s=8.81\nlast_roll_s=17.39\nmoving_fraction=0.883\ndistance=1123.1\nradius=6.945\nupgrade_levels=[8, 8, 7, 8, 7]\nroll_time_setting_s=19.8\nminute1: presses=30 accepted=11 buys=18 down_s=8.32 earned=836.8\nminute2: presses=18 accepted=4 buys=13 down_s=3.77 earned=2960.0\nminute3: presses=12 accepted=4 buys=7 down_s=3.18 earned=5085.4",
+ "firstSnow": 1.242,
+ "firstBuy": 12.235,
+ "swipes": 19,
+ "buys": 14,
+ "rows": [
+  {
+   "at": 10,
+   "snow": 8.2,
+   "radius": 1.257,
+   "lv": [
+    1,
+    1,
+    0,
+    0,
+    0
+   ],
+   "rollT": 3,
+   "lastRoll": 2.77,
+   "dist": 24.54,
+   "breaks": 3
+  },
+  {
+   "at": 30,
+   "snow": 28,
+   "radius": 1.898,
+   "lv": [
+    3,
+    2,
+    1,
+    2,
+    1
+   ],
+   "rollT": 5.4,
+   "lastRoll": 4.99,
+   "dist": 88.03,
+   "breaks": 10
+  },
+  {
+   "at": 60,
+   "snow": 93.3,
+   "radius": 3.07,
+   "lv": [
+    5,
+    4,
+    3,
+    4,
+    3
+   ],
+   "rollT": 10.2,
+   "lastRoll": 8.69,
+   "dist": 241.04,
+   "breaks": 24
+  },
+  {
+   "at": 120,
+   "snow": 186.4,
+   "radius": 5.207,
+   "lv": [
+    7,
+    6,
+    6,
+    6,
+    6
+   ],
+   "rollT": 17.4,
+   "lastRoll": 12.97,
+   "dist": 650.95,
+   "breaks": 48
+  }
+ ],
+ "final": {
+  "t": 180.31,
+  "lv": [
+   8,
+   8,
+   7,
+   8,
+   7
+  ],
+  "radius": 6.945,
+  "rollT": 19.8,
+  "lastRoll": 17.39
+ },
+ "errors": []
+}

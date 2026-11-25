@@ -1,0 +1,121 @@
+{
+ "m": {
+  "accepted": 57,
+  "buys": 43,
+  "cancelled": 0,
+  "downS": 15.248,
+  "elapsed": 180.77,
+  "field": 57,
+  "inputFrac": 0.0844,
+  "raw": 102,
+  "travelNorm": 0,
+  "upTaps": 45
+ },
+ "summary": "elapsed_s=180.8\nviewport=720x1558 dpr=2.00\nraw_presses=102 (33.9/min) field_gestures=57 accepted=57 upgrade_taps=45 buys=43 other_taps=0 cancelled=0\ntravel_px=0 travel_norm=0.00 touch_down_s=15.25 active_input_fraction=0.084\nfirst_action_s=0.77 first_buy_s=11.19 earned=38780.0 earned_per_min=12871.5\ntriggers_accepted=57\nbubbles_popped=2906\nwaves_finished=57\navg_wave_pops=50.98\nmax_wave_pops=70\nlast_wave_pops=70\navg_wave_s=0.37\nsheet_full=70/70\nrefill_s=1.19\nupgrade_levels=[8, 10, 9, 9, 7]\nminute1: presses=37 accepted=19 buys=18 down_s=5.55 earned=793.0\nminute2: presses=40 accepted=19 buys=19 down_s=5.88 earned=13704.4\nminute3: presses=25 accepted=19 buys=6 down_s=3.82 earned=24282.6",
+ "firstPop": 0.665,
+ "firstBuy": 17.521,
+ "taps": 57,
+ "buys": 26,
+ "rows": [
+  {
+   "at": 10,
+   "pop": 0,
+   "lv": [
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "lastWave": 1,
+   "lastWaveSecs": 0.05,
+   "biggest": 1,
+   "pops": 4,
+   "triggers": 4,
+   "full": 68
+  },
+  {
+   "at": 30,
+   "pop": 14,
+   "lv": [
+    1,
+    2,
+    2,
+    0,
+    0
+   ],
+   "lastWave": 3,
+   "lastWaveSecs": 0.24,
+   "biggest": 12,
+   "pops": 46,
+   "triggers": 10,
+   "full": 59
+  },
+  {
+   "at": 60,
+   "pop": 3,
+   "lv": [
+    4,
+    5,
+    4,
+    3,
+    2
+   ],
+   "lastWave": 32,
+   "lastWaveSecs": 0.52,
+   "biggest": 32,
+   "pops": 264,
+   "triggers": 19,
+   "full": 38
+  },
+  {
+   "at": 120,
+   "pop": 131.4,
+   "lv": [
+    7,
+    9,
+    8,
+    7,
+    6
+   ],
+   "lastWave": 70,
+   "lastWaveSecs": 0.39,
+   "biggest": 70,
+   "pops": 1576,
+   "triggers": 38,
+   "full": 19
+  },
+  {
+   "at": 180,
+   "pop": 2467,
+   "lv": [
+    8,
+    10,
+    9,
+    9,
+    7
+   ],
+   "lastWave": 70,
+   "lastWaveSecs": 0.3,
+   "biggest": 70,
+   "pops": 2906,
+   "triggers": 57,
+   "full": 70
+  }
+ ],
+ "final": {
+  "t": 180.77,
+  "lv": [
+   8,
+   10,
+   9,
+   9,
+   7
+  ],
+  "lastWave": 70,
+  "biggest": 70,
+  "pops": 2906,
+  "triggers": 57
+ },
+ "errors": []
+}

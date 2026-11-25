@@ -8,6 +8,7 @@ extends Node2D
 # happens when you let go; one touch is one trigger, however long or short.
 
 const Sim := preload("res://scripts/Sim.gd")
+const Metrics := preload("res://scripts/Metrics.gd")
 
 const BG_TOP := Color("e9defa")
 const BG_BOT := Color("f8f1fd")
@@ -17,6 +18,11 @@ const PINK := Color("ef7fb0")
 const GOLD := Color("f2b632")
 
 var sim: RefCounted = Sim.new(5)
+var metrics: RefCounted = Metrics.new()
+var panel_open: bool = false
+var _session_t0: float = 0.0
+var _g_t0: float = 0.0
+var _copied_until: float = -1.0
 var numbers_hidden: bool = false
 var muted: bool = false
 
@@ -55,6 +61,9 @@ func _ready() -> void:
 	_build_sfx()
 	if OS.has_feature("web"):
 		_win = JavaScriptBridge.get_interface("window")
+		var d: Variant = JavaScriptBridge.eval("window.devicePixelRatio")
+		if d != null:
+			metrics.dpr = float(d)
 
 
 # ---- layout ------------------------------------------------------------------
@@ -86,6 +95,12 @@ func _layout() -> void:
 	var ib: float = 64.0 * minf(u, 1.15)
 	_rects["reset"] = Rect2(col.position.x + m, m, ib, ib)
 	_rects["mute"] = Rect2(col.end.x - m - ib, m, ib, ib)
+	_rects["info"] = Rect2(col.position.x + m + ib + 10.0 * u, m, ib, ib)
+	if panel_open:
+		var pw: float = col.size.x - 2.0 * m
+		_rects["panel"] = Rect2(col.position.x + m, 120.0 * u, pw, 400.0 * u)
+		_rects["copy"] = Rect2(col.position.x + m + 16.0 * u, 120.0 * u + 330.0 * u, 150.0 * u, 56.0 * u)
+		_rects["num"] = Rect2(col.position.x + m + 182.0 * u, 120.0 * u + 330.0 * u, 150.0 * u, 56.0 * u)
 	_rects["u"] = Rect2(0, 0, u, u)
 	# the sheet: as large as fits between the top bar and the upgrade column
 	var y0: float = 120.0 * u
@@ -143,17 +158,19 @@ func _input(e: InputEvent) -> void:
 		if k.pressed and not k.echo:
 			match k.keycode:
 				KEY_SPACE, KEY_ENTER:
-					_trigger(_aim(_sheet.get_center(), false))
+					metrics.press(_t(), sim.earned, "field", 0.0, 0.0, 0.0, false, _trigger(_aim(_sheet.get_center(), false)))
 				KEY_M:
 					_toggle_mute()
 				KEY_H:
 					numbers_hidden = not numbers_hidden
 				KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
-					_buy(int(k.keycode - KEY_1))
+					metrics.press(_t(), sim.earned, "upgrade", 0.0, 0.0, 0.0, false, _buy(int(k.keycode - KEY_1)))
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		if _gid != -99:
+			metrics.press(_t(), sim.earned, "field" if _g_target == "" else "button", _clock - _g_t0, _g_len, _g_len / _short_side(), true, false)
 		_cancel_gesture()
 
 
@@ -165,7 +182,7 @@ func _cancel_gesture() -> void:
 
 func _hit(p: Vector2) -> String:
 	for k in _rects:
-		if k == "u" or k == "pad":
+		if k == "u" or k == "pad" or k == "panel" or k == "sheet":
 			continue
 		if (_rects[k] as Rect2).grow(4.0).has_point(p):
 			return k
@@ -182,6 +199,8 @@ func _down(id: int, p: Vector2) -> void:
 	_g_len = 0.0
 	_g_target = _hit(p)
 	_g_pad = (_rects["pad"] as Rect2).has_point(p)
+	_g_t0 = _clock
+	metrics.view = _view()
 	_last_input_t = _clock
 
 
@@ -198,47 +217,64 @@ func _up(id: int, p: Vector2, canceled: bool) -> void:
 		return
 	var target: String = _g_target
 	var in_pad: bool = _g_pad
+	var len_px: float = _g_len
+	var down_s: float = _clock - _g_t0
 	_cancel_gesture()
+	var kind: String = "field" if target == "" else ("upgrade" if target.begins_with("up") else "button")
 	if canceled:
+		metrics.press(_t(), sim.earned, kind, down_s, len_px, len_px / _short_side(), true, false)
 		return
 	_layout()
 	if target != "":
+		var took_b: bool = false
 		if _hit(p) == target:
-			_press_button(target)
+			took_b = _press_button(target)
+		metrics.press(_t(), sim.earned, kind, down_s, len_px, len_px / _short_side(), false, took_b)
 		return
-	_trigger(_aim(p, in_pad))
+	var took: bool = _trigger(_aim(p, in_pad))
+	metrics.press(_t(), sim.earned, "field", down_s, len_px, len_px / _short_side(), false, took)
 
 
-func _press_button(k: String) -> void:
+func _press_button(k: String) -> bool:
 	if k.begins_with("up"):
-		_buy(int(k.substr(2)))
+		return _buy(int(k.substr(2)))
 	elif k == "mute":
 		_toggle_mute()
+	elif k == "info":
+		panel_open = not panel_open
+	elif k == "copy":
+		DisplayServer.clipboard_set(_summary())
+		_copied_until = _clock + 1.5
+	elif k == "num":
+		numbers_hidden = not numbers_hidden
 	elif k == "reset":
 		if _clock < _reset_armed_until:
 			_reset()
 		else:
 			_reset_armed_until = _clock + 2.5
 			_blip("tick")
+	return false
 
 
-func _trigger(at: Vector2) -> void:
+func _trigger(at: Vector2) -> bool:
 	_last_input_t = _clock
 	var seed_i: int = sim.trigger(at)
 	if seed_i >= 0:
 		_ever_popped = true
-	else:
-		_blip("tick")
+		return true
+	_blip("tick")
+	return false
 
 
-func _buy(i: int) -> void:
+func _buy(i: int) -> bool:
 	if i < 0 or i > 4:
-		return
+		return false
 	if sim.buy(i):
 		_buy_flash[i] = 1.0
 		_blip("buy")
-	else:
-		_blip("tick")
+		return true
+	_blip("tick")
+	return false
 
 
 func _reset() -> void:
@@ -249,11 +285,45 @@ func _reset() -> void:
 	_ever_popped = false
 	_shown = 0.0
 	_reset_armed_until = -1.0
+	metrics.reset()
+	_session_t0 = _clock
 
 
 func _toggle_mute() -> void:
 	muted = not muted
 	AudioServer.set_bus_mute(0, muted)
+
+
+func _t() -> float:
+	return _clock - _session_t0
+
+
+func _short_side() -> float:
+	var v: Vector2 = _view()
+	return maxf(minf(v.x, v.y), 1.0)
+
+
+func _live_down() -> float:
+	return (_clock - _g_t0) if _gid != -99 else 0.0
+
+
+func _costs() -> Array:
+	var out: Array = []
+	for i in 5:
+		out.append(-1.0 if sim.maxed(i) else sim.cost(i))
+	return out
+
+
+func _summary() -> String:
+	var game: Dictionary = {
+		"triggers_accepted": sim.triggers, "bubbles_popped": sim.pops, "waves_finished": sim.wave_total,
+		"avg_wave_pops": snappedf((float(sim.wave_pops_sum) / float(sim.wave_total)) if sim.wave_total > 0 else 0.0, 0.01),
+		"max_wave_pops": sim.wave_max, "last_wave_pops": sim.last_wave_count,
+		"avg_wave_s": snappedf((sim.wave_secs_sum / float(sim.wave_total)) if sim.wave_total > 0 else 0.0, 0.01),
+		"sheet_full": "%d/%d" % [sim.full_count(), sim.pos.size()], "refill_s": snappedf(sim.refill_time(), 0.01),
+		"upgrade_levels": str(sim.lv),
+	}
+	return metrics.summary(_t(), _live_down(), sim.earned, game)
 
 
 # ---- frame ------------------------------------------------------------------
@@ -423,6 +493,41 @@ func _draw_hud(u: float) -> void:
 		draw_string(_font, Vector2(cx - 56.0 * u, y + 26.0 * u), _fmt(_shown), HORIZONTAL_ALIGNMENT_LEFT, -1, int(64.0 * u), INK)
 	_icon_button(_rects["reset"], "reset", _clock < _reset_armed_until)
 	_icon_button(_rects["mute"], "mute", muted)
+	_icon_button(_rects["info"], "info", panel_open)
+	if panel_open:
+		_draw_panel(u)
+
+
+func _draw_panel(u: float) -> void:
+	var r: Rect2 = _rects["panel"]
+	_style.set_corner_radius_all(int(22 * u))
+	_style.bg_color = Color(1, 1, 1, 0.94)
+	_style.border_color = Color(INK, 0.4)
+	_style.set_border_width_all(int(2 * u))
+	draw_style_box(_style, r)
+	var t: float = _t()
+	var lines: PackedStringArray = PackedStringArray([
+		"t %.0fs   view %dx%d   dpr %.1f" % [t, int(_view().x), int(_view().y), metrics.dpr],
+		"touches %d (%.1f/min)  field %d  accepted %d" % [metrics.gestures_raw, metrics.per_minute(metrics.gestures_raw, t), metrics.gestures_field, metrics.accepted],
+		"upgrade taps %d  bought %d  cancelled %d" % [metrics.upgrade_taps, metrics.upgrade_buys, metrics.cancelled],
+		"finger down %.1fs = %.1f%% of time" % [metrics.down_time + _live_down(), 100.0 * metrics.input_fraction(t, _live_down())],
+		"travel %.0f px = %.2f x screen width" % [metrics.travel_px, metrics.travel_norm],
+		"POP %.0f   per min %.0f" % [sim.earned, sim.earned / maxf(t / 60.0, 1.0 / 60.0)],
+		"waves %d  avg %.1f pops  max %d  avg %.2fs" % [sim.wave_total, (float(sim.wave_pops_sum) / float(sim.wave_total)) if sim.wave_total > 0 else 0.0, sim.wave_max, (sim.wave_secs_sum / float(sim.wave_total)) if sim.wave_total > 0 else 0.0],
+		"sheet full %d/%d  refill %.1fs" % [sim.full_count(), sim.pos.size(), sim.refill_time()],
+		"first action %.1fs  first buy %.1fs  levels %s" % [metrics.first_action_t, metrics.first_buy_t, str(sim.lv)],
+	])
+	for i in lines.size():
+		draw_string(_font, r.position + Vector2(18.0 * u, (34.0 + 33.0 * float(i)) * u), lines[i], HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 30.0 * u, int(22.0 * u), INK)
+	for k in ["copy", "num"]:
+		var b: Rect2 = _rects[k]
+		var label: String = "COPIED" if (k == "copy" and _clock < _copied_until) else ("COPY" if k == "copy" else ("NUM ON" if numbers_hidden else "NUM OFF"))
+		_style.set_corner_radius_all(int(14 * u))
+		_style.bg_color = Color(ACCENT, 0.9 if _g_target == k else 0.25)
+		_style.border_color = Color(ACCENT, 0.8)
+		_style.set_border_width_all(int(2 * u))
+		draw_style_box(_style, b)
+		draw_string(_font, b.position + Vector2(0, 36.0 * u), label, HORIZONTAL_ALIGNMENT_CENTER, b.size.x, int(24.0 * u), INK)
 
 
 func _icon_button(r: Rect2, kind: String, on: bool) -> void:
@@ -435,6 +540,9 @@ func _icon_button(r: Rect2, kind: String, on: bool) -> void:
 	if kind == "reset":
 		draw_arc(c, rad * 0.45, 0.6, TAU - 0.2, 20, ink, 4.0)
 		draw_colored_polygon(PackedVector2Array([c + Vector2(rad * 0.55, -rad * 0.55), c + Vector2(rad * 0.1, -rad * 0.5), c + Vector2(rad * 0.55, -rad * 0.05)]), ink)
+	elif kind == "info":
+		draw_circle(c + Vector2(0, -rad * 0.42), rad * 0.11, ink)
+		draw_line(c + Vector2(0, -rad * 0.15), c + Vector2(0, rad * 0.5), ink, 5.0)
 	else:
 		draw_colored_polygon(PackedVector2Array([c + Vector2(-rad * 0.45, -rad * 0.2), c + Vector2(-rad * 0.15, -rad * 0.2), c + Vector2(rad * 0.15, -rad * 0.5), c + Vector2(rad * 0.15, rad * 0.5), c + Vector2(-rad * 0.15, rad * 0.2), c + Vector2(-rad * 0.45, rad * 0.2)]), ink)
 		if on:
@@ -654,5 +762,8 @@ func _publish() -> void:
 		"hidden": numbers_hidden,
 		"view": [v.x, v.y],
 		"rects": rects,
+		"m": {"raw": metrics.gestures_raw, "field": metrics.gestures_field, "accepted": metrics.accepted, "upTaps": metrics.upgrade_taps, "buys": metrics.upgrade_buys, "cancelled": metrics.cancelled, "downS": snappedf(metrics.down_time, 0.001), "inputFrac": snappedf(metrics.input_fraction(_t(), _live_down()), 0.0001), "travelNorm": snappedf(metrics.travel_norm, 0.01), "elapsed": snappedf(_t(), 0.01)},
+		"costs": _costs(),
+		"summary": _summary(),
 	}
 	_win.set("__bubble", JSON.stringify(st))
