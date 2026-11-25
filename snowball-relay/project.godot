@@ -1,0 +1,33 @@
+; Snowball Relay -- a tiny incremental POC: one gentle swipe pushes one snowball,
+; it keeps rolling after you let go, and what it gathers buys five upgrades.
+; Art is shapes and colour only; the strings that appear are ASCII (the default
+; font has no Hangul, and the screen is meant to be read without words anyway).
+
+config_version=5
+
+[application]
+
+config/name="Snowball Relay"
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/version="0.1.0"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[input_devices]
+
+; Off: otherwise one finger arrives as a touch AND a synthetic mouse click, and
+; one swipe would push the ball twice. Touch and mouse are handled separately.
+pointing/emulate_mouse_from_touch=false
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.84, 0.91, 0.97, 1)
+textures/canvas_textures/default_texture_filter=1

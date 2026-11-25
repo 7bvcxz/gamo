@@ -1,0 +1,86 @@
+{
+ "firstSnow": 1.097,
+ "firstBuy": 3.355,
+ "swipes": 17,
+ "buys": 19,
+ "rows": [
+  {
+   "at": 10,
+   "snow": 7.7,
+   "radius": 1.25,
+   "lv": [
+    1,
+    1,
+    0,
+    0,
+    0
+   ],
+   "rollT": 3,
+   "lastRoll": 2.77,
+   "dist": 24.05,
+   "breaks": 3
+  },
+  {
+   "at": 30,
+   "snow": 8.1,
+   "radius": 1.73,
+   "lv": [
+    2,
+    2,
+    2,
+    2,
+    0
+   ],
+   "rollT": 7.8,
+   "lastRoll": 5.6,
+   "dist": 75.59,
+   "breaks": 9
+  },
+  {
+   "at": 60,
+   "snow": 54.2,
+   "radius": 2.851,
+   "lv": [
+    4,
+    4,
+    4,
+    3,
+    2
+   ],
+   "rollT": 12.6,
+   "lastRoll": 7.5,
+   "dist": 213.36,
+   "breaks": 22
+  },
+  {
+   "at": 120,
+   "snow": 143.4,
+   "radius": 4.865,
+   "lv": [
+    7,
+    6,
+    6,
+    5,
+    5
+   ],
+   "rollT": 17.4,
+   "lastRoll": 13.01,
+   "dist": 586.03,
+   "breaks": 44
+  }
+ ],
+ "final": {
+  "t": 181.26,
+  "lv": [
+   8,
+   7,
+   7,
+   7,
+   7
+  ],
+  "radius": 6.651,
+  "rollT": 19.8,
+  "lastRoll": 17.83
+ },
+ "errors": []
+}

@@ -32,6 +32,7 @@ const NAV = [
       { href: site('/momonium/doc/'), label: 'Momonium →' },
       { href: site('/windup/doc/'), label: 'Windup →' },
       { href: site('/popcorn-glory/doc/'), label: 'Popcorn & Glory →' },
+      { href: site('/snowball-relay/doc/'), label: 'Snowball Relay →' },
       { href: site('/gunslinger/doc/'), label: 'Gunslinger →' },
       { href: site('/looproom/doc/'), label: 'looproom →' },
     ],

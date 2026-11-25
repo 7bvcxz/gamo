@@ -48,6 +48,13 @@ export function WhatIsGamo() {
             손님에게 가는 팝콘의 흐름을 키웁니다. 출시 후보 0.48.1이 소유자의 결정을 기다립니다.
           </span>
         </a>
+        <a className="card" href={game('/snowball-relay/')}>
+          <b>Snowball Relay</b>
+          <span>
+            눈덩이를 한 번 가볍게 밀면 굴러가는 동안 눈을 모읍니다. 적게 만지고도 계속
+            자라는 느낌이 재미있는지 확인하려고 만든 증분 게임 프로토타입입니다.
+          </span>
+        </a>
         <a className="card" href={game('/gunslinger/')}>
           <b>Gunslinger</b>
           <span>

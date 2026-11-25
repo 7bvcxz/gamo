@@ -37,6 +37,13 @@ const GAMES = [
     extra: [{ href: site('/popcorn-glory/doc/'), label: '문서' }],
   },
   {
+    name: 'Snowball Relay',
+    path: game('/snowball-relay/'),
+    blurb:
+      '가볍게 한 번 밀면 눈덩이가 혼자 굴러가며 눈을 모아 커집니다. 손은 가끔, 눈덩이는 계속. 증분 게임 POC.',
+    extra: [{ href: site('/snowball-relay/doc/'), label: '문서' }],
+  },
+  {
     name: 'Gunslinger',
     path: game('/gunslinger/'),
     blurb:
