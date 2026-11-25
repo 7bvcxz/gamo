@@ -516,6 +516,7 @@ GitHub 이슈 `[incre] [Step-NN]`(#162~#166). 독립된 두 Godot 프로젝트�
 - Step 02 (#163): `bubble-wrap-empire/` — 한 번 가볍게 누르면 뽁뽁이 하나가 터지고 놓은 뒤 파도처럼 번지는 연쇄(독립 프로젝트). 엄지 칸이 시트의 작은 지도. 헤드리스 17/17, 폰 크기 실제 터치 3분(39번 터치 = 트리거 39, 최대 파도 70개)·마우스·두 번째 손가락 검사. 사람 평가 없음. 증거 `bubble-wrap-empire/evidence/step02/`.
 - Step 03 (#164): 두 게임에 로컬 입력 지표(ⓘ 패널·COPY·NUM)와 결정적 시나리오 비교. 연타/느긋: Snowball 최악 2.18배(조정 전 3.6), Bubble 최악 1.33배(조정 전 3.8). 실제 터치 3분의 활동 입력 비율 약 8.5%(자동화가 부풀림). 보고 `snowball-relay/evidence/step03/REPORT.md`, `bubble-wrap-empire/evidence/step03/REPORT.md`.
 - Step 04 (#165): 두 게임의 조작감 패스 — 제스처 취소·고착 방지(`touchcancel`이 일반 release로 오던 문제 포함), 좌우 반전, 숫자 숨김 정리, 흡수·리필·터치 세기 시각 피드백, 햅틱(기능 확인 후), Bubble 가로 레이아웃(e2e가 잡은 겹침 버그 수정). 오디오를 신호로 측정(출력 peak 0.18~0.20, 음소거 0.0000). 네 화면 전후 스크린샷. 실기기·사람 확인 없음.
+- Step 05 (#166): 최종 점검 — 공개 URL 두 곳에서 부팅·터치·구매·초기화·음소거·오류, 10분 세션(저입력 vs 연타)과 비교 보고서 `incre-poc/REPORT.md`, 사람용 점수표 `incre-poc/SCORECARD.md`. 가설: 둘 다 Iterate, 사람이 먼저 해 볼 것은 Bubble 3분. 사람 평가·실기기 없음, HeyDive 미등록(소유자 승인 필요).
 
 ## 다음 작업
 

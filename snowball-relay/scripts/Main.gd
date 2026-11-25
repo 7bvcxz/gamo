@@ -248,7 +248,8 @@ func _up(id: int, p: Vector2, canceled: bool) -> void:
 		var took_b: bool = false
 		if _hit(p) == target:
 			took_b = _press_button(target)
-		metrics.press(_t(), sim.earned, kind, down_s, len_px, len_px / _short_side(), false, took_b)
+		if not (target == "reset" and _session_t0 == _clock):   # the tap that resets is not part of the new session
+			metrics.press(_t(), sim.earned, kind, down_s, len_px, len_px / _short_side(), false, took_b)
 		return
 	# a field gesture: tap = small push, swipe = bigger, and it saturates
 	var ref: float = minf(_view().x, _view().y) * 0.22
@@ -344,10 +345,14 @@ func _costs() -> Array:
 	return out
 
 
+func _version() -> String:
+	return str(ProjectSettings.get_setting("application/config/version"))
+
+
 func _summary() -> String:
 	var rolls: int = sim.rolls
 	var game: Dictionary = {
-		"pushes": sim.pushes, "breaks": sim.breaks, "rolls_finished": rolls,
+		"version": _version(), "pushes": sim.pushes, "breaks": sim.breaks, "rolls_finished": rolls,
 		"avg_roll_s": snappedf((sim.roll_len_sum / float(rolls)) if rolls > 0 else 0.0, 0.01),
 		"last_roll_s": snappedf(sim.last_roll_len, 0.01),
 		"moving_fraction": snappedf(sim.moving_time / maxf(_t(), 0.001), 0.001),
@@ -615,7 +620,7 @@ func _draw_panel(u: float) -> void:
 	draw_style_box(_style, r)
 	var t: float = _t()
 	var lines: PackedStringArray = PackedStringArray([
-		"t %.0fs   view %dx%d   dpr %.1f" % [t, int(_view().x), int(_view().y), metrics.dpr],
+		"v%s   t %.0fs   view %dx%d   dpr %.1f" % [_version(), t, int(_view().x), int(_view().y), metrics.dpr],
 		"touches %d (%.1f/min)  field %d  accepted %d" % [metrics.gestures_raw, metrics.per_minute(metrics.gestures_raw, t), metrics.gestures_field, metrics.accepted],
 		"upgrade taps %d  bought %d  cancelled %d" % [metrics.upgrade_taps, metrics.upgrade_buys, metrics.cancelled],
 		"finger down %.1fs = %.1f%% of time" % [metrics.down_time + _live_down(), 100.0 * metrics.input_fraction(t, _live_down())],

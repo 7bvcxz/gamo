@@ -1,0 +1,6 @@
+ 13:22:30 up 90 days, 21:03,  2 users,  load average: 9.58, 6.38, 6.16
+               total        used        free      shared  buff/cache   available
+Mem:           58017       31324        8673         742       19536       26693
+ 13:32:33 up 90 days, 21:13,  2 users,  load average: 38.38, 35.53, 22.51
+               total        used        free      shared  buff/cache   available
+Mem:           58017       28865       10855         742       19813       29151

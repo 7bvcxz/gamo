@@ -292,7 +292,8 @@ func _up(id: int, p: Vector2, canceled: bool) -> void:
 		var took_b: bool = false
 		if _hit(p) == target:
 			took_b = _press_button(target)
-		metrics.press(_t(), sim.earned, kind, down_s, len_px, len_px / _short_side(), false, took_b)
+		if not (target == "reset" and _session_t0 == _clock):   # the tap that resets is not part of the new session
+			metrics.press(_t(), sim.earned, kind, down_s, len_px, len_px / _short_side(), false, took_b)
 		return
 	var took: bool = _trigger(_aim(p, in_pad))
 	metrics.press(_t(), sim.earned, "field", down_s, len_px, len_px / _short_side(), false, took)
@@ -379,9 +380,13 @@ func _costs() -> Array:
 	return out
 
 
+func _version() -> String:
+	return str(ProjectSettings.get_setting("application/config/version"))
+
+
 func _summary() -> String:
 	var game: Dictionary = {
-		"triggers_accepted": sim.triggers, "bubbles_popped": sim.pops, "waves_finished": sim.wave_total,
+		"version": _version(), "triggers_accepted": sim.triggers, "bubbles_popped": sim.pops, "waves_finished": sim.wave_total,
 		"avg_wave_pops": snappedf((float(sim.wave_pops_sum) / float(sim.wave_total)) if sim.wave_total > 0 else 0.0, 0.01),
 		"max_wave_pops": sim.wave_max, "last_wave_pops": sim.last_wave_count,
 		"avg_wave_s": snappedf((sim.wave_secs_sum / float(sim.wave_total)) if sim.wave_total > 0 else 0.0, 0.01),
@@ -585,7 +590,7 @@ func _draw_panel(u: float) -> void:
 	draw_style_box(_style, r)
 	var t: float = _t()
 	var lines: PackedStringArray = PackedStringArray([
-		"t %.0fs   view %dx%d   dpr %.1f" % [t, int(_view().x), int(_view().y), metrics.dpr],
+		"v%s   t %.0fs   view %dx%d   dpr %.1f" % [_version(), t, int(_view().x), int(_view().y), metrics.dpr],
 		"touches %d (%.1f/min)  field %d  accepted %d" % [metrics.gestures_raw, metrics.per_minute(metrics.gestures_raw, t), metrics.gestures_field, metrics.accepted],
 		"upgrade taps %d  bought %d  cancelled %d" % [metrics.upgrade_taps, metrics.upgrade_buys, metrics.cancelled],
 		"finger down %.1fs = %.1f%% of time" % [metrics.down_time + _live_down(), 100.0 * metrics.input_fraction(t, _live_down())],

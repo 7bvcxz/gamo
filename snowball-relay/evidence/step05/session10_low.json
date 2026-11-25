@@ -1,0 +1,238 @@
+{
+ "game": "snowball-relay",
+ "policy": "low",
+ "secs": 600,
+ "env": {
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+  "dpr": 2,
+  "w": 390,
+  "h": 844,
+  "cores": 16,
+  "mem": 32,
+  "loadAvgStart": 9.38,
+  "loadAvgEnd": 38.38
+ },
+ "T": {
+  "firstSnow": 1.46,
+  "firstBuy": 3.819,
+  "radius2": 37.175,
+  "rollGe10": 50.259
+ },
+ "rows": [
+  {
+   "at": 10,
+   "snow": 6.5,
+   "earned": 26.5,
+   "radius": 1.238,
+   "rollT": 3,
+   "lastRoll": 2.75,
+   "dist": 22.72,
+   "lv": [
+    1,
+    1,
+    0,
+    0,
+    0
+   ],
+   "m": {
+    "accepted": 3,
+    "buys": 2,
+    "cancelled": 0,
+    "downS": 2.902,
+    "elapsed": 11.28,
+    "field": 3,
+    "inputFrac": 0.2573,
+    "raw": 6,
+    "travelNorm": 0.47,
+    "upTaps": 3
+   }
+  },
+  {
+   "at": 30,
+   "snow": 9.9,
+   "earned": 121.9,
+   "radius": 1.778,
+   "rollT": 5.4,
+   "lastRoll": 4.97,
+   "dist": 70.43,
+   "lv": [
+    3,
+    1,
+    1,
+    1,
+    1
+   ],
+   "m": {
+    "accepted": 7,
+    "buys": 7,
+    "cancelled": 0,
+    "downS": 7.212,
+    "elapsed": 30.78,
+    "field": 7,
+    "inputFrac": 0.2343,
+    "raw": 15,
+    "travelNorm": 1.1,
+    "upTaps": 8
+   }
+  },
+  {
+   "at": 60,
+   "snow": 86.2,
+   "earned": 652.2,
+   "radius": 2.891,
+   "rollT": 10.2,
+   "lastRoll": 7.44,
+   "dist": 207.57,
+   "lv": [
+    4,
+    4,
+    3,
+    3,
+    3
+   ],
+   "m": {
+    "accepted": 10,
+    "buys": 17,
+    "cancelled": 0,
+    "downS": 11.207,
+    "elapsed": 60.51,
+    "field": 10,
+    "inputFrac": 0.1852,
+    "raw": 28,
+    "travelNorm": 1.57,
+    "upTaps": 18
+   }
+  },
+  {
+   "at": 180,
+   "snow": 702.9,
+   "earned": 8210.9,
+   "radius": 6.831,
+   "rollT": 19.8,
+   "lastRoll": 17.59,
+   "dist": 1085.72,
+   "lv": [
+    8,
+    8,
+    7,
+    7,
+    7
+   ],
+   "m": {
+    "accepted": 18,
+    "buys": 37,
+    "cancelled": 0,
+    "downS": 22.567,
+    "elapsed": 180.54,
+    "field": 18,
+    "inputFrac": 0.125,
+    "raw": 61,
+    "travelNorm": 2.83,
+    "upTaps": 43
+   }
+  },
+  {
+   "at": 300,
+   "snow": 2048.7,
+   "earned": 24899.7,
+   "radius": 9.925,
+   "rollT": 24.6,
+   "lastRoll": 22.72,
+   "dist": 2207.84,
+   "lv": [
+    10,
+    9,
+    9,
+    9,
+    9
+   ],
+   "m": {
+    "accepted": 24,
+    "buys": 46,
+    "cancelled": 0,
+    "downS": 30.132,
+    "elapsed": 300.57,
+    "field": 24,
+    "inputFrac": 0.1002,
+    "raw": 77,
+    "travelNorm": 3.78,
+    "upTaps": 53
+   }
+  },
+  {
+   "at": 600,
+   "snow": 61840.7,
+   "earned": 100429.7,
+   "radius": 15.449,
+   "rollT": 27,
+   "lastRoll": 24.93,
+   "dist": 5549.39,
+   "lv": [
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "m": {
+    "accepted": 35,
+    "buys": 50,
+    "cancelled": 0,
+    "downS": 41.609,
+    "elapsed": 600.39,
+    "field": 35,
+    "inputFrac": 0.0693,
+    "raw": 92,
+    "travelNorm": 5.51,
+    "upTaps": 57
+   }
+  }
+ ],
+ "perf": {
+  "fps": [
+   {
+    "at": 20,
+    "fps": 19.2
+   },
+   {
+    "at": 300,
+    "fps": 16.7
+   }
+  ],
+  "heapMB": [
+   50.4,
+   50.4
+  ]
+ },
+ "final": {
+  "t": 600.39,
+  "lv": [
+   10,
+   10,
+   10,
+   10,
+   10
+  ],
+  "radius": 15.449,
+  "rollT": 27,
+  "lastRoll": 24.93,
+  "dist": 5549.39,
+  "earned": 100429.7,
+  "pushes": 35,
+  "breaks": 135,
+  "m": {
+   "accepted": 35,
+   "buys": 50,
+   "cancelled": 0,
+   "downS": 41.609,
+   "elapsed": 600.39,
+   "field": 35,
+   "inputFrac": 0.0693,
+   "raw": 92,
+   "travelNorm": 5.51,
+   "upTaps": 57
+  }
+ },
+ "summary": "elapsed_s=600.4\nviewport=720x1558 dpr=2.00\nraw_presses=92 (9.2/min) field_gestures=35 accepted=35 upgrade_taps=57 buys=50 other_taps=0 cancelled=0\ntravel_px=3969 travel_norm=5.51 touch_down_s=41.61 active_input_fraction=0.069\nfirst_action_s=1.65 first_buy_s=3.81 earned=100429.7 earned_per_min=10036.5\nversion=0.5.0\npushes=35\nbreaks=135\nrolls_finished=34\navg_roll_s=15.62\nlast_roll_s=24.93\nmoving_fraction=0.911\ndistance=5549.4\nradius=15.449\nupgrade_levels=[10, 10, 10, 10, 10]\nroll_time_setting_s=27.0\nminute1: presses=28 accepted=10 buys=17 down_s=11.21 earned=653.8\nminute2: presses=21 accepted=5 buys=13 down_s=7.01 earned=2646.4\nminute3: presses=12 accepted=3 buys=7 down_s=4.35 earned=5253.4\nminute4: presses=9 accepted=3 buys=5 down_s=3.67 earned=7524.2\nminute5: presses=7 accepted=3 buys=4 down_s=3.90 earned=10017.3\nminute6: presses=5 accepted=2 buys=3 down_s=2.35 earned=12556.8\nminute7: presses=3 accepted=2 buys=1 down_s=2.16 earned=12579.4\nminute8: presses=3 accepted=3 buys=0 down_s=3.06 earned=20260.5\nminute9: presses=2 accepted=2 buys=0 down_s=1.79 earned=14576.7\nminute10: presses=2 accepted=2 buys=0 down_s=2.11 earned=14361.3",
+ "errors": []
+}

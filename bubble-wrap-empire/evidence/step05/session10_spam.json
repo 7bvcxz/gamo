@@ -1,0 +1,249 @@
+{
+ "game": "bubble-wrap-empire",
+ "policy": "spam",
+ "secs": 600,
+ "env": {
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+  "dpr": 2,
+  "w": 390,
+  "h": 844,
+  "cores": 16,
+  "mem": 32,
+  "loadAvgStart": 9.38,
+  "loadAvgEnd": 38.38
+ },
+ "T": {
+  "firstPop": 1.449,
+  "firstBuy": 4.885,
+  "wave10": 25.798,
+  "wave30": 77.523,
+  "wave70": 97.529
+ },
+ "rows": [
+  {
+   "at": 10,
+   "pop": 4.7,
+   "earned": 24.7,
+   "lastWave": 6,
+   "lastWaveSecs": 0.21,
+   "pops": 30,
+   "triggers": 14,
+   "full": 47,
+   "refill": 6,
+   "lv": [
+    0,
+    2,
+    1,
+    0,
+    0
+   ],
+   "m": {
+    "accepted": 14,
+    "buys": 3,
+    "cancelled": 0,
+    "downS": 3.664,
+    "elapsed": 11.25,
+    "field": 14,
+    "inputFrac": 0.3256,
+    "raw": 18,
+    "travelNorm": 0,
+    "upTaps": 4
+   }
+  },
+  {
+   "at": 30,
+   "pop": 25.7,
+   "earned": 273.7,
+   "lastWave": 1,
+   "lastWaveSecs": 0.05,
+   "pops": 185,
+   "triggers": 36,
+   "full": 29,
+   "refill": 4.14,
+   "lv": [
+    3,
+    4,
+    3,
+    1,
+    0
+   ],
+   "m": {
+    "accepted": 36,
+    "buys": 11,
+    "cancelled": 0,
+    "downS": 10.032,
+    "elapsed": 32.06,
+    "field": 36,
+    "inputFrac": 0.3129,
+    "raw": 51,
+    "travelNorm": 0,
+    "upTaps": 15
+   }
+  },
+  {
+   "at": 60,
+   "pop": 107.8,
+   "earned": 1857.8,
+   "lastWave": 1,
+   "lastWaveSecs": 0.05,
+   "pops": 679,
+   "triggers": 76,
+   "full": 27,
+   "refill": 2.14,
+   "lv": [
+    5,
+    6,
+    5,
+    4,
+    3
+   ],
+   "m": {
+    "accepted": 76,
+    "buys": 23,
+    "cancelled": 0,
+    "downS": 19.718,
+    "elapsed": 61.35,
+    "field": 76,
+    "inputFrac": 0.3214,
+    "raw": 105,
+    "travelNorm": 0,
+    "upTaps": 29
+   }
+  },
+  {
+   "at": 180,
+   "pop": 4784.8,
+   "earned": 35045.8,
+   "lastWave": 14,
+   "lastWaveSecs": 0.23,
+   "pops": 4036,
+   "triggers": 243,
+   "full": 22,
+   "refill": 1.3,
+   "lv": [
+    8,
+    10,
+    9,
+    8,
+    7
+   ],
+   "m": {
+    "accepted": 243,
+    "buys": 42,
+    "cancelled": 0,
+    "downS": 61.508,
+    "elapsed": 180.13,
+    "field": 286,
+    "inputFrac": 0.3415,
+    "raw": 339,
+    "travelNorm": 0,
+    "upTaps": 53
+   }
+  },
+  {
+   "at": 300,
+   "pop": 16771.5,
+   "earned": 97566.5,
+   "lastWave": 15,
+   "lastWaveSecs": 0.38,
+   "pops": 8201,
+   "triggers": 466,
+   "full": 13,
+   "refill": 1.09,
+   "lv": [
+    10,
+    10,
+    10,
+    10,
+    8
+   ],
+   "m": {
+    "accepted": 466,
+    "buys": 48,
+    "cancelled": 0,
+    "downS": 104.635,
+    "elapsed": 299.7,
+    "field": 517,
+    "inputFrac": 0.3491,
+    "raw": 576,
+    "travelNorm": 0,
+    "upTaps": 59
+   }
+  },
+  {
+   "at": 600,
+   "pop": 136369.9,
+   "earned": 275789.9,
+   "lastWave": 27,
+   "lastWaveSecs": 0.29,
+   "pops": 18890,
+   "triggers": 1023,
+   "full": 8,
+   "refill": 1.09,
+   "lv": [
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "m": {
+    "accepted": 1023,
+    "buys": 50,
+    "cancelled": 0,
+    "downS": 212.59,
+    "elapsed": 598.1,
+    "field": 1107,
+    "inputFrac": 0.3554,
+    "raw": 1168,
+    "travelNorm": 0,
+    "upTaps": 61
+   }
+  }
+ ],
+ "perf": {
+  "fps": [
+   {
+    "at": 20,
+    "fps": 13
+   },
+   {
+    "at": 300,
+    "fps": 13.4
+   }
+  ],
+  "heapMB": [
+   53.5,
+   53.5
+  ]
+ },
+ "final": {
+  "t": 598.1,
+  "lv": [
+   10,
+   10,
+   10,
+   10,
+   10
+  ],
+  "lastWave": 27,
+  "pops": 18890,
+  "triggers": 1023,
+  "earned": 275789.9,
+  "full": 8,
+  "m": {
+   "accepted": 1023,
+   "buys": 50,
+   "cancelled": 0,
+   "downS": 212.59,
+   "elapsed": 598.1,
+   "field": 1107,
+   "inputFrac": 0.3554,
+   "raw": 1168,
+   "travelNorm": 0,
+   "upTaps": 61
+  }
+ },
+ "summary": "elapsed_s=598.1\nviewport=720x1558 dpr=2.00\nraw_presses=1168 (117.2/min) field_gestures=1107 accepted=1023 upgrade_taps=61 buys=50 other_taps=0 cancelled=0\ntravel_px=0 travel_norm=0.00 touch_down_s=212.59 active_input_fraction=0.355\nfirst_action_s=1.16 first_buy_s=5.07 earned=275789.9 earned_per_min=27666.8\nversion=0.5.0\ntriggers_accepted=1023\nbubbles_popped=18890\nwaves_finished=1022\navg_wave_pops=18.47\nmax_wave_pops=70\nlast_wave_pops=27\navg_wave_s=0.28\nsheet_full=8/70\nrefill_s=1.09\nupgrade_levels=[10, 10, 10, 10, 10]\nminute1: presses=102 accepted=73 buys=23 down_s=19.26 earned=1815.6\nminute2: presses=115 accepted=68 buys=13 down_s=20.93 earned=12432.4\nminute3: presses=121 accepted=101 buys=6 down_s=21.15 earned=20789.7\nminute4: presses=117 accepted=109 buys=4 down_s=21.44 earned=29030.6\nminute5: presses=121 accepted=115 buys=2 down_s=21.85 earned=33527.0\nminute6: presses=117 accepted=99 buys=1 down_s=21.10 earned=38760.1\nminute7: presses=118 accepted=107 buys=1 down_s=21.83 earned=36543.8\nminute8: presses=121 accepted=117 buys=0 down_s=21.87 earned=34528.4\nminute9: presses=117 accepted=117 buys=0 down_s=21.98 earned=35727.7\nminute10: presses=119 accepted=117 buys=0 down_s=21.18 earned=32634.6",
+ "errors": []
+}
