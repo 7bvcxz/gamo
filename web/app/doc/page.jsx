@@ -33,6 +33,7 @@ const NAV = [
       { href: site('/windup/doc/'), label: 'Windup →' },
       { href: site('/popcorn-glory/doc/'), label: 'Popcorn & Glory →' },
       { href: site('/snowball-relay/doc/'), label: 'Snowball Relay →' },
+      { href: site('/bubble-wrap-empire/doc/'), label: 'Bubble Wrap Empire →' },
       { href: site('/gunslinger/doc/'), label: 'Gunslinger →' },
       { href: site('/looproom/doc/'), label: 'looproom →' },
     ],

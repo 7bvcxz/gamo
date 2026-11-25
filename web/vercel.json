@@ -35,6 +35,11 @@
       "permanent": false
     },
     {
+      "source": "/bubble-wrap-empire",
+      "destination": "https://7bvcxz.github.io/gamo/bubble-wrap-empire/",
+      "permanent": false
+    },
+    {
       "source": "/gunslinger",
       "destination": "https://7bvcxz.github.io/gamo/gunslinger/",
       "permanent": false

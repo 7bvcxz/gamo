@@ -1,0 +1,24 @@
+import { chromium, open, state, px, tap, rectCenter, sleep } from './lib.mjs';
+import fs from 'node:fs';
+const out = process.argv[2] || '/tmp/claude-1000/bub-smoke';
+fs.mkdirSync(out, { recursive: true });
+const browser = await chromium.launch();
+const { page, cdp, errors } = await open(browser, { w: 390, h: 844 });
+await sleep(800);
+await page.screenshot({ path: `${out}/0_fresh.png` });
+const s0 = await state(page);
+console.log('fresh', JSON.stringify({ pop: s0.pop, full: s0.full, view: s0.view }));
+// tap the pad's centre: a real touch, down then up
+const pad = await rectCenter(page, 'pad');
+await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: pad.x, y: pad.y, id: 1 }] });
+await sleep(150);
+await page.screenshot({ path: `${out}/1_down.png` });
+await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+await sleep(300);
+const s1 = await state(page);
+console.log('after tap +0.3s', JSON.stringify({ pop: s1.pop, pops: s1.pops, full: s1.full, triggers: s1.triggers }));
+await sleep(7000);
+const s2 = await state(page);
+console.log('after +7s (refill)', JSON.stringify({ full: s2.full, pop: s2.pop }));
+console.log('errors', errors);
+await browser.close();

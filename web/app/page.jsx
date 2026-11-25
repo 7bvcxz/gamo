@@ -44,6 +44,13 @@ const GAMES = [
     extra: [{ href: site('/snowball-relay/doc/'), label: '문서' }],
   },
   {
+    name: 'Bubble Wrap Empire',
+    path: game('/bubble-wrap-empire/'),
+    blurb:
+      '가볍게 한 번 누르면 뽁뽁이 하나가 터지고, 놓은 뒤 터짐이 파도처럼 번집니다. 한 번에 터지는 수가 늘어나는 증분 게임 POC.',
+    extra: [{ href: site('/bubble-wrap-empire/doc/'), label: '문서' }],
+  },
+  {
     name: 'Gunslinger',
     path: game('/gunslinger/'),
     blurb:

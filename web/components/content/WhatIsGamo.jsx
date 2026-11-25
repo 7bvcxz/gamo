@@ -55,6 +55,13 @@ export function WhatIsGamo() {
             자라는 느낌이 재미있는지 확인하려고 만든 증분 게임 프로토타입입니다.
           </span>
         </a>
+        <a className="card" href={game('/bubble-wrap-empire/')}>
+          <b>Bubble Wrap Empire</b>
+          <span>
+            뽁뽁이를 한 번 가볍게 누르면 터짐이 연쇄로 번집니다. 적게 만지고도 큰 파도가 이어지는
+            느낌이 재미있는지 확인하려고 만든 증분 게임 프로토타입입니다(Snowball Relay와 짝).
+          </span>
+        </a>
         <a className="card" href={game('/gunslinger/')}>
           <b>Gunslinger</b>
           <span>

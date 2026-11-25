@@ -1,0 +1,108 @@
+{
+ "firstPop": 0.606,
+ "firstBuy": 11.172,
+ "taps": 39,
+ "buys": 24,
+ "rows": [
+  {
+   "at": 10,
+   "pop": 0,
+   "lv": [
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "lastWave": 1,
+   "lastWaveSecs": 0.04,
+   "biggest": 1,
+   "pops": 4,
+   "triggers": 4,
+   "full": 68
+  },
+  {
+   "at": 30,
+   "pop": 15.1,
+   "lv": [
+    1,
+    2,
+    1,
+    0,
+    0
+   ],
+   "lastWave": 5,
+   "lastWaveSecs": 0.22,
+   "biggest": 13,
+   "pops": 43,
+   "triggers": 9,
+   "full": 65
+  },
+  {
+   "at": 60,
+   "pop": 0.3,
+   "lv": [
+    3,
+    4,
+    4,
+    1,
+    0
+   ],
+   "lastWave": 16,
+   "lastWaveSecs": 0.38,
+   "biggest": 31,
+   "pops": 169,
+   "triggers": 16,
+   "full": 54
+  },
+  {
+   "at": 120,
+   "pop": 175,
+   "lv": [
+    7,
+    8,
+    7,
+    5,
+    3
+   ],
+   "lastWave": 70,
+   "lastWaveSecs": 0.44,
+   "biggest": 70,
+   "pops": 962,
+   "triggers": 28,
+   "full": 7
+  },
+  {
+   "at": 180,
+   "pop": 176.4,
+   "lv": [
+    8,
+    9,
+    8,
+    7,
+    6
+   ],
+   "lastWave": 70,
+   "lastWaveSecs": 0.33,
+   "biggest": 70,
+   "pops": 1732,
+   "triggers": 39,
+   "full": 70
+  }
+ ],
+ "final": {
+  "t": 181.79,
+  "lv": [
+   8,
+   9,
+   8,
+   7,
+   6
+  ],
+  "lastWave": 70,
+  "biggest": 70,
+  "pops": 1732,
+  "triggers": 39
+ },
+ "errors": []
+}
